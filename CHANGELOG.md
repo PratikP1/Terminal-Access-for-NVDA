@@ -2,6 +2,16 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.2] - 2026-02-19
+
+### Fixed
+- Fixed "Missing file or invalid file format" error when installing add-on in NVDA
+- Build script now properly excludes root-level __init__.py from .nvda-addon package
+
+### Technical
+- Updated build.py to skip addon/__init__.py during package creation (lines 45-48)
+- NVDA add-ons must not include __init__.py at the root level of the package
+
 ## [1.0.1] - 2026-02-19
 
 ### Changed
