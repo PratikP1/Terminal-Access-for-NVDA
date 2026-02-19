@@ -2,6 +2,17 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.7] - 2026-02-19
+
+### Fixed
+- Fixed spell current word command (NVDA+Alt+K twice) - now properly binds navigator to terminal before accessing review cursor
+- Fixed phonetic character announcement (NVDA+Alt+Comma twice) - now properly binds navigator to terminal before accessing review cursor
+
+### Technical
+- Added api.setNavigatorObject(self._boundTerminal) call in script_spellCurrentWord before calling _getWordAtReview()
+- Added api.setNavigatorObject(self._boundTerminal) call in script_readCurrentCharPhonetic before accessing review position
+- Both functions now follow established pattern of binding navigator before review cursor access
+
 ## [1.0.5] - 2026-02-19
 
 ### Fixed
