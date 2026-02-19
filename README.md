@@ -69,13 +69,28 @@ Access TDSR settings through:
 - NVDA menu > Preferences > Settings > Terminal Settings
 - Or press **NVDA+Alt+C** while in a terminal
 
-Available settings:
-- Cursor tracking
-- Key echo
-- Line pause
-- Symbol processing
-- Repeated symbols condensation
-- Cursor delay
+### Available Settings
+
+**Cursor Tracking** - Automatically announces the character at cursor position when it moves. Essential for monitoring position while navigating with arrow keys. Works with Cursor Delay to control timing.
+
+**Key Echo** - Announces each character as you type it. Provides immediate feedback for every keystroke. Works with Process Symbols and Condense Repeated Symbols for intelligent announcements.
+
+**Line Pause** - Reserved for future continuous reading functionality. Currently preserved but not actively used.
+
+**Process Symbols** - Speaks symbols by name (e.g., "dollar" for $, "at" for @). Affects typing echo, cursor tracking, and manual character navigation. Essential for working with scripts and complex command syntax.
+
+**Condense Repeated Symbols** - Counts repeated symbols and announces them as a group (e.g., "3 equals" instead of "equals equals equals"). Only works with symbols specified in "Repeated Symbols to Condense".
+
+**Repeated Symbols to Condense** - Specifies which symbols to condense (default: `-_=!`). Customize for your workflow (e.g., `-=#` for Markdown users).
+
+**Cursor Delay** - Delay in milliseconds (0-1000) before announcing cursor position changes. Lower values provide instant feedback but may overwhelm during rapid movement. Default: 20ms.
+
+### Settings Interactions
+
+- **Quiet Mode** (NVDA+Alt+Q) temporarily disables cursor tracking and key echo
+- **Process Symbols** affects cursor tracking, key echo, and character navigation
+- **Condense Repeated Symbols** requires Key Echo to be enabled
+- **Cursor Delay** only affects cursor tracking, not key echo or manual navigation
 
 ## Documentation
 

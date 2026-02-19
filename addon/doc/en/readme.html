@@ -287,57 +287,203 @@
 	</p>
 	
 	<h3>Available Settings</h3>
-	
+
 	<h4>Enable Cursor Tracking</h4>
 	<p>
-		When enabled, NVDA will automatically announce cursor position changes in the terminal.
-		This is useful for monitoring command execution and output as it appears.
+		<strong>What it does:</strong> Automatically announces the character at the cursor position whenever
+		the cursor moves in the terminal.
+	</p>
+	<p>
+		<strong>How it affects your experience:</strong> When enabled, you'll hear immediate feedback as you
+		navigate through terminal text using arrow keys. This is particularly useful when:
+	</p>
+	<ul>
+		<li>Reviewing command output and wanting to track your position</li>
+		<li>Monitoring real-time updates in terminal applications</li>
+		<li>Navigating through text editors like vim or nano within the terminal</li>
+		<li>Following along as text appears during command execution</li>
+	</ul>
+	<p>
+		<strong>Behavior:</strong> Works with the "Cursor Delay" setting to control announcement timing.
+		Respects "Quiet Mode" - no announcements when quiet mode is active. Uses "Process Symbols" setting
+		to determine how symbols are announced.
+	</p>
+	<p>
+		<strong>When to disable:</strong> If you find cursor announcements distracting or if you're using
+		navigation commands frequently and don't need position updates.
 	</p>
 	<p><strong>Default:</strong> Enabled</p>
-	
+
 	<h4>Enable Key Echo</h4>
 	<p>
-		When enabled, characters will be spoken as you type them. This provides immediate feedback
-		during command entry and text editing.
+		<strong>What it does:</strong> Announces each character as you type it in the terminal.
+	</p>
+	<p>
+		<strong>How it affects your experience:</strong> Provides immediate auditory feedback for every
+		keystroke, helping you:
+	</p>
+	<ul>
+		<li>Verify you've typed the correct character</li>
+		<li>Catch typos immediately as you type</li>
+		<li>Maintain confidence when entering commands or passwords (though passwords are typically not echoed by the terminal)</li>
+		<li>Work more efficiently without needing to review what you've typed</li>
+	</ul>
+	<p>
+		<strong>Behavior:</strong> Works together with "Process Symbols" - when both are enabled, symbols are
+		announced by name (e.g., "dollar" instead of "$"). Works with "Condense Repeated Symbols" to avoid
+		repetitive announcements when typing sequences like "====" or "----". Respects "Quiet Mode".
+	</p>
+	<p>
+		<strong>When to disable:</strong> If you're a confident typist and find character announcements
+		slow down your workflow, or when typing large amounts of text where constant feedback becomes overwhelming.
 	</p>
 	<p><strong>Default:</strong> Enabled</p>
-	
+
 	<h4>Pause at Newlines</h4>
 	<p>
-		When enabled, NVDA will pause briefly at line breaks during continuous reading. This makes
-		it easier to distinguish between separate lines of output.
+		<strong>What it does:</strong> This setting is designed for NVDA's continuous reading functionality
+		(speak all) to pause briefly at line breaks.
+	</p>
+	<p>
+		<strong>Current status:</strong> This setting is preserved for potential future use. Currently, the
+		add-on focuses on manual navigation commands rather than continuous reading of terminal output.
+	</p>
+	<p>
+		<strong>Note:</strong> Line pauses during continuous reading are typically controlled by NVDA's core
+		speech settings and synthesizer configuration.
 	</p>
 	<p><strong>Default:</strong> Enabled</p>
-	
+
 	<h4>Process Symbols</h4>
 	<p>
-		When enabled, symbols will be spoken by name (e.g., "dollar" for $, "at" for @) rather than
-		the symbol itself. This is particularly useful when working with complex command syntax.
+		<strong>What it does:</strong> Speaks symbol characters by their name instead of the symbol itself.
+	</p>
+	<p>
+		<strong>How it affects your experience:</strong> When enabled, symbols are announced clearly:
+	</p>
+	<ul>
+		<li>"$" is announced as "dollar"</li>
+		<li>"@" is announced as "at"</li>
+		<li>"#" is announced as "hash"</li>
+		<li>"=" is announced as "equals"</li>
+		<li>And many more (see full list of 25+ symbols in the code)</li>
+	</ul>
+	<p>
+		<strong>Affects:</strong> Both typing (with Key Echo) and navigation (when reading characters with
+		NVDA+Alt+Comma/Period). Also affects cursor tracking announcements.
+	</p>
+	<p>
+		<strong>When to enable:</strong>
+	</p>
+	<ul>
+		<li>Working with shell scripts that use many special characters</li>
+		<li>Editing configuration files with complex syntax</li>
+		<li>Writing code or reviewing command-line parameters</li>
+		<li>When you need to distinguish between similar-sounding symbols</li>
+	</ul>
+	<p>
+		<strong>When to disable:</strong> When symbols are obvious from context or when you prefer hearing
+		the actual symbol pronunciation for faster comprehension.
 	</p>
 	<p><strong>Default:</strong> Disabled</p>
-	
+
 	<h4>Condense Repeated Symbols</h4>
 	<p>
-		When enabled, sequences of repeated symbols will be condensed into a count followed by the
-		symbol name (e.g., "42 equals" instead of "equals equals equals...").
+		<strong>What it does:</strong> Counts consecutive identical symbols and announces them as a group
+		(e.g., "3 equals" instead of "equals equals equals").
+	</p>
+	<p>
+		<strong>How it affects your experience:</strong> Significantly improves the experience when typing:
+	</p>
+	<ul>
+		<li>Horizontal rules in comments: <code>----</code> becomes "4 dash" instead of "dash dash dash dash"</li>
+		<li>Separators: <code>====</code> becomes "4 equals"</li>
+		<li>Markdown headers: <code>###</code> becomes "3 hash"</li>
+		<li>Underscores in variable names: <code>__init__</code> announces underscores as "2 underscore"</li>
+	</ul>
+	<p>
+		<strong>Behavior:</strong> Only condenses symbols specified in "Repeated Symbols to Condense" setting.
+		Works during typing (Key Echo must be enabled). Uses "Process Symbols" to determine how to name the symbols.
+	</p>
+	<p>
+		<strong>Technical note:</strong> Announcements are deferred until a different character is typed, so you
+		won't hear the count until you type something else. Single instances are announced normally.
+	</p>
+	<p>
+		<strong>When to enable:</strong> When frequently typing repetitive symbols like creating ASCII art,
+		writing formatted text, or working with code that uses separator lines.
 	</p>
 	<p><strong>Default:</strong> Disabled</p>
-	
+
 	<h4>Repeated Symbols to Condense</h4>
 	<p>
-		Specifies which symbols should be condensed when "Condense Repeated Symbols" is enabled.
-		Enter the symbols without spaces (e.g., "-_=!").
+		<strong>What it does:</strong> Specifies exactly which symbols should be condensed when
+		"Condense Repeated Symbols" is enabled.
+	</p>
+	<p>
+		<strong>How to configure:</strong> Enter symbols as a continuous string without spaces. Each character
+		in the string will be tracked for repetition.
+	</p>
+	<p>
+		<strong>Examples:</strong>
+	</p>
+	<ul>
+		<li><code>-_=!</code> (default) - Condenses dashes, underscores, equals, and exclamation marks</li>
+		<li><code>-=#</code> - For Markdown users who frequently type headers and separators</li>
+		<li><code>*-_</code> - For emphasis markers in text</li>
+		<li><code>-_=!@#$</code> - Extended set for programming</li>
+	</ul>
+	<p>
+		<strong>Behavior:</strong> Only active when "Condense Repeated Symbols" is enabled. Does not affect
+		characters not in this list - those are announced individually as normal.
 	</p>
 	<p><strong>Default:</strong> <code>-_=!</code></p>
-	
+
 	<h4>Cursor Delay (milliseconds)</h4>
 	<p>
-		Sets the delay before cursor movement is announced. A higher value reduces the frequency
-		of announcements during rapid cursor movement, while a lower value provides more immediate
-		feedback.
+		<strong>What it does:</strong> Sets how long to wait after cursor movement before announcing the
+		character at the new position.
+	</p>
+	<p>
+		<strong>How it affects your experience:</strong> This delay acts as a "debounce" to prevent
+		overwhelming speech during rapid cursor movement:
+	</p>
+	<ul>
+		<li><strong>Low delay (0-50ms):</strong> Nearly instant announcements. Best if you move the cursor
+		deliberately and want immediate feedback. May result in rapid-fire announcements when holding arrow keys.</li>
+		<li><strong>Medium delay (50-100ms):</strong> Balanced responsiveness. Good for most users. Filters out
+		very rapid movements while still feeling responsive.</li>
+		<li><strong>High delay (100-1000ms):</strong> Waits longer before announcing. Useful when you frequently
+		hold arrow keys to move across long lines and only want to hear the final position.</li>
+	</ul>
+	<p>
+		<strong>Technical behavior:</strong> Each new cursor movement resets the timer. NVDA only announces
+		when the cursor stays in one position for the full delay duration.
+	</p>
+	<p>
+		<strong>Recommended values:</strong>
+	</p>
+	<ul>
+		<li>Arrow key navigation: 20-50ms (default: 20ms)</li>
+		<li>Frequent long-distance moves: 100-200ms</li>
+		<li>Following rapid updates: 50-100ms</li>
+	</ul>
+	<p>
+		<strong>Note:</strong> Only affects cursor tracking. Does not affect key echo or manual navigation commands.
 	</p>
 	<p><strong>Default:</strong> 20 milliseconds</p>
 	<p><strong>Range:</strong> 0 to 1000 milliseconds</p>
+
+	<div class="info">
+		<strong>Settings Interaction Summary:</strong>
+		<ul>
+			<li><strong>Quiet Mode</strong> (toggled with NVDA+Alt+Q) temporarily disables cursor tracking
+			and key echo, regardless of their settings</li>
+			<li><strong>Process Symbols</strong> affects cursor tracking, key echo, and manual character navigation</li>
+			<li><strong>Condense Repeated Symbols</strong> only works with Key Echo enabled</li>
+			<li><strong>Cursor Delay</strong> only affects cursor tracking announcements</li>
+		</ul>
+	</div>
 	
 	<h2 id="tips">Tips and Best Practices</h2>
 	
