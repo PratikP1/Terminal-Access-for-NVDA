@@ -10,7 +10,10 @@ TDSR for NVDA enables screen reader users to efficiently navigate and interact w
 
 - **Line-by-line navigation** through terminal output
 - **Word and character navigation** with phonetic spelling support
-- **Cursor tracking** with automatic position announcements
+- **Multiple cursor tracking modes** - Standard, Highlight, Window, or Off
+- **Highlight tracking** - Detect and announce highlighted/inverse text
+- **Screen windowing** - Define and monitor specific screen regions
+- **Attribute/color reading** - Announce ANSI colors and text formatting
 - **Key echo** to hear characters as you type
 - **Symbol processing** to speak symbol names
 - **Quiet mode** to temporarily disable automatic announcements
@@ -52,6 +55,15 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 - **NVDA+Alt+J/K/L** - Read previous/current/next word
 - **NVDA+Alt+M/Comma/Period** - Read previous/current/next character
 
+### Cursor Tracking & Attributes
+- **NVDA+Alt+Asterisk** - Cycle cursor tracking mode (Off → Standard → Highlight → Window)
+- **NVDA+Alt+Shift+A** - Read text attributes/colors at cursor
+
+### Screen Windowing
+- **NVDA+Alt+F2** - Set screen window (press twice: start, then end)
+- **NVDA+Alt+F3** - Clear screen window
+- **NVDA+Alt+Plus** - Read window content
+
 ### Special Features
 - **NVDA+Alt+K** (twice) - Spell current word
 - **NVDA+Alt+Comma** (twice) - Read character phonetically
@@ -72,6 +84,12 @@ Access TDSR settings through:
 ### Available Settings
 
 **Cursor Tracking** - Automatically announces the character at cursor position when it moves. Essential for monitoring position while navigating with arrow keys. Works with Cursor Delay to control timing.
+
+**Cursor Tracking Mode** - Choose between four tracking modes:
+- **Off**: No cursor tracking
+- **Standard**: Announce character at cursor position (default)
+- **Highlight**: Track and announce highlighted/inverse video text
+- **Window**: Only track cursor within defined screen window
 
 **Key Echo** - Announces each character as you type it. Provides immediate feedback for every keystroke. Works with Process Symbols and Condense Repeated Symbols for intelligent announcements.
 
@@ -168,7 +186,9 @@ Contributions are welcome! Please feel free to:
 
 ## Credits
 
-This add-on is inspired by [TDSR (Terminal Data Structure Reader)](https://github.com/tspivey/tdsr) by Tyler Spivey.
+This add-on is inspired by:
+- [TDSR (Terminal Data Structure Reader)](https://github.com/tspivey/tdsr) by Tyler Spivey
+- [Speakup](https://github.com/linux-speakup/speakup) - Linux kernel screen reader, which inspired the advanced cursor tracking modes, screen windowing system, and attribute reading features
 
 ## License
 
@@ -185,4 +205,6 @@ See the LICENSE file for the complete license text.
 - [Project Repository](https://github.com/PratikP1/TDSR-for-NVDA)
 - [NVDA Official Website](https://www.nvaccess.org/)
 - [Original TDSR Project](https://github.com/tspivey/tdsr)
+- [Speakup Screen Reader](https://github.com/linux-speakup/speakup)
 - [NVDA Add-on Development Guide](https://github.com/nvda-es/devguides_translation/blob/master/original_docs/NVDA-Add-on-DevelopmentGuide.md)
+- [NVDA Developer Guide](https://download.nvaccess.org/documentation/developerGuide.html)
