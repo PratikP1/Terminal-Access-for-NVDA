@@ -387,6 +387,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
+
+		# Ensure navigator is bound to terminal before accessing review position
+		if self._boundTerminal:
+			api.setNavigatorObject(self._boundTerminal)
+
 		word = self._getWordAtReview()
 		if word:
 			for char in word:
@@ -446,6 +451,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
+
+		# Ensure navigator is bound to terminal before accessing review position
+		if self._boundTerminal:
+			api.setNavigatorObject(self._boundTerminal)
+
 		try:
 			reviewPos = self._getReviewPosition()
 			if reviewPos is None:
