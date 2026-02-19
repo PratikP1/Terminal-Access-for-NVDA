@@ -9,13 +9,12 @@ All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
 ### Fixed
 - Review cursor now properly binds to focused terminal window to prevent reading content outside the terminal (e.g., window title)
-- Character, word, and line navigation now consistently use the bound terminal object
-- Phonetic character reading now uses the bound terminal object
+- Line, word, and character navigation now use the review cursor directly, preserving review position between navigation calls
+- Phonetic character reading now uses the review cursor directly
 
 ### Technical
-- Bind review cursor to terminal in event_gainFocus
-- Set navigator object before all navigation operations
-- Updated release workflow to build on all main branch commits
+- Navigator object used only in event_gainFocus to route review cursor to the terminal; all read operations use api.getReviewPosition()
+- Stored bound terminal reference (self._boundTerminal) for screen copy operations
 
 ## [1.0.3] - 2026-02-19
 

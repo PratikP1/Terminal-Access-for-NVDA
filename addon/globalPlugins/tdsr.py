@@ -73,6 +73,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.announcedHelp = False
 		self.selectionStart = None
 		self.copyMode = False
+		self._boundTerminal = None
 
 		# Add settings panel to NVDA preferences
 		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(TDSRSettingsPanel)
@@ -126,14 +127,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if self.isTerminalApp(obj):
 			appName = obj.appModule.appName
 
-			# Bind review cursor to the focused terminal object
+			# Store the terminal object and route the review cursor to it via the navigator
+			self._boundTerminal = obj
 			api.setNavigatorObject(obj)
 			try:
 				# Position review cursor at the caret/focus position in the terminal
 				info = obj.makeTextInfo(textInfos.POSITION_CARET)
 				api.setReviewPosition(info)
 			except:
-				# Fallback: just ensure navigator is set to the focused object
 				pass
 
 			# Announce help on first focus to a terminal
@@ -289,11 +290,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			gesture.send()
 			return
 		try:
-			# Ensure navigator object is set to focus for terminal binding
-			obj = api.getFocusObject()
-			if obj and self.isTerminalApp(obj):
-				api.setNavigatorObject(obj)
-
 			info = api.getReviewPosition().copy()
 			info.expand(textInfos.UNIT_CHARACTER)
 			char = info.text
@@ -395,11 +391,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			return
 
 		try:
-			# Ensure navigator object is set to focus for terminal binding
-			obj = api.getFocusObject()
-			if obj and self.isTerminalApp(obj):
-				api.setNavigatorObject(obj)
-
 			info = api.getReviewPosition().copy()
 			info.expand(textInfos.UNIT_LINE)
 			text = info.text
@@ -425,13 +416,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			return
 
 		try:
-			# Ensure navigator object is set to focus for terminal binding
-			obj = api.getFocusObject()
-			if obj and self.isTerminalApp(obj):
-				api.setNavigatorObject(obj)
+			terminal = self._boundTerminal
+			if not terminal:
+				ui.message(_("Unable to copy"))
+				return
 
 			# Get the entire text from the terminal
-			info = obj.makeTextInfo(textInfos.POSITION_FIRST)
+			info = terminal.makeTextInfo(textInfos.POSITION_FIRST)
 			info.expand(textInfos.UNIT_STORY)
 			text = info.text
 			if text and self._copyToClipboard(text):
@@ -543,11 +534,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			direction: -1 for previous, 0 for current, 1 for next.
 		"""
 		try:
-			# Ensure navigator object is set to focus for terminal binding
-			obj = api.getFocusObject()
-			if obj and self.isTerminalApp(obj):
-				api.setNavigatorObject(obj)
-
 			info = api.getReviewPosition().copy()
 			if direction != 0:
 				info.expand(textInfos.UNIT_LINE)
@@ -576,11 +562,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			direction: -1 for previous, 0 for current, 1 for next.
 		"""
 		try:
-			# Ensure navigator object is set to focus for terminal binding
-			obj = api.getFocusObject()
-			if obj and self.isTerminalApp(obj):
-				api.setNavigatorObject(obj)
-
 			info = api.getReviewPosition().copy()
 			if direction != 0:
 				info.expand(textInfos.UNIT_WORD)
@@ -608,11 +589,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			str: The word at the review position, or None.
 		"""
 		try:
-			# Ensure navigator object is set to focus for terminal binding
-			obj = api.getFocusObject()
-			if obj and self.isTerminalApp(obj):
-				api.setNavigatorObject(obj)
-
 			info = api.getReviewPosition().copy()
 			info.expand(textInfos.UNIT_WORD)
 			return info.text
@@ -627,11 +603,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			direction: -1 for previous, 0 for current, 1 for next.
 		"""
 		try:
-			# Ensure navigator object is set to focus for terminal binding
-			obj = api.getFocusObject()
-			if obj and self.isTerminalApp(obj):
-				api.setNavigatorObject(obj)
-
 			info = api.getReviewPosition().copy()
 			if direction != 0:
 				info.expand(textInfos.UNIT_CHARACTER)
