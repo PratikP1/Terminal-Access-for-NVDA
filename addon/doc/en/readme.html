@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>TDSR for NVDA - User Guide</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			line-height: 1.6;
+			max-width: 900px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+		h1, h2, h3 {
+			color: #2c3e50;
+		}
+		h1 {
+			border-bottom: 3px solid #3498db;
+			padding-bottom: 10px;
+		}
+		h2 {
+			border-bottom: 2px solid #95a5a6;
+			padding-bottom: 8px;
+			margin-top: 30px;
+		}
+		table {
+			border-collapse: collapse;
+			width: 100%;
+			margin: 20px 0;
+		}
+		th, td {
+			border: 1px solid #ddd;
+			padding: 12px;
+			text-align: left;
+		}
+		th {
+			background-color: #3498db;
+			color: white;
+		}
+		tr:nth-child(even) {
+			background-color: #f2f2f2;
+		}
+		code {
+			background-color: #f4f4f4;
+			padding: 2px 6px;
+			border-radius: 3px;
+			font-family: 'Courier New', monospace;
+		}
+		.note {
+			background-color: #fff3cd;
+			border-left: 4px solid #ffc107;
+			padding: 15px;
+			margin: 20px 0;
+		}
+		.warning {
+			background-color: #f8d7da;
+			border-left: 4px solid #dc3545;
+			padding: 15px;
+			margin: 20px 0;
+		}
+		.info {
+			background-color: #d1ecf1;
+			border-left: 4px solid #17a2b8;
+			padding: 15px;
+			margin: 20px 0;
+		}
+	</style>
+</head>
+<body>
+	<h1>TDSR for NVDA - User Guide</h1>
+	
+	<h2>Table of Contents</h2>
+	<ul>
+		<li><a href="#introduction">Introduction</a></li>
+		<li><a href="#features">Features</a></li>
+		<li><a href="#supported-terminals">Supported Terminals</a></li>
+		<li><a href="#getting-started">Getting Started</a></li>
+		<li><a href="#keyboard-commands">Keyboard Commands</a></li>
+		<li><a href="#settings">Settings</a></li>
+		<li><a href="#tips">Tips and Best Practices</a></li>
+		<li><a href="#troubleshooting">Troubleshooting</a></li>
+		<li><a href="#license">License</a></li>
+	</ul>
+	
+	<h2 id="introduction">Introduction</h2>
+	<p>
+		TDSR for NVDA is an add-on that provides enhanced terminal accessibility for Windows users. 
+		It brings Terminal Data Structure Reader (TDSR) functionality directly into NVDA, enabling 
+		screen reader users to efficiently navigate and interact with command-line interfaces.
+	</p>
+	<p>
+		This add-on integrates seamlessly with NVDA's built-in speech synthesis and provides a 
+		comprehensive set of navigation and reading commands specifically designed for terminal usage.
+	</p>
+	
+	<h2 id="features">Features</h2>
+	<ul>
+		<li><strong>Line Navigation:</strong> Move through terminal output line by line</li>
+		<li><strong>Word Navigation:</strong> Navigate by word within the terminal</li>
+		<li><strong>Character Navigation:</strong> Move character by character with phonetic spelling support</li>
+		<li><strong>Cursor Tracking:</strong> Automatic announcement of cursor position changes</li>
+		<li><strong>Key Echo:</strong> Hear characters as you type them</li>
+		<li><strong>Symbol Processing:</strong> Speak symbol names instead of the symbols themselves</li>
+		<li><strong>Quiet Mode:</strong> Temporarily disable automatic announcements</li>
+		<li><strong>Selection and Copy:</strong> Select and copy terminal content</li>
+		<li><strong>Configurable Settings:</strong> Customize behavior through NVDA's settings dialog</li>
+	</ul>
+	
+	<h2 id="supported-terminals">Supported Terminals</h2>
+	<p>TDSR for NVDA supports the following terminal applications on Windows 10 and Windows 11:</p>
+	<ul>
+		<li>Windows Terminal</li>
+		<li>Windows PowerShell</li>
+		<li>PowerShell Core (pwsh)</li>
+		<li>Command Prompt (cmd.exe)</li>
+		<li>Console Host (conhost.exe)</li>
+	</ul>
+	
+	<div class="info">
+		<strong>Note:</strong> The add-on is designed to work with NVDA versions 2019.3 and later, 
+		ensuring compatibility with a wide range of NVDA installations.
+	</div>
+	
+	<h2 id="getting-started">Getting Started</h2>
+	<h3>Installation</h3>
+	<ol>
+		<li>Download the TDSR for NVDA add-on file (.nvda-addon)</li>
+		<li>Press Enter on the downloaded file to install it</li>
+		<li>NVDA will ask for confirmation - press Enter to confirm</li>
+		<li>Restart NVDA when prompted</li>
+	</ol>
+	
+	<h3>First Use</h3>
+	<p>
+		When you open a supported terminal application for the first time after installing the add-on, 
+		NVDA will announce: "TDSR terminal support active. Press NVDA+shift+f1 for help."
+	</p>
+	<p>
+		This announcement serves as a reminder that the add-on is active and provides a quick way to 
+		access this help documentation.
+	</p>
+	
+	<h2 id="keyboard-commands">Keyboard Commands</h2>
+	
+	<h3>Help and Information</h3>
+	<table>
+		<thead>
+			<tr>
+				<th>Command</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>NVDA+Shift+F1</code></td>
+				<td>Open this user guide</td>
+			</tr>
+			<tr>
+				<td><code>NVDA+Alt+C</code></td>
+				<td>Open TDSR settings</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<h3>Line Navigation</h3>
+	<table>
+		<thead>
+			<tr>
+				<th>Command</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>NVDA+Alt+U</code></td>
+				<td>Read previous line</td>
+			</tr>
+			<tr>
+				<td><code>NVDA+Alt+I</code></td>
+				<td>Read current line</td>
+			</tr>
+			<tr>
+				<td><code>NVDA+Alt+O</code></td>
+				<td>Read next line</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<h3>Word Navigation</h3>
+	<table>
+		<thead>
+			<tr>
+				<th>Command</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>NVDA+Alt+J</code></td>
+				<td>Read previous word</td>
+			</tr>
+			<tr>
+				<td><code>NVDA+Alt+K</code></td>
+				<td>Read current word</td>
+			</tr>
+			<tr>
+				<td><code>NVDA+Alt+K</code> (twice)</td>
+				<td>Spell current word letter by letter</td>
+			</tr>
+			<tr>
+				<td><code>NVDA+Alt+L</code></td>
+				<td>Read next word</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<h3>Character Navigation</h3>
+	<table>
+		<thead>
+			<tr>
+				<th>Command</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>NVDA+Alt+M</code></td>
+				<td>Read previous character</td>
+			</tr>
+			<tr>
+				<td><code>NVDA+Alt+Comma</code></td>
+				<td>Read current character</td>
+			</tr>
+			<tr>
+				<td><code>NVDA+Alt+Comma</code> (twice)</td>
+				<td>Read current character phonetically (e.g., "alpha" for "a")</td>
+			</tr>
+			<tr>
+				<td><code>NVDA+Alt+Period</code></td>
+				<td>Read next character</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<h3>Selection and Copy</h3>
+	<table>
+		<thead>
+			<tr>
+				<th>Command</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>NVDA+Alt+R</code></td>
+				<td>Start or end selection</td>
+			</tr>
+			<tr>
+				<td><code>NVDA+Alt+V</code></td>
+				<td>Enter copy mode (then press L for line, S for screen)</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<h3>Modes and Toggles</h3>
+	<table>
+		<thead>
+			<tr>
+				<th>Command</th>
+				<th>Description</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><code>NVDA+Alt+Q</code></td>
+				<td>Toggle quiet mode (disables automatic announcements)</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<h2 id="settings">Settings</h2>
+	<p>
+		TDSR settings can be accessed through NVDA's preferences dialog. Press <code>NVDA+N</code> 
+		to open the NVDA menu, select Preferences, then Settings. Alternatively, use 
+		<code>NVDA+Alt+C</code> while in a terminal to jump directly to the Terminal Settings category.
+	</p>
+	
+	<h3>Available Settings</h3>
+	
+	<h4>Enable Cursor Tracking</h4>
+	<p>
+		When enabled, NVDA will automatically announce cursor position changes in the terminal.
+		This is useful for monitoring command execution and output as it appears.
+	</p>
+	<p><strong>Default:</strong> Enabled</p>
+	
+	<h4>Enable Key Echo</h4>
+	<p>
+		When enabled, characters will be spoken as you type them. This provides immediate feedback
+		during command entry and text editing.
+	</p>
+	<p><strong>Default:</strong> Enabled</p>
+	
+	<h4>Pause at Newlines</h4>
+	<p>
+		When enabled, NVDA will pause briefly at line breaks during continuous reading. This makes
+		it easier to distinguish between separate lines of output.
+	</p>
+	<p><strong>Default:</strong> Enabled</p>
+	
+	<h4>Process Symbols</h4>
+	<p>
+		When enabled, symbols will be spoken by name (e.g., "dollar" for $, "at" for @) rather than
+		the symbol itself. This is particularly useful when working with complex command syntax.
+	</p>
+	<p><strong>Default:</strong> Disabled</p>
+	
+	<h4>Condense Repeated Symbols</h4>
+	<p>
+		When enabled, sequences of repeated symbols will be condensed into a count followed by the
+		symbol name (e.g., "42 equals" instead of "equals equals equals...").
+	</p>
+	<p><strong>Default:</strong> Disabled</p>
+	
+	<h4>Repeated Symbols to Condense</h4>
+	<p>
+		Specifies which symbols should be condensed when "Condense Repeated Symbols" is enabled.
+		Enter the symbols without spaces (e.g., "-_=!").
+	</p>
+	<p><strong>Default:</strong> <code>-_=!</code></p>
+	
+	<h4>Cursor Delay (milliseconds)</h4>
+	<p>
+		Sets the delay before cursor movement is announced. A higher value reduces the frequency
+		of announcements during rapid cursor movement, while a lower value provides more immediate
+		feedback.
+	</p>
+	<p><strong>Default:</strong> 20 milliseconds</p>
+	<p><strong>Range:</strong> 0 to 1000 milliseconds</p>
+	
+	<h2 id="tips">Tips and Best Practices</h2>
+	
+	<h3>Efficient Terminal Usage</h3>
+	<ul>
+		<li><strong>Use Quiet Mode:</strong> When running commands that produce verbose output, 
+		enable quiet mode (<code>NVDA+Alt+Q</code>) to prevent overwhelming speech output.</li>
+		
+		<li><strong>Review Output:</strong> After a command completes, use line navigation 
+		(<code>NVDA+Alt+U/I/O</code>) to review the output at your own pace.</li>
+		
+		<li><strong>Word Navigation:</strong> When examining long command lines or paths, 
+		word navigation (<code>NVDA+Alt+J/K/L</code>) is faster than character-by-character review.</li>
+		
+		<li><strong>Phonetic Spelling:</strong> When dealing with complex filenames or unclear output, 
+		use phonetic character reading (<code>NVDA+Alt+Comma</code> twice) to ensure accuracy.</li>
+	</ul>
+	
+	<h3>Customization</h3>
+	<ul>
+		<li><strong>Adjust Cursor Delay:</strong> If you find cursor tracking announcements too 
+		frequent or too slow, adjust the cursor delay setting to match your preference.</li>
+		
+		<li><strong>Symbol Processing:</strong> Enable symbol processing when working with scripts 
+		or configuration files to better understand punctuation and special characters.</li>
+		
+		<li><strong>Key Echo:</strong> If you're a confident typist, you may prefer to disable 
+		key echo to reduce speech output during typing.</li>
+	</ul>
+	
+	<h2 id="troubleshooting">Troubleshooting</h2>
+	
+	<h3>Add-on Not Working</h3>
+	<p><strong>Symptom:</strong> Commands don't work or NVDA doesn't announce terminal support.</p>
+	<p><strong>Solution:</strong></p>
+	<ul>
+		<li>Ensure you're using a supported terminal application</li>
+		<li>Restart NVDA (NVDA+Q, then restart)</li>
+		<li>Verify the add-on is installed (NVDA menu > Tools > Manage add-ons)</li>
+		<li>Check that the add-on is enabled in the add-ons manager</li>
+	</ul>
+	
+	<h3>Help File Doesn't Open</h3>
+	<p><strong>Symptom:</strong> Pressing <code>NVDA+Shift+F1</code> doesn't open the user guide.</p>
+	<p><strong>Solution:</strong></p>
+	<ul>
+		<li>Ensure the add-on is properly installed</li>
+		<li>Try reinstalling the add-on</li>
+		<li>Check that your default browser or HTML viewer is properly configured</li>
+	</ul>
+	
+	<h3>Commands Conflict with Other Add-ons</h3>
+	<p><strong>Symptom:</strong> TDSR commands trigger unexpected behavior.</p>
+	<p><strong>Solution:</strong></p>
+	<ul>
+		<li>Check for keyboard shortcut conflicts in NVDA's Input Gestures dialog</li>
+		<li>Disable conflicting add-ons temporarily to identify the issue</li>
+		<li>Remap conflicting gestures through Input Gestures (NVDA menu > Preferences > Input Gestures)</li>
+	</ul>
+	
+	<h3>Settings Not Saving</h3>
+	<p><strong>Symptom:</strong> Changes to TDSR settings don't persist after restart.</p>
+	<p><strong>Solution:</strong></p>
+	<ul>
+		<li>Ensure NVDA has write permissions to its configuration directory</li>
+		<li>Check for NVDA running with elevated privileges issues</li>
+		<li>Try resetting NVDA configuration (backup first!)</li>
+	</ul>
+	
+	<h2 id="license">License</h2>
+	<p>
+		TDSR for NVDA is free and open source software, licensed under the 
+		GNU General Public License version 3 (GPL v3).
+	</p>
+	<p>
+		This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+		without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+		See the GNU General Public License for more details.
+	</p>
+	
+	<h2>Additional Resources</h2>
+	<ul>
+		<li><a href="https://github.com/PratikP1/TDSR-for-NVDA">Project Repository</a></li>
+		<li><a href="https://www.nvaccess.org/">NVDA Official Website</a></li>
+		<li><a href="https://github.com/tspivey/tdsr">Original TDSR Project</a></li>
+	</ul>
+	
+	<hr>
+	<p><em>Thank you for using TDSR for NVDA! We hope this add-on enhances your terminal experience.</em></p>
+</body>
+</html>

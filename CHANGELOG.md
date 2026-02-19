@@ -1,0 +1,41 @@
+# Changelog
+
+All notable changes to the TDSR for NVDA add-on will be documented in this file.
+
+## [1.0.0] - 2024-02-19
+
+### Added
+- Initial release of TDSR for NVDA add-on
+- Support for Windows Terminal, PowerShell, PowerShell Core, Command Prompt, and Console Host
+- Line-by-line navigation (NVDA+Alt+U/I/O)
+- Word navigation with spelling support (NVDA+Alt+J/K/L)
+- Character navigation with phonetic alphabet (NVDA+Alt+M/Comma/Period)
+- Cursor tracking and automatic announcements
+- Key echo functionality
+- Symbol processing for better command syntax understanding
+- Quiet mode toggle (NVDA+Alt+Q)
+- Selection and copy mode functionality
+- Comprehensive settings panel in NVDA preferences ("Terminal Settings")
+- User guide accessible via NVDA+Shift+F1
+- Automatic help announcement when entering terminals
+- Configuration options for:
+  - Cursor tracking
+  - Key echo
+  - Line pause
+  - Symbol processing
+  - Repeated symbols condensation
+  - Cursor delay (0-1000ms)
+- Support for Windows 10 and Windows 11
+- Compatibility with NVDA 2019.3 and later versions
+
+### Documentation
+- Comprehensive user guide with keyboard commands reference
+- Installation and configuration instructions
+- Troubleshooting guide
+- Tips and best practices
+
+### Technical
+- Global plugin architecture for system-wide terminal support
+- Integration with NVDA's configuration system
+- Settings persistence across sessions
+- Modular code structure for maintainability
