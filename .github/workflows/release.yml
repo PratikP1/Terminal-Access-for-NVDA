@@ -31,7 +31,27 @@ jobs:
       - name: Extract version from buildVars.py
         id: version
         run: |
-          VERSION=$(python3 -c "import buildVars; print(buildVars.addon_info['addon_version'])")
+          # Extract version with error handling
+          if [ ! -f buildVars.py ]; then
+            echo "Error: buildVars.py not found" >&2
+            exit 1
+          fi
+          
+          VERSION=$(python3 -c "
+          try:
+              import buildVars
+              print(buildVars.addon_info['addon_version'])
+          except Exception as e:
+              print(f'Error reading version from buildVars.py: {e}', file=__import__('sys').stderr)
+              exit(1)
+          " 2>&1)
+          
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to extract version from buildVars.py" >&2
+            echo "$VERSION" >&2
+            exit 1
+          fi
+          
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Detected version: $VERSION"
       
@@ -69,6 +89,8 @@ jobs:
         id: changelog
         run: |
           # Extract the most recent version entry from CHANGELOG.md
+          # This awk command finds content between the first two version headers (## [x.y.z])
+          # to get only the latest version's changes
           if [ -f CHANGELOG.md ]; then
             # Get content between the first two version headers
             CHANGELOG=$(awk '/^## \[/{if(++count==2)exit;if(count==1)next}count==1' CHANGELOG.md)
