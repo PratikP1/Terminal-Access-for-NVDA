@@ -278,7 +278,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		self._readChar(0)
+		# Ensure gesture is consumed by handling in try-except
+		try:
+			self._readChar(0)
+		except Exception:
+			# Even if there's an error, don't pass through the keystroke
+			ui.message(_("Unable to read character"))
 
 	@script(
 		# Translators: Description for reading the current character phonetically
@@ -320,7 +325,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		self._readChar(1)
+		# Ensure gesture is consumed by handling in try-except
+		try:
+			self._readChar(1)
+		except Exception:
+			# Even if there's an error, don't pass through the keystroke
+			ui.message(_("Unable to read character"))
 	
 	@script(
 		# Translators: Description for toggling quiet mode
@@ -353,17 +363,26 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		
-		if self.selectionStart is None:
-			# Start selection
-			self.selectionStart = dict(self.reviewPosition)
-			# Translators: Message when selection starts
-			ui.message(_("Selection started"))
-		else:
-			# End selection
-			self.selectionStart = None
-			# Translators: Message when selection ends
-			ui.message(_("Selection ended"))
+
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				# Translators: Error message when unable to set selection
+				ui.message(_("Unable to set selection"))
+				return
+
+			if self.selectionStart is None:
+				# Start selection - create a bookmark to mark the position
+				self.selectionStart = reviewPos.bookmark
+				# Translators: Message when selection starts
+				ui.message(_("Selection started"))
+			else:
+				# End selection
+				self.selectionStart = None
+				# Translators: Message when selection ends
+				ui.message(_("Selection ended"))
+		except Exception:
+			ui.message(_("Unable to set selection"))
 	
 	@script(
 		# Translators: Description for copy mode
