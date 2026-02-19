@@ -2,6 +2,15 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.5] - 2026-02-19
+
+### Fixed
+- Review cursor architecture corrected: navigator object is now used only in event_gainFocus to route the review cursor to the terminal; all read operations (line/word/character) use the review cursor directly via api.getReviewPosition(), preserving review position between navigation calls
+
+### Technical
+- Removed erroneous api.setNavigatorObject() calls from _readLine, _readWord, _readChar, _getWordAtReview, and script_readCurrentCharPhonetic
+- script_copyScreen now uses stored self._boundTerminal reference instead of re-fetching focus object
+
 ## [1.0.4] - 2026-02-19
 
 ### Added
