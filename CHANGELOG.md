@@ -2,6 +2,26 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.4] - 2026-02-19
+
+### Added
+- Line copy (NVDA+Alt+C) and screen copy (NVDA+Alt+Shift+C) functionality to copy terminal content to clipboard
+
+### Fixed
+- Review cursor now properly binds to focused terminal window to prevent reading content outside the terminal (e.g., window title)
+- Character, word, and line navigation now consistently use the bound terminal object
+- Phonetic character reading now uses the bound terminal object
+
+### Technical
+- Bind review cursor to terminal in event_gainFocus
+- Set navigator object before all navigation operations
+- Updated release workflow to build on all main branch commits
+
+## [1.0.3] - 2026-02-19
+
+### Fixed
+- Fixed line, word, and character reading by switching to NVDA review cursor API
+
 ## [1.0.2] - 2026-02-19
 
 ### Fixed
