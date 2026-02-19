@@ -71,6 +71,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.selectionStart = None
 		self.copyMode = False
 		self._boundTerminal = None
+		self._cursorTrackingTimer = None
+		self._lastCaretPosition = None
+		self._lastTypedChar = None
+		self._repeatedCharCount = 0
 
 		# Add settings panel to NVDA preferences
 		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(TDSRSettingsPanel)
@@ -151,6 +155,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		Announces characters as they are typed if keyEcho is enabled.
 		Uses processSymbols setting to determine whether to speak symbol names.
+		Uses repeatedSymbols to condense sequences of repeated symbols.
 		"""
 		nextHandler()
 
@@ -164,6 +169,33 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Process the character for speech
 		if ch:
+			# Check if we should condense repeated symbols
+			if config.conf["TDSR"]["repeatedSymbols"]:
+				repeatedSymbolsValues = config.conf["TDSR"]["repeatedSymbolsValues"]
+
+				# Check if this character is in the list of symbols to condense
+				if ch in repeatedSymbolsValues:
+					# If it's the same as the last character, increment count
+					if ch == self._lastTypedChar:
+						self._repeatedCharCount += 1
+						# Don't announce yet - wait to see if more come
+						return
+					else:
+						# Different character - announce any pending repeated symbols
+						if self._repeatedCharCount > 0:
+							self._announceRepeatedSymbol(self._lastTypedChar, self._repeatedCharCount)
+						# Reset for this new character
+						self._lastTypedChar = ch
+						self._repeatedCharCount = 1
+						# Don't announce yet
+						return
+				else:
+					# Not a symbol to condense - announce any pending repeated symbols first
+					if self._repeatedCharCount > 0:
+						self._announceRepeatedSymbol(self._lastTypedChar, self._repeatedCharCount)
+						self._lastTypedChar = None
+						self._repeatedCharCount = 0
+
 			# Use processSymbols setting to determine if we should speak symbol names
 			if config.conf["TDSR"]["processSymbols"]:
 				charToSpeak = self._processSymbol(ch)
@@ -175,6 +207,94 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				ui.message(_("space"))
 			else:
 				ui.message(charToSpeak)
+
+	def _announceRepeatedSymbol(self, char, count):
+		"""
+		Announce a repeated symbol with its count.
+
+		Args:
+			char: The repeated character.
+			count: The number of times it was repeated.
+		"""
+		if count > 1:
+			# Get symbol name if processSymbols is enabled
+			if config.conf["TDSR"]["processSymbols"]:
+				symbolName = self._processSymbol(char)
+			else:
+				symbolName = char
+
+			# Translators: Message format for repeated symbols, e.g. "3 dash"
+			ui.message(_("{count} {symbol}").format(count=count, symbol=symbolName))
+		elif count == 1:
+			# Just one - announce normally
+			if config.conf["TDSR"]["processSymbols"]:
+				charToSpeak = self._processSymbol(char)
+			else:
+				charToSpeak = char
+			ui.message(charToSpeak)
+
+	def event_caret(self, obj, nextHandler):
+		"""
+		Handle caret movement events.
+
+		Announces cursor position changes if cursorTracking is enabled.
+		Uses cursorDelay to debounce rapid movements.
+		"""
+		nextHandler()
+
+		# Only handle if in a terminal and cursor tracking is enabled
+		if not self.isTerminalApp(obj) or not config.conf["TDSR"]["cursorTracking"]:
+			return
+
+		# Don't track if in quiet mode
+		if config.conf["TDSR"]["quietMode"]:
+			return
+
+		# Cancel any pending cursor tracking announcement
+		if self._cursorTrackingTimer:
+			self._cursorTrackingTimer.Stop()
+			self._cursorTrackingTimer = None
+
+		# Get cursor delay setting
+		delay = config.conf["TDSR"]["cursorDelay"]
+
+		# Schedule announcement with delay
+		self._cursorTrackingTimer = wx.CallLater(delay, self._announceCursorPosition, obj)
+
+	def _announceCursorPosition(self, obj):
+		"""
+		Announce the current cursor position.
+
+		Args:
+			obj: The terminal object.
+		"""
+		try:
+			# Get the current caret position
+			info = obj.makeTextInfo(textInfos.POSITION_CARET)
+
+			# Check if position has actually changed
+			currentPos = (info.bookmark.startOffset if hasattr(info, 'bookmark') else None)
+			if currentPos == self._lastCaretPosition:
+				return
+
+			self._lastCaretPosition = currentPos
+
+			# Expand to get the character at cursor
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+
+			if char and char.strip():
+				# Use processSymbols setting if enabled
+				if config.conf["TDSR"]["processSymbols"]:
+					charToSpeak = self._processSymbol(char)
+				else:
+					charToSpeak = char
+				ui.message(charToSpeak)
+			elif char == ' ':
+				ui.message(_("space"))
+		except Exception:
+			# Silently fail - cursor tracking is a non-critical feature
+			pass
 
 	@script(
 		# Translators: Description for the show help gesture
