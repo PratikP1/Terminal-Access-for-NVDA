@@ -1,0 +1,141 @@
+name: Build and Release Add-on
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'buildVars.py'
+      - 'manifest.ini'
+      - 'addon/**'
+      - 'build.py'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      
+      - name: Extract version from buildVars.py
+        id: version
+        run: |
+          # Extract version with error handling
+          if [ ! -f buildVars.py ]; then
+            echo "Error: buildVars.py not found" >&2
+            exit 1
+          fi
+          
+          VERSION=$(python3 -c "
+          try:
+              import buildVars
+              print(buildVars.addon_info['addon_version'])
+          except Exception as e:
+              print(f'Error reading version from buildVars.py: {e}', file=__import__('sys').stderr)
+              exit(1)
+          " 2>&1)
+          
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to extract version from buildVars.py" >&2
+            echo "$VERSION" >&2
+            exit 1
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Detected version: $VERSION"
+      
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Tag v${{ steps.version.outputs.version }} already exists"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Tag v${{ steps.version.outputs.version }} does not exist"
+          fi
+      
+      - name: Build add-on
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          python3 build.py --non-interactive
+          ls -lh *.nvda-addon
+      
+      - name: Create source code archive
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          zip -r TDSR-${{ steps.version.outputs.version }}-source.zip . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x "*.nvda-addon" \
+            -x "__pycache__/*" \
+            -x "*.pyc" \
+            -x "*.pyo"
+          ls -lh *.zip
+      
+      - name: Generate changelog for release
+        if: steps.check_tag.outputs.exists == 'false'
+        id: changelog
+        run: |
+          # Extract the most recent version entry from CHANGELOG.md
+          # This awk command finds content between the first two version headers (## [x.y.z])
+          # to get only the latest version's changes
+          if [ -f CHANGELOG.md ]; then
+            # Get content between the first two version headers
+            CHANGELOG=$(awk '/^## \[/{if(++count==2)exit;if(count==1)next}count==1' CHANGELOG.md)
+            if [ -z "$CHANGELOG" ]; then
+              CHANGELOG="Release version ${{ steps.version.outputs.version }}"
+            fi
+          else
+            CHANGELOG="Release version ${{ steps.version.outputs.version }}"
+          fi
+          # Save to file for multiline handling
+          echo "$CHANGELOG" > changelog.txt
+          echo "Changelog extracted"
+      
+      - name: Create GitHub Release
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
+          body_path: changelog.txt
+          draft: false
+          prerelease: false
+          files: |
+            TDSR-${{ steps.version.outputs.version }}.nvda-addon
+            TDSR-${{ steps.version.outputs.version }}-source.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update latest tag
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Delete the latest tag if it exists (both local and remote)
+          git tag -d latest 2>/dev/null || true
+          git push origin :refs/tags/latest 2>/dev/null || true
+          
+          # Create and push new latest tag
+          git tag -a latest -m "Latest release: v${{ steps.version.outputs.version }}"
+          git push origin latest
+          
+          echo "Updated 'latest' tag to point to v${{ steps.version.outputs.version }}"
+      
+      - name: Skip release (tag exists)
+        if: steps.check_tag.outputs.exists == 'true'
+        run: |
+          echo "Release v${{ steps.version.outputs.version }} already exists. Skipping release creation."

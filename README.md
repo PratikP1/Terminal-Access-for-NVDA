@@ -95,6 +95,39 @@ The add-on can be built using standard NVDA add-on build tools. Ensure you have:
 - Python 3.7+
 - NVDA add-on development environment
 
+To build the add-on manually:
+```bash
+python build.py
+```
+
+For automated builds (non-interactive mode):
+```bash
+python build.py --non-interactive
+```
+
+### Automated Releases
+
+This project uses GitHub Actions to automatically build and publish releases when changes are pushed to the `main` branch. The release process:
+
+1. **Automatic Triggering**: When commits are pushed to the `main` branch that affect `buildVars.py`, `manifest.ini`, `addon/`, or `build.py`, the workflow automatically triggers.
+
+2. **Version Detection**: The version number is extracted from `buildVars.py` (the `addon_version` field).
+
+3. **Build Process**: The workflow:
+   - Builds the `.nvda-addon` package
+   - Creates a source code archive
+   - Extracts changelog information from `CHANGELOG.md`
+
+4. **Release Creation**: If the version tag doesn't already exist, a GitHub release is created with:
+   - Tag name: `v{version}` (e.g., `v1.0.1`)
+   - The compiled `.nvda-addon` file
+   - Source code archive
+   - Changelog excerpt from the latest version
+
+5. **Latest Tag**: The `latest` tag is automatically updated to point to the most recent release, making it easy for users to always download the current version.
+
+**Note**: To create a new release, simply update the version number in `buildVars.py` and `manifest.ini`, update the `CHANGELOG.md`, and push to the `main` branch.
+
 ### Project Structure
 
 ```

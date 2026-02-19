@@ -22,8 +22,6 @@ import wx
 import os
 import re
 from scriptHandler import script
-import winUser
-import controlTypes
 
 try:
 	addonHandler.initTranslation()

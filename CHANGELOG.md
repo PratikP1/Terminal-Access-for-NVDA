@@ -2,6 +2,18 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.1] - 2026-02-19
+
+### Changed
+- Updated compatibility for NVDA 2026.1 (beta)
+- Updated lastTestedNVDAVersion to 2026.1 in manifest and build configuration
+- Removed unused imports (controlTypes, winUser) for cleaner code
+
+### Technical
+- Verified all NVDA API usage is compatible with NVDA 2026.1
+- Confirmed script decorator usage follows current NVDA patterns
+- Validated settings panel integration with modern NVDA
+
 ## [1.0.0] - 2024-02-19
 
 ### Added

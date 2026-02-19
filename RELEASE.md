@@ -1,0 +1,164 @@
+# Release Process
+
+This document describes the automated release process for the TDSR for NVDA add-on.
+
+## Overview
+
+The project uses GitHub Actions to automatically build and publish releases when changes are pushed to the `main` branch. This ensures consistent, reproducible releases without manual intervention.
+
+## Automated Release Workflow
+
+### Trigger Conditions
+
+The release workflow automatically runs when:
+- Changes are pushed to the `main` branch
+- Changes affect any of these files/directories:
+  - `buildVars.py`
+  - `manifest.ini`
+  - `addon/**` (any file in the addon directory)
+  - `build.py`
+
+### Workflow Steps
+
+1. **Version Detection**
+   - Extracts version from `buildVars.py` (`addon_info['addon_version']`)
+   - Checks if a release with this version already exists
+
+2. **Build Process** (skipped if version already released)
+   - Builds the `.nvda-addon` package using `build.py`
+   - Creates a source code archive (zip file)
+   - Extracts relevant changelog from `CHANGELOG.md`
+
+3. **Release Creation**
+   - Creates a GitHub release with tag `v{version}`
+   - Attaches the `.nvda-addon` file
+   - Attaches the source code archive
+   - Includes changelog excerpt in release notes
+
+4. **Latest Tag Update**
+   - Moves the `latest` tag to point to the new release
+   - Allows users to always download the most recent version via the `latest` tag
+
+## Creating a New Release
+
+To create a new release, follow these steps:
+
+### 1. Update Version Numbers
+
+Edit `buildVars.py`:
+```python
+addon_info = {
+    # ...
+    "addon_version": "1.0.2",  # Update this
+    # ...
+}
+```
+
+Edit `manifest.ini`:
+```ini
+[Core]
+version = 1.0.2  # Update this to match buildVars.py
+```
+
+### 2. Update Changelog
+
+Edit `CHANGELOG.md` and add a new entry at the top:
+```markdown
+## [1.0.2] - 2024-XX-XX
+
+### Added
+- New feature description
+
+### Changed
+- Change description
+
+### Fixed
+- Bug fix description
+```
+
+### 3. Commit and Push
+
+```bash
+git add buildVars.py manifest.ini CHANGELOG.md
+git commit -m "Bump version to 1.0.2"
+git push origin main
+```
+
+### 4. Automatic Release
+
+The GitHub Action will automatically:
+- Build the add-on
+- Create a release tagged `v1.0.2`
+- Upload the `.nvda-addon` file and source archive
+- Update the `latest` tag
+
+### 5. Verify Release
+
+Visit the [Releases page](https://github.com/PratikP1/TDSR-for-NVDA/releases) to verify the release was created successfully.
+
+## Release Artifacts
+
+Each release includes:
+
+1. **`TDSR-{version}.nvda-addon`** - The compiled add-on package ready for installation in NVDA
+2. **`TDSR-{version}-source.zip`** - Source code archive for the specific version
+
+## Version Tagging
+
+- **Version tags**: `v1.0.0`, `v1.0.1`, etc. - Point to specific releases
+- **Latest tag**: `latest` - Always points to the most recent release
+
+## Troubleshooting
+
+### Release Not Created
+
+If a release is not created after pushing to main:
+
+1. Check that the version number was updated in both `buildVars.py` and `manifest.ini`
+2. Verify that the version tag doesn't already exist
+3. Check the [Actions tab](https://github.com/PratikP1/TDSR-for-NVDA/actions) for workflow logs
+4. Ensure the changed files match the workflow trigger paths
+
+### Duplicate Version
+
+If you accidentally push the same version number twice:
+- The workflow will detect the existing tag and skip release creation
+- Update the version number to a new value and push again
+
+### Build Failures
+
+If the build fails:
+1. Check the workflow logs in the Actions tab
+2. Test the build locally with `python build.py --non-interactive`
+3. Ensure all required files are present in the repository
+4. Verify Python syntax with `python validate.py`
+
+## Manual Release (Not Recommended)
+
+While the automated process is preferred, you can create a manual release:
+
+1. Build locally: `python build.py`
+2. Go to [Releases page](https://github.com/PratikP1/TDSR-for-NVDA/releases)
+3. Click "Draft a new release"
+4. Create a new tag (e.g., `v1.0.2`)
+5. Upload the `.nvda-addon` file
+6. Write release notes
+7. Publish release
+
+**Note**: Manual releases won't automatically update the `latest` tag.
+
+## Best Practices
+
+1. **Version Numbering**: Follow [Semantic Versioning](https://semver.org/)
+   - MAJOR.MINOR.PATCH (e.g., 1.0.1)
+   - MAJOR: Breaking changes
+   - MINOR: New features (backward compatible)
+   - PATCH: Bug fixes
+
+2. **Changelog**: Always update `CHANGELOG.md` before releasing
+
+3. **Testing**: Test the add-on thoroughly before updating versions
+
+4. **Consistency**: Keep `buildVars.py` and `manifest.ini` versions in sync
+
+5. **Branch Strategy**: Only push release-ready code to `main`

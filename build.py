@@ -3,7 +3,10 @@
 Simple build script for TDSR for NVDA add-on.
 
 This script creates an NVDA add-on package without requiring SCons.
-Usage: python build.py
+Usage: python build.py [--non-interactive | -y]
+
+Options:
+  --non-interactive, -y   Run in non-interactive mode (auto-overwrite)
 """
 
 import os
@@ -54,13 +57,20 @@ def main():
 	# Define output filename
 	output_file = f"{addon_name}-{addon_version}.nvda-addon"
 	
+	# Check for non-interactive mode
+	non_interactive = "--non-interactive" in sys.argv or "-y" in sys.argv
+	
 	# Check if output file already exists
 	if os.path.exists(output_file):
-		response = input(f"\n{output_file} already exists. Overwrite? (y/n): ")
-		if response.lower() != 'y':
-			print("Build cancelled.")
-			return 1
-		os.remove(output_file)
+		if non_interactive:
+			print(f"\n{output_file} already exists. Overwriting (non-interactive mode)...")
+			os.remove(output_file)
+		else:
+			response = input(f"\n{output_file} already exists. Overwrite? (y/n): ")
+			if response.lower() != 'y':
+				print("Build cancelled.")
+				return 1
+			os.remove(output_file)
 	
 	# Create the add-on
 	try:
