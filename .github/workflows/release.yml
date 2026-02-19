@@ -4,11 +4,6 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'buildVars.py'
-      - 'addon/manifest.ini'
-      - 'addon/**'
-      - 'build.py'
 
 permissions:
   contents: write
@@ -71,19 +66,7 @@ jobs:
         run: |
           python3 build.py --non-interactive
           ls -lh *.nvda-addon
-      
-      - name: Create source code archive
-        if: steps.check_tag.outputs.exists == 'false'
-        run: |
-          zip -r TDSR-${{ steps.version.outputs.version }}-source.zip . \
-            -x ".git/*" \
-            -x ".github/*" \
-            -x "*.nvda-addon" \
-            -x "__pycache__/*" \
-            -x "*.pyc" \
-            -x "*.pyo"
-          ls -lh *.zip
-      
+
       - name: Generate changelog for release
         if: steps.check_tag.outputs.exists == 'false'
         id: changelog
@@ -115,7 +98,6 @@ jobs:
           prerelease: false
           files: |
             TDSR-${{ steps.version.outputs.version }}.nvda-addon
-            TDSR-${{ steps.version.outputs.version }}-source.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
