@@ -1,6 +1,6 @@
-# Contributing to TDSR for NVDA
+# Contributing to Terminal Access for NVDA
 
-Thank you for your interest in contributing to TDSR for NVDA! This document provides guidelines and instructions for contributing to the project.
+Thank you for your interest in contributing to Terminal Access for NVDA! This document provides guidelines and instructions for contributing to the project.
 
 ## Code of Conduct
 
@@ -23,7 +23,7 @@ If you find a bug, please create an issue on GitHub with:
    - Windows version (10 or 11)
    - NVDA version
    - Terminal application and version
-   - TDSR add-on version
+   - Terminal Access add-on version
 
 ### Suggesting Enhancements
 
@@ -66,8 +66,8 @@ Feature requests are welcome! Please include:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/PratikP1/TDSR-for-NVDA.git
-   cd TDSR-for-NVDA
+   git clone https://github.com/PratikP1/Terminal-Access-for-NVDA.git
+   cd Terminal-Access-for-NVDA
    ```
 
 2. **Install development dependencies**:
@@ -85,23 +85,27 @@ Feature requests are welcome! Please include:
 
 3. **Understand the project structure**:
    ```
-   TDSR-for-NVDA/
+   Terminal-Access-for-NVDA/
    ├── addon/
    │   ├── globalPlugins/
-   │   │   └── tdsr.py          # Main plugin (2600+ lines)
+   │   │   └── terminalAccess.py # Main plugin (2600+ lines)
+   │   ├── locale/                # Translation files
    │   └── doc/
    │       └── en/
-   │           └── readme.html   # User guide
+   │           └── readme.html    # User guide
    ├── tests/
-   │   ├── conftest.py           # Test fixtures and mocks
-   │   ├── test_*.py             # Test files (150+ tests)
+   │   ├── conftest.py            # Test fixtures and mocks
+   │   ├── test_*.py              # Test files (150+ tests)
    │   └── README.md
-   ├── manifest.ini              # Add-on metadata
-   ├── buildVars.py              # Build configuration
-   ├── ARCHITECTURE.md           # System architecture
-   ├── API_REFERENCE.md          # API documentation
-   ├── CHANGELOG.md              # Version history
-   └── requirements-dev.txt      # Dev dependencies
+   ├── docs/                      # Organized documentation
+   │   ├── user/                  # User guides
+   │   ├── developer/             # Architecture & API
+   │   ├── testing/               # Testing guide
+   │   └── archive/               # Historical docs
+   ├── manifest.ini               # Add-on metadata
+   ├── buildVars.py               # Build configuration
+   ├── CHANGELOG.md               # Version history
+   └── requirements-dev.txt       # Dev dependencies
    ```
 
 4. **Build the add-on**:
@@ -117,7 +121,7 @@ Feature requests are welcome! Please include:
    ```
 
 5. **Install and test**:
-   - Build creates `TDSR-{version}.nvda-addon` file
+   - Build creates `terminalAccess-{version}.nvda-addon` file
    - Press Enter on the file to install in NVDA
    - Test in Windows Terminal, PowerShell, or cmd.exe
    - Check NVDA log (NVDA+F1) for errors
