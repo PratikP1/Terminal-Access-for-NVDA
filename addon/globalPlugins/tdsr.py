@@ -3536,92 +3536,211 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 class TDSRSettingsPanel(SettingsPanel):
 	"""
-	Settings panel for TDSR terminal configuration.
-	
-	Provides UI for configuring all TDSR options within NVDA's settings dialog.
+	Enhanced settings panel for TDSR terminal configuration.
+
+	Provides organized UI with logical grouping, tooltips, and reset functionality.
+	Follows NVDA GUI guidelines for accessibility and usability.
 	"""
-	
+
 	# Translators: Title for the TDSR settings category
 	title = _("Terminal Settings")
-	
+
 	def makeSettings(self, settingsSizer):
-		"""Create the settings UI elements."""
+		"""Create the settings UI elements with logical grouping."""
 		sHelper = guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
+
+		# === Cursor Tracking Section ===
+		# Translators: Label for cursor tracking settings group
+		cursorGroup = guiHelper.BoxSizerHelper(self, sizer=wx.StaticBoxSizer(
+			wx.StaticBox(self, label=_("Cursor Tracking")),
+			wx.VERTICAL
+		))
+		sHelper.addItem(cursorGroup)
 
 		# Cursor tracking checkbox
 		# Translators: Label for cursor tracking checkbox
-		self.cursorTrackingCheckBox = sHelper.addItem(
+		self.cursorTrackingCheckBox = cursorGroup.addItem(
 			wx.CheckBox(self, label=_("Enable cursor &tracking"))
 		)
 		self.cursorTrackingCheckBox.SetValue(config.conf["TDSR"]["cursorTracking"])
+		# Translators: Tooltip for cursor tracking checkbox
+		self.cursorTrackingCheckBox.SetToolTip(_(
+			"Automatically announce cursor position changes in the terminal"
+		))
 
 		# Cursor tracking mode choice
 		# Translators: Label for cursor tracking mode choice
-		self.cursorTrackingModeChoice = sHelper.addLabeledControl(
+		self.cursorTrackingModeChoice = cursorGroup.addLabeledControl(
 			_("Cursor tracking &mode:"),
 			wx.Choice,
 			choices=[
+				# Translators: Cursor tracking mode option
 				_("Off"),
+				# Translators: Cursor tracking mode option
 				_("Standard"),
+				# Translators: Cursor tracking mode option
 				_("Highlight"),
+				# Translators: Cursor tracking mode option
 				_("Window")
 			]
 		)
 		self.cursorTrackingModeChoice.SetSelection(config.conf["TDSR"]["cursorTrackingMode"])
-
-		# Key echo checkbox
-		# Translators: Label for key echo checkbox
-		self.keyEchoCheckBox = sHelper.addItem(
-			wx.CheckBox(self, label=_("Enable &key echo"))
-		)
-		self.keyEchoCheckBox.SetValue(config.conf["TDSR"]["keyEcho"])
-
-		# Line pause checkbox
-		# Translators: Label for line pause checkbox
-		self.linePauseCheckBox = sHelper.addItem(
-			wx.CheckBox(self, label=_("Pause at &newlines"))
-		)
-		self.linePauseCheckBox.SetValue(config.conf["TDSR"]["linePause"])
-
-		# Punctuation level choice
-		# Translators: Label for punctuation level choice
-		self.punctuationLevelChoice = sHelper.addLabeledControl(
-			_("&Punctuation level:"),
-			wx.Choice,
-			choices=[
-				_("None"),
-				_("Some (.,?!;:)"),
-				_("Most (adds @#$%^&*()_+=[]{}\\|<>/)"),
-				_("All")
-			]
-		)
-		self.punctuationLevelChoice.SetSelection(config.conf["TDSR"]["punctuationLevel"])
-
-		# Repeated symbols checkbox
-		# Translators: Label for repeated symbols checkbox
-		self.repeatedSymbolsCheckBox = sHelper.addItem(
-			wx.CheckBox(self, label=_("Condense &repeated symbols"))
-		)
-		self.repeatedSymbolsCheckBox.SetValue(config.conf["TDSR"]["repeatedSymbols"])
-
-		# Repeated symbols values text field
-		# Translators: Label for repeated symbols values
-		self.repeatedSymbolsValuesText = sHelper.addLabeledControl(
-			_("Repeated symbols to condense:"),
-			wx.TextCtrl
-		)
-		self.repeatedSymbolsValuesText.SetValue(config.conf["TDSR"]["repeatedSymbolsValues"])
+		# Translators: Tooltip for cursor tracking mode
+		self.cursorTrackingModeChoice.SetToolTip(_(
+			"Standard: announce line/column changes, "
+			"Highlight: announce highlighted text, "
+			"Window: only announce within defined window"
+		))
 
 		# Cursor delay spinner
 		# Translators: Label for cursor delay spinner
-		self.cursorDelaySpinner = sHelper.addLabeledControl(
+		self.cursorDelaySpinner = cursorGroup.addLabeledControl(
 			_("Cursor delay (milliseconds):"),
 			nvdaControls.SelectOnFocusSpinCtrl,
 			min=0,
 			max=1000,
 			initial=config.conf["TDSR"]["cursorDelay"]
 		)
-	
+		# Translators: Tooltip for cursor delay
+		self.cursorDelaySpinner.SetToolTip(_(
+			"Delay before announcing cursor position (0-1000ms). "
+			"Higher values reduce announcement frequency."
+		))
+
+		# === Feedback Settings Section ===
+		# Translators: Label for feedback settings group
+		feedbackGroup = guiHelper.BoxSizerHelper(self, sizer=wx.StaticBoxSizer(
+			wx.StaticBox(self, label=_("Feedback")),
+			wx.VERTICAL
+		))
+		sHelper.addItem(feedbackGroup)
+
+		# Key echo checkbox
+		# Translators: Label for key echo checkbox
+		self.keyEchoCheckBox = feedbackGroup.addItem(
+			wx.CheckBox(self, label=_("Enable &key echo"))
+		)
+		self.keyEchoCheckBox.SetValue(config.conf["TDSR"]["keyEcho"])
+		# Translators: Tooltip for key echo
+		self.keyEchoCheckBox.SetToolTip(_(
+			"Announce characters as you type in the terminal"
+		))
+
+		# Line pause checkbox
+		# Translators: Label for line pause checkbox
+		self.linePauseCheckBox = feedbackGroup.addItem(
+			wx.CheckBox(self, label=_("Pause at &newlines"))
+		)
+		self.linePauseCheckBox.SetValue(config.conf["TDSR"]["linePause"])
+		# Translators: Tooltip for line pause
+		self.linePauseCheckBox.SetToolTip(_(
+			"Brief pause when speaking line content to improve clarity"
+		))
+
+		# Punctuation level choice
+		# Translators: Label for punctuation level choice
+		self.punctuationLevelChoice = feedbackGroup.addLabeledControl(
+			_("&Punctuation level:"),
+			wx.Choice,
+			choices=[
+				# Translators: Punctuation level option
+				_("None"),
+				# Translators: Punctuation level option
+				_("Some (.,?!;:)"),
+				# Translators: Punctuation level option
+				_("Most (adds @#$%^&*()_+=[]{}\\|<>/)"),
+				# Translators: Punctuation level option
+				_("All")
+			]
+		)
+		self.punctuationLevelChoice.SetSelection(config.conf["TDSR"]["punctuationLevel"])
+		# Translators: Tooltip for punctuation level
+		self.punctuationLevelChoice.SetToolTip(_(
+			"Controls which punctuation symbols are announced. "
+			"Higher levels announce more symbols. "
+			"Use NVDA+Alt+[ and ] to adjust quickly."
+		))
+
+		# === Advanced Settings Section ===
+		# Translators: Label for advanced settings group
+		advancedGroup = guiHelper.BoxSizerHelper(self, sizer=wx.StaticBoxSizer(
+			wx.StaticBox(self, label=_("Advanced")),
+			wx.VERTICAL
+		))
+		sHelper.addItem(advancedGroup)
+
+		# Repeated symbols checkbox
+		# Translators: Label for repeated symbols checkbox
+		self.repeatedSymbolsCheckBox = advancedGroup.addItem(
+			wx.CheckBox(self, label=_("Condense &repeated symbols"))
+		)
+		self.repeatedSymbolsCheckBox.SetValue(config.conf["TDSR"]["repeatedSymbols"])
+		# Translators: Tooltip for repeated symbols
+		self.repeatedSymbolsCheckBox.SetToolTip(_(
+			"Condense runs of repeated symbols (e.g., '====' becomes '4 equals')"
+		))
+
+		# Repeated symbols values text field
+		# Translators: Label for repeated symbols values
+		self.repeatedSymbolsValuesText = advancedGroup.addLabeledControl(
+			_("Repeated symbols to condense:"),
+			wx.TextCtrl
+		)
+		self.repeatedSymbolsValuesText.SetValue(config.conf["TDSR"]["repeatedSymbolsValues"])
+		# Translators: Tooltip for repeated symbols values
+		self.repeatedSymbolsValuesText.SetToolTip(_(
+			"Characters that will be condensed when repeated. "
+			"Example: -_=! (max 50 characters)"
+		))
+
+		# === Reset Button ===
+		# Translators: Label for reset to defaults button
+		self.resetButton = sHelper.addItem(
+			wx.Button(self, label=_("&Reset to Defaults"))
+		)
+		# Translators: Tooltip for reset button
+		self.resetButton.SetToolTip(_(
+			"Reset all TDSR settings to their default values"
+		))
+		self.resetButton.Bind(wx.EVT_BUTTON, self.onResetToDefaults)
+
+	def onResetToDefaults(self, event):
+		"""Reset all settings to their default values."""
+		# Translators: Confirmation dialog for resetting settings
+		result = gui.messageBox(
+			_("Are you sure you want to reset all TDSR settings to their default values?"),
+			_("Confirm Reset"),
+			wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION
+		)
+
+		if result == wx.YES:
+			# Reset all settings to defaults
+			config.conf["TDSR"]["cursorTracking"] = True
+			config.conf["TDSR"]["cursorTrackingMode"] = CT_STANDARD
+			config.conf["TDSR"]["keyEcho"] = True
+			config.conf["TDSR"]["linePause"] = True
+			config.conf["TDSR"]["punctuationLevel"] = PUNCT_MOST
+			config.conf["TDSR"]["repeatedSymbols"] = False
+			config.conf["TDSR"]["repeatedSymbolsValues"] = "-_=!"
+			config.conf["TDSR"]["cursorDelay"] = 20
+
+			# Update UI to reflect defaults
+			self.cursorTrackingCheckBox.SetValue(True)
+			self.cursorTrackingModeChoice.SetSelection(CT_STANDARD)
+			self.keyEchoCheckBox.SetValue(True)
+			self.linePauseCheckBox.SetValue(True)
+			self.punctuationLevelChoice.SetSelection(PUNCT_MOST)
+			self.repeatedSymbolsCheckBox.SetValue(False)
+			self.repeatedSymbolsValuesText.SetValue("-_=!")
+			self.cursorDelaySpinner.SetValue(20)
+
+			# Translators: Message after resetting to defaults
+			gui.messageBox(
+				_("All settings have been reset to their default values."),
+				_("Settings Reset"),
+				wx.OK | wx.ICON_INFORMATION
+			)
+
 	def onSave(self):
 		"""Save the settings when the user clicks OK with validation."""
 		# Validate and save cursor tracking mode
