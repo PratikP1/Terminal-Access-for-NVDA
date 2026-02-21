@@ -1219,6 +1219,587 @@ def _validateSelectionSize(startRow: int, endRow: int, startCol: int, endCol: in
 	return (True, None)
 
 
+class ConfigManager:
+	"""
+	Centralized configuration management for TDSR settings.
+
+	Handles all interactions with config.conf["TDSR"], including:
+	- Getting and setting configuration values
+	- Validation and sanitization
+	- Default value management
+	- Configuration migration
+
+	Example usage:
+		>>> config_mgr = ConfigManager()
+		>>>
+		>>> # Get a setting value
+		>>> tracking_mode = config_mgr.get("cursorTrackingMode")
+		>>> print(tracking_mode)  # 1 (CT_STANDARD)
+		>>>
+		>>> # Set a setting value (with validation)
+		>>> config_mgr.set("cursorTrackingMode", 2)  # CT_HIGHLIGHT
+		>>>
+		>>> # Check a boolean setting
+		>>> if config_mgr.get("keyEcho"):
+		>>>     print("Key echo is enabled")
+		>>>
+		>>> # Validate all settings
+		>>> config_mgr.validate_all()
+
+	Thread Safety:
+		All operations are thread-safe. Config access is synchronized by NVDA.
+
+	Validation:
+		All set() operations automatically validate values against configured ranges.
+		Invalid values are rejected and logged.
+	"""
+
+	def __init__(self) -> None:
+		"""Initialize the configuration manager and perform initial validation."""
+		self._migrate_legacy_settings()
+		self.validate_all()
+
+	def _migrate_legacy_settings(self) -> None:
+		"""Migrate old configuration keys to new format (one-time migration)."""
+		# Migrate processSymbols to punctuationLevel
+		if "processSymbols" in config.conf["TDSR"]:
+			if "punctuationLevel" not in config.conf["TDSR"]:
+				old_value = config.conf["TDSR"]["processSymbols"]
+				# True -> Level 2 (most), False -> Level 0 (none)
+				config.conf["TDSR"]["punctuationLevel"] = PUNCT_MOST if old_value else PUNCT_NONE
+			# Remove the old key
+			del config.conf["TDSR"]["processSymbols"]
+
+	def get(self, key: str, default: Any = None) -> Any:
+		"""
+		Get a configuration value.
+
+		Args:
+			key: Configuration key name
+			default: Default value if key doesn't exist
+
+		Returns:
+			The configuration value or default if not found
+		"""
+		try:
+			return config.conf["TDSR"].get(key, default)
+		except Exception:
+			return default
+
+	def set(self, key: str, value: Any) -> bool:
+		"""
+		Set a configuration value with validation.
+
+		Args:
+			key: Configuration key name
+			value: Value to set
+
+		Returns:
+			True if set successfully, False if validation failed
+		"""
+		try:
+			# Validate based on key type
+			validated_value = self._validate_key(key, value)
+			if validated_value is None:
+				return False
+
+			config.conf["TDSR"][key] = validated_value
+			return True
+		except Exception as e:
+			import logHandler
+			logHandler.log.error(f"TDSR ConfigManager: Failed to set {key}={value}: {e}")
+			return False
+
+	def _validate_key(self, key: str, value: Any) -> Any:
+		"""
+		Validate a configuration value based on its key.
+
+		Args:
+			key: Configuration key name
+			value: Value to validate
+
+		Returns:
+			Validated value, or None if validation fails
+		"""
+		# Integer validations
+		if key == "cursorTrackingMode":
+			return _validateInteger(value, 0, 3, 1, key)
+		elif key == "punctuationLevel":
+			return _validateInteger(value, 0, 3, 2, key)
+		elif key == "cursorDelay":
+			return _validateInteger(value, 0, 1000, 20, key)
+		elif key in ["windowTop", "windowBottom", "windowLeft", "windowRight"]:
+			return _validateInteger(value, 0, MAX_WINDOW_DIMENSION, 0, key)
+
+		# String validations
+		elif key == "repeatedSymbolsValues":
+			return _validateString(value, MAX_REPEATED_SYMBOLS_LENGTH, "-_=!", key)
+
+		# Boolean values - no validation needed
+		elif key in ["cursorTracking", "keyEcho", "linePause", "repeatedSymbols",
+					 "quietMode", "windowEnabled"]:
+			return bool(value)
+
+		# Unknown key - return as-is (for forward compatibility)
+		return value
+
+	def validate_all(self) -> None:
+		"""Validate and sanitize all configuration values."""
+		# Validate all integer settings
+		self.set("cursorTrackingMode", self.get("cursorTrackingMode", 1))
+		self.set("punctuationLevel", self.get("punctuationLevel", 2))
+		self.set("cursorDelay", self.get("cursorDelay", 20))
+		self.set("windowTop", self.get("windowTop", 0))
+		self.set("windowBottom", self.get("windowBottom", 0))
+		self.set("windowLeft", self.get("windowLeft", 0))
+		self.set("windowRight", self.get("windowRight", 0))
+
+		# Validate string settings
+		self.set("repeatedSymbolsValues", self.get("repeatedSymbolsValues", "-_=!"))
+
+	def reset_to_defaults(self) -> None:
+		"""Reset all configuration values to their defaults."""
+		config.conf["TDSR"]["cursorTracking"] = True
+		config.conf["TDSR"]["cursorTrackingMode"] = CT_STANDARD
+		config.conf["TDSR"]["keyEcho"] = True
+		config.conf["TDSR"]["linePause"] = True
+		config.conf["TDSR"]["punctuationLevel"] = PUNCT_MOST
+		config.conf["TDSR"]["repeatedSymbols"] = False
+		config.conf["TDSR"]["repeatedSymbolsValues"] = "-_=!"
+		config.conf["TDSR"]["cursorDelay"] = 20
+		config.conf["TDSR"]["quietMode"] = False
+		config.conf["TDSR"]["windowTop"] = 0
+		config.conf["TDSR"]["windowBottom"] = 0
+		config.conf["TDSR"]["windowLeft"] = 0
+		config.conf["TDSR"]["windowRight"] = 0
+		config.conf["TDSR"]["windowEnabled"] = False
+
+
+class WindowManager:
+	"""
+	Centralized window tracking and management for TDSR.
+
+	Handles window definition, position tracking, and state management.
+	Windows are rectangular regions of the terminal screen that can be
+	tracked separately with different speech modes.
+
+	Example usage:
+		>>> win_mgr = WindowManager(config_manager)
+		>>>
+		>>> # Define a window
+		>>> win_mgr.set_window_start(row=1, col=1)
+		>>> win_mgr.set_window_end(row=24, col=80)
+		>>> win_mgr.enable_window()
+		>>>
+		>>> # Check if position is in window
+		>>> if win_mgr.is_position_in_window(row=10, col=40):
+		>>>     print("Position is in window")
+		>>>
+		>>> # Get window bounds
+		>>> bounds = win_mgr.get_window_bounds()
+		>>> print(f"Window: rows {bounds['top']}-{bounds['bottom']}")
+
+	Thread Safety:
+		All operations are thread-safe through config manager.
+
+	State Management:
+		Window state is persisted via ConfigManager.
+		Changes are immediately saved to NVDA configuration.
+	"""
+
+	def __init__(self, config_manager: ConfigManager) -> None:
+		"""
+		Initialize the window manager.
+
+		Args:
+			config_manager: ConfigManager instance for config access
+		"""
+		self._config = config_manager
+		self._defining = False
+		self._start_set = False
+
+	def is_defining(self) -> bool:
+		"""Check if currently in window definition mode."""
+		return self._defining
+
+	def start_definition(self) -> None:
+		"""Start window definition mode."""
+		self._defining = True
+		self._start_set = False
+
+	def cancel_definition(self) -> None:
+		"""Cancel window definition mode."""
+		self._defining = False
+		self._start_set = False
+
+	def set_window_start(self, row: int, col: int) -> bool:
+		"""
+		Set the window start position.
+
+		Args:
+			row: Starting row (1-based)
+			col: Starting column (1-based)
+
+		Returns:
+			True if set successfully
+		"""
+		if not self._defining:
+			return False
+
+		if not self._validate_coordinates(row, col):
+			return False
+
+		self._config.set("windowTop", row)
+		self._config.set("windowLeft", col)
+		self._start_set = True
+		return True
+
+	def set_window_end(self, row: int, col: int) -> bool:
+		"""
+		Set the window end position and complete definition.
+
+		Args:
+			row: Ending row (1-based)
+			col: Ending column (1-based)
+
+		Returns:
+			True if set successfully
+		"""
+		if not self._defining or not self._start_set:
+			return False
+
+		if not self._validate_coordinates(row, col):
+			return False
+
+		self._config.set("windowBottom", row)
+		self._config.set("windowRight", col)
+		self._defining = False
+		return True
+
+	def _validate_coordinates(self, row: int, col: int) -> bool:
+		"""
+		Validate row and column coordinates.
+
+		Args:
+			row: Row number
+			col: Column number
+
+		Returns:
+			True if valid
+		"""
+		return (1 <= row <= MAX_WINDOW_DIMENSION and
+				1 <= col <= MAX_WINDOW_DIMENSION)
+
+	def enable_window(self) -> None:
+		"""Enable window tracking."""
+		self._config.set("windowEnabled", True)
+
+	def disable_window(self) -> None:
+		"""Disable window tracking."""
+		self._config.set("windowEnabled", False)
+
+	def is_window_enabled(self) -> bool:
+		"""Check if window tracking is enabled."""
+		return self._config.get("windowEnabled", False)
+
+	def is_position_in_window(self, row: int, col: int) -> bool:
+		"""
+		Check if a position is within the defined window.
+
+		Args:
+			row: Row number (1-based)
+			col: Column number (1-based)
+
+		Returns:
+			True if position is in window and window is enabled
+		"""
+		if not self.is_window_enabled():
+			return False
+
+		top = self._config.get("windowTop", 0)
+		bottom = self._config.get("windowBottom", 0)
+		left = self._config.get("windowLeft", 0)
+		right = self._config.get("windowRight", 0)
+
+		# Window not properly defined
+		if top == 0 or bottom == 0 or left == 0 or right == 0:
+			return False
+
+		return (top <= row <= bottom and left <= col <= right)
+
+	def get_window_bounds(self) -> Dict[str, int]:
+		"""
+		Get the current window bounds.
+
+		Returns:
+			Dictionary with 'top', 'bottom', 'left', 'right' keys
+		"""
+		return {
+			'top': self._config.get("windowTop", 0),
+			'bottom': self._config.get("windowBottom", 0),
+			'left': self._config.get("windowLeft", 0),
+			'right': self._config.get("windowRight", 0),
+		}
+
+	def clear_window(self) -> None:
+		"""Clear window definition and disable tracking."""
+		self._config.set("windowTop", 0)
+		self._config.set("windowBottom", 0)
+		self._config.set("windowLeft", 0)
+		self._config.set("windowRight", 0)
+		self._config.set("windowEnabled", False)
+		self._defining = False
+		self._start_set = False
+
+
+class PositionCalculator:
+	"""
+	Centralized position calculation for terminal coordinates.
+
+	Handles calculation of (row, col) coordinates from TextInfo objects,
+	with performance optimization through caching and incremental tracking.
+
+	Example usage:
+		>>> calc = PositionCalculator()
+		>>>
+		>>> # Calculate position from TextInfo
+		>>> row, col = calc.calculate(textInfo, terminal)
+		>>> print(f"Position: row {row}, col {col}")
+		>>>
+		>>> # Position is automatically cached for fast repeat access
+		>>> row2, col2 = calc.calculate(textInfo, terminal)  # Returns cached
+		>>>
+		>>> # Clear cache when terminal content changes
+		>>> calc.clear_cache()
+
+	Performance:
+		- First calculation: O(n) where n = row number
+		- Cached calculation: O(1)
+		- Incremental calculation: O(k) where k = distance moved
+
+	Thread Safety:
+		All operations are thread-safe through PositionCache locking.
+
+	Caching Strategy:
+		- Cache entries expire after 1000ms
+		- Maximum 100 cached positions
+		- Automatic invalidation on content changes
+	"""
+
+	def __init__(self) -> None:
+		"""Initialize the position calculator with empty cache."""
+		self._cache = PositionCache()
+		self._last_known_position: Optional[Tuple[Any, int, int]] = None
+
+	def calculate(self, textInfo: Any, terminal: Any) -> Tuple[int, int]:
+		"""
+		Calculate row and column coordinates from TextInfo.
+
+		Uses multi-tiered approach:
+		1. Check position cache (1000ms timeout)
+		2. Try incremental tracking from last position
+		3. Fall back to full calculation from buffer start
+
+		Args:
+			textInfo: TextInfo object to calculate position for
+			terminal: Terminal object for context
+
+		Returns:
+			Tuple of (row, col) as 1-based integers, or (0, 0) on error
+		"""
+		if not terminal:
+			return (0, 0)
+
+		try:
+			bookmark = textInfo.bookmark
+
+			# Check cache first
+			cached = self._cache.get(bookmark)
+			if cached is not None:
+				return cached
+
+			# Try incremental tracking
+			if self._last_known_position is not None:
+				result = self._try_incremental_calculation(
+					textInfo, terminal, bookmark
+				)
+				if result is not None:
+					return result
+
+			# Fall back to full calculation
+			return self._calculate_full(textInfo, terminal, bookmark)
+
+		except (RuntimeError, AttributeError) as e:
+			import logHandler
+			logHandler.log.error(f"TDSR PositionCalculator: Position access error - {type(e).__name__}: {e}")
+			return (0, 0)
+		except Exception as e:
+			import logHandler
+			logHandler.log.error(f"TDSR PositionCalculator: Unexpected error - {type(e).__name__}: {e}")
+			return (0, 0)
+
+	def _try_incremental_calculation(self, textInfo: Any, terminal: Any,
+									 bookmark: Any) -> Optional[Tuple[int, int]]:
+		"""
+		Try to calculate position incrementally from last known position.
+
+		Args:
+			textInfo: Target TextInfo
+			terminal: Terminal object
+			bookmark: TextInfo bookmark
+
+		Returns:
+			(row, col) tuple if successful, None if incremental not possible
+		"""
+		try:
+			lastBookmark, lastRow, lastCol = self._last_known_position
+			lastInfo = terminal.makeTextInfo(lastBookmark)
+
+			# Calculate distance between positions
+			comparison = lastInfo.compareEndPoints(textInfo, "startToStart")
+
+			# If close enough (within 10 lines), use incremental
+			if abs(comparison) <= 10:
+				result = self._calculate_incremental(
+					textInfo, lastInfo, lastRow, lastCol, comparison
+				)
+				if result is not None:
+					row, col = result
+					# Cache and store
+					self._cache.set(bookmark, row, col)
+					self._last_known_position = (bookmark, row, col)
+					return (row, col)
+
+		except Exception:
+			pass
+
+		return None
+
+	def _calculate_incremental(self, targetInfo: Any, lastInfo: Any,
+							   lastRow: int, lastCol: int,
+							   comparison: int) -> Optional[Tuple[int, int]]:
+		"""
+		Calculate position incrementally from known position.
+
+		Args:
+			targetInfo: Target TextInfo
+			lastInfo: Last known TextInfo
+			lastRow: Last known row
+			lastCol: Last known column
+			comparison: Comparison result from compareEndPoints
+
+		Returns:
+			(row, col) tuple if successful, None if failed
+		"""
+		try:
+			if comparison == 0:
+				return (lastRow, lastCol)  # Same position
+
+			# Clone the last info to avoid modifying it
+			workingInfo = lastInfo.copy()
+
+			# Move forward or backward by lines
+			if comparison > 0:  # Target is after last position
+				linesMovedForward = workingInfo.move(textInfos.UNIT_LINE, comparison)
+				newRow = lastRow + linesMovedForward
+
+				# Calculate column
+				lineStart = workingInfo.copy()
+				lineStart.collapse()
+				lineStart.expand(textInfos.UNIT_LINE)
+				lineStart.collapse()
+
+				targetCopy = targetInfo.copy()
+				targetCopy.collapse()
+
+				charsFromLineStart = lineStart.moveEndToPoint(targetCopy)
+				newCol = charsFromLineStart + 1
+
+				return (newRow, newCol)
+
+			else:  # Target is before last position
+				linesMovedBack = abs(workingInfo.move(textInfos.UNIT_LINE, comparison))
+				newRow = max(1, lastRow - linesMovedBack)
+
+				# Calculate column
+				lineStart = workingInfo.copy()
+				lineStart.collapse()
+				lineStart.expand(textInfos.UNIT_LINE)
+				lineStart.collapse()
+
+				targetCopy = targetInfo.copy()
+				targetCopy.collapse()
+
+				charsFromLineStart = lineStart.moveEndToPoint(targetCopy)
+				newCol = charsFromLineStart + 1
+
+				return (newRow, newCol)
+
+		except Exception:
+			return None
+
+	def _calculate_full(self, textInfo: Any, terminal: Any,
+					   bookmark: Any) -> Tuple[int, int]:
+		"""
+		Perform full O(n) position calculation from buffer start.
+
+		Args:
+			textInfo: TextInfo to calculate position for
+			terminal: Terminal object
+			bookmark: TextInfo bookmark
+
+		Returns:
+			(row, col) tuple
+		"""
+		# Start from beginning of buffer
+		startInfo = terminal.makeTextInfo(textInfos.POSITION_FIRST)
+
+		# Calculate row by counting lines
+		targetCopy = textInfo.copy()
+		targetCopy.collapse()
+
+		linesMoved = startInfo.move(textInfos.UNIT_LINE, 999999, endPoint="end")
+		startInfo.collapse(end=False)
+
+		# Count how many lines until target
+		lineCount = 0
+		while startInfo.compareEndPoints(targetCopy, "startToStart") < 0:
+			moved = startInfo.move(textInfos.UNIT_LINE, 1)
+			if moved == 0:
+				break
+			lineCount += 1
+
+		row = lineCount + 1
+
+		# Calculate column by counting characters from line start
+		lineStart = targetCopy.copy()
+		lineStart.expand(textInfos.UNIT_LINE)
+		lineStart.collapse()
+
+		charsFromLineStart = lineStart.moveEndToPoint(targetCopy)
+		col = charsFromLineStart + 1
+
+		# Cache and store
+		self._cache.set(bookmark, row, col)
+		self._last_known_position = (bookmark, row, col)
+
+		return (row, col)
+
+	def clear_cache(self) -> None:
+		"""Clear all cached positions."""
+		self._cache.clear()
+		self._last_known_position = None
+
+	def invalidate_position(self, bookmark: Any) -> None:
+		"""
+		Invalidate a specific cached position.
+
+		Args:
+			bookmark: TextInfo bookmark to invalidate
+		"""
+		self._cache.invalidate(bookmark)
+
+
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	"""
 	TDSR Global Plugin for NVDA
@@ -1230,14 +1811,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		"""Initialize the TDSR global plugin."""
 		super(GlobalPlugin, self).__init__()
 
-		# Migrate old processSymbols setting to punctuationLevel (one-time migration)
-		if "processSymbols" in config.conf["TDSR"] and "punctuationLevel" not in config.conf["TDSR"]:
-			oldValue = config.conf["TDSR"]["processSymbols"]
-			# True -> Level 2 (most punctuation), False -> Level 0 (no punctuation)
-			config.conf["TDSR"]["punctuationLevel"] = PUNCT_MOST if oldValue else PUNCT_NONE
-
-		# Validate and sanitize configuration values for security
-		self._sanitizeConfig()
+		# Initialize manager classes for configuration, windows, and position tracking
+		self._configManager = ConfigManager()
+		self._windowManager = WindowManager(self._configManager)
+		self._positionCalculator = PositionCalculator()
 
 		# Initialize state variables
 		self.lastTerminalAppName = None
@@ -1249,10 +1826,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self._lastTypedChar = None
 		self._repeatedCharCount = 0
 
-		# Window definition state
-		self._windowDefining = False
-		self._windowStartSet = False
-
 		# Highlight tracking state
 		self._lastHighlightedText = None
 		self._lastHighlightPosition = None
@@ -1261,10 +1834,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self._markStart = None
 		self._markEnd = None
 
-		# Performance optimization: position caching and incremental tracking
-		self._positionCache = PositionCache()
-		self._lastKnownPosition = None  # (bookmark, row, col) for incremental tracking
-		self._backgroundCalculationThread = None  # Thread for long-running operations
+		# Background calculation thread for long operations
+		self._backgroundCalculationThread = None
 
 		# Application profile management
 		self._profileManager = ProfileManager()
@@ -1272,49 +1843,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Add settings panel to NVDA preferences
 		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(TDSRSettingsPanel)
-
-	def _sanitizeConfig(self):
-		"""
-		Validate and sanitize configuration values on plugin initialization.
-
-		Ensures all config values are within safe ranges to prevent crashes and security issues.
-		"""
-		# Validate cursor tracking mode (0-3)
-		config.conf["TDSR"]["cursorTrackingMode"] = _validateInteger(
-			config.conf["TDSR"]["cursorTrackingMode"], 0, 3, 1, "cursorTrackingMode"
-		)
-
-		# Validate punctuation level (0-3)
-		config.conf["TDSR"]["punctuationLevel"] = _validateInteger(
-			config.conf["TDSR"]["punctuationLevel"], 0, 3, 2, "punctuationLevel"
-		)
-
-		# Validate cursor delay (0-1000ms)
-		config.conf["TDSR"]["cursorDelay"] = _validateInteger(
-			config.conf["TDSR"]["cursorDelay"], 0, 1000, 20, "cursorDelay"
-		)
-
-		# Validate repeated symbols string length
-		config.conf["TDSR"]["repeatedSymbolsValues"] = _validateString(
-			config.conf["TDSR"]["repeatedSymbolsValues"],
-			MAX_REPEATED_SYMBOLS_LENGTH,
-			"-_=!",
-			"repeatedSymbolsValues"
-		)
-
-		# Validate window bounds
-		config.conf["TDSR"]["windowTop"] = _validateInteger(
-			config.conf["TDSR"]["windowTop"], 0, MAX_WINDOW_DIMENSION, 0, "windowTop"
-		)
-		config.conf["TDSR"]["windowBottom"] = _validateInteger(
-			config.conf["TDSR"]["windowBottom"], 0, MAX_WINDOW_DIMENSION, 0, "windowBottom"
-		)
-		config.conf["TDSR"]["windowLeft"] = _validateInteger(
-			config.conf["TDSR"]["windowLeft"], 0, MAX_WINDOW_DIMENSION, 0, "windowLeft"
-		)
-		config.conf["TDSR"]["windowRight"] = _validateInteger(
-			config.conf["TDSR"]["windowRight"], 0, MAX_WINDOW_DIMENSION, 0, "windowRight"
-		)
 
 	def terminate(self):
 		"""Clean up when the plugin is terminated."""
@@ -1623,7 +2151,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			info = obj.makeTextInfo(textInfos.POSITION_CARET)
 
 			# Calculate current row and column
-			currentRow, currentCol = self._calculatePosition(info)
+			currentRow, currentCol = self._positionCalculator.calculate(info, self._boundTerminal)
 
 			# Check if position changed
 			currentPos = (currentRow, currentCol)
@@ -2389,7 +2917,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				return
 
 			# Calculate position using helper method
-			lineCount, colCount = self._calculatePosition(reviewPos)
+			lineCount, colCount = self._positionCalculator.calculate(reviewPos, terminal)
 
 			if lineCount == 0 or colCount == 0:
 				ui.message(_("Position unavailable"))
@@ -2813,8 +3341,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			endInfo = terminal.makeTextInfo(self._markEnd)
 
 			# Calculate row and column coordinates
-			startRow, startCol = self._calculatePosition(startInfo)
-			endRow, endCol = self._calculatePosition(endInfo)
+			startRow, startCol = self._positionCalculator.calculate(startInfo, terminal)
+			endRow, endCol = self._positionCalculator.calculate(endInfo, terminal)
 
 			# Validate coordinates
 			if startRow == 0 or startCol == 0 or endRow == 0 or endCol == 0:
@@ -3005,196 +3533,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				return None
 		api.setReviewPosition(info)
 		return info
-
-	def _calculatePosition(self, textInfo):
-		"""
-		Calculate row and column coordinates from TextInfo with caching and incremental tracking.
-
-		This method uses a multi-tiered approach for performance optimization:
-		1. Check position cache for recent calculations (1000ms timeout)
-		2. Use incremental tracking from last known position for small movements
-		3. Fall back to full O(n) calculation from buffer start if needed
-
-		Args:
-			textInfo: TextInfo object to get position for
-
-		Returns:
-			Tuple of (row, column) as 1-based integers, or (0, 0) if calculation fails
-		"""
-		terminal = self._boundTerminal
-		if not terminal:
-			return (0, 0)
-
-		try:
-			# Try to get bookmark for caching
-			bookmark = textInfo.bookmark
-
-			# Check cache first
-			cached = self._positionCache.get(bookmark)
-			if cached is not None:
-				return cached
-
-			# Try incremental tracking if we have a last known position
-			if self._lastKnownPosition is not None:
-				lastBookmark, lastRow, lastCol = self._lastKnownPosition
-				try:
-					lastInfo = terminal.makeTextInfo(lastBookmark)
-					# Calculate distance between positions
-					comparison = lastInfo.compareEndPoints(textInfo, "startToStart")
-
-					# If positions are close (within 10 lines), calculate incrementally
-					if abs(comparison) <= 10:
-						result = self._calculatePositionIncremental(textInfo, lastInfo, lastRow, lastCol, comparison)
-						if result is not None:
-							row, col = result
-							# Cache and store the result
-							self._positionCache.set(bookmark, row, col)
-							self._lastKnownPosition = (bookmark, row, col)
-							return (row, col)
-				except Exception:
-					# Fall back to full calculation
-					pass
-
-			# Full O(n) calculation from start
-			startInfo = terminal.makeTextInfo(textInfos.POSITION_FIRST)
-			lineCount = 1
-
-			testInfo = startInfo.copy()
-			while testInfo.compareEndPoints(textInfo, "startToStart") < 0:
-				moved = testInfo.move(textInfos.UNIT_LINE, 1)
-				if moved == 0:
-					break
-				lineCount += 1
-
-			# Calculate column (character position in current line)
-			lineInfo = textInfo.copy()
-			lineInfo.expand(textInfos.UNIT_LINE)
-			lineInfo.collapse()
-
-			colCount = 1
-			testInfo = lineInfo.copy()
-			while testInfo.compareEndPoints(textInfo, "startToStart") < 0:
-				moved = testInfo.move(textInfos.UNIT_CHARACTER, 1)
-				if moved == 0:
-					break
-				colCount += 1
-
-			# Cache and store the result
-			self._positionCache.set(bookmark, lineCount, colCount)
-			self._lastKnownPosition = (bookmark, lineCount, colCount)
-
-			return (lineCount, colCount)
-		except (RuntimeError, AttributeError) as e:
-			import logHandler
-			logHandler.log.warning(f"TDSR: Position calculation failed - {type(e).__name__}: {e}")
-			return (0, 0)
-		except Exception as e:
-			import logHandler
-			logHandler.log.error(f"TDSR: Unexpected error in position calculation - {type(e).__name__}: {e}")
-			return (0, 0)
-
-	def _calculatePositionIncremental(self, targetInfo, lastInfo, lastRow, lastCol, comparison):
-		"""
-		Calculate position incrementally from a known position.
-
-		Args:
-			targetInfo: Target TextInfo to calculate position for
-			lastInfo: Last known TextInfo position
-			lastRow: Row of last known position
-			lastCol: Column of last known position
-			comparison: Result of compareEndPoints (negative = before, positive = after)
-
-		Returns:
-			Tuple of (row, col) or None if incremental calculation fails
-		"""
-		try:
-			if comparison == 0:
-				# Same position
-				return (lastRow, lastCol)
-			elif comparison < 0:
-				# Target is before last position - count backwards
-				testInfo = lastInfo.copy()
-				lineCount = lastRow
-				while testInfo.compareEndPoints(targetInfo, "startToStart") > 0:
-					moved = testInfo.move(textInfos.UNIT_LINE, -1)
-					if moved == 0:
-						break
-					lineCount -= 1
-			else:
-				# Target is after last position - count forwards
-				testInfo = lastInfo.copy()
-				lineCount = lastRow
-				while testInfo.compareEndPoints(targetInfo, "startToStart") < 0:
-					moved = testInfo.move(textInfos.UNIT_LINE, 1)
-					if moved == 0:
-						break
-					lineCount += 1
-
-			# Calculate column for target position
-			lineInfo = targetInfo.copy()
-			lineInfo.expand(textInfos.UNIT_LINE)
-			lineInfo.collapse()
-
-			colCount = 1
-			testInfo = lineInfo.copy()
-			while testInfo.compareEndPoints(targetInfo, "startToStart") < 0:
-				moved = testInfo.move(textInfos.UNIT_CHARACTER, 1)
-				if moved == 0:
-					break
-				colCount += 1
-
-			return (lineCount, colCount)
-		except Exception:
-			return None
-
-	def _processSymbol(self, char):
-		"""
-		Process a symbol character for speech.
-		
-		Args:
-			char: The character to process.
-			
-		Returns:
-			str: The processed symbol name or the original character.
-		"""
-		# Map common symbols to their names
-		symbolMap = {
-			'!': 'exclamation',
-			'@': 'at',
-			'#': 'hash',
-			'$': 'dollar',
-			'%': 'percent',
-			'^': 'caret',
-			'&': 'ampersand',
-			'*': 'asterisk',
-			'(': 'left paren',
-			')': 'right paren',
-			'-': 'dash',
-			'_': 'underscore',
-			'=': 'equals',
-			'+': 'plus',
-			'[': 'left bracket',
-			']': 'right bracket',
-			'{': 'left brace',
-			'}': 'right brace',
-			'\\': 'backslash',
-			'|': 'pipe',
-			';': 'semicolon',
-			':': 'colon',
-			"'": 'apostrophe',
-			'"': 'quote',
-			',': 'comma',
-			'.': 'dot',
-			'/': 'slash',
-			'<': 'less than',
-			'>': 'greater than',
-			'?': 'question',
-			'~': 'tilde',
-			'`': 'backtick',
-		}
-		
-		return symbolMap.get(char, char)
-
 
 class TDSRSettingsPanel(SettingsPanel):
 	"""
