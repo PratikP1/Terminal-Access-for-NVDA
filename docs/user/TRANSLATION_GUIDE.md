@@ -344,7 +344,7 @@ msgstr "Se encontraron {count} coincidencias"  # {count} stays as-is
 1. **Fork Repository**
    ```bash
    # Fork on GitHub, then:
-   git clone https://github.com/<your-username>/TDSR-for-NVDA.git
+   git clone https://github.com/<your-username>/Terminal-Access-for-NVDA.git
    ```
 
 2. **Create Branch**
@@ -377,10 +377,10 @@ msgstr "Se encontraron {count} coincidencias"  # {count} stays as-is
 
 ### Support Channels
 
-- **GitHub Issues**: https://github.com/PratikP1/TDSR-for-NVDA/issues
+- **GitHub Issues**: https://github.com/PratikP1/Terminal-Access-for-NVDA/issues
   - For bugs, questions, or suggestions
 
-- **GitHub Discussions**: https://github.com/PratikP1/TDSR-for-NVDA/discussions
+- **GitHub Discussions**: https://github.com/PratikP1/Terminal-Access-for-NVDA/discussions
   - For general translation questions
   - To coordinate with other translators
 

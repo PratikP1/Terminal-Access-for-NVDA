@@ -333,7 +333,7 @@ If you encounter issues with WSL support:
 
 ### Community Support
 
-- [TDSR Issues](https://github.com/PratikP1/TDSR-for-NVDA/issues)
+- [TDSR Issues](https://github.com/PratikP1/Terminal-Access-for-NVDA/issues)
 - [NVDA Community](https://www.nvaccess.org/community/)
 
 ### Related Guides

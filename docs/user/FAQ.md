@@ -55,7 +55,7 @@ Terminal Access provides additional features specifically designed for terminal 
 
 ### Is Terminal Access free and open source?
 
-Yes! Terminal Access is free and open source under the GNU General Public License v3.0. Source code is available at https://github.com/PratikP1/TDSR-for-NVDA
+Yes! Terminal Access is free and open source under the GNU General Public License v3.0. Source code is available at https://github.com/PratikP1/Terminal-Access-for-NVDA
 
 ---
 
@@ -63,7 +63,7 @@ Yes! Terminal Access is free and open source under the GNU General Public Licens
 
 ### How do I install Terminal Access?
 
-1. Download the latest `.nvda-addon` file from the [GitHub Releases page](https://github.com/PratikP1/TDSR-for-NVDA/releases)
+1. Download the latest `.nvda-addon` file from the [GitHub Releases page](https://github.com/PratikP1/Terminal-Access-for-NVDA/releases)
 2. Press Enter on the downloaded file
 3. NVDA will prompt you to install the add-on
 4. Click "Yes" to install
@@ -103,7 +103,7 @@ Yes! As of v1.0.26, Terminal Access supports 13 popular third-party terminal emu
 
 ### How do I request support for a new terminal?
 
-1. Open a [Terminal Support Request](https://github.com/PratikP1/TDSR-for-NVDA/issues/new/choose) on GitHub
+1. Open a [Terminal Support Request](https://github.com/PratikP1/Terminal-Access-for-NVDA/issues/new/choose) on GitHub
 2. Provide:
    - Terminal name and version
    - Application module name (see issue template for instructions)
@@ -375,7 +375,7 @@ See CONTRIBUTING.md for guidelines.
 
 ## Still Have Questions?
 
-- **GitHub Issues**: https://github.com/PratikP1/TDSR-for-NVDA/issues
+- **GitHub Issues**: https://github.com/PratikP1/Terminal-Access-for-NVDA/issues
 - **Documentation**: See README.md, ADVANCED_USER_GUIDE.md, API_REFERENCE.md
 - **Code**: Explore the source on GitHub
 

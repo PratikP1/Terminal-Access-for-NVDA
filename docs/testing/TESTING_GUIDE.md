@@ -515,7 +515,7 @@ If any test fails:
 2. Record exact steps to reproduce
 3. Include NVDA version, Windows version, terminal application
 4. Check NVDA log (NVDA menu → Tools → View Log)
-5. Report via GitHub: https://github.com/PratikP1/TDSR-for-NVDA/issues
+5. Report via GitHub: https://github.com/PratikP1/Terminal-Access-for-NVDA/issues
 
 ---
 
