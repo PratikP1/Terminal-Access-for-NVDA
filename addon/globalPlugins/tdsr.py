@@ -3059,8 +3059,8 @@ class CommandHistoryManager:
 	- Automatic command detection from output
 	- Support for multiple shell prompt formats:
 	  * Bash: `$`, `#`, custom PS1
-	  * PowerShell: `PS>`, `PS C:\>`, custom prompts
-	  * Windows CMD: drive letter prompts (e.g., `C:\>`)
+	  * PowerShell: `PS>`, `PS C:\\>`, custom prompts
+	  * Windows CMD: drive letter prompts (e.g., `C:\\>`)
 	  * WSL: Linux prompts
 	- Navigate through command history (previous/next)
 	- Jump to specific command
