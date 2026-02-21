@@ -2044,8 +2044,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			api.setNavigatorObject(obj)
 
 			# Clear position cache when switching terminals
-			self._positionCache.clear()
-			self._lastKnownPosition = None
+			self._positionCalculator.clear_cache()
 
 			# Detect and activate application profile
 			detectedApp = self._profileManager.detectApplication(obj)
@@ -2095,8 +2094,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			return
 
 		# Clear position cache on content change
-		self._positionCache.clear()
-		self._lastKnownPosition = None
+		self._positionCalculator.clear_cache()
 
 		# Process the character for speech
 		if ch:

@@ -2,6 +2,30 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.21] - 2026-02-21
+
+### Bug Fixes - Position Cache Integration
+
+**Bug Fix Release**: Corrects position cache integration issues in event handlers.
+
+#### Fixed
+- **Position Cache Integration**: Fixed incorrect cache method calls in event handlers
+  - `event_gainFocus`: Now correctly calls `self._positionCalculator.clear_cache()` instead of non-existent `self._positionCache.clear()`
+  - `event_typedCharacter`: Now correctly calls `self._positionCalculator.clear_cache()` instead of non-existent `self._positionCache.clear()`
+  - Removed references to non-existent `self._lastKnownPosition` instance variable (handled internally by PositionCalculator)
+  - Cache invalidation now works correctly when switching terminals or typing characters
+
+#### Technical Details
+- PositionCache class (lines 148-247) was already fully implemented with timeout-based invalidation
+- PositionCalculator class (lines 1557-1803) was already using PositionCache internally
+- Event handlers were using incorrect API - fixed to use public PositionCalculator methods
+- No functional changes to caching behavior, just corrected the API calls
+
+#### Impact
+- Position caching now works as designed
+- Performance improvements from O(n) to O(1) for cached position lookups are now active
+- Cache properly invalidates on terminal switches and content changes
+
 ## [1.0.18] - 2026-02-21
 
 ### Feature Enhancements - ANSI Parsing, Unicode Support, Application Profiles
