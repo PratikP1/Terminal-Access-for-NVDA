@@ -21,6 +21,7 @@ from gui.settingsDialogs import SettingsPanel
 import addonHandler
 import wx
 import os
+import re
 from scriptHandler import script
 import scriptHandler
 import globalCommands
@@ -94,7 +95,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Initialize state variables
 		self.lastTerminalAppName = None
 		self.announcedHelp = False
-		self.selectionStart = None
 		self.copyMode = False
 		self._boundTerminal = None
 		self._cursorTrackingTimer = None
@@ -121,7 +121,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		"""Clean up when the plugin is terminated."""
 		try:
 			gui.settingsDialogs.NVDASettingsDialog.categoryClasses.remove(TDSRSettingsPanel)
-		except:
+		except (ValueError, AttributeError):
 			pass
 		super(GlobalPlugin, self).terminate()
 	
@@ -192,7 +192,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		Handle typed character events.
 
 		Announces characters as they are typed if keyEcho is enabled.
-		Uses processSymbols setting to determine whether to speak symbol names.
+		Uses punctuation level system to determine whether to speak symbol names.
 		Uses repeatedSymbols to condense sequences of repeated symbols.
 		"""
 		nextHandler()
@@ -234,8 +234,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 						self._lastTypedChar = None
 						self._repeatedCharCount = 0
 
-			# Use processSymbols setting to determine if we should speak symbol names
-			if config.conf["TDSR"]["processSymbols"]:
+			# Use punctuation level system to determine if we should speak symbol names
+			if self._shouldProcessSymbol(ch):
 				charToSpeak = self._processSymbol(ch)
 			else:
 				charToSpeak = ch
@@ -255,8 +255,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			count: The number of times it was repeated.
 		"""
 		if count > 1:
-			# Get symbol name if processSymbols is enabled
-			if config.conf["TDSR"]["processSymbols"]:
+			# Get symbol name based on punctuation level
+			if self._shouldProcessSymbol(char):
 				symbolName = self._processSymbol(char)
 			else:
 				symbolName = char
@@ -265,7 +265,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			ui.message(_("{count} {symbol}").format(count=count, symbol=symbolName))
 		elif count == 1:
 			# Just one - announce normally
-			if config.conf["TDSR"]["processSymbols"]:
+			if self._shouldProcessSymbol(char):
 				charToSpeak = self._processSymbol(char)
 			else:
 				charToSpeak = char
@@ -345,8 +345,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		char = info.text
 
 		if char and char.strip():
-			# Use processSymbols setting if enabled
-			if config.conf["TDSR"]["processSymbols"]:
+			# Use punctuation level system if enabled
+			if self._shouldProcessSymbol(char):
 				charToSpeak = self._processSymbol(char)
 			else:
 				charToSpeak = char
@@ -434,7 +434,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		"""
 		# This is a simplified implementation
 		# Real implementation would need robust ANSI escape sequence parsing
-		import re
 		# Remove ANSI escape codes to get clean text
 		ansiPattern = re.compile(r'\x1b\[[0-9;]*m')
 		cleanText = ansiPattern.sub('', text)
@@ -594,19 +593,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			globalCommands.commands.script_review_currentCharacter(gesture)
 
 	@script(
-		# Translators: Description for reading the current character phonetically
-		description=_("Read current character phonetically in terminal"),
-		gesture="kb:NVDA+alt+comma,kb:NVDA+alt+comma"
-	)
-	def script_readCurrentCharPhonetic(self, gesture):
-		"""Read the current character using the phonetic alphabet."""
-		if not self.isTerminalApp():
-			gesture.send()
-			return
-		# Use NVDA's built-in review cursor functionality for phonetic reading
-		globalCommands.commands.script_review_currentCharacter(gesture)
-
-	@script(
 		# Translators: Description for reading the next character
 		description=_("Read next character in terminal"),
 		gesture="kb:NVDA+alt+period"
@@ -640,65 +626,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# Translators: Message when quiet mode is disabled
 			ui.message(_("Quiet mode off"))
 	
-	@script(
-		# Translators: Description for starting/ending selection
-		description=_("Start or end selection in terminal"),
-		gesture="kb:NVDA+alt+r"
-	)
-	def script_toggleSelection(self, gesture):
-		"""Start or end a selection in the terminal."""
-		if not self.isTerminalApp():
-			gesture.send()
-			return
-
-		try:
-			reviewPos = self._getReviewPosition()
-			if reviewPos is None:
-				# Translators: Error message when unable to set selection
-				ui.message(_("Unable to set selection"))
-				return
-
-			if self.selectionStart is None:
-				# Start selection - create a bookmark to mark the position
-				self.selectionStart = reviewPos.bookmark
-				# Translators: Message when selection starts
-				ui.message(_("Selection started"))
-			else:
-				# End selection - copy text between markers to clipboard
-				try:
-					# Get terminal object
-					terminal = self._boundTerminal
-					if not terminal:
-						ui.message(_("Unable to copy selection"))
-						self.selectionStart = None
-						return
-
-					# Create text info from start marker
-					startInfo = terminal.makeTextInfo(self.selectionStart)
-					# Create text info at current review position (end marker)
-					endInfo = reviewPos.copy()
-
-					# Set range from start to end
-					startInfo.setEndPoint(endInfo, "endToEnd")
-
-					# Get the selected text
-					selectedText = startInfo.text
-
-					# Copy to clipboard
-					if selectedText and self._copyToClipboard(selectedText):
-						# Translators: Message when selection is copied to clipboard
-						ui.message(_("Selection copied to clipboard"))
-					else:
-						# Translators: Error message when unable to copy
-						ui.message(_("Unable to copy selection"))
-				except Exception:
-					# Translators: Error message when unable to copy
-					ui.message(_("Unable to copy selection"))
-				finally:
-					# Always clear the selection marker
-					self.selectionStart = None
-		except Exception:
-			ui.message(_("Unable to set selection"))
 	
 	@script(
 		# Translators: Description for copy mode
@@ -801,13 +728,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self.removeGestureBinding("kb:l")
 			self.removeGestureBinding("kb:s")
 			self.removeGestureBinding("kb:escape")
-		except:
+		except (KeyError, AttributeError):
 			pass
 	
 	@script(
 		# Translators: Description for opening terminal settings
 		description=_("Open TDSR terminal settings"),
-		gesture="kb:NVDA+alt+c"
+		gesture="kb:NVDA+alt+shift+s"
 	)
 	def script_openSettings(self, gesture):
 		"""Open the TDSR settings dialog."""
@@ -949,7 +876,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			lineText = lineInfo.text
 
 			# Simple ANSI code detection
-			import re
 			colorPattern = re.compile(r'\x1b\[([0-9;]+)m')
 			matches = colorPattern.findall(lineText)
 
@@ -1217,7 +1143,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 					if moved == 0:
 						break
 					lineCount += 1
-			except:
+			except (RuntimeError, AttributeError):
 				pass
 
 			# Calculate column (character position in line)
@@ -1233,7 +1159,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 					if moved == 0:
 						break
 					colCount += 1
-			except:
+			except (RuntimeError, AttributeError):
 				pass
 
 			# Translators: Message announcing row and column position

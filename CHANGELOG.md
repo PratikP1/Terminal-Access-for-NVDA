@@ -2,6 +2,51 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.13] - 2026-02-21
+
+### Fixed - NVDA Compliance and Code Quality
+- **Critical Gesture Conflicts Resolved**
+  - Fixed NVDA+Alt+R conflict between old selection toggle and new mark-based system
+  - Removed deprecated `script_toggleSelection` method (replaced by mark-based selection)
+  - Changed settings gesture from NVDA+Alt+C to NVDA+Alt+Shift+S
+  - NVDA+Alt+C now exclusively handles copying linear selection
+  - NVDA+Alt+R now exclusively handles toggling mark positions
+
+- **NVDA Coding Standards Compliance**
+  - Replaced all bare `except:` handlers with specific exception types
+  - `except (ValueError, AttributeError)` for config/GUI operations
+  - `except (KeyError, AttributeError)` for gesture binding cleanup
+  - `except (RuntimeError, AttributeError)` for TextInfo operations
+  - Improves error handling and debugging per PEP 8 standards
+
+- **Punctuation Level System Applied Consistently**
+  - Replaced all remaining `processSymbols` references with `_shouldProcessSymbol()` helper
+  - Key echo now uses punctuation level system (was still using old boolean)
+  - Cursor tracking now uses punctuation level system
+  - Repeated symbol announcement now uses punctuation level system
+  - Ensures consistent symbol verbosity across all features
+
+- **Code Organization Improvements**
+  - Moved `import re` to module-level imports (was inline in two methods)
+  - Removed duplicate `script_readCurrentCharPhonetic` method
+  - Multi-press detection in `script_readCurrentChar` already handles phonetic reading
+  - Eliminates redundant code and improves maintainability
+
+### Changed
+- Settings gesture moved to NVDA+Alt+Shift+S (from NVDA+Alt+C)
+- Copy linear selection gesture now exclusively uses NVDA+Alt+C
+- All exception handlers now specify exact exception types for better error isolation
+
+### Documentation
+- Updated all docstrings to reference punctuation level system instead of processSymbols
+- Code comments clarified for exception handling rationale
+
+### Technical
+- Removed `self.selectionStart` variable (superseded by `self._markStart`/`self._markEnd`)
+- Gesture binding cleanup improved with specific exception handling
+- File now follows NVDA coding standards more closely
+- Better separation of concerns between selection methods
+
 ## [1.0.12] - 2026-02-21
 
 ### Added - Phase 2 Core Enhancements
