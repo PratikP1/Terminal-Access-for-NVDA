@@ -146,10 +146,29 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 
 ### Selection & Copy
 - **NVDA+Alt+R** - Toggle mark (start/end/clear for enhanced selection)
-- **NVDA+Alt+C** - Copy linear selection (if marks set) or open settings (if no marks)
-- **NVDA+Alt+Shift+C** - Copy rectangular selection
+- **NVDA+Alt+C** - Copy linear selection (requires marks to be set)
+- **NVDA+Alt+Shift+C** - Copy rectangular selection (requires marks to be set)
 - **NVDA+Alt+X** - Clear selection marks
 - **NVDA+Alt+V** - Enter legacy copy mode
+
+### Bookmarks (v1.0.29+)
+- **NVDA+Alt+Shift+0-9** - Set bookmark at current position
+- **NVDA+Alt+0-9** - Jump to bookmark
+- **NVDA+Alt+Shift+B** - List all bookmarks
+
+### Command History (v1.0.31+)
+- **NVDA+Alt+Shift+H** - Scan and detect command history
+- **NVDA+Alt+Up Arrow** - Navigate to previous command
+- **NVDA+Alt+Down Arrow** - Navigate to next command
+- **NVDA+Alt+Shift+L** - List command history
+
+### Search (v1.0.30+)
+- **NVDA+Control+F** - Search terminal output
+- **NVDA+F3** - Jump to next search match
+- **NVDA+Shift+F3** - Jump to previous search match
+
+### Settings
+- **NVDA+Alt+Shift+S** - Open Terminal Access settings
 
 ### Special Features
 - **NVDA+Alt+K** (twice) - Spell current word
@@ -162,7 +181,7 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 
 Access Terminal Access settings through:
 - NVDA menu > Preferences > Settings > Terminal Settings
-- Or press **NVDA+Alt+C** while in a terminal
+- Or press **NVDA+Alt+Shift+S** while in a terminal
 
 ### Available Settings
 

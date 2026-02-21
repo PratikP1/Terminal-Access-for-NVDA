@@ -59,7 +59,7 @@ Position on any text and try:
 |---------|--------|
 | **NVDA+Shift+F1** | Open full user guide |
 | **NVDA+Alt+Q** | Toggle quiet mode |
-| **NVDA+Alt+C** | Open settings (or copy selection if marks set) |
+| **NVDA+Alt+Shift+S** | Open settings |
 | **NVDA+Alt+I** | Read current line |
 | **NVDA+Alt+I** (twice) | Announce line indentation |
 | **NVDA+Alt+K** | Read current word |
@@ -72,7 +72,7 @@ Position on any text and try:
 
 ## Settings (2 minutes)
 
-Open settings with **NVDA+Alt+C** or:
+Open settings with **NVDA+Alt+Shift+S** or:
 1. Press **NVDA+N** (NVDA menu)
 2. Go to Preferences > Settings
 3. Select "Terminal Settings"
@@ -140,6 +140,64 @@ Try these settings:
 2. Navigate with line commands
 3. Use word navigation to scan faster
 4. Switch to character navigation for precision
+
+## Complete Keyboard Reference
+
+### Basic Navigation
+- **NVDA+Alt+U/I/O** - Read previous/current/next line
+- **NVDA+Alt+J/K/L** - Read previous/current/next word
+- **NVDA+Alt+M/Comma/Period** - Read previous/current/next character
+- **NVDA+Alt+Home/End** - Jump to start/end of line
+- **NVDA+Alt+PageUp/PageDown** - Jump to top/bottom of buffer
+
+### Advanced Reading
+- **NVDA+Alt+A** - Continuous reading (say all)
+- **NVDA+Alt+I** (twice) - Announce indentation level
+- **NVDA+Alt+Comma** (twice) - Read character phonetically
+- **NVDA+Alt+Comma** (three times) - Announce character code
+- **NVDA+Alt+K** (twice) - Spell current word
+- **NVDA+Alt+P** - Announce position (row, column)
+
+### Directional Reading
+- **NVDA+Alt+Shift+Left/Right** - Read to beginning/end of line
+- **NVDA+Alt+Shift+Up/Down** - Read to top/bottom of buffer
+
+### Punctuation & Tracking
+- **NVDA+Alt+[/]** - Decrease/increase punctuation level
+- **NVDA+Alt+Asterisk** - Cycle cursor tracking mode
+- **NVDA+Alt+Q** - Toggle quiet mode
+
+### Selection & Copy
+- **NVDA+Alt+R** - Toggle mark (press 3 times: start, end, clear)
+- **NVDA+Alt+C** - Copy linear selection
+- **NVDA+Alt+Shift+C** - Copy rectangular selection
+- **NVDA+Alt+X** - Clear marks
+- **NVDA+Alt+V** - Enter legacy copy mode
+
+### Window Management
+- **NVDA+Alt+F2** - Set screen window (press twice: start, end)
+- **NVDA+Alt+F3** - Clear screen window
+- **NVDA+Alt+Plus** - Read window content
+- **NVDA+Alt+Shift+A** - Read text attributes/colors
+
+### Bookmarks (v1.0.29+)
+- **NVDA+Alt+Shift+0-9** - Set bookmark
+- **NVDA+Alt+0-9** - Jump to bookmark
+- **NVDA+Alt+Shift+B** - List bookmarks
+
+### Command History (v1.0.31+)
+- **NVDA+Alt+Shift+H** - Scan command history
+- **NVDA+Alt+Up/Down** - Navigate previous/next command
+- **NVDA+Alt+Shift+L** - List command history
+
+### Search (v1.0.30+)
+- **NVDA+Control+F** - Search terminal output
+- **NVDA+F3** - Next search match
+- **NVDA+Shift+F3** - Previous search match
+
+### Settings & Help
+- **NVDA+Alt+Shift+S** - Open settings
+- **NVDA+Shift+F1** - Open user guide
 
 ## Getting Help
 
