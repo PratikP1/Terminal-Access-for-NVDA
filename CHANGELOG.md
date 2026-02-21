@@ -4,6 +4,36 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.35] - 2026-02-21
+
+### Fixed
+
+- **Global Plugin Initialization**: Fixed "Error initializing global plugin" caused by GUI not being fully initialized
+  - Added error handling in `GlobalPlugin.__init__` for GUI operations (line 3437-3442)
+  - Added error handling in `script_openSettings` for GUI errors (line 4241-4245)
+  - Plugin now initializes successfully even when GUI subsystem is not ready
+  - Settings panel gracefully degrades if GUI unavailable during initialization
+  - Added comprehensive test suite (`test_plugin_initialization.py`) with 5 tests
+
+### Code Quality
+
+- **Lint Compliance**: Fixed all critical lint errors to ensure code quality
+  - Fixed F401: Removed unused `Set` import from typing
+  - Fixed F541: Removed 2 unnecessary f-string prefixes (lines 491, 496)
+  - Fixed F821: Fixed undefined variable `terminal` → `self._boundTerminal` (line 4644)
+  - Fixed F841: Removed 3 unused variables (startInfo, endInfo, linesMoved)
+  - Fixed E302, E303: Corrected blank lines formatting
+  - Updated flake8 configuration to properly reflect NVDA coding standards (tabs for indentation)
+  - Created comprehensive lint compliance documentation (`LINT_COMPLIANCE.md`)
+  - All 298 tests passing successfully
+
+### Documentation
+
+- **Lint Compliance Documentation**: Added detailed documentation of NVDA coding standards
+  - Explains why tabs are used (NVDA standard, not PEP 8 spaces)
+  - Documents all fixed lint errors with line numbers
+  - Provides validation steps for future development
+
 ## [1.0.34] - 2026-02-21
 
 ### Fixed
