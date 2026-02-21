@@ -4,29 +4,53 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
-### Project Rename
+## [1.0.33] - 2026-02-21
 
-**This project has been renamed from "TDSR for NVDA" to "Terminal Access for NVDA".**
+### Documentation - User Guide Enhancements
 
-#### Changed
+**Documentation Release**: Comprehensive user guide improvements with detailed feature explanations and practical usage scenarios.
 
-- **Project Name**: Renamed from "TDSR for NVDA" to "Terminal Access for NVDA"
-- **Add-on Internal Name**: Changed from `tdsr` to `terminalAccess`
-- **Main Plugin File**: Renamed from `tdsr.py` to `terminalAccess.py`
-- **Settings Panel Class**: Renamed from `TDSRSettingsPanel` to `TerminalAccessSettingsPanel`
-- **Script Category**: Updated from `SCRCAT_TDSR` to `SCRCAT_TERMINALACCESS`
-- **Configuration Section**: Changed from `config.conf["TDSR"]` to `config.conf["terminalAccess"]`
-- **Repository URL**: Updated to `https://github.com/PratikP1/Terminal-Access-for-NVDA`
-- **All Documentation**: Updated to reflect new project name with proper attribution
+#### Enhanced
 
-#### Attribution
+- **Features Section**: Complete rewrite with detailed explanations and examples
+  - Core Navigation Features: Line, word, and character navigation with practical examples
+  - Advanced Reading Features: Continuous reading, indentation detection, position announcement
+  - Real-Time Feedback Features: Cursor tracking, key echo, symbol processing with real command examples
+  - Advanced Features: Comprehensive explanations for all features including:
+    - Quiet Mode with use cases
+    - Selection and Copy with step-by-step workflows
+    - Bookmarks with complete navigation examples
+    - Command History Navigation with git and command-line scenarios
+    - Output Search with debugging scenarios
+    - Window Management with htop and vim examples
+    - Punctuation Levels with code vs. prose examples
+    - Directional Reading with practical use cases
+    - Configurable Settings overview
 
-Terminal Access is inspired by and incorporates functionality from:
-- **TDSR (Terminal Data Structure Reader)** by Tyler Spivey - Original terminal accessibility project
-- **Speakup** - Linux kernel screen reader (cursor tracking, windowing, attribute reading)
-- **Community Contributions** - Advanced features inspired by accessibility community discussions
+- **Practical Usage Scenarios**: Added 10 real-world scenarios demonstrating feature usage
+  1. Reviewing Long Command Output (pip list workflow)
+  2. Debugging a Failed Command (build error detection with bookmarks)
+  3. Copying Specific Output (error message extraction)
+  4. Editing a Complex Command (Docker command modification)
+  5. Working with Git Output (git status and diff workflows)
+  6. Monitoring a Long-Running Process (npm install with quiet mode)
+  7. Reviewing Python Code Indentation (code structure understanding)
+  8. Using Table Output (htop with window management)
+  9. Copying Columns from Tabular Data (rectangular selection from ls -l)
+  10. Verifying Special Characters in Commands (regex pattern verification)
 
-This rename maintains the project's history while better reflecting its evolved functionality and broader inspiration. Historical references to "TDSR" in changelog entries below are preserved for accuracy.
+- **Keyboard Commands Documentation**: Updated all documentation files with complete command reference
+  - README.md: Added Bookmarks, Command History, Search, and Settings sections
+  - QUICKSTART.md: Added complete keyboard reference with all 45 commands
+  - HTML User Guide: Complete keyboard command tables with all features
+  - Fixed keyboard shortcut references (NVDA+Alt+Shift+S for settings, not NVDA+Alt+C)
+
+#### Improved
+
+- Table of Contents: Updated to include Practical Usage Scenarios section
+- Documentation Structure: Better organization with visual callouts and styled info boxes
+- Example Quality: All examples use real commands and realistic scenarios with step-by-step workflows
+- User Experience: Progressive learning approach from simple examples to complex workflows
 
 ---
 
