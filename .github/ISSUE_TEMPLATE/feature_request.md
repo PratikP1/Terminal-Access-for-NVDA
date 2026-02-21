@@ -1,6 +1,6 @@
 ---
 name: Feature Request
-about: Suggest a new feature or enhancement for TDSR
+about: Suggest a new feature or enhancement for Terminal Access
 title: '[FEATURE] '
 labels: enhancement
 assignees: ''
@@ -42,13 +42,13 @@ How important is this feature to your workflow?
 Add any other context, screenshots, or examples about the feature request here.
 
 ## Related Features
-Are there any existing TDSR features related to this request?
+Are there any existing Terminal Access features related to this request?
 - Related to: [feature name]
 - Builds on: [feature name]
 - Complements: [feature name]
 
 ## Specification References
-If you're aware of relevant specifications (Speakup, TDSR, etc.), mention them here.
+If you're aware of relevant specifications (Speakup, TDSR project, etc.), mention them here.
 
 ## Related Issues
 Link any related issues here: #

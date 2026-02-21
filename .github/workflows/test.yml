@@ -149,6 +149,6 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
-          name: TDSR-addon
+          name: TerminalAccess-addon
           path: '*.nvda-addon'
           retention-days: 30

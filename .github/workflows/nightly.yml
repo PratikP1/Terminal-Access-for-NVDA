@@ -121,7 +121,7 @@ jobs:
           draft: false
           prerelease: true
           files: |
-            TDSR-${{ steps.version.outputs.nightly_version }}.nvda-addon
+            terminalAccess-${{ steps.version.outputs.nightly_version }}.nvda-addon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

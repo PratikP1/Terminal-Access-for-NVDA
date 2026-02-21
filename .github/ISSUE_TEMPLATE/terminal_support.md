@@ -25,7 +25,7 @@ Describe the terminal's key features:
 - [ ] Plugin/extension system
 - [ ] Other: [describe]
 
-## Current Status with TDSR
+## Current Status with Terminal Access
 - [ ] Works partially
 - [ ] Doesn't work at all
 - [ ] Untested
@@ -50,7 +50,7 @@ Explain why you prefer this terminal over supported alternatives:
 - **Accessibility**: Are there accessibility features in the terminal itself?
 
 ## Proposed Profile Settings
-If you have preferences for how TDSR should behave with this terminal:
+If you have preferences for how Terminal Access should behave with this terminal:
 - **Punctuation Level**: None / Some / Most / All
 - **Cursor Tracking**: Off / Standard / Highlight / Window
 - **Special Regions**: Any status bars or UI elements that should be silenced?
