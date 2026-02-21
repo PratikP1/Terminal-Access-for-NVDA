@@ -2,6 +2,108 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.26] - 2026-02-21
+
+### Feature - Third-Party Terminal Support (Section 5.1)
+
+**Feature Release**: Adds support for popular third-party terminal emulators, expanding TDSR compatibility beyond built-in Windows terminals.
+
+#### Added
+
+- **Third-Party Terminal Detection**: Enhanced terminal detection for 13 additional terminal emulators
+  - **Cmder**: Portable console emulator for Windows
+  - **ConEmu**: Windows console emulator with tabs (32-bit and 64-bit support)
+  - **mintty**: Git Bash and Cygwin terminal emulator
+  - **PuTTY**: SSH and telnet client
+  - **KiTTY**: PuTTY fork with additional features
+  - **Terminus**: Modern, highly configurable terminal
+  - **Hyper**: Electron-based terminal with web technologies
+  - **Alacritty**: GPU-accelerated terminal emulator
+  - **WezTerm**: GPU-accelerated terminal with multiplexing (GUI variant supported)
+  - **Tabby**: Modern terminal with SSH and serial support
+  - **FluentTerminal**: UWP-based terminal with modern UI
+  - Location: `addon/globalPlugins/tdsr.py` lines 2487-2503
+
+- **Default Profiles for Third-Party Terminals**: Optimized settings for each terminal type
+  - All profiles include reasonable default settings:
+    - Punctuation level: PUNCT_SOME (balanced for general use)
+    - Cursor tracking: CT_STANDARD (standard tracking mode)
+    - mintty uses PUNCT_MOST (common for development workflows)
+    - PuTTY uses PUNCT_SOME (optimized for SSH/remote sessions)
+  - Profile sharing where appropriate (ConEmu64 → ConEmu, KiTTY → PuTTY, WezTerm-GUI → WezTerm)
+  - Location: `addon/globalPlugins/tdsr.py` lines 1391-1455
+
+#### Enhanced
+
+- **Terminal Detection Robustness**: Separated built-in and third-party terminal lists
+  - Clear distinction between Windows built-in terminals (5 types)
+  - Third-party terminal list (13 types)
+  - Case-insensitive matching maintained
+  - Backward compatible with existing terminal detection
+
+- **Profile Management**: Extended ProfileManager with third-party profiles
+  - Total of 20+ profiles (7 built-in apps + 13 third-party terminals)
+  - All profiles follow consistent naming and setting conventions
+  - Profile detection works seamlessly for third-party terminals
+
+#### Testing
+
+- **Comprehensive Third-Party Terminal Tests**: `tests/test_third_party_terminals.py`
+  - **TestThirdPartyTerminalDetection**: 16 test cases
+    - Individual terminal detection (Cmder, ConEmu, mintty, PuTTY, etc.)
+    - Built-in terminal compatibility verification
+    - Non-terminal app rejection
+    - Case-insensitive detection
+  - **TestThirdPartyTerminalProfiles**: 16 test cases
+    - Profile existence for each terminal
+    - Profile settings validation
+    - Built-in profile preservation
+    - Total profile count verification
+  - **TestProfileManagerIntegration**: 2 test cases
+    - Profile retrieval
+    - Active profile setting
+
+#### Technical Details
+
+- **Terminal Detection Method** (`isTerminalApp`):
+  - Enhanced docstring with version and feature notes
+  - Separated terminal lists for clarity
+  - Combined list for matching
+  - Returns `True` for any supported terminal (built-in or third-party)
+
+- **Profile Creation** (`_initializeDefaultProfiles`):
+  - Added 13 new terminal profiles
+  - Consistent settings across similar terminals
+  - Profile reuse for variants (ConEmu64, KiTTY, WezTerm-GUI)
+
+#### Impact
+
+- **Expanded Compatibility**: TDSR now works with 18 terminal applications (5 built-in + 13 third-party)
+- **Developer Workflows**: Better support for development-focused terminals (mintty, Alacritty, WezTerm)
+- **SSH/Remote Access**: Optimized for remote terminals (PuTTY, KiTTY)
+- **Modern Terminals**: Support for electron-based and GPU-accelerated terminals
+- **Backward Compatible**: No breaking changes to existing functionality
+- **User Choice**: Users can now choose their preferred terminal emulator
+
+#### Use Cases
+
+- Developers using Git Bash (mintty) for version control
+- System administrators using PuTTY for remote server access
+- Power users preferring modern terminals (Terminus, Hyper, Alacritty)
+- Users requiring GPU acceleration (Alacritty, WezTerm)
+- Cross-platform users familiar with specific terminal emulators
+
+#### Notes
+
+- All third-party terminals use standard TDSR features (navigation, selection, tracking)
+- Profile settings can be customized via NVDA settings or profile import/export
+- Terminal-specific quirks can be addressed by creating custom profiles
+- Testing on actual third-party terminals is recommended for optimal experience
+
+#### Section Reference
+
+- FUTURE_ENHANCEMENTS.md Section 5.1 (lines 618-677): Additional Terminal Emulator Support
+
 ## [1.0.25] - 2026-02-21
 
 ### Feature - Advanced Unicode Support (Section 4)

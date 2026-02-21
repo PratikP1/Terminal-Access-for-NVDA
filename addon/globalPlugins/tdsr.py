@@ -1388,6 +1388,72 @@ class ProfileManager:
 		irssi.addWindow('status', 9999, 9999, 1, 9999, mode='silent')
 		self.profiles['irssi'] = irssi
 
+		# Section 5.1: Third-party terminal profiles (v1.0.26+)
+		# These profiles optimize TDSR for popular third-party terminal emulators
+
+		# Cmder profile
+		cmder = ApplicationProfile('cmder', 'Cmder')
+		cmder.punctuationLevel = PUNCT_SOME  # Balanced for general use
+		cmder.cursorTrackingMode = CT_STANDARD
+		self.profiles['cmder'] = cmder
+
+		# ConEmu profile
+		conemu = ApplicationProfile('conemu', 'ConEmu')
+		conemu.punctuationLevel = PUNCT_SOME
+		conemu.cursorTrackingMode = CT_STANDARD
+		self.profiles['conemu'] = conemu
+		self.profiles['conemu64'] = conemu  # Same profile for 64-bit
+
+		# mintty (Git Bash) profile
+		mintty = ApplicationProfile('mintty', 'Git Bash (mintty)')
+		mintty.punctuationLevel = PUNCT_MOST  # Common for development
+		mintty.cursorTrackingMode = CT_STANDARD
+		self.profiles['mintty'] = mintty
+
+		# PuTTY profile
+		putty = ApplicationProfile('putty', 'PuTTY')
+		putty.punctuationLevel = PUNCT_SOME  # SSH/remote terminal
+		putty.cursorTrackingMode = CT_STANDARD
+		self.profiles['putty'] = putty
+		self.profiles['kitty'] = putty  # KiTTY uses same defaults
+
+		# Terminus profile
+		terminus = ApplicationProfile('terminus', 'Terminus')
+		terminus.punctuationLevel = PUNCT_SOME
+		terminus.cursorTrackingMode = CT_STANDARD
+		self.profiles['terminus'] = terminus
+
+		# Hyper profile
+		hyper = ApplicationProfile('hyper', 'Hyper')
+		hyper.punctuationLevel = PUNCT_SOME
+		hyper.cursorTrackingMode = CT_STANDARD
+		self.profiles['hyper'] = hyper
+
+		# Alacritty profile
+		alacritty = ApplicationProfile('alacritty', 'Alacritty')
+		alacritty.punctuationLevel = PUNCT_SOME
+		alacritty.cursorTrackingMode = CT_STANDARD
+		self.profiles['alacritty'] = alacritty
+
+		# WezTerm profile
+		wezterm = ApplicationProfile('wezterm', 'WezTerm')
+		wezterm.punctuationLevel = PUNCT_SOME
+		wezterm.cursorTrackingMode = CT_STANDARD
+		self.profiles['wezterm'] = wezterm
+		self.profiles['wezterm-gui'] = wezterm  # Same for GUI variant
+
+		# Tabby profile
+		tabby = ApplicationProfile('tabby', 'Tabby')
+		tabby.punctuationLevel = PUNCT_SOME
+		tabby.cursorTrackingMode = CT_STANDARD
+		self.profiles['tabby'] = tabby
+
+		# FluentTerminal profile
+		fluent = ApplicationProfile('fluent', 'FluentTerminal')
+		fluent.punctuationLevel = PUNCT_SOME
+		fluent.cursorTrackingMode = CT_STANDARD
+		self.profiles['fluent'] = fluent
+
 	def detectApplication(self, focusObject: Any) -> str:
 		"""
 		Detect the current terminal application.
@@ -2456,31 +2522,54 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def isTerminalApp(self, obj=None):
 		"""
 		Check if the current application is a supported terminal.
-		
+
+		Supports both built-in Windows terminals and popular third-party
+		terminal emulators. Enhanced in v1.0.26 to support additional
+		third-party terminals.
+
 		Args:
 			obj: The object to check. If None, uses the foreground object.
-			
+
 		Returns:
 			bool: True if in a supported terminal application.
 		"""
 		if obj is None:
 			obj = api.getForegroundObject()
-		
+
 		if not obj or not obj.appModule:
 			return False
-		
+
 		appName = obj.appModule.appName.lower()
-		
-		# Supported terminal applications
-		supportedTerminals = [
+
+		# Built-in Windows terminal applications (v1.0.0+)
+		builtinTerminals = [
 			"windowsterminal",  # Windows Terminal
 			"cmd",              # Command Prompt
 			"powershell",       # Windows PowerShell
 			"pwsh",             # PowerShell Core
 			"conhost",          # Console Host
 		]
-		
-		return any(term in appName for term in supportedTerminals)
+
+		# Third-party terminal emulators (v1.0.26+)
+		# Section 5.1: Additional Terminal Emulator Support
+		thirdPartyTerminals = [
+			"cmder",            # Cmder
+			"conemu",           # ConEmu (32-bit)
+			"conemu64",         # ConEmu (64-bit)
+			"mintty",           # Git Bash (mintty)
+			"putty",            # PuTTY
+			"kitty",            # KiTTY (PuTTY fork)
+			"terminus",         # Terminus
+			"hyper",            # Hyper
+			"alacritty",        # Alacritty
+			"wezterm",          # WezTerm
+			"wezterm-gui",      # WezTerm GUI
+			"tabby",            # Tabby
+			"fluent",           # FluentTerminal
+		]
+
+		allSupported = builtinTerminals + thirdPartyTerminals
+		return any(term in appName for term in allSupported)
 
 	def _getPositionContext(self, textInfo=None) -> str:
 		"""
