@@ -26,10 +26,15 @@ sys.modules['scriptHandler'] = MagicMock()
 sys.modules['globalCommands'] = MagicMock()
 sys.modules['speech'] = MagicMock()
 sys.modules['logHandler'] = MagicMock()
+sys.modules['wx'] = MagicMock()
+
+# Mock translation function
+import builtins
+builtins._ = lambda x: x
 
 # Set up mock config
 config_mock = sys.modules['config']
-config_mock.conf = {
+conf_dict = {
     "terminalAccess": {
         "cursorTracking": True,
         "cursorTrackingMode": 1,
@@ -48,6 +53,11 @@ config_mock.conf = {
         "windowEnabled": False,
     }
 }
+# Create a mock conf object that acts like a dict but also has a spec attribute
+config_mock.conf = Mock()
+config_mock.conf.__getitem__ = lambda self, key: conf_dict[key]
+config_mock.conf.__setitem__ = lambda self, key, value: conf_dict.__setitem__(key, value)
+config_mock.conf.spec = {}
 
 
 @pytest.fixture

@@ -70,7 +70,7 @@ class TestProfileManagementUI(unittest.TestCase):
 			'wx', 'config', 'gui', 'gui.guiHelper', 'gui.nvdaControls',
 			'gui.settingsDialogs', 'globalPluginHandler', 'api', 'ui',
 			'textInfos', 'addonHandler', 'scriptHandler', 'globalCommands',
-			'speech', 'addon.globalPlugins.tdsr', 'addon.globalPlugins', 'addon'
+			'speech', 'addon.globalPlugins.terminalAccess', 'addon.globalPlugins', 'addon'
 		]
 		for module in modules_to_remove:
 			if module in sys.modules:
@@ -193,7 +193,7 @@ class TestProfileManagerIntegration(unittest.TestCase):
 		modules_to_remove = [
 			'wx', 'config', 'gui', 'globalPluginHandler', 'api', 'ui',
 			'textInfos', 'addonHandler', 'scriptHandler', 'globalCommands',
-			'speech', 'addon.globalPlugins.tdsr', 'addon.globalPlugins', 'addon'
+			'speech', 'addon.globalPlugins.terminalAccess', 'addon.globalPlugins', 'addon'
 		]
 		for module in modules_to_remove:
 			if module in sys.modules:
@@ -201,7 +201,7 @@ class TestProfileManagerIntegration(unittest.TestCase):
 
 	def test_profile_manager_has_export_method(self):
 		"""Test ProfileManager has exportProfile method."""
-		from addon.globalPlugins.tdsr import ProfileManager
+		from addon.globalPlugins.terminalAccess import ProfileManager
 
 		mgr = ProfileManager()
 		self.assertTrue(hasattr(mgr, 'exportProfile'))
@@ -209,7 +209,7 @@ class TestProfileManagerIntegration(unittest.TestCase):
 
 	def test_profile_manager_has_import_method(self):
 		"""Test ProfileManager has importProfile method."""
-		from addon.globalPlugins.tdsr import ProfileManager
+		from addon.globalPlugins.terminalAccess import ProfileManager
 
 		mgr = ProfileManager()
 		self.assertTrue(hasattr(mgr, 'importProfile'))
@@ -217,7 +217,7 @@ class TestProfileManagerIntegration(unittest.TestCase):
 
 	def test_profile_manager_has_remove_method(self):
 		"""Test ProfileManager has removeProfile method."""
-		from addon.globalPlugins.tdsr import ProfileManager
+		from addon.globalPlugins.terminalAccess import ProfileManager
 
 		mgr = ProfileManager()
 		self.assertTrue(hasattr(mgr, 'removeProfile'))
@@ -225,7 +225,7 @@ class TestProfileManagerIntegration(unittest.TestCase):
 
 	def test_profile_manager_default_profiles(self):
 		"""Test ProfileManager initializes with default profiles."""
-		from addon.globalPlugins.tdsr import ProfileManager
+		from addon.globalPlugins.terminalAccess import ProfileManager
 
 		mgr = ProfileManager()
 		self.assertIn('vim', mgr.profiles)
@@ -236,7 +236,7 @@ class TestProfileManagerIntegration(unittest.TestCase):
 
 	def test_profile_export_returns_dict(self):
 		"""Test exportProfile returns dictionary."""
-		from addon.globalPlugins.tdsr import ProfileManager
+		from addon.globalPlugins.terminalAccess import ProfileManager
 
 		mgr = ProfileManager()
 		vim_profile = mgr.exportProfile('vim')
@@ -247,7 +247,7 @@ class TestProfileManagerIntegration(unittest.TestCase):
 
 	def test_profile_import_creates_profile(self):
 		"""Test importProfile creates new profile from dict."""
-		from addon.globalPlugins.tdsr import ProfileManager, ApplicationProfile
+		from addon.globalPlugins.terminalAccess import ProfileManager, ApplicationProfile
 
 		mgr = ProfileManager()
 
@@ -264,7 +264,7 @@ class TestProfileManagerIntegration(unittest.TestCase):
 
 	def test_profile_remove_deletes_custom_profile(self):
 		"""Test removeProfile deletes custom profiles."""
-		from addon.globalPlugins.tdsr import ProfileManager, ApplicationProfile
+		from addon.globalPlugins.terminalAccess import ProfileManager, ApplicationProfile
 
 		mgr = ProfileManager()
 
@@ -279,7 +279,7 @@ class TestProfileManagerIntegration(unittest.TestCase):
 
 	def test_profile_remove_protects_default_profiles(self):
 		"""Test removeProfile does not delete default profiles."""
-		from addon.globalPlugins.tdsr import ProfileManager
+		from addon.globalPlugins.terminalAccess import ProfileManager
 
 		mgr = ProfileManager()
 

@@ -36,7 +36,7 @@ class TestConfigurationSanitization(unittest.TestCase):
 
     def test_sanitize_config_valid_values(self):
         """Test _sanitizeConfig with all valid values."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
 
         # Create mock for GUI dialog
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
@@ -57,7 +57,7 @@ class TestConfigurationSanitization(unittest.TestCase):
         config_dict = config_mock.conf["terminalAccess"]
         config_dict["cursorTrackingMode"] = 99  # Invalid
 
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
 
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             plugin = GlobalPlugin()
@@ -71,7 +71,7 @@ class TestConfigurationSanitization(unittest.TestCase):
         config_dict = config_mock.conf["terminalAccess"]
         config_dict["punctuationLevel"] = -1  # Invalid
 
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
 
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             plugin = GlobalPlugin()
@@ -85,7 +85,7 @@ class TestConfigurationSanitization(unittest.TestCase):
         config_dict = config_mock.conf["terminalAccess"]
         config_dict["cursorDelay"] = 5000  # Too high
 
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
 
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             plugin = GlobalPlugin()
@@ -99,7 +99,7 @@ class TestConfigurationSanitization(unittest.TestCase):
         config_dict = config_mock.conf["terminalAccess"]
         config_dict["repeatedSymbolsValues"] = "a" * 100  # Too long
 
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
 
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             plugin = GlobalPlugin()
@@ -114,7 +114,7 @@ class TestConfigurationSanitization(unittest.TestCase):
         config_dict["windowTop"] = -10  # Negative
         config_dict["windowBottom"] = 20000  # Too high
 
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
 
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             plugin = GlobalPlugin()
@@ -129,48 +129,48 @@ class TestConfigConstants(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins import tdsr
-        self.tdsr = tdsr
+        from globalPlugins import terminalAccess
+        self.terminalAccess = terminalAccess
 
     def test_cursor_tracking_constants(self):
         """Test cursor tracking mode constants are defined."""
-        self.assertEqual(self.tdsr.CT_OFF, 0)
-        self.assertEqual(self.tdsr.CT_STANDARD, 1)
-        self.assertEqual(self.tdsr.CT_HIGHLIGHT, 2)
-        self.assertEqual(self.tdsr.CT_WINDOW, 3)
+        self.assertEqual(self.terminalAccess.CT_OFF, 0)
+        self.assertEqual(self.terminalAccess.CT_STANDARD, 1)
+        self.assertEqual(self.terminalAccess.CT_HIGHLIGHT, 2)
+        self.assertEqual(self.terminalAccess.CT_WINDOW, 3)
 
     def test_punctuation_constants(self):
         """Test punctuation level constants are defined."""
-        self.assertEqual(self.tdsr.PUNCT_NONE, 0)
-        self.assertEqual(self.tdsr.PUNCT_SOME, 1)
-        self.assertEqual(self.tdsr.PUNCT_MOST, 2)
-        self.assertEqual(self.tdsr.PUNCT_ALL, 3)
+        self.assertEqual(self.terminalAccess.PUNCT_NONE, 0)
+        self.assertEqual(self.terminalAccess.PUNCT_SOME, 1)
+        self.assertEqual(self.terminalAccess.PUNCT_MOST, 2)
+        self.assertEqual(self.terminalAccess.PUNCT_ALL, 3)
 
     def test_punctuation_sets_defined(self):
         """Test PUNCTUATION_SETS dictionary is properly defined."""
-        self.assertIsNotNone(self.tdsr.PUNCTUATION_SETS)
-        self.assertIn(self.tdsr.PUNCT_NONE, self.tdsr.PUNCTUATION_SETS)
-        self.assertIn(self.tdsr.PUNCT_SOME, self.tdsr.PUNCTUATION_SETS)
-        self.assertIn(self.tdsr.PUNCT_MOST, self.tdsr.PUNCTUATION_SETS)
-        self.assertIn(self.tdsr.PUNCT_ALL, self.tdsr.PUNCTUATION_SETS)
+        self.assertIsNotNone(self.terminalAccess.PUNCTUATION_SETS)
+        self.assertIn(self.terminalAccess.PUNCT_NONE, self.terminalAccess.PUNCTUATION_SETS)
+        self.assertIn(self.terminalAccess.PUNCT_SOME, self.terminalAccess.PUNCTUATION_SETS)
+        self.assertIn(self.terminalAccess.PUNCT_MOST, self.terminalAccess.PUNCTUATION_SETS)
+        self.assertIn(self.terminalAccess.PUNCT_ALL, self.terminalAccess.PUNCTUATION_SETS)
 
     def test_punctuation_sets_content(self):
         """Test PUNCTUATION_SETS contain expected characters."""
-        punct_sets = self.tdsr.PUNCTUATION_SETS
+        punct_sets = self.terminalAccess.PUNCTUATION_SETS
 
         # PUNCT_NONE should be empty
-        self.assertEqual(len(punct_sets[self.tdsr.PUNCT_NONE]), 0)
+        self.assertEqual(len(punct_sets[self.terminalAccess.PUNCT_NONE]), 0)
 
         # PUNCT_SOME should have basic punctuation
-        self.assertIn('.', punct_sets[self.tdsr.PUNCT_SOME])
-        self.assertIn(',', punct_sets[self.tdsr.PUNCT_SOME])
+        self.assertIn('.', punct_sets[self.terminalAccess.PUNCT_SOME])
+        self.assertIn(',', punct_sets[self.terminalAccess.PUNCT_SOME])
 
         # PUNCT_MOST should have more punctuation
-        self.assertIn('@', punct_sets[self.tdsr.PUNCT_MOST])
-        self.assertIn('#', punct_sets[self.tdsr.PUNCT_MOST])
+        self.assertIn('@', punct_sets[self.terminalAccess.PUNCT_MOST])
+        self.assertIn('#', punct_sets[self.terminalAccess.PUNCT_MOST])
 
         # PUNCT_ALL should be None (process everything)
-        self.assertIsNone(punct_sets[self.tdsr.PUNCT_ALL])
+        self.assertIsNone(punct_sets[self.terminalAccess.PUNCT_ALL])
 
 
 class TestConfigSpec(unittest.TestCase):
@@ -178,12 +178,12 @@ class TestConfigSpec(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins import tdsr
-        self.tdsr = tdsr
+        from globalPlugins import terminalAccess
+        self.terminalAccess = terminalAccess
 
     def test_confspec_defined(self):
         """Test confspec dictionary is defined."""
-        self.assertIsNotNone(self.tdsr.confspec)
+        self.assertIsNotNone(self.terminalAccess.confspec)
 
     def test_confspec_has_required_keys(self):
         """Test confspec has all required configuration keys."""
@@ -206,7 +206,7 @@ class TestConfigSpec(unittest.TestCase):
         ]
 
         for key in required_keys:
-            self.assertIn(key, self.tdsr.confspec, f"Missing config key: {key}")
+            self.assertIn(key, self.terminalAccess.confspec, f"Missing config key: {key}")
 
 
 if __name__ == '__main__':

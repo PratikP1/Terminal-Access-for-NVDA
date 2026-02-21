@@ -14,9 +14,9 @@ class TestPositionCache(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins import tdsr
-        self.tdsr = tdsr
-        self.cache = tdsr.PositionCache()
+        from globalPlugins import terminalAccess
+        self.terminalAccess = terminalAccess
+        self.cache = terminalAccess.PositionCache()
 
     def test_cache_initialization(self):
         """Test cache initializes empty."""

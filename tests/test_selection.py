@@ -13,44 +13,44 @@ class TestSelectionOperations(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins import tdsr
-        self.tdsr = tdsr
+        from globalPlugins import terminalAccess
+        self.terminalAccess = terminalAccess
 
     def test_validate_selection_within_limits(self):
         """Test selection validation for normal-sized selections."""
-        is_valid, msg = self.tdsr._validateSelectionSize(1, 100, 1, 80)
+        is_valid, msg = self.terminalAccess._validateSelectionSize(1, 100, 1, 80)
         self.assertTrue(is_valid)
         self.assertIsNone(msg)
 
     def test_validate_selection_single_line(self):
         """Test selection validation for single line."""
-        is_valid, msg = self.tdsr._validateSelectionSize(5, 5, 1, 80)
+        is_valid, msg = self.terminalAccess._validateSelectionSize(5, 5, 1, 80)
         self.assertTrue(is_valid)
         self.assertIsNone(msg)
 
     def test_validate_selection_single_column(self):
         """Test selection validation for single column."""
-        is_valid, msg = self.tdsr._validateSelectionSize(1, 100, 10, 10)
+        is_valid, msg = self.terminalAccess._validateSelectionSize(1, 100, 10, 10)
         self.assertTrue(is_valid)
         self.assertIsNone(msg)
 
     def test_validate_selection_exceeds_row_limit(self):
         """Test selection validation when exceeding row limit."""
-        is_valid, msg = self.tdsr._validateSelectionSize(1, 10001, 1, 80)
+        is_valid, msg = self.terminalAccess._validateSelectionSize(1, 10001, 1, 80)
         self.assertFalse(is_valid)
         self.assertIsNotNone(msg)
         self.assertIn("row", msg.lower())
 
     def test_validate_selection_exceeds_col_limit(self):
         """Test selection validation when exceeding column limit."""
-        is_valid, msg = self.tdsr._validateSelectionSize(1, 100, 1, 1001)
+        is_valid, msg = self.terminalAccess._validateSelectionSize(1, 100, 1, 1001)
         self.assertFalse(is_valid)
         self.assertIsNotNone(msg)
         self.assertIn("col", msg.lower())
 
     def test_validate_selection_large_valid(self):
         """Test selection validation for large but valid selection."""
-        is_valid, msg = self.tdsr._validateSelectionSize(1, 9999, 1, 999)
+        is_valid, msg = self.terminalAccess._validateSelectionSize(1, 9999, 1, 999)
         self.assertTrue(is_valid)
         self.assertIsNone(msg)
 
@@ -60,23 +60,23 @@ class TestPunctuationProcessing(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins import tdsr
-        self.tdsr = tdsr
+        from globalPlugins import terminalAccess
+        self.terminalAccess = terminalAccess
 
     def test_punctuation_sets_structure(self):
         """Test punctuation sets are properly structured."""
-        self.assertIsInstance(self.tdsr.PUNCTUATION_SETS, dict)
-        self.assertEqual(len(self.tdsr.PUNCTUATION_SETS), 4)
+        self.assertIsInstance(self.terminalAccess.PUNCTUATION_SETS, dict)
+        self.assertEqual(len(self.terminalAccess.PUNCTUATION_SETS), 4)
 
     def test_punctuation_none_empty(self):
         """Test PUNCT_NONE has empty set."""
-        punct_set = self.tdsr.PUNCTUATION_SETS[self.tdsr.PUNCT_NONE]
+        punct_set = self.terminalAccess.PUNCTUATION_SETS[self.terminalAccess.PUNCT_NONE]
         self.assertIsInstance(punct_set, set)
         self.assertEqual(len(punct_set), 0)
 
     def test_punctuation_some_basic(self):
         """Test PUNCT_SOME has basic punctuation."""
-        punct_set = self.tdsr.PUNCTUATION_SETS[self.tdsr.PUNCT_SOME]
+        punct_set = self.terminalAccess.PUNCTUATION_SETS[self.terminalAccess.PUNCT_SOME]
         self.assertIsInstance(punct_set, set)
         self.assertIn('.', punct_set)
         self.assertIn(',', punct_set)
@@ -85,7 +85,7 @@ class TestPunctuationProcessing(unittest.TestCase):
 
     def test_punctuation_most_extended(self):
         """Test PUNCT_MOST has extended punctuation."""
-        punct_set = self.tdsr.PUNCTUATION_SETS[self.tdsr.PUNCT_MOST]
+        punct_set = self.terminalAccess.PUNCTUATION_SETS[self.terminalAccess.PUNCT_MOST]
         self.assertIsInstance(punct_set, set)
 
         # Should include PUNCT_SOME
@@ -101,7 +101,7 @@ class TestPunctuationProcessing(unittest.TestCase):
 
     def test_punctuation_all_none(self):
         """Test PUNCT_ALL is None (process everything)."""
-        punct_set = self.tdsr.PUNCTUATION_SETS[self.tdsr.PUNCT_ALL]
+        punct_set = self.terminalAccess.PUNCTUATION_SETS[self.terminalAccess.PUNCT_ALL]
         self.assertIsNone(punct_set)
 
 
@@ -110,7 +110,7 @@ class TestTerminalDetection(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             self.plugin = GlobalPlugin()
 

@@ -20,7 +20,7 @@ class TestBidiHelper(unittest.TestCase):
 	def setUp(self):
 		"""Set up test fixtures."""
 		# Import after mocking
-		from addon.globalPlugins.tdsr import BidiHelper
+		from addon.globalPlugins.terminalAccess import BidiHelper
 		self.BidiHelper = BidiHelper
 
 	def test_bidi_helper_initialization(self):
@@ -115,7 +115,7 @@ class TestEmojiHelper(unittest.TestCase):
 
 	def setUp(self):
 		"""Set up test fixtures."""
-		from addon.globalPlugins.tdsr import EmojiHelper
+		from addon.globalPlugins.terminalAccess import EmojiHelper
 		self.EmojiHelper = EmojiHelper
 
 	def test_emoji_helper_initialization(self):
@@ -208,7 +208,7 @@ class TestBidiHelperIntegration(unittest.TestCase):
 
 	def setUp(self):
 		"""Set up test fixtures."""
-		from addon.globalPlugins.tdsr import BidiHelper, UnicodeWidthHelper
+		from addon.globalPlugins.terminalAccess import BidiHelper, UnicodeWidthHelper
 		self.BidiHelper = BidiHelper
 		self.UnicodeWidthHelper = UnicodeWidthHelper
 
@@ -245,7 +245,7 @@ class TestEmojiHelperIntegration(unittest.TestCase):
 
 	def setUp(self):
 		"""Set up test fixtures."""
-		from addon.globalPlugins.tdsr import EmojiHelper, UnicodeWidthHelper
+		from addon.globalPlugins.terminalAccess import EmojiHelper, UnicodeWidthHelper
 		self.EmojiHelper = EmojiHelper
 		self.UnicodeWidthHelper = UnicodeWidthHelper
 
@@ -278,7 +278,7 @@ class TestUnicodeEdgeCases(unittest.TestCase):
 
 	def setUp(self):
 		"""Set up test fixtures."""
-		from addon.globalPlugins.tdsr import BidiHelper, EmojiHelper
+		from addon.globalPlugins.terminalAccess import BidiHelper, EmojiHelper
 		self.BidiHelper = BidiHelper
 		self.EmojiHelper = EmojiHelper
 
@@ -323,7 +323,7 @@ class TestOptionalDependencyHandling(unittest.TestCase):
 
 	def test_bidi_without_library(self):
 		"""Test BidiHelper works without bidi library."""
-		from addon.globalPlugins.tdsr import BidiHelper
+		from addon.globalPlugins.terminalAccess import BidiHelper
 		helper = BidiHelper()
 
 		# Should initialize even if library unavailable
@@ -336,7 +336,7 @@ class TestOptionalDependencyHandling(unittest.TestCase):
 
 	def test_emoji_without_library(self):
 		"""Test EmojiHelper works without emoji library."""
-		from addon.globalPlugins.tdsr import EmojiHelper
+		from addon.globalPlugins.terminalAccess import EmojiHelper
 		helper = EmojiHelper()
 
 		# Should initialize even if library unavailable

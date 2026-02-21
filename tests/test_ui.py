@@ -76,7 +76,7 @@ class TestSettingsPanel(unittest.TestCase):
 			'wx', 'config', 'gui', 'gui.guiHelper', 'gui.nvdaControls',
 			'gui.settingsDialogs', 'globalPluginHandler', 'api', 'ui',
 			'textInfos', 'addonHandler', 'scriptHandler', 'globalCommands',
-			'speech', 'addon.globalPlugins.tdsr', 'addon.globalPlugins', 'addon'
+			'speech', 'addon.globalPlugins.terminalAccess', 'addon.globalPlugins', 'addon'
 		]
 		for module in modules_to_remove:
 			if module in sys.modules:
@@ -85,7 +85,7 @@ class TestSettingsPanel(unittest.TestCase):
 	def test_settings_panel_structure(self):
 		"""Test settings panel has correct structure."""
 		# Import after mocking
-		from addon.globalPlugins.tdsr import TerminalAccessSettingsPanel
+		from addon.globalPlugins.terminalAccess import TerminalAccessSettingsPanel
 
 		# Verify class exists and has required attributes
 		self.assertTrue(hasattr(TerminalAccessSettingsPanel, 'title'))
@@ -197,7 +197,7 @@ class TestConfigManager(unittest.TestCase):
 			'wx', 'config', 'gui', 'gui.guiHelper', 'gui.nvdaControls',
 			'gui.settingsDialogs', 'globalPluginHandler', 'api', 'ui',
 			'textInfos', 'addonHandler', 'scriptHandler', 'globalCommands',
-			'speech', 'addon.globalPlugins.tdsr', 'addon.globalPlugins', 'addon'
+			'speech', 'addon.globalPlugins.terminalAccess', 'addon.globalPlugins', 'addon'
 		]
 		for module in modules_to_remove:
 			if module in sys.modules:
@@ -205,13 +205,13 @@ class TestConfigManager(unittest.TestCase):
 
 	def test_config_manager_exists(self):
 		"""Test ConfigManager class exists."""
-		from addon.globalPlugins.tdsr import ConfigManager
+		from addon.globalPlugins.terminalAccess import ConfigManager
 
 		self.assertTrue(callable(ConfigManager))
 
 	def test_config_manager_validation(self):
 		"""Test ConfigManager validates settings."""
-		from addon.globalPlugins.tdsr import ConfigManager
+		from addon.globalPlugins.terminalAccess import ConfigManager
 
 		# Create instance
 		config_mgr = ConfigManager()
@@ -222,7 +222,7 @@ class TestConfigManager(unittest.TestCase):
 
 	def test_boolean_validation(self):
 		"""Test boolean settings accept only boolean values."""
-		from addon.globalPlugins.tdsr import ConfigManager
+		from addon.globalPlugins.terminalAccess import ConfigManager
 
 		config_mgr = ConfigManager()
 
@@ -282,7 +282,7 @@ class TestUIIntegration(unittest.TestCase):
 			'wx', 'config', 'gui', 'gui.guiHelper', 'gui.nvdaControls',
 			'gui.settingsDialogs', 'globalPluginHandler', 'api', 'ui',
 			'textInfos', 'addonHandler', 'scriptHandler', 'globalCommands',
-			'speech', 'addon.globalPlugins.tdsr', 'addon.globalPlugins', 'addon'
+			'speech', 'addon.globalPlugins.terminalAccess', 'addon.globalPlugins', 'addon'
 		]
 		for module in modules_to_remove:
 			if module in sys.modules:

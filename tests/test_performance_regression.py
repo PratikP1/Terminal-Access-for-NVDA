@@ -26,7 +26,7 @@ class TestPositionCalculationPerformance(unittest.TestCase):
 
 	def test_position_calculation_benchmark(self):
 		"""Test position calculation completes within time limit."""
-		from addon.globalPlugins.tdsr import PositionCalculator
+		from addon.globalPlugins.terminalAccess import PositionCalculator
 
 		calc = PositionCalculator()
 
@@ -56,7 +56,7 @@ class TestPositionCalculationPerformance(unittest.TestCase):
 
 	def test_cache_hit_performance(self):
 		"""Test cache hits are very fast."""
-		from addon.globalPlugins.tdsr import PositionCache
+		from addon.globalPlugins.terminalAccess import PositionCache
 
 		cache = PositionCache()
 
@@ -81,7 +81,7 @@ class TestPositionCalculationPerformance(unittest.TestCase):
 
 	def test_incremental_calculation_faster_than_full(self):
 		"""Test incremental calculation is faster than full calculation."""
-		from addon.globalPlugins.tdsr import PositionCalculator
+		from addon.globalPlugins.terminalAccess import PositionCalculator
 
 		calc = PositionCalculator()
 
@@ -155,7 +155,7 @@ class TestMemoryUsage(unittest.TestCase):
 
 	def test_cache_size_limit(self):
 		"""Test cache respects size limit."""
-		from addon.globalPlugins.tdsr import PositionCache
+		from addon.globalPlugins.terminalAccess import PositionCache
 
 		cache = PositionCache()
 
@@ -170,7 +170,7 @@ class TestMemoryUsage(unittest.TestCase):
 
 	def test_cache_expiration(self):
 		"""Test old cache entries expire."""
-		from addon.globalPlugins.tdsr import PositionCache
+		from addon.globalPlugins.terminalAccess import PositionCache
 
 		cache = PositionCache()
 

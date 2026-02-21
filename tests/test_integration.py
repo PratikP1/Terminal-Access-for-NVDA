@@ -13,7 +13,7 @@ class TestPositionCalculation(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             self.plugin = GlobalPlugin()
 
@@ -67,7 +67,7 @@ class TestCursorTracking(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             self.plugin = GlobalPlugin()
 
@@ -90,7 +90,7 @@ class TestWindowOperations(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             self.plugin = GlobalPlugin()
 
@@ -110,7 +110,7 @@ class TestSelectionWorkflow(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             self.plugin = GlobalPlugin()
 
@@ -145,7 +145,7 @@ class TestClipboardOperations(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             self.plugin = GlobalPlugin()
 
@@ -174,14 +174,14 @@ class TestPluginLifecycle(unittest.TestCase):
 
     def test_plugin_initialization(self):
         """Test plugin initializes without errors."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             plugin = GlobalPlugin()
             self.assertIsNotNone(plugin)
 
     def test_plugin_has_required_attributes(self):
         """Test plugin has all required attributes after init."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             plugin = GlobalPlugin()
 
@@ -194,7 +194,7 @@ class TestPluginLifecycle(unittest.TestCase):
 
     def test_plugin_terminate(self):
         """Test plugin terminates without errors."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog') as mock_dialog:
             plugin = GlobalPlugin()
             # Should not raise any errors
@@ -206,7 +206,7 @@ class TestConfigurationIntegration(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             self.plugin = GlobalPlugin()
 
@@ -228,7 +228,7 @@ class TestPerformanceOptimizations(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             self.plugin = GlobalPlugin()
 
@@ -251,7 +251,7 @@ class TestErrorRecovery(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from globalPlugins.tdsr import GlobalPlugin
+        from globalPlugins.terminalAccess import GlobalPlugin
         with patch('gui.settingsDialogs.NVDASettingsDialog'):
             self.plugin = GlobalPlugin()
 

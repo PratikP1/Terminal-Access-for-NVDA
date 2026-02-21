@@ -28,7 +28,7 @@ class TestGestureRegistration(unittest.TestCase):
 
 	def test_all_gestures_registered(self):
 		"""Test all gestures are properly registered."""
-		from addon.globalPlugins.tdsr import GlobalPlugin
+		from addon.globalPlugins.terminalAccess import GlobalPlugin
 
 		# Get all script methods
 		script_methods = [
@@ -61,7 +61,7 @@ class TestGestureRegistration(unittest.TestCase):
 
 	def test_gesture_bindings_exist(self):
 		"""Test gesture bindings are defined."""
-		from addon.globalPlugins.tdsr import GlobalPlugin
+		from addon.globalPlugins.terminalAccess import GlobalPlugin
 
 		# Check __gestures__ attribute exists
 		self.assertTrue(hasattr(GlobalPlugin, '__gestures__'),
@@ -77,7 +77,7 @@ class TestGestureRegistration(unittest.TestCase):
 
 	def test_no_gesture_conflicts(self):
 		"""Test no conflicts with NVDA core gestures."""
-		from addon.globalPlugins.tdsr import GlobalPlugin
+		from addon.globalPlugins.terminalAccess import GlobalPlugin
 
 		# Common NVDA core gestures we should avoid
 		nvda_core_gestures = {
@@ -116,7 +116,7 @@ class TestGestureDocumentation(unittest.TestCase):
 
 	def test_gesture_help_descriptions(self):
 		"""Test all gestures have help descriptions."""
-		from addon.globalPlugins.tdsr import GlobalPlugin
+		from addon.globalPlugins.terminalAccess import GlobalPlugin
 
 		# Get all script methods
 		for attr_name in dir(GlobalPlugin):
@@ -136,7 +136,7 @@ class TestGestureDocumentation(unittest.TestCase):
 
 	def test_gesture_categories(self):
 		"""Test gestures are properly categorized."""
-		from addon.globalPlugins.tdsr import GlobalPlugin
+		from addon.globalPlugins.terminalAccess import GlobalPlugin
 
 		# Scripts should be categorized by function
 		navigation_scripts = [
@@ -191,7 +191,7 @@ class TestGestureExecution(unittest.TestCase):
 		"""Test toggle gestures properly change state."""
 		# This would require more complex mocking
 		# Just verify the methods exist for now
-		from addon.globalPlugins.tdsr import GlobalPlugin
+		from addon.globalPlugins.terminalAccess import GlobalPlugin
 
 		toggle_methods = [
 			'script_toggleVerboseMode',
@@ -207,7 +207,7 @@ class TestGestureExecution(unittest.TestCase):
 		"""Test report gestures provide user feedback."""
 		# This would require mocking ui.message
 		# Just verify the methods exist for now
-		from addon.globalPlugins.tdsr import GlobalPlugin
+		from addon.globalPlugins.terminalAccess import GlobalPlugin
 
 		report_methods = [
 			'script_reportCurrentLine',

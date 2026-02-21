@@ -24,11 +24,11 @@ class TestANSIParser(unittest.TestCase):
 		# Import the module
 		import importlib.util
 		spec = importlib.util.spec_from_file_location(
-			"tdsr",
-			os.path.join(os.path.dirname(__file__), '..', 'addon', 'globalPlugins', 'tdsr.py')
+			"terminalAccess",
+			os.path.join(os.path.dirname(__file__), '..', 'addon', 'globalPlugins', 'terminalAccess.py')
 		)
-		tdsr = importlib.util.module_from_spec(spec)
-		self.ANSIParser = tdsr.ANSIParser
+		terminalAccess = importlib.util.module_from_spec(spec)
+		self.ANSIParser = terminalAccess.ANSIParser
 
 	def test_parser_initialization(self):
 		"""Test ANSIParser initializes correctly."""
@@ -105,11 +105,11 @@ class TestUnicodeWidthHelper(unittest.TestCase):
 		"""Import UnicodeWidthHelper for testing."""
 		import importlib.util
 		spec = importlib.util.spec_from_file_location(
-			"tdsr",
-			os.path.join(os.path.dirname(__file__), '..', 'addon', 'globalPlugins', 'tdsr.py')
+			"terminalAccess",
+			os.path.join(os.path.dirname(__file__), '..', 'addon', 'globalPlugins', 'terminalAccess.py')
 		)
-		tdsr = importlib.util.module_from_spec(spec)
-		self.UnicodeWidthHelper = tdsr.UnicodeWidthHelper
+		terminalAccess = importlib.util.module_from_spec(spec)
+		self.UnicodeWidthHelper = terminalAccess.UnicodeWidthHelper
 
 	def test_ascii_character_width(self):
 		"""Test width of ASCII characters."""
@@ -155,13 +155,13 @@ class TestApplicationProfile(unittest.TestCase):
 		"""Import profile classes for testing."""
 		import importlib.util
 		spec = importlib.util.spec_from_file_location(
-			"tdsr",
-			os.path.join(os.path.dirname(__file__), '..', 'addon', 'globalPlugins', 'tdsr.py')
+			"terminalAccess",
+			os.path.join(os.path.dirname(__file__), '..', 'addon', 'globalPlugins', 'terminalAccess.py')
 		)
-		tdsr = importlib.util.module_from_spec(spec)
-		self.ApplicationProfile = tdsr.ApplicationProfile
-		self.ProfileManager = tdsr.ProfileManager
-		self.WindowDefinition = tdsr.WindowDefinition
+		terminalAccess = importlib.util.module_from_spec(spec)
+		self.ApplicationProfile = terminalAccess.ApplicationProfile
+		self.ProfileManager = terminalAccess.ProfileManager
+		self.WindowDefinition = terminalAccess.WindowDefinition
 
 	def test_profile_creation(self):
 		"""Test creating an application profile."""

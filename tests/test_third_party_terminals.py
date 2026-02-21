@@ -18,7 +18,7 @@ class TestThirdPartyTerminalDetection(unittest.TestCase):
 
 	def setUp(self):
 		"""Set up test fixtures."""
-		from addon.globalPlugins.tdsr import GlobalPlugin
+		from addon.globalPlugins.terminalAccess import GlobalPlugin
 		self.plugin = GlobalPlugin()
 
 	def test_cmder_detection(self):
@@ -154,7 +154,7 @@ class TestThirdPartyTerminalProfiles(unittest.TestCase):
 
 	def setUp(self):
 		"""Set up test fixtures."""
-		from addon.globalPlugins.tdsr import ProfileManager
+		from addon.globalPlugins.terminalAccess import ProfileManager
 		self.manager = ProfileManager()
 
 	def test_cmder_profile_exists(self):
@@ -268,7 +268,7 @@ class TestProfileManagerIntegration(unittest.TestCase):
 
 	def setUp(self):
 		"""Set up test fixtures."""
-		from addon.globalPlugins.tdsr import ProfileManager
+		from addon.globalPlugins.terminalAccess import ProfileManager
 		self.manager = ProfileManager()
 
 	def test_get_third_party_profile(self):

@@ -36,7 +36,7 @@ class TestWindowMonitor(unittest.TestCase):
 		addon_path = os.path.join(os.path.dirname(__file__), '..', 'addon', 'globalPlugins')
 		sys.path.insert(0, addon_path)
 
-		from tdsr import WindowMonitor
+		from terminalAccess import WindowMonitor
 
 		# Create mock objects
 		self.mock_terminal = MockTerminal()
@@ -194,7 +194,7 @@ class TestWindowMonitor(unittest.TestCase):
 		expected = "Line 1\nLine 2"
 		self.assertEqual(content, expected)
 
-	@patch('tdsr.ui.message')
+	@patch('terminalAccess.ui.message')
 	def test_announce_change_first_content(self, mock_ui_message):
 		"""Test that first content is not announced."""
 		self.monitor._announce_change("test", "new content", None)
@@ -202,7 +202,7 @@ class TestWindowMonitor(unittest.TestCase):
 		# Should not announce first content (old_content is None)
 		mock_ui_message.assert_not_called()
 
-	@patch('tdsr.ui.message')
+	@patch('terminalAccess.ui.message')
 	def test_announce_change_with_old_content(self, mock_ui_message):
 		"""Test announcing changes when old content exists."""
 		self.monitor._announce_change("test_window", "new content", "old content")
@@ -260,7 +260,7 @@ class TestWindowMonitorIntegration(unittest.TestCase):
 		addon_path = os.path.join(os.path.dirname(__file__), '..', 'addon', 'globalPlugins')
 		sys.path.insert(0, addon_path)
 
-		from tdsr import WindowMonitor
+		from terminalAccess import WindowMonitor
 
 		self.mock_terminal = MockTerminal("Line 1\nLine 2\nLine 3")
 		self.mock_position_calculator = Mock()
@@ -285,7 +285,7 @@ class TestWindowMonitorIntegration(unittest.TestCase):
 		# Should stop cleanly
 		self.assertFalse(self.monitor.is_monitoring())
 
-	@patch('tdsr.ui.message')
+	@patch('terminalAccess.ui.message')
 	def test_change_detection_triggers_announcement(self, mock_ui_message):
 		"""Test that content changes trigger announcements."""
 		# Add monitor
