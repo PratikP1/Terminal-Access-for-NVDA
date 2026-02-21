@@ -4095,6 +4095,88 @@ class TDSRSettingsPanel(SettingsPanel):
 			"Example: -_=! (max 50 characters)"
 		))
 
+		# === Profile Management Section (Section 3: Profile Management UI) ===
+		# Translators: Label for profile management group
+		profileGroup = guiHelper.BoxSizerHelper(self, sizer=wx.StaticBoxSizer(
+			wx.StaticBox(self, label=_("Application Profiles")),
+			wx.VERTICAL
+		))
+		sHelper.addItem(profileGroup)
+
+		# Profile list
+		# Translators: Label for profile list
+		self.profileList = profileGroup.addLabeledControl(
+			_("Installed &profiles:"),
+			wx.Choice,
+			choices=self._getProfileNames()
+		)
+		if len(self._getProfileNames()) > 0:
+			self.profileList.SetSelection(0)
+		# Translators: Tooltip for profile list
+		self.profileList.SetToolTip(_(
+			"Select an application profile to view or edit. "
+			"Profiles customize TDSR behavior for specific applications."
+		))
+
+		# Profile action buttons
+		buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+		# Translators: Label for new profile button
+		self.newProfileButton = wx.Button(self, label=_("&New Profile..."))
+		self.newProfileButton.Bind(wx.EVT_BUTTON, self.onNewProfile)
+		# Translators: Tooltip for new profile button
+		self.newProfileButton.SetToolTip(_(
+			"Create a new application profile with custom settings"
+		))
+		buttonSizer.Add(self.newProfileButton, flag=wx.RIGHT, border=5)
+
+		# Translators: Label for edit profile button
+		self.editProfileButton = wx.Button(self, label=_("&Edit Profile..."))
+		self.editProfileButton.Bind(wx.EVT_BUTTON, self.onEditProfile)
+		# Translators: Tooltip for edit profile button
+		self.editProfileButton.SetToolTip(_(
+			"Edit the selected application profile"
+		))
+		buttonSizer.Add(self.editProfileButton, flag=wx.RIGHT, border=5)
+
+		# Translators: Label for delete profile button
+		self.deleteProfileButton = wx.Button(self, label=_("&Delete Profile"))
+		self.deleteProfileButton.Bind(wx.EVT_BUTTON, self.onDeleteProfile)
+		# Translators: Tooltip for delete profile button
+		self.deleteProfileButton.SetToolTip(_(
+			"Delete the selected custom profile (default profiles cannot be deleted)"
+		))
+		buttonSizer.Add(self.deleteProfileButton, flag=wx.RIGHT, border=5)
+
+		profileGroup.sizer.Add(buttonSizer, flag=wx.TOP, border=5)
+
+		# Import/Export buttons
+		importExportSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+		# Translators: Label for import profile button
+		self.importProfileButton = wx.Button(self, label=_("&Import..."))
+		self.importProfileButton.Bind(wx.EVT_BUTTON, self.onImportProfile)
+		# Translators: Tooltip for import profile button
+		self.importProfileButton.SetToolTip(_(
+			"Import a profile from a JSON file"
+		))
+		importExportSizer.Add(self.importProfileButton, flag=wx.RIGHT, border=5)
+
+		# Translators: Label for export profile button
+		self.exportProfileButton = wx.Button(self, label=_("E&xport..."))
+		self.exportProfileButton.Bind(wx.EVT_BUTTON, self.onExportProfile)
+		# Translators: Tooltip for export profile button
+		self.exportProfileButton.SetToolTip(_(
+			"Export the selected profile to a JSON file"
+		))
+		importExportSizer.Add(self.exportProfileButton)
+
+		profileGroup.sizer.Add(importExportSizer, flag=wx.TOP, border=5)
+
+		# Update button states based on selection
+		self.profileList.Bind(wx.EVT_CHOICE, self.onProfileSelection)
+		self.onProfileSelection(None)  # Initialize button states
+
 		# === Reset Button ===
 		# Translators: Label for reset to defaults button
 		self.resetButton = sHelper.addItem(
@@ -4180,3 +4262,212 @@ class TDSRSettingsPanel(SettingsPanel):
 		config.conf["TDSR"]["cursorDelay"] = _validateInteger(
 			cursorDelay, 0, 1000, 20, "cursorDelay"
 		)
+
+	def _getProfileNames(self):
+		"""Get list of profile names for the dropdown."""
+		try:
+			# Get the global plugin instance to access ProfileManager
+			from . import tdsr
+			for plugin in globalPluginHandler.runningPlugins:
+				if isinstance(plugin, tdsr.GlobalPlugin):
+					if hasattr(plugin, '_profileManager') and plugin._profileManager:
+						names = list(plugin._profileManager.profiles.keys())
+						# Sort with default profiles first, then custom profiles
+						default_profiles = ['vim', 'nvim', 'tmux', 'htop', 'less', 'more', 'git', 'nano', 'irssi']
+						defaults = [n for n in names if n in default_profiles]
+						customs = [n for n in names if n not in default_profiles]
+						return sorted(defaults) + sorted(customs)
+			return []
+		except Exception:
+			return []
+
+	def _getSelectedProfileName(self):
+		"""Get the currently selected profile name."""
+		selection = self.profileList.GetSelection()
+		if selection != wx.NOT_FOUND:
+			return self.profileList.GetString(selection)
+		return None
+
+	def _isDefaultProfile(self, profileName):
+		"""Check if a profile is a default (built-in) profile."""
+		default_profiles = ['vim', 'nvim', 'tmux', 'htop', 'less', 'more', 'git', 'nano', 'irssi']
+		return profileName in default_profiles
+
+	def onProfileSelection(self, event):
+		"""Update button states when profile selection changes."""
+		profileName = self._getSelectedProfileName()
+		hasSelection = profileName is not None
+		isDefault = self._isDefaultProfile(profileName) if profileName else False
+
+		# Enable/disable buttons based on selection
+		self.editProfileButton.Enable(hasSelection)
+		self.deleteProfileButton.Enable(hasSelection and not isDefault)
+		self.exportProfileButton.Enable(hasSelection)
+
+	def onNewProfile(self, event):
+		"""Create a new application profile."""
+		# Translators: Message for profile creation
+		gui.messageBox(
+			_("Profile creation dialog will be implemented soon. "
+			  "For now, profiles can be created programmatically via the ProfileManager API."),
+			_("Feature In Development"),
+			wx.OK | wx.ICON_INFORMATION
+		)
+
+	def onEditProfile(self, event):
+		"""Edit the selected profile."""
+		profileName = self._getSelectedProfileName()
+		if not profileName:
+			return
+
+		# Translators: Message for profile editing
+		gui.messageBox(
+			_("Profile editing dialog will be implemented soon. "
+			  "Selected profile: {name}").format(name=profileName),
+			_("Feature In Development"),
+			wx.OK | wx.ICON_INFORMATION
+		)
+
+	def onDeleteProfile(self, event):
+		"""Delete the selected custom profile."""
+		profileName = self._getSelectedProfileName()
+		if not profileName or self._isDefaultProfile(profileName):
+			return
+
+		# Translators: Confirmation dialog for deleting profile
+		result = gui.messageBox(
+			_("Are you sure you want to delete the profile '{name}'?").format(name=profileName),
+			_("Confirm Delete"),
+			wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION
+		)
+
+		if result == wx.YES:
+			try:
+				# Get the global plugin instance to access ProfileManager
+				from . import tdsr
+				for plugin in globalPluginHandler.runningPlugins:
+					if isinstance(plugin, tdsr.GlobalPlugin):
+						if hasattr(plugin, '_profileManager') and plugin._profileManager:
+							plugin._profileManager.removeProfile(profileName)
+							# Update the profile list
+							self.profileList.SetItems(self._getProfileNames())
+							if len(self._getProfileNames()) > 0:
+								self.profileList.SetSelection(0)
+							self.onProfileSelection(None)
+							# Translators: Message after deleting profile
+							gui.messageBox(
+								_("Profile '{name}' has been deleted.").format(name=profileName),
+								_("Profile Deleted"),
+								wx.OK | wx.ICON_INFORMATION
+							)
+							return
+			except Exception as e:
+				import logHandler
+				logHandler.log.error(f"TDSR: Failed to delete profile: {e}")
+				# Translators: Error message for profile deletion
+				gui.messageBox(
+					_("Failed to delete profile. See NVDA log for details."),
+					_("Error"),
+					wx.OK | wx.ICON_ERROR
+				)
+
+	def onImportProfile(self, event):
+		"""Import a profile from a JSON file."""
+		# Translators: File dialog for importing profile
+		with wx.FileDialog(
+			self,
+			_("Import Profile"),
+			defaultDir=os.path.expanduser("~"),
+			wildcard=_("JSON files (*.json)|*.json"),
+			style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST
+		) as fileDialog:
+			if fileDialog.ShowModal() == wx.ID_CANCEL:
+				return
+
+			pathname = fileDialog.GetPath()
+			try:
+				import json
+				with open(pathname, 'r', encoding='utf-8') as f:
+					profileData = json.load(f)
+
+				# Get the global plugin instance to access ProfileManager
+				from . import tdsr
+				for plugin in globalPluginHandler.runningPlugins:
+					if isinstance(plugin, tdsr.GlobalPlugin):
+						if hasattr(plugin, '_profileManager') and plugin._profileManager:
+							profile = plugin._profileManager.importProfile(profileData)
+							# Update the profile list
+							self.profileList.SetItems(self._getProfileNames())
+							# Select the newly imported profile
+							profileIndex = self.profileList.FindString(profile.appName)
+							if profileIndex != wx.NOT_FOUND:
+								self.profileList.SetSelection(profileIndex)
+							self.onProfileSelection(None)
+							# Translators: Message after importing profile
+							gui.messageBox(
+								_("Profile '{name}' has been imported successfully.").format(
+									name=profile.displayName
+								),
+								_("Profile Imported"),
+								wx.OK | wx.ICON_INFORMATION
+							)
+							return
+			except Exception as e:
+				import logHandler
+				logHandler.log.error(f"TDSR: Failed to import profile: {e}")
+				# Translators: Error message for profile import
+				gui.messageBox(
+					_("Failed to import profile. The file may be invalid or corrupted."),
+					_("Import Error"),
+					wx.OK | wx.ICON_ERROR
+				)
+
+	def onExportProfile(self, event):
+		"""Export the selected profile to a JSON file."""
+		profileName = self._getSelectedProfileName()
+		if not profileName:
+			return
+
+		try:
+			# Get the global plugin instance to access ProfileManager
+			from . import tdsr
+			for plugin in globalPluginHandler.runningPlugins:
+				if isinstance(plugin, tdsr.GlobalPlugin):
+					if hasattr(plugin, '_profileManager') and plugin._profileManager:
+						profileData = plugin._profileManager.exportProfile(profileName)
+						if not profileData:
+							return
+
+						# Translators: File dialog for exporting profile
+						with wx.FileDialog(
+							self,
+							_("Export Profile"),
+							defaultDir=os.path.expanduser("~"),
+							defaultFile=f"{profileName}_profile.json",
+							wildcard=_("JSON files (*.json)|*.json"),
+							style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT
+						) as fileDialog:
+							if fileDialog.ShowModal() == wx.ID_CANCEL:
+								return
+
+							pathname = fileDialog.GetPath()
+							import json
+							with open(pathname, 'w', encoding='utf-8') as f:
+								json.dump(profileData, f, indent=2, ensure_ascii=False)
+
+							# Translators: Message after exporting profile
+							gui.messageBox(
+								_("Profile '{name}' has been exported successfully.").format(name=profileName),
+								_("Profile Exported"),
+								wx.OK | wx.ICON_INFORMATION
+							)
+							return
+		except Exception as e:
+			import logHandler
+			logHandler.log.error(f"TDSR: Failed to export profile: {e}")
+			# Translators: Error message for profile export
+			gui.messageBox(
+				_("Failed to export profile. See NVDA log for details."),
+				_("Export Error"),
+				wx.OK | wx.ICON_ERROR
+			)

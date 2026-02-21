@@ -2,6 +2,79 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.24] - 2026-02-21
+
+### Feature - Profile Management UI (Section 3)
+
+**Feature Release**: Adds profile management capabilities to NVDA settings UI, enabling users to view, import, export, and delete application profiles.
+
+#### Added
+
+- **Profile Management Section in Settings Panel**: New section in TDSR settings
+  - Profile list dropdown showing all installed profiles (default and custom)
+  - Profiles sorted with default profiles first, then custom profiles alphabetically
+  - Visual feedback with tooltips explaining each control
+
+- **Profile Actions**: Comprehensive profile management buttons
+  - **New Profile button**: Placeholder for future ProfileEditorDialog (displays info message)
+  - **Edit Profile button**: Placeholder for future profile editing (displays info message)
+  - **Delete Profile button**: Removes custom profiles with confirmation
+    - Disabled for default profiles (vim, tmux, htop, less, git, nano, irssi)
+    - Confirmation dialog before deletion
+    - Automatic list refresh after deletion
+  - **Import Profile button**: Import profiles from JSON files
+    - File dialog for selecting JSON files
+    - Validates JSON structure
+    - Adds profile to ProfileManager
+    - Error handling for invalid files
+  - **Export Profile button**: Export profiles to JSON files
+    - File dialog with suggested filename (profilename_profile.json)
+    - Creates JSON file with proper encoding (UTF-8)
+    - Preserves all profile settings and window definitions
+
+#### Enhanced
+
+- **Button State Management**: Dynamic button enabling/disabling
+  - Edit button: enabled when profile selected
+  - Delete button: enabled only for custom profiles
+  - Export button: enabled when profile selected
+  - Updates automatically on selection change
+
+- **Error Handling**: Comprehensive error reporting
+  - Import errors show user-friendly messages
+  - Export errors logged to NVDA log
+  - Profile deletion errors handled gracefully
+
+#### Technical Details
+
+- Profile management UI: `addon/globalPlugins/tdsr.py` lines 4098-4473
+  - `_getProfileNames()`: Returns sorted list of profile names
+  - `_getSelectedProfileName()`: Gets currently selected profile
+  - `_isDefaultProfile()`: Checks if profile is built-in
+  - `onProfileSelection()`: Updates button states
+  - `onDeleteProfile()`: Deletes custom profiles
+  - `onImportProfile()`: Imports from JSON files
+  - `onExportProfile()`: Exports to JSON files
+- Profile management tests: `tests/test_profile_management_ui.py`
+  - Tests for UI components and ProfileManager integration
+  - JSON import/export validation
+  - Default profile protection
+
+#### Impact
+
+- Users can now manage application profiles through NVDA settings UI
+- Easy sharing of custom profiles via JSON export/import
+- Better discoverability of profile management features
+- Foundation for future ProfileEditorDialog and WindowDefinitionDialog
+- Maintains backward compatibility with existing ProfileManager API
+
+#### Notes
+
+- ProfileEditorDialog and WindowDefinitionDialog are placeholders
+  - Display informative messages about future implementation
+  - Full dialog implementation deferred to future release
+  - Current implementation focuses on core import/export/delete functionality
+
 ## [1.0.23] - 2026-02-21
 
 ### Enhancements - CI/CD Improvements (Section 2.2)
