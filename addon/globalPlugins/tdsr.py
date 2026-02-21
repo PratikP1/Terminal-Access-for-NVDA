@@ -22,7 +22,9 @@ import addonHandler
 import wx
 import os
 from scriptHandler import script
+import scriptHandler
 import globalCommands
+import speech
 
 try:
 	addonHandler.initTranslation()
@@ -449,16 +451,21 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	@script(
 		# Translators: Description for reading the current line
-		description=_("Read current line in terminal"),
+		description=_("Read current line in terminal. Press twice for indentation level."),
 		gesture="kb:NVDA+alt+i"
 	)
 	def script_readCurrentLine(self, gesture):
-		"""Read the current line in the terminal."""
+		"""Read the current line in the terminal. Double-press announces indentation level."""
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		# Use NVDA's built-in review cursor functionality
-		globalCommands.commands.script_review_currentLine(gesture)
+
+		# Check if this is a double-press for indentation
+		if scriptHandler.getLastScriptRepeatCount() == 1:
+			self._announceIndentation()
+		else:
+			# Use NVDA's built-in review cursor functionality
+			globalCommands.commands.script_review_currentLine(gesture)
 
 	@script(
 		# Translators: Description for reading the next line
@@ -540,16 +547,26 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	@script(
 		# Translators: Description for reading the current character
-		description=_("Read current character in terminal"),
+		description=_("Read current character in terminal. Press twice for phonetic. Press three times for character code."),
 		gesture="kb:NVDA+alt+comma"
 	)
 	def script_readCurrentChar(self, gesture):
-		"""Read the current character in the terminal."""
+		"""Read the current character. Double-press for phonetic. Triple-press for character code."""
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		# Use NVDA's built-in review cursor functionality
-		globalCommands.commands.script_review_currentCharacter(gesture)
+
+		repeatCount = scriptHandler.getLastScriptRepeatCount()
+
+		if repeatCount == 2:
+			# Triple press - announce character code
+			self._announceCharacterCode()
+		elif repeatCount == 1:
+			# Double press - phonetic reading
+			globalCommands.commands.script_review_currentCharacter(gesture)
+		else:
+			# Single press - read character
+			globalCommands.commands.script_review_currentCharacter(gesture)
 
 	@script(
 		# Translators: Description for reading the current character phonetically
@@ -962,6 +979,341 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		codes = code.split(';')
 		attributes = [colorMap.get(c, c) for c in codes]
 		return ', '.join(attributes)
+
+	# Phase 1 Quick Win Features
+
+	@script(
+		# Translators: Description for continuous reading (say all)
+		description=_("Read continuously from cursor to end of buffer"),
+		gesture="kb:NVDA+alt+a"
+	)
+	def script_sayAll(self, gesture):
+		"""Read continuously from current review cursor position to end of buffer."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				# Translators: Message when unable to start continuous reading
+				ui.message(_("Unable to read"))
+				return
+
+			# Get text from current position to end
+			info = reviewPos.copy()
+			info.expand(textInfos.UNIT_STORY)
+
+			# Move to current position
+			info.setEndPoint(reviewPos, "startToStart")
+
+			text = info.text
+			if not text or not text.strip():
+				# Translators: Message when buffer is empty
+				ui.message(_("Nothing to read"))
+				return
+
+			# Use NVDA's speech system to read the text
+			# This allows for proper interruption
+			speech.speakText(text)
+		except Exception:
+			# Translators: Message when continuous reading fails
+			ui.message(_("Unable to read"))
+
+	@script(
+		# Translators: Description for jumping to start of line
+		description=_("Move to first character of current line"),
+		gesture="kb:NVDA+alt+home"
+	)
+	def script_reviewHome(self, gesture):
+		"""Move review cursor to first character of current line."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				# Translators: Message when unable to move
+				ui.message(_("Unable to move"))
+				return
+
+			# Move to start of line
+			info = reviewPos.copy()
+			info.collapse()
+			info.move(textInfos.UNIT_LINE, -1)
+			info.move(textInfos.UNIT_LINE, 1)
+			api.setReviewPosition(info)
+
+			# Read character at new position
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+			if char and char != '\n' and char != '\r':
+				speech.speakText(char)
+			else:
+				# Translators: Message for blank line
+				ui.message(_("Blank"))
+		except Exception:
+			ui.message(_("Unable to move"))
+
+	@script(
+		# Translators: Description for jumping to end of line
+		description=_("Move to last character of current line"),
+		gesture="kb:NVDA+alt+end"
+	)
+	def script_reviewEnd(self, gesture):
+		"""Move review cursor to last character of current line."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				ui.message(_("Unable to move"))
+				return
+
+			# Expand to line and move to end
+			info = reviewPos.copy()
+			info.expand(textInfos.UNIT_LINE)
+			# Collapse to end
+			info.collapse(end=True)
+			# Move back one character to be on the last character, not after it
+			info.move(textInfos.UNIT_CHARACTER, -1)
+			api.setReviewPosition(info)
+
+			# Read character at new position
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+			if char and char != '\n' and char != '\r':
+				speech.speakText(char)
+			else:
+				# Translators: Message for blank line
+				ui.message(_("Blank"))
+		except Exception:
+			ui.message(_("Unable to move"))
+
+	@script(
+		# Translators: Description for jumping to top
+		description=_("Move to top of terminal buffer"),
+		gesture="kb:NVDA+alt+pageUp"
+	)
+	def script_reviewTop(self, gesture):
+		"""Move review cursor to top of terminal buffer."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			terminal = self._boundTerminal
+			if not terminal:
+				ui.message(_("Unable to move"))
+				return
+
+			# Move to first position
+			info = terminal.makeTextInfo(textInfos.POSITION_FIRST)
+			api.setReviewPosition(info)
+
+			# Read character at new position
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+			if char and char != '\n' and char != '\r':
+				speech.speakText(char)
+			else:
+				ui.message(_("Blank"))
+		except Exception:
+			ui.message(_("Unable to move"))
+
+	@script(
+		# Translators: Description for jumping to bottom
+		description=_("Move to bottom of terminal buffer"),
+		gesture="kb:NVDA+alt+pageDown"
+	)
+	def script_reviewBottom(self, gesture):
+		"""Move review cursor to bottom of terminal buffer."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			terminal = self._boundTerminal
+			if not terminal:
+				ui.message(_("Unable to move"))
+				return
+
+			# Move to last position
+			info = terminal.makeTextInfo(textInfos.POSITION_LAST)
+			api.setReviewPosition(info)
+
+			# Read character at new position
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+			if char and char != '\n' and char != '\r':
+				speech.speakText(char)
+			else:
+				ui.message(_("Blank"))
+		except Exception:
+			ui.message(_("Unable to move"))
+
+	@script(
+		# Translators: Description for announcing position
+		description=_("Announce current row and column position"),
+		gesture="kb:NVDA+alt+p"
+	)
+	def script_announcePosition(self, gesture):
+		"""Announce current row and column coordinates of review cursor."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				# Translators: Message when position unavailable
+				ui.message(_("Position unavailable"))
+				return
+
+			# Calculate row (line number)
+			# Create info from start to current position
+			terminal = self._boundTerminal
+			if not terminal:
+				ui.message(_("Position unavailable"))
+				return
+
+			startInfo = terminal.makeTextInfo(textInfos.POSITION_FIRST)
+			currentInfo = reviewPos.copy()
+
+			# Count lines from start to current position
+			lineCount = 1
+			try:
+				testInfo = startInfo.copy()
+				while testInfo.compareEndPoints(currentInfo, "startToStart") < 0:
+					moved = testInfo.move(textInfos.UNIT_LINE, 1)
+					if moved == 0:
+						break
+					lineCount += 1
+			except:
+				pass
+
+			# Calculate column (character position in line)
+			lineInfo = reviewPos.copy()
+			lineInfo.expand(textInfos.UNIT_LINE)
+			lineInfo.collapse()
+
+			colCount = 1
+			try:
+				testInfo = lineInfo.copy()
+				while testInfo.compareEndPoints(reviewPos, "startToStart") < 0:
+					moved = testInfo.move(textInfos.UNIT_CHARACTER, 1)
+					if moved == 0:
+						break
+					colCount += 1
+			except:
+				pass
+
+			# Translators: Message announcing row and column position
+			ui.message(_("Row {row}, column {col}").format(row=lineCount, col=colCount))
+		except Exception:
+			ui.message(_("Position unavailable"))
+
+	def _announceIndentation(self):
+		"""Announce the indentation level of the current line."""
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				# Translators: Message when unable to read indentation
+				ui.message(_("Unable to read indentation"))
+				return
+
+			# Get current line text
+			info = reviewPos.copy()
+			info.expand(textInfos.UNIT_LINE)
+			lineText = info.text
+
+			if not lineText:
+				# Translators: Message for empty line
+				ui.message(_("Empty line"))
+				return
+
+			# Remove trailing newline if present
+			if lineText.endswith('\n') or lineText.endswith('\r'):
+				lineText = lineText.rstrip('\n\r')
+
+			if not lineText:
+				ui.message(_("Empty line"))
+				return
+
+			# Count leading spaces and tabs
+			spaces = 0
+			tabs = 0
+			for char in lineText:
+				if char == ' ':
+					spaces += 1
+				elif char == '\t':
+					tabs += 1
+				else:
+					break
+
+			# Announce indentation
+			if spaces == 0 and tabs == 0:
+				# Translators: Message when line has no indentation
+				ui.message(_("No indentation"))
+			elif tabs > 0 and spaces > 0:
+				# Translators: Message for mixed indentation
+				ui.message(_("{tabs} tab, {spaces} spaces").format(tabs=tabs, spaces=spaces) if tabs == 1 else _("{tabs} tabs, {spaces} spaces").format(tabs=tabs, spaces=spaces))
+			elif tabs > 0:
+				# Translators: Message for tab indentation
+				ui.message(_("{count} tab").format(count=tabs) if tabs == 1 else _("{count} tabs").format(count=tabs))
+			else:
+				# Translators: Message for space indentation
+				ui.message(_("{count} space").format(count=spaces) if spaces == 1 else _("{count} spaces").format(count=spaces))
+		except Exception:
+			ui.message(_("Unable to read indentation"))
+
+	def _announceCharacterCode(self):
+		"""Announce the ASCII/Unicode code of the current character."""
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				# Translators: Message when unable to read character
+				ui.message(_("Unable to read character"))
+				return
+
+			# Get character at cursor
+			info = reviewPos.copy()
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+
+			if not char or char == '\n' or char == '\r':
+				# Translators: Message when no character at position
+				ui.message(_("No character"))
+				return
+
+			# Get character code
+			charCode = ord(char)
+			hexCode = hex(charCode)[2:].upper()
+
+			# Get character name for common control characters
+			charName = char
+			if charCode == 32:
+				charName = "space"
+			elif charCode == 9:
+				charName = "tab"
+			elif charCode == 10:
+				charName = "line feed"
+			elif charCode == 13:
+				charName = "carriage return"
+			elif charCode < 32:
+				charName = "control character"
+
+			# Translators: Message announcing character code
+			ui.message(_("Character {decimal}, hex {hex}, {name}").format(
+				decimal=charCode,
+				hex=hexCode,
+				name=charName
+			))
+		except Exception:
+			ui.message(_("Unable to read character"))
 
 
 	def _copyToClipboard(self, text):

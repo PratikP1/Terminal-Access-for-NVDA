@@ -41,6 +41,12 @@ Position on any text and try:
 
 - **NVDA+Alt+Comma** - Read current character
 - **NVDA+Alt+Comma** (twice) - Phonetic reading (e.g., "alpha" for "a")
+- **NVDA+Alt+Comma** (three times) - Character code (e.g., "Character 65, hex 41, A")
+
+### Step 5: Try Advanced Features
+- **NVDA+Alt+A** - Continuous reading (say all) from cursor to end
+- **NVDA+Alt+I** (twice) - Announce line indentation
+- **NVDA+Alt+P** - Announce current position (row and column)
 
 ## Essential Commands
 
@@ -50,7 +56,12 @@ Position on any text and try:
 | **NVDA+Alt+Q** | Toggle quiet mode |
 | **NVDA+Alt+C** | Open settings |
 | **NVDA+Alt+I** | Read current line |
+| **NVDA+Alt+I** (twice) | Announce line indentation |
 | **NVDA+Alt+K** | Read current word |
+| **NVDA+Alt+A** | Continuous reading (say all) |
+| **NVDA+Alt+P** | Announce position (row, column) |
+| **NVDA+Alt+Home/End** | Jump to start/end of line |
+| **NVDA+Alt+PageUp/Down** | Jump to top/bottom of buffer |
 
 ## Settings (2 minutes)
 
@@ -68,13 +79,33 @@ Try these settings:
 
 ### Reading Command Output
 1. Run a command
-2. Use **NVDA+Alt+U/I/O** to read line by line
-3. Use **NVDA+Alt+Q** to enable quiet mode if output is verbose
+2. Use **NVDA+Alt+A** for continuous reading (say all)
+3. Or use **NVDA+Alt+U/I/O** to read line by line
+4. Use **NVDA+Alt+Q** to enable quiet mode if output is verbose
+
+### Reading Long Files or Logs
+1. Navigate to start position
+2. Press **NVDA+Alt+A** to read continuously to the end
+3. Press any key to stop reading
+4. Use **NVDA+Alt+PageUp/PageDown** to jump to top or bottom
+
+### Working with Python or YAML Code
+1. Navigate to a line of code
+2. Press **NVDA+Alt+I** twice to hear indentation level
+3. Use line navigation to review code structure
+4. Indentation feedback helps understand nesting
+
+### Debugging Character Issues
+1. Navigate to a suspicious character
+2. Press **NVDA+Alt+Comma** three times
+3. Hear the character code (decimal and hex)
+4. Useful for finding hidden control characters
 
 ### Working with Long Commands
 1. Type your command
 2. Use **NVDA+Alt+J/K/L** to review word by word
 3. Use **NVDA+Alt+M/Comma/Period** for character-by-character editing
+4. Use **NVDA+Alt+Home/End** to jump to start or end of line
 
 ### Finding Specific Information
 1. Run your command
@@ -90,11 +121,14 @@ Try these settings:
 
 ## Tips for Efficiency
 
-1. **Use Quiet Mode**: Enable with NVDA+Alt+Q when commands produce lots of output
-2. **Learn Word Navigation**: Faster than character-by-character
-3. **Enable Symbol Processing**: Helpful when working with scripts or configs
-4. **Adjust Cursor Delay**: Fine-tune in settings for your preference
-5. **Practice Commands**: Muscle memory makes navigation much faster
+1. **Use Continuous Reading**: Press NVDA+Alt+A to read long output instead of navigating line by line
+2. **Use Quiet Mode**: Enable with NVDA+Alt+Q when commands produce lots of output
+3. **Learn Screen Edge Navigation**: Jump to line/buffer boundaries with Home/End/PageUp/PageDown
+4. **Check Indentation**: Press NVDA+Alt+I twice when reviewing Python or YAML code
+5. **Learn Word Navigation**: Faster than character-by-character
+6. **Enable Symbol Processing**: Helpful when working with scripts or configs
+7. **Adjust Cursor Delay**: Fine-tune in settings for your preference
+8. **Practice Commands**: Muscle memory makes navigation much faster
 
 ## Troubleshooting
 

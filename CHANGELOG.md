@@ -2,6 +2,51 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.11] - 2026-02-21
+
+### Added - Phase 1 Quick Win Features
+- **Continuous Reading (Say All)** - NVDA+Alt+A reads continuously from cursor to end of terminal buffer
+  - Leverages NVDA's speech system for smooth reading
+  - Can be interrupted with any key press
+  - Respects processSymbols settings
+  - Essential for reading long log files, man pages, and command output
+- **Screen Edge Navigation** - Quick navigation to screen and line boundaries
+  - NVDA+Alt+Home: Jump to first character of current line
+  - NVDA+Alt+End: Jump to last character of current line
+  - NVDA+Alt+PageUp: Jump to top of terminal buffer
+  - NVDA+Alt+PageDown: Jump to bottom of terminal buffer
+  - Character at destination is announced after navigation
+- **Line Indentation Detection** - Double-press NVDA+Alt+I to announce indentation level
+  - Counts leading spaces and tabs on current line
+  - Distinguishes between spaces, tabs, and mixed indentation
+  - Critical for Python code and YAML configuration files
+  - Announces "X spaces", "Y tabs", or "X tabs, Y spaces"
+- **Position Announcement** - NVDA+Alt+P announces row and column coordinates
+  - Reports current line number (row) and character position (column)
+  - Uses 1-based indexing for user-friendly reporting
+  - Useful for understanding table alignment and verifying cursor location
+- **Character Code Announcement** - Triple-press NVDA+Alt+Comma to announce character code
+  - Single press: Read character
+  - Double press: Read character phonetically
+  - Triple press: Announce ASCII/Unicode code (decimal and hexadecimal)
+  - Identifies control characters (space, tab, line feed, etc.)
+  - Helpful for debugging encoding issues and identifying special characters
+
+### Changed
+- Attribute reading gesture moved from NVDA+Alt+A to NVDA+Alt+Shift+A (to make room for continuous reading)
+- Enhanced NVDA+Alt+I (read current line) to support double-press for indentation
+- Enhanced NVDA+Alt+Comma (read character) to support triple-press for character code
+
+### Technical
+- Added speech module import for continuous reading functionality
+- Added scriptHandler import for multi-press gesture detection
+- Implemented helper methods: _announceIndentation() and _announceCharacterCode()
+- All new features follow consistent error handling patterns
+
+### Credits
+- Phase 1 features inspired by [Speakup](https://github.com/linux-speakup/speakup) screen reader
+- Implementation based on SPEAKUP_FEATURE_ANALYSIS.md recommendations
+
 ## [1.0.10] - 2026-02-21
 
 ### Changed

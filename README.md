@@ -10,6 +10,11 @@ TDSR for NVDA enables screen reader users to efficiently navigate and interact w
 
 - **Line-by-line navigation** through terminal output
 - **Word and character navigation** with phonetic spelling support
+- **Continuous reading (Say All)** - Read from cursor to end of buffer
+- **Screen edge navigation** - Jump to line/buffer boundaries quickly
+- **Line indentation detection** - Essential for Python and YAML code
+- **Position announcement** - Report row and column coordinates
+- **Character code announcement** - Display ASCII/Unicode values
 - **Multiple cursor tracking modes** - Standard, Highlight, Window, or Off
 - **Highlight tracking** - Detect and announce highlighted/inverse text
 - **Screen windowing** - Define and monitor specific screen regions
@@ -52,8 +57,21 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 
 ### Navigation
 - **NVDA+Alt+U/I/O** - Read previous/current/next line
+- **NVDA+Alt+I** (twice) - Announce line indentation level
 - **NVDA+Alt+J/K/L** - Read previous/current/next word
 - **NVDA+Alt+M/Comma/Period** - Read previous/current/next character
+- **NVDA+Alt+Comma** (twice) - Read character phonetically
+- **NVDA+Alt+Comma** (three times) - Announce character code
+
+### Screen Edge Navigation
+- **NVDA+Alt+Home** - Jump to first character of line
+- **NVDA+Alt+End** - Jump to last character of line
+- **NVDA+Alt+PageUp** - Jump to top of terminal buffer
+- **NVDA+Alt+PageDown** - Jump to bottom of terminal buffer
+
+### Reading & Position
+- **NVDA+Alt+A** - Continuous reading (Say All) from cursor to end
+- **NVDA+Alt+P** - Announce current row and column position
 
 ### Cursor Tracking & Attributes
 - **NVDA+Alt+Asterisk** - Cycle cursor tracking mode (Off → Standard → Highlight → Window)
@@ -66,7 +84,6 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 
 ### Special Features
 - **NVDA+Alt+K** (twice) - Spell current word
-- **NVDA+Alt+Comma** (twice) - Read character phonetically
 - **NVDA+Alt+Q** - Toggle quiet mode
 - **NVDA+Alt+R** - Start/end selection (automatically copies to clipboard)
 - **NVDA+Alt+V** - Enter copy mode
