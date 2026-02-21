@@ -157,13 +157,13 @@ class TestWindowManager(unittest.TestCase):
 
 	def test_window_manager_exists(self):
 		"""Test WindowManager class exists."""
-		from addon.globalPlugins.terminalAccess import WindowManager
+		from globalPlugins.terminalAccess import WindowManager
 
 		self.assertTrue(callable(WindowManager))
 
 	def test_window_bounds_validation(self):
 		"""Test window bounds are validated."""
-		from addon.globalPlugins.terminalAccess import WindowManager
+		from globalPlugins.terminalAccess import WindowManager
 
 		mgr = WindowManager()
 
@@ -181,7 +181,7 @@ class TestWindowManager(unittest.TestCase):
 
 	def test_window_enabled_state(self):
 		"""Test window enabled state management."""
-		from addon.globalPlugins.terminalAccess import WindowManager
+		from globalPlugins.terminalAccess import WindowManager
 
 		mgr = WindowManager()
 
@@ -195,7 +195,7 @@ class TestWindowManager(unittest.TestCase):
 
 	def test_position_in_window(self):
 		"""Test position within window bounds."""
-		from addon.globalPlugins.terminalAccess import WindowManager
+		from globalPlugins.terminalAccess import WindowManager
 
 		mgr = WindowManager()
 		mgr.set_window_bounds(top=5, bottom=20, left=10, right=70)
