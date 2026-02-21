@@ -13,7 +13,7 @@ This document provides comprehensive API research for implementing rectangular s
 
 ### What Terminal Access Currently Has
 
-The current implementation in `/home/runner/work/TDSR-for-NVDA/TDSR-for-NVDA/addon/globalPlugins/tdsr.py` uses:
+The current implementation in `/home/runner/work/Terminal-Access-for-NVDA/Terminal-Access-for-NVDA/addon/globalPlugins/tdsr.py` uses:
 
 **Position Tracking (Lines 1114-1168)**:
 ```python

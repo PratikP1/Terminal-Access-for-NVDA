@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: TDSR 1.0.32\n"
-"Report-Msgid-Bugs-To: https://github.com/PratikP1/TDSR-for-NVDA/issues\n"
+"Report-Msgid-Bugs-To: https://github.com/PratikP1/Terminal-Access-for-NVDA/issues\n"
 "POT-Creation-Date: 2026-02-21 09:00+0000\n"
 "PO-Revision-Date: 2026-02-21 09:00+0000\n"
 "Last-Translator: TDSR Team\n"

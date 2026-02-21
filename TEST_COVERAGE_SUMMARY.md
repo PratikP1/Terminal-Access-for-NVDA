@@ -1,7 +1,7 @@
 # Test Coverage Improvement Summary
 
 ## Overview
-This document summarizes the comprehensive test coverage improvement work completed on the TDSR-for-NVDA project.
+This document summarizes the comprehensive test coverage improvement work completed on the Terminal-Access-for-NVDA project.
 
 ## Initial State
 - **Tests Passing**: 147/274 (53.6%)

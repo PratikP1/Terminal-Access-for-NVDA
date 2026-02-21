@@ -129,7 +129,7 @@ This document summarizes the complete implementation of the TDSR for NVDA add-on
 ## Project Structure
 
 ```
-TDSR-for-NVDA/
+Terminal-Access-for-NVDA/
 ├── addon/                          # Add-on code and resources
 │   ├── __init__.py                # Package initialization
 │   ├── globalPlugins/             # Global plugin directory

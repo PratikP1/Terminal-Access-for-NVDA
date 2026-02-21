@@ -482,7 +482,7 @@ Large rectangular selections (>100 rows) run in background threads:
 
 ## Additional Resources
 
-- **GitHub Repository**: https://github.com/PratikP1/TDSR-for-NVDA
+- **GitHub Repository**: https://github.com/PratikP1/Terminal-Access-for-NVDA
 - **Issue Tracker**: Report bugs and request features
 - **CHANGELOG.md**: Detailed version history
 - **API_REFERENCE.md**: Developer API documentation
