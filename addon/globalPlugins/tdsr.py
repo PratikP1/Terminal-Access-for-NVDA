@@ -714,6 +714,342 @@ class UnicodeWidthHelper:
 		return len(text)
 
 
+class BidiHelper:
+	"""
+	Helper class for bidirectional text (RTL/LTR) handling.
+
+	Implements Unicode Bidirectional Algorithm (UAX #9) for proper handling of
+	right-to-left text (Arabic, Hebrew) mixed with left-to-right text.
+
+	Features:
+	- Automatic RTL text detection
+	- Bidirectional text reordering
+	- Arabic character reshaping
+	- Mixed RTL/LTR text support
+
+	Example usage:
+		>>> helper = BidiHelper()
+		>>>
+		>>> # Detect RTL text
+		>>> is_rtl = helper.is_rtl("مرحبا")  # Arabic "Hello"
+		>>> print(is_rtl)  # True
+		>>>
+		>>> # Process mixed RTL/LTR text
+		>>> text = "Hello مرحبا World"
+		>>> display_text = helper.process_text(text)
+		>>>
+		>>> # Extract column range with RTL awareness
+		>>> result = helper.extract_column_range_rtl(text, 1, 5)
+
+	Dependencies:
+		Requires optional packages:
+		- python-bidi>=0.4.2
+		- arabic-reshaper>=2.1.3
+
+		Gracefully degrades if packages not available.
+
+	Thread Safety:
+		All methods are thread-safe (no shared mutable state).
+
+	Section Reference:
+		FUTURE_ENHANCEMENTS.md Section 4.1 (lines 465-526)
+	"""
+
+	def __init__(self):
+		"""Initialize BidiHelper with optional dependencies."""
+		try:
+			from bidi.algorithm import get_display
+			self._get_display = get_display
+			self._bidi_available = True
+		except ImportError:
+			self._bidi_available = False
+
+		try:
+			import arabic_reshaper
+			self._reshaper = arabic_reshaper.reshape
+			self._reshaper_available = True
+		except ImportError:
+			self._reshaper_available = False
+
+	def is_available(self) -> bool:
+		"""
+		Check if bidirectional text processing is available.
+
+		Returns:
+			bool: True if bidi libraries are available
+		"""
+		return self._bidi_available
+
+	def is_rtl(self, text: str) -> bool:
+		"""
+		Detect if text is primarily right-to-left.
+
+		Uses Unicode character properties to determine text direction.
+
+		Args:
+			text: Text to analyze
+
+		Returns:
+			bool: True if text is primarily RTL
+		"""
+		if not text:
+			return False
+
+		rtl_count = 0
+		ltr_count = 0
+
+		# RTL Unicode ranges:
+		# Arabic: U+0600-U+06FF, U+0750-U+077F
+		# Hebrew: U+0590-U+05FF
+		for char in text:
+			code = ord(char)
+			if (0x0590 <= code <= 0x05FF or  # Hebrew
+				0x0600 <= code <= 0x06FF or  # Arabic
+				0x0750 <= code <= 0x077F):   # Arabic Supplement
+				rtl_count += 1
+			elif char.isalpha():
+				ltr_count += 1
+
+		return rtl_count > ltr_count
+
+	def process_text(self, text: str) -> str:
+		"""
+		Process text for correct bidirectional display.
+
+		Applies Arabic reshaping and bidirectional algorithm.
+
+		Args:
+			text: Input text (may contain mixed RTL/LTR)
+
+		Returns:
+			str: Text reordered for visual display
+		"""
+		if not text:
+			return text
+
+		# If libraries not available, return as-is
+		if not self._bidi_available:
+			return text
+
+		# Reshape Arabic characters if available
+		processed = text
+		if self._reshaper_available and self.is_rtl(text):
+			try:
+				processed = self._reshaper(text)
+			except Exception:
+				# If reshaping fails, continue with original
+				pass
+
+		# Apply bidirectional algorithm
+		try:
+			return self._get_display(processed)
+		except Exception:
+			# If bidi fails, return processed text
+			return processed
+
+	def extract_column_range_rtl(self, text: str, startCol: int, endCol: int) -> str:
+		"""
+		Extract column range with RTL awareness.
+
+		For RTL text, reverses column indices to match visual order.
+
+		Args:
+			text: Source text string
+			startCol: Starting column (1-based)
+			endCol: Ending column (1-based, inclusive)
+
+		Returns:
+			str: Text within the specified column range
+		"""
+		if not text:
+			return ""
+
+		# Detect if text is primarily RTL
+		if self.is_rtl(text):
+			# Reverse column indices for RTL text
+			text_width = UnicodeWidthHelper.getTextWidth(text)
+			rtl_start = text_width - endCol + 1
+			rtl_end = text_width - startCol + 1
+			return UnicodeWidthHelper.extractColumnRange(text, rtl_start, rtl_end)
+		else:
+			# LTR text - normal extraction
+			return UnicodeWidthHelper.extractColumnRange(text, startCol, endCol)
+
+
+class EmojiHelper:
+	"""
+	Helper class for handling complex emoji sequences.
+
+	Handles modern emoji features:
+	- Emoji sequences (family, flags, professions)
+	- Skin tone modifiers (U+1F3FB-U+1F3FF)
+	- Zero-width joiners (ZWJ sequences)
+	- Emoji variation selectors
+
+	Features:
+	- Accurate width calculation for emoji sequences
+	- Detection of emoji vs regular text
+	- Support for multi-codepoint emoji
+
+	Example usage:
+		>>> helper = EmojiHelper()
+		>>>
+		>>> # Detect emoji
+		>>> has_emoji = helper.contains_emoji("Hello 👨‍👩‍👧‍👦")
+		>>> print(has_emoji)  # True
+		>>>
+		>>> # Calculate width including emoji
+		>>> width = helper.get_text_width_with_emoji("👨‍👩‍👧‍👦 Family")
+		>>> print(width)  # 2 (emoji) + 7 (text) = 9
+		>>>
+		>>> # Get emoji list
+		>>> emojis = helper.extract_emoji_list("Hello 👋 World 🌍")
+		>>> print(emojis)  # ['👋', '🌍']
+
+	Dependencies:
+		Requires optional package:
+		- emoji>=2.0.0
+
+		Falls back to wcwidth if emoji package not available.
+
+	Thread Safety:
+		All methods are thread-safe (no shared mutable state).
+
+	Section Reference:
+		FUTURE_ENHANCEMENTS.md Section 4.2 (lines 528-566)
+	"""
+
+	def __init__(self):
+		"""Initialize EmojiHelper with optional dependencies."""
+		try:
+			import emoji
+			self._emoji = emoji
+			self._available = True
+		except ImportError:
+			self._available = False
+
+	def is_available(self) -> bool:
+		"""
+		Check if emoji processing is available.
+
+		Returns:
+			bool: True if emoji library is available
+		"""
+		return self._available
+
+	def contains_emoji(self, text: str) -> bool:
+		"""
+		Check if text contains any emoji.
+
+		Args:
+			text: Text to check
+
+		Returns:
+			bool: True if text contains emoji
+		"""
+		if not text or not self._available:
+			return False
+
+		try:
+			return bool(self._emoji.emoji_count(text))
+		except Exception:
+			return False
+
+	def extract_emoji_list(self, text: str) -> List[str]:
+		"""
+		Extract all emoji from text.
+
+		Args:
+			text: Text to analyze
+
+		Returns:
+			List[str]: List of emoji found in text
+		"""
+		if not text or not self._available:
+			return []
+
+		try:
+			# emoji_list returns list of dicts with 'emoji' key
+			emoji_data = self._emoji.emoji_list(text)
+			return [item['emoji'] for item in emoji_data]
+		except Exception:
+			return []
+
+	def get_emoji_width(self, emoji_text: str) -> int:
+		"""
+		Calculate display width of emoji sequence.
+
+		Most emoji display as 2 columns wide, including complex sequences.
+
+		Args:
+			emoji_text: Emoji or emoji sequence
+
+		Returns:
+			int: Display width (typically 2 for emoji)
+		"""
+		if not emoji_text:
+			return 0
+
+		# Most emoji are 2 columns wide
+		# This includes complex sequences (family, flags, etc.)
+		if self.contains_emoji(emoji_text):
+			# Count number of emoji (not codepoints)
+			emoji_count = len(self.extract_emoji_list(emoji_text))
+			# Each emoji is typically 2 columns
+			return emoji_count * 2
+
+		# Not an emoji, fall back to standard width
+		return UnicodeWidthHelper.getTextWidth(emoji_text)
+
+	def get_text_width_with_emoji(self, text: str) -> int:
+		"""
+		Calculate total display width including emoji sequences.
+
+		Handles both emoji and regular text accurately.
+
+		Args:
+			text: Text with potential emoji
+
+		Returns:
+			int: Total display width in columns
+		"""
+		if not text:
+			return 0
+
+		if not self._available or not self.contains_emoji(text):
+			# No emoji or library not available - use standard calculation
+			return UnicodeWidthHelper.getTextWidth(text)
+
+		try:
+			# Get emoji positions
+			emoji_data = self._emoji.emoji_list(text)
+
+			total_width = 0
+			last_end = 0
+
+			for item in emoji_data:
+				# Add width of text before emoji
+				start = item['match_start']
+				if start > last_end:
+					text_before = text[last_end:start]
+					total_width += UnicodeWidthHelper.getTextWidth(text_before)
+
+				# Add emoji width (typically 2)
+				total_width += 2
+
+				last_end = item['match_end']
+
+			# Add any remaining text after last emoji
+			if last_end < len(text):
+				text_after = text[last_end:]
+				total_width += UnicodeWidthHelper.getTextWidth(text_after)
+
+			return total_width
+		except Exception:
+			# If processing fails, fall back to standard calculation
+			return UnicodeWidthHelper.getTextWidth(text)
+
+
 class WindowDefinition:
 	"""
 	Definition of a window region in terminal output.

@@ -2,6 +2,140 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.25] - 2026-02-21
+
+### Feature - Advanced Unicode Support (Section 4)
+
+**Feature Release**: Implements comprehensive support for right-to-left (RTL) text and complex emoji sequences, enabling full internationalization and modern Unicode handling.
+
+#### Added
+
+- **BidiHelper Class**: Bidirectional text (RTL/LTR) handling
+  - **RTL Text Detection**: Automatic detection of Arabic, Hebrew, and other RTL languages
+    - Supports Hebrew (U+0590-U+05FF)
+    - Supports Arabic (U+0600-U+06FF, U+0750-U+077F)
+    - Character-by-character analysis for mixed RTL/LTR text
+    - Returns True if text is primarily RTL, False for LTR
+  - **Bidirectional Algorithm**: Unicode UAX #9 implementation
+    - Proper text reordering for visual display
+    - Mixed RTL/LTR text support
+    - Graceful degradation if python-bidi library unavailable
+  - **Arabic Character Reshaping**: Contextual form support
+    - Uses arabic-reshaper library for proper character forms
+    - Initial, medial, final, and isolated forms
+    - Graceful degradation if arabic-reshaper unavailable
+  - **RTL-Aware Column Extraction**: Reverses column indices for RTL text
+    - Integrates with UnicodeWidthHelper
+    - Maintains visual column order for RTL content
+    - Normal extraction for LTR text
+  - Location: `addon/globalPlugins/tdsr.py` lines 717-877
+
+- **EmojiHelper Class**: Complex emoji sequence handling
+  - **Emoji Detection**: Identifies emoji in text using emoji library
+    - `contains_emoji()`: Checks if text has any emoji
+    - `extract_emoji_list()`: Returns list of all emoji in text
+    - Returns empty results if emoji library unavailable
+  - **Emoji Width Calculation**: Accurate display width for emoji sequences
+    - Handles ZWJ (Zero-Width Joiner) sequences
+    - Handles skin tone modifiers (U+1F3FB-U+1F3FF)
+    - Handles emoji variation selectors
+    - Family emoji, flag emoji, profession emoji support
+    - Each emoji typically 2 columns wide
+  - **Mixed Content Width**: Text with both emoji and regular characters
+    - Separates emoji from regular text
+    - Calculates each portion accurately
+    - Combines for total width
+    - Falls back to UnicodeWidthHelper if emoji library unavailable
+  - Location: `addon/globalPlugins/tdsr.py` lines 879-1051
+
+#### Enhanced
+
+- **Optional Dependencies**: New Unicode support libraries
+  - `python-bidi>=0.4.2`: Bidirectional text algorithm
+  - `arabic-reshaper>=2.1.3`: Arabic character contextual forms
+  - `emoji>=2.0.0`: Emoji sequence detection and handling
+  - All dependencies are optional with graceful degradation
+  - Updated `requirements-dev.txt` with Section 4 dependencies
+
+- **Graceful Degradation**: Works without optional libraries
+  - BidiHelper returns text as-is if bidi libraries unavailable
+  - EmojiHelper falls back to UnicodeWidthHelper if emoji library unavailable
+  - No breaking changes for existing installations
+  - Enhanced functionality when libraries installed
+
+#### Testing
+
+- **Comprehensive Unicode Tests**: `tests/test_unicode_advanced.py`
+  - **TestBidiHelper**: 11 test cases
+    - RTL detection (Hebrew, Arabic, English, mixed)
+    - Text processing and reordering
+    - RTL-aware column extraction
+    - Empty string and edge case handling
+  - **TestEmojiHelper**: 10 test cases
+    - Emoji detection and extraction
+    - Width calculation for emoji and regular text
+    - Empty string and whitespace handling
+  - **TestBidiHelperIntegration**: 3 test cases
+    - Integration with UnicodeWidthHelper
+    - Unicode category coverage
+    - CJK character handling with RTL
+  - **TestEmojiHelperIntegration**: 2 test cases
+    - Fallback behavior to UnicodeWidthHelper
+    - Consistent width calculation
+  - **TestUnicodeEdgeCases**: 4 test cases
+    - Numbers and punctuation (neutral characters)
+    - Whitespace handling
+    - Unusual input graceful handling
+  - **TestOptionalDependencyHandling**: 2 test cases
+    - Functionality without bidi library
+    - Functionality without emoji library
+
+#### Technical Details
+
+- **BidiHelper Methods**:
+  - `__init__()`: Initialize with optional python-bidi and arabic-reshaper
+  - `is_available()`: Check if bidi libraries loaded
+  - `is_rtl(text)`: Detect if text primarily RTL
+  - `process_text(text)`: Apply reshaping and bidi algorithm
+  - `extract_column_range_rtl(text, startCol, endCol)`: Extract with RTL awareness
+
+- **EmojiHelper Methods**:
+  - `__init__()`: Initialize with optional emoji library
+  - `is_available()`: Check if emoji library loaded
+  - `contains_emoji(text)`: Check for emoji presence
+  - `extract_emoji_list(text)`: Get all emoji in text
+  - `get_emoji_width(emoji_text)`: Calculate emoji display width
+  - `get_text_width_with_emoji(text)`: Total width including emoji
+
+#### Impact
+
+- **International Users**: Full support for RTL languages (Arabic, Hebrew)
+- **Modern Text**: Proper handling of emoji sequences (family, flags, professions)
+- **Terminal Display**: Accurate width calculation for mixed Unicode content
+- **Accessibility**: Better screen reader experience with international text
+- **Backward Compatible**: No breaking changes, optional enhancement
+- **Standards Compliant**: Implements Unicode UAX #9 bidirectional algorithm
+
+#### Use Cases
+
+- Reading Arabic or Hebrew terminal output
+- Terminal applications with emoji (git status, modern CLIs)
+- Mixed RTL/LTR text in terminal buffers
+- International programming (Arabic/Hebrew variable names)
+- Modern UI frameworks with emoji indicators
+
+#### Notes
+
+- Optional dependencies can be installed with: `pip install python-bidi arabic-reshaper emoji`
+- Without libraries, functionality gracefully degrades to basic Unicode support
+- No performance impact when libraries not installed
+- Thread-safe implementations (no shared mutable state)
+
+#### Section Reference
+
+- FUTURE_ENHANCEMENTS.md Section 4.1 (lines 465-526): RTL text support
+- FUTURE_ENHANCEMENTS.md Section 4.2 (lines 528-566): Emoji sequence handling
+
 ## [1.0.24] - 2026-02-21
 
 ### Feature - Profile Management UI (Section 3)

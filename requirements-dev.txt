@@ -16,3 +16,9 @@ markdown>=3.4.0
 
 # Unicode support for CJK characters
 wcwidth>=0.2.6
+
+# Section 4: Advanced Unicode features (RTL text and emoji support)
+# These are optional dependencies for enhanced Unicode handling
+python-bidi>=0.4.2  # Bidirectional text algorithm (RTL/LTR)
+arabic-reshaper>=2.1.3  # Arabic character reshaping
+emoji>=2.0.0  # Emoji sequence detection and handling
