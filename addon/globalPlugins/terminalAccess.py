@@ -93,7 +93,9 @@ from typing import Optional, Tuple, Dict, List, Union, Any, Set
 try:
 	addonHandler.initTranslation()
 except (ImportError, AttributeError, OSError):
-	pass
+	# If translation initialization fails, provide a fallback function
+	def _(text):
+		return text
 
 # Script category for Terminal Access commands
 SCRCAT_TERMINALACCESS = _("Terminal Access")
