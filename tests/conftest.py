@@ -7,6 +7,9 @@ from unittest.mock import Mock, MagicMock
 
 import pytest
 
+# Store original module references
+_original_modules = {}
+
 # Add the addon directory to the Python path
 addon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'addon')
 sys.path.insert(0, addon_path)
@@ -82,6 +85,7 @@ conf_dict = {
         "repeatedSymbolsValues": "-_=!",
         "cursorDelay": 20,
         "quietMode": False,
+        "verboseMode": False,  # Added verboseMode
         "windowTop": 0,
         "windowBottom": 0,
         "windowLeft": 0,
@@ -135,10 +139,54 @@ def reset_config():
         "repeatedSymbolsValues": "-_=!",
         "cursorDelay": 20,
         "quietMode": False,
+        "verboseMode": False,
         "windowTop": 0,
         "windowBottom": 0,
         "windowLeft": 0,
         "windowRight": 0,
         "windowEnabled": False,
     }
+    yield
+
+
+@pytest.fixture(autouse=True)
+def ensure_mocks():
+    """Ensure NVDA mocks are always available in sys.modules."""
+    # This fixture runs automatically before each test
+    # It ensures that if any test deleted a mock, it's restored
+    required_modules = ['config', 'api', 'ui', 'gui', 'globalPluginHandler']
+
+    for module_name in required_modules:
+        if module_name not in sys.modules:
+            # Restore from our global setup
+            if module_name == 'config':
+                config_mock = MagicMock()
+                conf_dict = {
+                    "terminalAccess": {
+                        "cursorTracking": True,
+                        "cursorTrackingMode": 1,
+                        "keyEcho": True,
+                        "linePause": True,
+                        "processSymbols": False,
+                        "punctuationLevel": 2,
+                        "repeatedSymbols": False,
+                        "repeatedSymbolsValues": "-_=!",
+                        "cursorDelay": 20,
+                        "quietMode": False,
+                        "verboseMode": False,
+                        "windowTop": 0,
+                        "windowBottom": 0,
+                        "windowLeft": 0,
+                        "windowRight": 0,
+                        "windowEnabled": False,
+                    }
+                }
+                config_mock.conf = Mock()
+                config_mock.conf.__getitem__ = lambda self, key: conf_dict[key]
+                config_mock.conf.__setitem__ = lambda self, key, value: conf_dict.__setitem__(key, value)
+                config_mock.conf.spec = {}
+                sys.modules['config'] = config_mock
+            else:
+                sys.modules[module_name] = MagicMock()
+
     yield
