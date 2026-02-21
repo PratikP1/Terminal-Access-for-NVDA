@@ -8,6 +8,66 @@ TDSR (Terminal Data Structure Reader) Global Plugin for NVDA
 
 This plugin provides enhanced accessibility features for Windows Terminal and PowerShell,
 including navigation by line/word/character, cursor tracking, and symbol processing.
+
+Architecture Overview:
+	The plugin is organized into several key components:
+
+	1. **PositionCache**: Performance optimization for position calculations
+	   - Caches (row, col) results with timestamp-based expiration
+	   - Thread-safe with O(1) lookup and update
+
+	2. **ANSIParser**: Color and formatting detection
+	   - Parses ANSI escape sequences (SGR codes)
+	   - Supports standard colors, 256-color, and RGB modes
+	   - Extracts bold, italic, underline, and other formatting
+
+	3. **UnicodeWidthHelper**: CJK and combining character support
+	   - Calculates display width accounting for Unicode properties
+	   - Handles double-width CJK characters correctly
+	   - Extracts text by column range, not character index
+
+	4. **ApplicationProfile**: App-specific settings and window definitions
+	   - Customizes behavior per application (vim, tmux, htop, etc.)
+	   - Defines screen regions with different speech modes
+	   - Overrides global settings on per-app basis
+
+	5. **ProfileManager**: Profile detection and management
+	   - Detects current application from focus object
+	   - Loads appropriate profile automatically
+	   - Manages profile creation, import, and export
+
+	6. **GlobalPlugin**: Main NVDA plugin class
+	   - Registers keyboard gestures and scripts
+	   - Manages terminal detection and navigation
+	   - Coordinates all components for terminal access
+
+Key Features:
+	- Navigation: Line, word, character, column, row movement
+	- Selection: Linear and rectangular (column-based) text selection
+	- Cursor Tracking: Standard, highlight, window, or off modes
+	- Symbol Processing: Configurable punctuation levels (none/some/most/all)
+	- Window Tracking: Define and track screen regions independently
+	- Application Profiles: Auto-detect and apply app-specific settings
+	- Color/Format: Announce ANSI colors and formatting attributes
+	- Unicode Support: Proper handling of CJK and combining characters
+
+Configuration:
+	Settings are stored in NVDA config under [TDSR] section.
+	See confspec for available settings and their defaults.
+
+Performance:
+	- Position caching reduces O(n) calculations to O(1)
+	- Background threading for large selections (>1000 chars)
+	- Resource limits prevent DoS from malicious terminal output
+
+Security:
+	- Input validation on all configuration values
+	- Size limits on selections and window dimensions
+	- Timeout-based cache invalidation
+	- Safe handling of untrusted terminal content
+
+For detailed architecture information, see ARCHITECTURE.md.
+For API reference, see API_REFERENCE.md.
 """
 
 import globalPluginHandler
@@ -90,6 +150,31 @@ class PositionCache:
 
 	Stores bookmark→(row, col, timestamp) mappings to avoid repeated O(n) calculations.
 	Cache entries expire after CACHE_TIMEOUT_MS milliseconds.
+
+	Example usage:
+		>>> cache = PositionCache()
+		>>> bookmark = textInfo.bookmark
+		>>>
+		>>> # First calculation (cache miss)
+		>>> cached_pos = cache.get(bookmark)  # Returns None
+		>>> row, col = expensive_calculation(bookmark)
+		>>> cache.set(bookmark, row, col)
+		>>>
+		>>> # Second calculation (cache hit)
+		>>> cached_pos = cache.get(bookmark)  # Returns (row, col)
+		>>> if cached_pos:
+		>>>     row, col = cached_pos  # No expensive recalculation needed
+		>>>
+		>>> # After CACHE_TIMEOUT_MS milliseconds
+		>>> cached_pos = cache.get(bookmark)  # Returns None (expired)
+
+	Thread Safety:
+		All operations are thread-safe using internal locking.
+
+	Performance:
+		- get(): O(1) average case
+		- set(): O(1) average case
+		- Space complexity: O(min(n, MAX_CACHE_SIZE)) where n = unique bookmarks
 	"""
 
 	CACHE_TIMEOUT_MS = 1000  # 1 second timeout
@@ -170,6 +255,40 @@ class ANSIParser:
 	- 256-color mode (ESC[38;5;Nm and ESC[48;5;Nm)
 	- RGB color mode (ESC[38;2;R;G;Bm and ESC[48;2;R;G;Bm)
 	- Formatting: bold, dim, italic, underline, blink, inverse, strikethrough
+
+	Example usage:
+		>>> parser = ANSIParser()
+		>>>
+		>>> # Parse standard color
+		>>> attrs = parser.parse('\\x1b[31mRed text\\x1b[0m')
+		>>> print(attrs['foreground'])  # 'red'
+		>>> print(attrs['bold'])  # False
+		>>>
+		>>> # Parse multiple attributes
+		>>> attrs = parser.parse('\\x1b[1;4;91mBright red, bold, underlined\\x1b[0m')
+		>>> print(attrs['foreground'])  # 'bright red'
+		>>> print(attrs['bold'])  # True
+		>>> print(attrs['underline'])  # True
+		>>>
+		>>> # Parse RGB color
+		>>> attrs = parser.parse('\\x1b[38;2;255;128;0mOrange\\x1b[0m')
+		>>> print(attrs['foreground'])  # (255, 128, 0)
+		>>>
+		>>> # Format attributes as human-readable text
+		>>> formatted = parser.formatAttributes(mode='detailed')
+		>>> # Returns: "bright red foreground, bold, underline"
+		>>>
+		>>> # Strip ANSI codes from text
+		>>> clean = ANSIParser.stripANSI('\\x1b[31mRed\\x1b[0m')
+		>>> print(clean)  # 'Red'
+
+	State Management:
+		Parser maintains internal state across parse() calls. Use reset() to clear.
+		Each parse() call updates the internal state based on found codes.
+
+	Performance:
+		- parse(): O(n) where n = length of input text
+		- stripANSI(): O(n) static method, no state modification
 	"""
 
 	# Standard ANSI color names
@@ -436,6 +555,41 @@ class UnicodeWidthHelper:
 	- Combining characters (0 columns wide)
 	- Control characters
 	- Standard ASCII (1 column wide)
+
+	Example usage:
+		>>> # Single character width
+		>>> width = UnicodeWidthHelper.getCharWidth('A')
+		>>> print(width)  # 1
+		>>>
+		>>> # CJK character (double-width)
+		>>> width = UnicodeWidthHelper.getCharWidth('中')
+		>>> print(width)  # 2
+		>>>
+		>>> # Total text width
+		>>> text = "Hello世界"  # 5 ASCII + 2 CJK = 5*1 + 2*2 = 9 columns
+		>>> width = UnicodeWidthHelper.getTextWidth(text)
+		>>> print(width)  # 9
+		>>>
+		>>> # Extract by column range (1-based)
+		>>> text = "Hello World"
+		>>> result = UnicodeWidthHelper.extractColumnRange(text, 1, 5)
+		>>> print(result)  # "Hello"
+		>>>
+		>>> result = UnicodeWidthHelper.extractColumnRange(text, 7, 11)
+		>>> print(result)  # "World"
+		>>>
+		>>> # Find string index for column position
+		>>> text = "Hello"
+		>>> index = UnicodeWidthHelper.findColumnPosition(text, 3)
+		>>> print(index)  # 2 (0-based index for column 3)
+		>>> print(text[index])  # 'l'
+
+	Fallback Behavior:
+		If wcwidth library is not available, assumes 1 column per character.
+		This provides graceful degradation on systems without wcwidth.
+
+	Thread Safety:
+		All methods are static and thread-safe (no shared state).
 	"""
 
 	@staticmethod
@@ -565,6 +719,34 @@ class WindowDefinition:
 
 	Used for tracking specific regions of terminal display (e.g., tmux panes,
 	vim status line, htop process list).
+
+	Example usage:
+		>>> # Define a status line window at bottom of screen
+		>>> status_window = WindowDefinition(
+		>>>     name='status',
+		>>>     top=24, bottom=24,  # Last line only
+		>>>     left=1, right=80,   # Full width
+		>>>     mode='silent'       # Don't announce content
+		>>> )
+		>>>
+		>>> # Check if cursor position is in window
+		>>> if status_window.contains(row=24, col=40):
+		>>>     print("Cursor is in status window")
+		>>>
+		>>> # Serialize for storage
+		>>> data = status_window.toDict()
+		>>> # {'name': 'status', 'top': 24, 'bottom': 24, ...}
+		>>>
+		>>> # Deserialize from storage
+		>>> restored = WindowDefinition.fromDict(data)
+
+	Window Modes:
+		- 'announce': Read content normally (default)
+		- 'silent': Suppress all speech for this region
+		- 'monitor': Track changes but announce differently
+
+	Coordinate System:
+		All coordinates are 1-based (row 1, col 1 is top-left).
 	"""
 
 	def __init__(self, name: str, top: int, bottom: int, left: int, right: int,
@@ -635,6 +817,40 @@ class ApplicationProfile:
 	Application-specific configuration profile for terminal applications.
 
 	Allows customizing TDSR behavior for different applications (vim, tmux, htop, etc.).
+
+	Example usage:
+		>>> # Create a custom profile for Vim
+		>>> vim_profile = ApplicationProfile('vim', 'Vim/Neovim')
+		>>>
+		>>> # Configure settings (None = use global setting)
+		>>> vim_profile.punctuationLevel = PUNCT_MOST  # Read more punctuation
+		>>> vim_profile.cursorTrackingMode = CT_WINDOW  # Window-based tracking
+		>>>
+		>>> # Define screen regions
+		>>> vim_profile.addWindow('editor', 1, 9997, 1, 9999, mode='announce')
+		>>> vim_profile.addWindow('status', 9998, 9999, 1, 9999, mode='silent')
+		>>>
+		>>> # Check which window cursor is in
+		>>> window = vim_profile.getWindowAtPosition(row=10, col=40)
+		>>> if window:
+		>>>     print(f"In {window.name} window ({window.mode} mode)")
+		>>>
+		>>> # Export for storage
+		>>> data = vim_profile.toDict()
+		>>> import json
+		>>> json.dump(data, open('vim_profile.json', 'w'))
+		>>>
+		>>> # Import from storage
+		>>> data = json.load(open('vim_profile.json'))
+		>>> restored_profile = ApplicationProfile.fromDict(data)
+
+	Profile Inheritance:
+		Settings set to None inherit from global TDSR settings.
+		Non-None values override global settings for this application.
+
+	Window Tracking:
+		Profiles can define multiple non-overlapping windows.
+		Windows are checked in order; first match wins.
 	"""
 
 	def __init__(self, appName: str, displayName: Optional[str] = None) -> None:
@@ -724,6 +940,51 @@ class ProfileManager:
 	Manager for application-specific profiles.
 
 	Handles profile creation, detection, loading, and application.
+
+	Example usage:
+		>>> # Initialize with default profiles (vim, tmux, htop, etc.)
+		>>> manager = ProfileManager()
+		>>>
+		>>> # Detect application from focus object
+		>>> app_name = manager.detectApplication(focus)
+		>>> print(app_name)  # 'vim', 'tmux', or 'default'
+		>>>
+		>>> # Get profile for detected app
+		>>> profile = manager.getProfile(app_name)
+		>>> if profile:
+		>>>     print(f"Using {profile.displayName} profile")
+		>>>     print(f"Punctuation level: {profile.punctuationLevel}")
+		>>>
+		>>> # Set as active profile
+		>>> manager.setActiveProfile('vim')
+		>>> active = manager.activeProfile
+		>>> print(f"Active: {active.displayName}")
+		>>>
+		>>> # Create custom profile
+		>>> custom = ApplicationProfile('myapp', 'My Application')
+		>>> custom.punctuationLevel = PUNCT_ALL
+		>>> manager.addProfile(custom)
+		>>>
+		>>> # Export/Import profiles
+		>>> vim_data = manager.exportProfile('vim')
+		>>> # ... save to file ...
+		>>> # ... load from file ...
+		>>> imported = manager.importProfile(vim_data)
+
+	Default Profiles:
+		Includes pre-configured profiles for:
+		- vim/nvim: Editor with status line suppression
+		- tmux: Terminal multiplexer with status bar
+		- htop: Process viewer with header/process regions
+		- less/more: Pager with quiet mode
+		- git: Version control with diff support
+		- nano: Editor with shortcut bar suppression
+		- irssi: IRC client with status bar
+
+	Profile Detection:
+		1. Check app module name (focusObject.appModule.appName)
+		2. Check window title for common patterns
+		3. Return 'default' if no match found
 	"""
 
 	def __init__(self) -> None:
