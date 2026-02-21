@@ -1686,13 +1686,13 @@ class ConfigManager:
 	def _migrate_legacy_settings(self) -> None:
 		"""Migrate old configuration keys to new format (one-time migration)."""
 		# Migrate processSymbols to punctuationLevel
+		# Note: We don't remove the old key as it's still in the config spec (deprecated)
+		# and NVDA's config objects don't support deletion
 		if "processSymbols" in config.conf["terminalAccess"]:
 			if "punctuationLevel" not in config.conf["terminalAccess"]:
 				old_value = config.conf["terminalAccess"]["processSymbols"]
 				# True -> Level 2 (most), False -> Level 0 (none)
 				config.conf["terminalAccess"]["punctuationLevel"] = PUNCT_MOST if old_value else PUNCT_NONE
-			# Remove the old key
-			del config.conf["terminalAccess"]["processSymbols"]
 
 	def get(self, key: str, default: Any = None) -> Any:
 		"""

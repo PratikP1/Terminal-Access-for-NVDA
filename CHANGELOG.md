@@ -4,6 +4,24 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.36] - 2026-02-21
+
+### Fixed
+
+- **Global Plugin Initialization**: Fixed "Error initializing global plugin" caused by config migration attempting to delete keys
+  - Fixed `AttributeError: __delitem__` in `ConfigManager._migrate_legacy_settings()` (line 1695)
+  - Removed unsupported `del config.conf["terminalAccess"]["processSymbols"]` operation
+  - NVDA's config objects don't support deletion; old deprecated keys now remain in config spec
+  - Plugin now initializes successfully when migrating from `processSymbols` to `punctuationLevel`
+  - Added comprehensive test suite (`test_config.py`) with 3 new migration tests
+
+### Code Quality
+
+- **Test Coverage**: Added 3 new tests for configuration migration functionality
+  - Test migration from `processSymbols=True` to `punctuationLevel=2`
+  - Test migration from `processSymbols=False` to `punctuationLevel=0`
+  - Test that existing `punctuationLevel` values are preserved during migration
+
 ## [1.0.35] - 2026-02-21
 
 ### Fixed

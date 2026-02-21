@@ -209,5 +209,106 @@ class TestConfigSpec(unittest.TestCase):
             self.assertIn(key, self.terminalAccess.confspec, f"Missing config key: {key}")
 
 
+class TestConfigMigration(unittest.TestCase):
+    """Test configuration migration from old keys to new keys."""
+
+    def test_migrate_processSymbols_to_punctuationLevel_true(self):
+        """Test migration from processSymbols=True to punctuationLevel=2."""
+        from globalPlugins.terminalAccess import ConfigManager, PUNCT_MOST
+
+        # Mock config with old processSymbols setting
+        config_mock = sys.modules['config']
+        config_dict = {
+            "cursorTracking": True,
+            "cursorTrackingMode": 1,
+            "keyEcho": True,
+            "linePause": True,
+            "processSymbols": True,  # Old setting
+            # punctuationLevel not set yet
+            "repeatedSymbols": False,
+            "repeatedSymbolsValues": "-_=!",
+            "cursorDelay": 20,
+            "quietMode": False,
+            "windowTop": 0,
+            "windowBottom": 0,
+            "windowLeft": 0,
+            "windowRight": 0,
+            "windowEnabled": False,
+        }
+        config_mock.conf.__getitem__ = MagicMock(return_value=config_dict)
+
+        # Create ConfigManager which should trigger migration
+        manager = ConfigManager()
+
+        # Verify migration occurred
+        self.assertEqual(config_dict["punctuationLevel"], PUNCT_MOST)
+        # Old key should still exist (not deleted)
+        self.assertIn("processSymbols", config_dict)
+
+    def test_migrate_processSymbols_to_punctuationLevel_false(self):
+        """Test migration from processSymbols=False to punctuationLevel=0."""
+        from globalPlugins.terminalAccess import ConfigManager, PUNCT_NONE
+
+        # Mock config with old processSymbols setting
+        config_mock = sys.modules['config']
+        config_dict = {
+            "cursorTracking": True,
+            "cursorTrackingMode": 1,
+            "keyEcho": True,
+            "linePause": True,
+            "processSymbols": False,  # Old setting
+            # punctuationLevel not set yet
+            "repeatedSymbols": False,
+            "repeatedSymbolsValues": "-_=!",
+            "cursorDelay": 20,
+            "quietMode": False,
+            "windowTop": 0,
+            "windowBottom": 0,
+            "windowLeft": 0,
+            "windowRight": 0,
+            "windowEnabled": False,
+        }
+        config_mock.conf.__getitem__ = MagicMock(return_value=config_dict)
+
+        # Create ConfigManager which should trigger migration
+        manager = ConfigManager()
+
+        # Verify migration occurred
+        self.assertEqual(config_dict["punctuationLevel"], PUNCT_NONE)
+        # Old key should still exist (not deleted)
+        self.assertIn("processSymbols", config_dict)
+
+    def test_no_migration_when_punctuationLevel_exists(self):
+        """Test that migration doesn't overwrite existing punctuationLevel."""
+        from globalPlugins.terminalAccess import ConfigManager, PUNCT_ALL
+
+        # Mock config with both old and new settings
+        config_mock = sys.modules['config']
+        config_dict = {
+            "cursorTracking": True,
+            "cursorTrackingMode": 1,
+            "keyEcho": True,
+            "linePause": True,
+            "processSymbols": True,  # Old setting
+            "punctuationLevel": PUNCT_ALL,  # New setting already exists
+            "repeatedSymbols": False,
+            "repeatedSymbolsValues": "-_=!",
+            "cursorDelay": 20,
+            "quietMode": False,
+            "windowTop": 0,
+            "windowBottom": 0,
+            "windowLeft": 0,
+            "windowRight": 0,
+            "windowEnabled": False,
+        }
+        config_mock.conf.__getitem__ = MagicMock(return_value=config_dict)
+
+        # Create ConfigManager which should trigger migration check
+        manager = ConfigManager()
+
+        # Verify existing value was preserved
+        self.assertEqual(config_dict["punctuationLevel"], PUNCT_ALL)
+
+
 if __name__ == '__main__':
     unittest.main()
