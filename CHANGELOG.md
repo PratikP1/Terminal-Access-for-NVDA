@@ -1,6 +1,34 @@
 # Changelog
 
-All notable changes to the TDSR for NVDA add-on will be documented in this file.
+All notable changes to Terminal Access for NVDA will be documented in this file.
+
+## [Unreleased]
+
+### Project Rename
+
+**This project has been renamed from "TDSR for NVDA" to "Terminal Access for NVDA".**
+
+#### Changed
+
+- **Project Name**: Renamed from "TDSR for NVDA" to "Terminal Access for NVDA"
+- **Add-on Internal Name**: Changed from `tdsr` to `terminalAccess`
+- **Main Plugin File**: Renamed from `tdsr.py` to `terminalAccess.py`
+- **Settings Panel Class**: Renamed from `TDSRSettingsPanel` to `TerminalAccessSettingsPanel`
+- **Script Category**: Updated from `SCRCAT_TDSR` to `SCRCAT_TERMINALACCESS`
+- **Configuration Section**: Changed from `config.conf["TDSR"]` to `config.conf["terminalAccess"]`
+- **Repository URL**: Updated to `https://github.com/PratikP1/Terminal-Access-for-NVDA`
+- **All Documentation**: Updated to reflect new project name with proper attribution
+
+#### Attribution
+
+Terminal Access is inspired by and incorporates functionality from:
+- **TDSR (Terminal Data Structure Reader)** by Tyler Spivey - Original terminal accessibility project
+- **Speakup** - Linux kernel screen reader (cursor tracking, windowing, attribute reading)
+- **Community Contributions** - Advanced features inspired by accessibility community discussions
+
+This rename maintains the project's history while better reflecting its evolved functionality and broader inspiration. Historical references to "TDSR" in changelog entries below are preserved for accuracy.
+
+---
 
 ## [1.0.32] - 2026-02-21
 

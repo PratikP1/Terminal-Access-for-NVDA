@@ -1,14 +1,14 @@
-# TDSR for NVDA - Quick Start Guide
+# Terminal Access for NVDA - Quick Start Guide
 
-Welcome to TDSR for NVDA! This quick start guide will help you get up and running in minutes.
+Welcome to Terminal Access for NVDA! This quick start guide will help you get up and running in minutes.
 
-## What is TDSR for NVDA?
+## What is Terminal Access for NVDA?
 
-TDSR for NVDA is an add-on that enhances terminal accessibility on Windows. It provides navigation, reading, and interaction features specifically designed for command-line interfaces.
+Terminal Access for NVDA is an add-on that enhances terminal accessibility on Windows. It provides navigation, reading, and interaction features specifically designed for command-line interfaces. Inspired by [TDSR](https://github.com/tspivey/tdsr) and [Speakup](https://github.com/linux-speakup/speakup).
 
 ## Installation (1 minute)
 
-1. Download `TDSR-1.0.0.nvda-addon`
+1. Download `terminalAccess-1.0.17.nvda-addon`
 2. Press Enter on the file
 3. Confirm installation
 4. Restart NVDA
@@ -20,7 +20,7 @@ That's it! The add-on is now installed.
 ### Step 1: Open a Terminal
 Open Windows Terminal, PowerShell, or Command Prompt.
 
-You'll hear: *"TDSR terminal support active. Press NVDA+shift+f1 for help."*
+You'll hear: *"Terminal Access support active. Press NVDA+shift+f1 for help."*
 
 ### Step 2: Try Basic Navigation
 Try these keyboard commands:
@@ -144,8 +144,8 @@ Try these settings:
 ## Getting Help
 
 - **Full User Guide**: Press **NVDA+Shift+F1** anytime in a terminal
-- **GitHub**: https://github.com/PratikP1/TDSR-for-NVDA
-- **Documentation**: See INSTALL.md, README.md, and ROADMAP.md
+- **GitHub**: https://github.com/PratikP1/Terminal-Access-for-NVDA
+- **Documentation**: See INSTALL.md, README.md, and docs/ directory
 
 ## Tips for Efficiency
 
@@ -175,17 +175,17 @@ Try these settings:
 ## Next Steps
 
 1. **Read the Full Guide**: Press **NVDA+Shift+F1** for complete documentation
-2. **Explore Settings**: Customize TDSR to your workflow
+2. **Explore Settings**: Customize Terminal Access to your workflow
 3. **Try All Features**: Selection, copy mode, phonetic reading
 4. **Practice Daily**: The more you use it, the more efficient you become
 
 ## Support
 
-Need help? 
+Need help?
 - Check the troubleshooting section in the user guide
 - Visit the GitHub repository
 - Report issues on GitHub
 
 ---
 
-**Enjoy using TDSR for NVDA!** Your command-line experience just got a lot better.
+**Enjoy using Terminal Access for NVDA!** Your command-line experience just got a lot better.

@@ -1,4 +1,4 @@
-# Installation Guide
+# Installation Guide - Terminal Access for NVDA
 
 ## Prerequisites
 
@@ -32,7 +32,7 @@
 
 4. **Verify Installation**
    - Open a supported terminal application (e.g., Windows Terminal or PowerShell)
-   - NVDA should announce: "TDSR terminal support active. Press NVDA+shift+f1 for help."
+   - NVDA should announce: "Terminal Access support active. Press NVDA+shift+f1 for help."
    - If you hear this message, the installation was successful!
 
 ### Method 2: Manual Installation
@@ -58,14 +58,14 @@ To verify the add-on is installed and working:
 
 1. Press `NVDA+N` to open the NVDA menu
 2. Navigate to "Tools" > "Manage add-ons"
-3. Look for "TDSR" in the list of installed add-ons
+3. Look for "Terminal Access" or "terminalAccess" in the list of installed add-ons
 4. Ensure it is not disabled
 
 ## First Use
 
 1. **Open a Terminal**
    - Launch Windows Terminal, PowerShell, or Command Prompt
-   - NVDA will announce that TDSR terminal support is active
+   - NVDA will announce that Terminal Access support is active
 
 2. **Access Help**
    - Press `NVDA+Shift+F1` to open the comprehensive user guide
@@ -82,7 +82,7 @@ If you need to uninstall the add-on:
 
 1. Press `NVDA+N` to open the NVDA menu
 2. Navigate to "Tools" > "Manage add-ons"
-3. Find "TDSR" in the list
+3. Find "Terminal Access" or "terminalAccess" in the list
 4. Press the "Remove" button (or press Alt+R)
 5. Confirm removal when prompted
 6. Restart NVDA
@@ -119,7 +119,7 @@ To update to a newer version:
 If you encounter issues during installation:
 
 1. Check the troubleshooting section in the user guide (press `NVDA+Shift+F1` in a terminal)
-2. Visit the project repository: https://github.com/PratikP1/TDSR-for-NVDA
+2. Visit the project repository: https://github.com/PratikP1/Terminal-Access-for-NVDA
 3. Report issues on the project's issue tracker
 
 ---
