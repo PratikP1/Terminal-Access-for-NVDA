@@ -2,6 +2,109 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.18] - 2026-02-21
+
+### Feature Enhancements - ANSI Parsing, Unicode Support, Application Profiles
+
+**Major Feature Release**: Completes Phase 3 advanced features with robust ANSI parsing, Unicode/CJK character support, application-specific profiles, and multiple window definitions for complex terminal layouts.
+
+### Added
+
+#### Enhanced Attribute/Color Reading
+- **ANSIParser Class**: Robust ANSI escape sequence parser with comprehensive attribute support
+  - Standard 8 colors (30-37 foreground, 40-47 background)
+  - Bright colors (90-97 foreground, 100-107 background)
+  - 256-color mode support (ESC[38;5;Nm and ESC[48;5;Nm)
+  - RGB/TrueColor support (ESC[38;2;R;G;Bm and ESC[48;2;R;G;Bm)
+  - Format attributes: bold, dim, italic, underline, blink, inverse, hidden, strikethrough
+  - Format reset codes (22-29) for fine-grained control
+  - Default color restoration (39 foreground, 49 background)
+- **Enhanced Attribute Reading**: Updated `script_readAttributes` to use ANSIParser
+  - Detailed mode: Full color and formatting information
+  - Brief mode: Concise color names only
+  - RGB color display with values
+  - Multiple format attributes announced together
+- **ANSI Utilities**: `stripANSI()` method for removing escape sequences from text
+
+#### Unicode and CJK Character Support
+- **UnicodeWidthHelper Class**: Proper display width calculation for international text
+  - `getCharWidth()`: Returns 0, 1, or 2 columns per character
+  - `getTextWidth()`: Total display width for strings
+  - `extractColumnRange()`: Unicode-aware column extraction
+  - `findColumnPosition()`: Map column positions to string indices
+  - Handles CJK characters (2 columns wide)
+  - Handles combining characters (0 columns wide)
+  - Handles control characters correctly
+  - Fallback mode when wcwidth library unavailable
+- **Updated Rectangular Selection**: Uses Unicode-aware column extraction
+  - Strips ANSI codes before column calculation
+  - Proper alignment for Chinese, Japanese, Korean text
+  - Correct handling of emoji and special characters
+- **Dependencies**: Added `wcwidth>=0.2.6` to requirements-dev.txt
+
+#### Application-Specific Profiles
+- **WindowDefinition Class**: Define specific regions in terminal output
+  - Named windows with coordinate bounds (top, bottom, left, right)
+  - Window modes: 'announce' (read content), 'silent' (suppress), 'monitor' (track changes)
+  - `contains()` method for position checking
+  - Serialization support (toDict/fromDict)
+- **ApplicationProfile Class**: Application-specific configuration
+  - Settings overrides (punctuationLevel, cursorTrackingMode, keyEcho, etc.)
+  - Multiple window definitions per profile
+  - Custom gesture support (for future extension)
+  - Profile serialization and import/export
+- **ProfileManager Class**: Profile detection and management
+  - Automatic application detection via app module name
+  - Fallback detection via window title patterns
+  - Profile activation on focus gain
+  - Profile import/export functionality
+- **Default Profiles for Popular Applications**:
+  - **Vim/Neovim**: Silences status line, increased punctuation for code
+  - **tmux**: Silences status bar, standard cursor tracking
+  - **htop**: Separate header and process list regions, reduced symbol repetition
+  - **less/more**: Quiet mode, reduced key echo for reading
+  - **Git**: Enhanced punctuation for diffs, reduced symbol repetition
+  - **GNU nano**: Silences shortcuts area, standard tracking
+  - **irssi**: Chat-optimized punctuation, fast reading, silent status bar
+
+#### Multiple Window Definitions
+- **Multi-Window Support**: Applications can define multiple named windows
+  - tmux panes: Separate window definitions for split panes
+  - Vim splits: Track multiple editor windows
+  - Complex layouts: htop with header/process list separation
+- **Enhanced Window Tracking**: Updated `_announceWindowCursor()` method
+  - Checks profile-specific windows first
+  - Falls back to global window setting
+  - Respects window modes (announce/silent/monitor)
+- **Integration**: Profile windows integrated into cursor tracking system
+
+### Changed
+- **Attribute Reading**: Replaced basic color map with comprehensive ANSIParser
+- **Rectangular Selection**: Now Unicode-aware, handles CJK and combining characters correctly
+- **Focus Events**: Automatically detects and activates application profiles
+- **Window Tracking**: Checks both profile windows and global window settings
+
+### Technical Details
+- ANSIParser supports full SGR (Select Graphic Rendition) parameter set
+- Unicode width calculations use wcwidth library with graceful fallbacks
+- Profile system architecture supports future UI for custom profiles
+- Window definitions use 1-based coordinate system for consistency
+- Profile detection uses app module name with title pattern fallback
+- All new classes fully documented with docstrings
+
+### Benefits
+- **International Users**: Proper column alignment for CJK text and emoji
+- **Power Users**: Tailored experience for vim, tmux, htop, and other apps
+- **Better Readability**: Accurate color and formatting announcements
+- **Complex Layouts**: Support for tmux panes and split windows
+- **Reduced Noise**: Silent status bars and UI elements per application
+
+### Future Enhancements
+- Profile management UI in settings panel
+- Custom profile creation and editing
+- Profile sharing and import/export UI
+- Window definition visual editor
+
 ## [1.0.17] - 2026-02-21
 
 ### Testing Infrastructure - Automated Testing and CI/CD

@@ -179,52 +179,80 @@ OPERATION_TIMEOUT_MS = 5000
 
 ## 3. Feature Enhancements (Priority: MEDIUM-HIGH)
 
-### 3.1 Enhanced Attribute/Color Reading
+### 3.1 Enhanced Attribute/Color Reading ✅ COMPLETED
 **Estimated Effort:** 5-7 days
 **Priority:** MEDIUM
-**Status:** Partially implemented (basic ANSI detection exists)
+**Status:** ✅ **COMPLETED in v1.0.18**
 
-**Current Limitations:**
-- Only basic ANSI color code detection
-- No comprehensive color name mapping
-- Limited formatting attribute support
-- No Windows Terminal API integration
+**Implementation:**
+- ✅ Robust ANSIParser class with full SGR parameter support
+- ✅ Standard 8 colors (30-37 foreground, 40-47 background)
+- ✅ Bright colors (90-97 foreground, 100-107 background)
+- ✅ 256-color mode (ESC[38;5;Nm and ESC[48;5;Nm)
+- ✅ RGB/TrueColor mode (ESC[38;2;R;G;Bm and ESC[48;2;R;G;Bm)
+- ✅ All format attributes: bold, dim, italic, underline, blink, inverse, hidden, strikethrough
+- ✅ Format reset codes (22-29)
+- ✅ Enhanced script_readAttributes using ANSIParser
+- ✅ Brief and detailed format announcement modes
+- ✅ ANSI stripping utility
 
-**Enhancement Plan:**
-1. **Robust ANSI Escape Sequence Parser**
-   ```python
-   class ANSIParser:
-       def parse(self, text):
-           """Parse ANSI codes and extract formatting."""
-           codes = re.findall(r'\x1b\[([0-9;]+)m', text)
-           return {
-               'foreground': self._parseForeground(codes),
-               'background': self._parseBackground(codes),
-               'bold': '1' in codes,
-               'italic': '3' in codes,
-               'underline': '4' in codes,
-               'strikethrough': '9' in codes,
-           }
-   ```
-
-2. **Color Name Mapping**
-   ```python
-   COLOR_NAMES = {
-       30: 'black', 31: 'red', 32: 'green', 33: 'yellow',
-       34: 'blue', 35: 'magenta', 36: 'cyan', 37: 'white',
-       90: 'bright black', 91: 'bright red', # ... etc
-   }
-   ```
-
-3. **Format Announcement Options**
-   - Brief mode: "Red text"
-   - Detailed mode: "Red foreground, bold, underlined"
-   - Change-only mode: Only announce when attributes change
-
-### 3.2 Unicode and CJK Character Support
+### 3.2 Unicode and CJK Character Support ✅ COMPLETED
 **Estimated Effort:** 3-4 days
 **Priority:** MEDIUM
 **Impact:** Proper column alignment for international text
+**Status:** ✅ **COMPLETED in v1.0.18**
+
+**Implementation:**
+- ✅ UnicodeWidthHelper class with wcwidth integration
+- ✅ getCharWidth() for CJK (2 columns), combining (0 columns), ASCII (1 column)
+- ✅ getTextWidth() for total string display width
+- ✅ extractColumnRange() for Unicode-aware column extraction
+- ✅ findColumnPosition() utility
+- ✅ Updated rectangular selection to use Unicode-aware extraction
+- ✅ ANSI stripping before column calculations
+- ✅ Graceful fallback when wcwidth unavailable
+- ✅ Added wcwidth>=0.2.6 to dependencies
+
+### 3.3 Application-Specific Profiles ✅ COMPLETED
+**Estimated Effort:** 2-3 weeks
+**Priority:** LOW
+**Impact:** Tailored experience for different applications
+**Status:** ✅ **COMPLETED in v1.0.18**
+
+**Implementation:**
+- ✅ WindowDefinition class for region tracking
+- ✅ ApplicationProfile class with settings overrides
+- ✅ ProfileManager with automatic detection
+- ✅ Default profiles for 7 popular applications:
+  - vim/nvim: Status line silence, enhanced punctuation
+  - tmux: Status bar suppression
+  - htop: Header/process list regions
+  - less/more: Quiet mode for reading
+  - git: Diff-optimized settings
+  - nano: Shortcuts silence
+  - irssi: Chat-optimized settings
+- ✅ Profile detection via app module and window title
+- ✅ Automatic profile activation on focus
+- ✅ Profile serialization (import/export)
+- ✅ Integration with cursor tracking system
+
+**Future Enhancement:** Profile management UI in settings panel
+
+### 3.4 Multiple Window Definitions ✅ COMPLETED
+**Estimated Effort:** 4-5 days
+**Priority:** LOW
+**Impact:** Support for split panes and complex layouts
+**Status:** ✅ **COMPLETED in v1.0.18**
+
+**Implementation:**
+- ✅ WindowDefinition class with named windows
+- ✅ Window modes: announce, silent, monitor
+- ✅ Multiple windows per application profile
+- ✅ contains() method for position checking
+- ✅ Window serialization (toDict/fromDict)
+- ✅ Enhanced _announceWindowCursor() with profile window support
+- ✅ Priority system: profile windows → global window → no restrictions
+- ✅ Integration examples: vim splits, tmux panes, htop regions
 
 **Current Issue:**
 - Assumes all characters are 1 column wide
