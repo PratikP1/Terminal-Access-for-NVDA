@@ -1,5 +1,5 @@
 """
-Test runner script for TDSR tests.
+Test runner script for Terminal Access tests.
 
 Run with: python run_tests.py
 """

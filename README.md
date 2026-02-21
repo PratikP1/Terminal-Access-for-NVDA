@@ -1,10 +1,10 @@
-# TDSR for NVDA
+# Terminal Access for NVDA
 
-An NVDA add-on that provides enhanced terminal accessibility for Windows Terminal and PowerShell, bringing Terminal Data Structure Reader (TDSR) functionality directly into NVDA.
+An NVDA add-on that provides enhanced terminal accessibility for Windows Terminal and PowerShell. Inspired by [TDSR (Terminal Data Structure Reader)](https://github.com/tspivey/tdsr) and incorporates functionality from both TDSR and [Speakup](https://github.com/linux-speakup/speakup). Advanced features inspired by community suggestions and discussions.
 
 ## Overview
 
-TDSR for NVDA enables screen reader users to efficiently navigate and interact with command-line interfaces on Windows. The add-on integrates seamlessly with NVDA's built-in speech synthesis and provides comprehensive navigation and reading commands specifically designed for terminal usage.
+Terminal Access enables screen reader users to efficiently navigate and interact with command-line interfaces on Windows. The add-on integrates seamlessly with NVDA's built-in speech synthesis and provides comprehensive navigation and reading commands specifically designed for terminal usage.
 
 ## Features
 
@@ -99,7 +99,7 @@ For detailed information about each terminal, see [ADVANCED_USER_GUIDE.md](docs/
 ## Quick Start
 
 When you open a supported terminal application, NVDA will announce:
-> "TDSR terminal support active. Press NVDA+shift+f1 for help."
+> "Terminal Access support active. Press NVDA+shift+f1 for help."
 
 Press **NVDA+Shift+F1** to open the comprehensive user guide.
 
@@ -159,7 +159,7 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 
 ## Configuration
 
-Access TDSR settings through:
+Access Terminal Access settings through:
 - NVDA menu > Preferences > Settings > Terminal Settings
 - Or press **NVDA+Alt+C** while in a terminal
 
@@ -199,12 +199,12 @@ Access TDSR settings through:
 
 ## Troubleshooting
 
-### TDSR Commands Not Working
+### Terminal Access Commands Not Working
 
 **Problem**: Keyboard shortcuts don't respond in the terminal.
 
 **Solutions**:
-1. **Verify TDSR is active**: You should hear "TDSR terminal support active" when focusing a terminal
+1. **Verify Terminal Access is active**: You should hear "Terminal Access support active" when focusing a terminal
 2. **Check terminal type**: Ensure you're using a supported terminal (Windows Terminal, PowerShell, cmd.exe)
 3. **Check gesture conflicts**: Verify no other add-ons are using the same keyboard shortcuts
 4. **Restart NVDA**: Sometimes a clean restart resolves initialization issues
@@ -247,7 +247,7 @@ Access TDSR settings through:
 1. **Update to v1.0.18+**: Unicode/CJK support was added in v1.0.18
 2. **Verify wcwidth**: Ensure wcwidth library is available
 3. **Check selection marks**: Set both start and end marks before copying
-4. **Strip ANSI codes**: TDSR automatically strips color codes for accurate column extraction
+4. **Strip ANSI codes**: Terminal Access automatically strips color codes for accurate column extraction
 
 ### Profile Not Activating
 
@@ -281,7 +281,7 @@ Access TDSR settings through:
 
 ### Performance Issues
 
-**Problem**: TDSR is slow with large terminal buffers.
+**Problem**: Terminal Access is slow with large terminal buffers.
 
 **Solutions**:
 1. **Position caching**: v1.0.16+ includes automatic position caching (1-second timeout)
@@ -316,8 +316,8 @@ If problems persist:
 
 1. **Check NVDA log**: NVDA menu > Tools > View log for error details
 2. **Enable debug logging**: NVDA menu > Preferences > Settings > General > Log level: Debug
-3. **Gather information**: Note your NVDA version, Windows version, terminal app, TDSR version
-4. **Create issue**: Report at https://github.com/PratikP1/TDSR-for-NVDA/issues with:
+3. **Gather information**: Note your NVDA version, Windows version, terminal app, Terminal Access version
+4. **Create issue**: Report at https://github.com/PratikP1/Terminal-Access-for-NVDA/issues with:
    - Clear description of the problem
    - Steps to reproduce
    - Expected vs. actual behavior
@@ -378,10 +378,10 @@ This project uses GitHub Actions to automatically build and publish releases whe
 ### Project Structure
 
 ```
-TDSR-for-NVDA/
+Terminal-Access-for-NVDA/
 ├── addon/
 │   ├── globalPlugins/
-│   │   └── tdsr.py          # Main plugin code
+│   │   └── terminalAccess.py  # Main plugin code
 │   ├── locale/              # Translation files (v1.0.32+)
 │   └── doc/
 │       └── en/
@@ -401,7 +401,7 @@ TDSR-for-NVDA/
 
 ## Documentation
 
-TDSR provides comprehensive documentation organized by audience:
+Terminal Access provides comprehensive documentation organized by audience:
 
 ### User Documentation
 - **[README.md](README.md)** (this file) - Quick start and feature overview
@@ -465,13 +465,15 @@ Contributions are welcome! Please feel free to:
 
 ## Credits
 
-This add-on is inspired by:
-- [TDSR (Terminal Data Structure Reader)](https://github.com/tspivey/tdsr) by Tyler Spivey
+Terminal Access is inspired by:
+- [TDSR (Terminal Data Structure Reader)](https://github.com/tspivey/tdsr) by Tyler Spivey - Original terminal accessibility project that laid the foundation for terminal screen reader support
 - [Speakup](https://github.com/linux-speakup/speakup) - Linux kernel screen reader, which inspired the advanced cursor tracking modes, screen windowing system, and attribute reading features
+
+Community contributions and discussions from various accessibility forums and social media have shaped the advanced features in Terminal Access.
 
 ## License
 
-Copyright (C) 2024 TDSR for NVDA Contributors
+Copyright (C) 2024 Terminal Access Contributors
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -481,7 +483,7 @@ See the LICENSE file for the complete license text.
 
 ## Links
 
-- [Project Repository](https://github.com/PratikP1/TDSR-for-NVDA)
+- [Project Repository](https://github.com/PratikP1/Terminal-Access-for-NVDA)
 - [NVDA Official Website](https://www.nvaccess.org/)
 - [Original TDSR Project](https://github.com/tspivey/tdsr)
 - [Speakup Screen Reader](https://github.com/linux-speakup/speakup)

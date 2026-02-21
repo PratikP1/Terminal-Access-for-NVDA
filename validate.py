@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Validation script for TDSR for NVDA add-on.
+Validation script for Terminal Access for NVDA add-on.
 
 This script performs basic checks on the add-on before building or releasing.
 Usage: python validate.py
@@ -78,7 +78,7 @@ def check_structure():
 	required_paths = [
 		("addon", "Add-on directory"),
 		("addon/globalPlugins", "Global plugins directory"),
-		("addon/globalPlugins/tdsr.py", "Main plugin file"),
+		("addon/globalPlugins/terminalAccess.py", "Main plugin file"),
 		("addon/doc/en", "English documentation directory"),
 		("addon/doc/en/readme.html", "User guide"),
 		("addon/manifest.ini", "Manifest file"),
@@ -145,7 +145,7 @@ def check_user_guide():
 def main():
 	"""Run all validation checks."""
 	print("=" * 60)
-	print("TDSR for NVDA - Validation Script")
+	print("Terminal Access for NVDA - Validation Script")
 	print("=" * 60)
 	
 	# Change to script directory
