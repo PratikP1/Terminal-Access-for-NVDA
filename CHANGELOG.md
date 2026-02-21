@@ -46,6 +46,13 @@ All notable changes to the TDSR for NVDA add-on will be documented in this file.
 - Gesture binding cleanup improved with specific exception handling
 - File now follows NVDA coding standards more closely
 - Better separation of concerns between selection methods
+- All Python syntax validated successfully
+- Zero bare exception handlers remaining
+
+### Known Limitations
+- **Rectangular Selection**: Current implementation is simplified and copies full lines rather than exact column ranges. Full implementation would require terminal-specific coordinate tracking beyond NVDA's standard TextInfo API capabilities.
+- **Window Tracking Mode**: Skeletal implementation present but falls back to standard cursor tracking. Full implementation would require precise row/column coordinate tracking that varies by terminal application.
+- These features are marked for future enhancement when terminal-specific APIs become available.
 
 ## [1.0.12] - 2026-02-21
 

@@ -29,7 +29,7 @@ import speech
 
 try:
 	addonHandler.initTranslation()
-except:
+except (ImportError, AttributeError, OSError):
 	pass
 
 # Cursor tracking mode constants
