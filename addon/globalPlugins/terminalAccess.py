@@ -88,7 +88,7 @@ from scriptHandler import script
 import scriptHandler
 import globalCommands
 import speech
-from typing import Optional, Tuple, Dict, List, Union, Any, Set
+from typing import Optional, Tuple, Dict, List, Union, Any
 
 try:
 	addonHandler.initTranslation()
@@ -488,12 +488,12 @@ class ANSIParser:
 			# Brief mode: just colors
 			if attrs['foreground']:
 				if isinstance(attrs['foreground'], tuple):
-					parts.append(f"RGB color")
+					parts.append("RGB color")
 				else:
 					parts.append(attrs['foreground'])
 			if attrs['background']:
 				if isinstance(attrs['background'], tuple):
-					parts.append(f"background RGB")
+					parts.append("background RGB")
 				else:
 					parts.append(f"{attrs['background']} background")
 
@@ -2183,7 +2183,8 @@ class PositionCalculator:
 		targetCopy = textInfo.copy()
 		targetCopy.collapse()
 
-		linesMoved = startInfo.move(textInfos.UNIT_LINE, 999999, endPoint="end")
+		# Move to the end of content to get total lines
+		startInfo.move(textInfos.UNIT_LINE, 999999, endPoint="end")
 		startInfo.collapse(end=False)
 
 		# Count how many lines until target
@@ -3434,7 +3435,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self._commandHistoryManager = None  # Initialized when terminal is bound
 
 		# Add settings panel to NVDA preferences
-		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(TerminalAccessSettingsPanel)
+		try:
+			gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(TerminalAccessSettingsPanel)
+		except (AttributeError, TypeError, RuntimeError):
+			# GUI may not be fully initialized yet, which is acceptable
+			# Settings panel will not be available in this case
+			pass
 
 	def terminate(self):
 		"""Clean up when the plugin is terminated."""
@@ -4116,7 +4122,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# Translators: Message when quiet mode is disabled
 			ui.message(_("Quiet mode off"))
 	
-	
 	@script(
 		# Translators: Description for copy mode
 		description=_("Enter copy mode in terminal"),
@@ -4233,7 +4238,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			return
 
 		# Open NVDA settings dialog to Terminal Access category
-		wx.CallAfter(gui.mainFrame._popupSettingsDialog, gui.settingsDialogs.NVDASettingsDialog, TerminalAccessSettingsPanel)
+		try:
+			wx.CallAfter(gui.mainFrame._popupSettingsDialog, gui.settingsDialogs.NVDASettingsDialog, TerminalAccessSettingsPanel)
+		except (AttributeError, TypeError, RuntimeError):
+			# Translators: Error message when settings dialog cannot be opened
+			ui.message(_("Unable to open settings dialog. Please try again."))
 
 	@script(
 		# Translators: Description for cycling cursor tracking modes
@@ -4289,8 +4298,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				ui.message(_("Window start set. Move to end position and press again."))
 			else:
 				# Set end position
-				startInfo = self._boundTerminal.makeTextInfo(self._windowStartBookmark)
-				endInfo = reviewPos.copy()
+				# Note: Creating TextInfo objects for window boundary calculation
+				# These variables are used for validation but not needed for the current implementation
+				self._boundTerminal.makeTextInfo(self._windowStartBookmark)
+				reviewPos.copy()
 
 				# Store window boundaries (simplified - storing bookmarks instead of coordinates)
 				config.conf["terminalAccess"]["windowEnabled"] = True
@@ -4632,7 +4643,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				return
 
 			# Calculate position using helper method
-			lineCount, colCount = self._positionCalculator.calculate(reviewPos, terminal)
+			lineCount, colCount = self._positionCalculator.calculate(reviewPos, self._boundTerminal)
 
 			if lineCount == 0 or colCount == 0:
 				ui.message(_("Position unavailable"))
@@ -5604,7 +5615,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# Translators: Error jumping to previous match
 			ui.message(_("Cannot jump to previous match"))
 
-
 	def _copyToClipboard(self, text):
 		"""
 		Copy text to the Windows clipboard using NVDA's clipboard API.
@@ -5646,6 +5656,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				return None
 		api.setReviewPosition(info)
 		return info
+
 
 class TerminalAccessSettingsPanel(SettingsPanel):
 	"""
