@@ -133,6 +133,7 @@ confspec = {
 	"repeatedSymbolsValues": "string(default='-_=!')",
 	"cursorDelay": "integer(default=20, min=0, max=1000)",
 	"quietMode": "boolean(default=False)",
+	"verboseMode": "boolean(default=False)",  # Phase 6: Verbose feedback with context
 	"windowTop": "integer(default=0, min=0)",
 	"windowBottom": "integer(default=0, min=0)",
 	"windowLeft": "integer(default=0, min=0)",
@@ -1337,7 +1338,7 @@ class ConfigManager:
 
 		# Boolean values - no validation needed
 		elif key in ["cursorTracking", "keyEcho", "linePause", "repeatedSymbols",
-					 "quietMode", "windowEnabled"]:
+					 "quietMode", "verboseMode", "windowEnabled"]:
 			return bool(value)
 
 		# Unknown key - return as-is (for forward compatibility)
@@ -1368,6 +1369,7 @@ class ConfigManager:
 		config.conf["TDSR"]["repeatedSymbolsValues"] = "-_=!"
 		config.conf["TDSR"]["cursorDelay"] = 20
 		config.conf["TDSR"]["quietMode"] = False
+		config.conf["TDSR"]["verboseMode"] = False
 		config.conf["TDSR"]["windowTop"] = 0
 		config.conf["TDSR"]["windowBottom"] = 0
 		config.conf["TDSR"]["windowLeft"] = 0
@@ -1802,9 +1804,83 @@ class PositionCalculator:
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	"""
-	TDSR Global Plugin for NVDA
-	
-	Provides terminal accessibility enhancements for Windows Terminal and PowerShell.
+	TDSR Global Plugin for NVDA - Terminal Data Structure Reader
+
+	Provides enhanced terminal accessibility for Windows Terminal, PowerShell,
+	Command Prompt, and other console applications.
+
+	==== KEYBOARD GESTURES (Phase 7: Documented Gesture Patterns) ====
+
+	Navigation (Line-based):
+		NVDA+Alt+U - Previous line
+		NVDA+Alt+I - Current line (double-press: indentation level)
+		NVDA+Alt+O - Next line
+
+	Navigation (Word-based):
+		NVDA+Alt+J - Previous word
+		NVDA+Alt+K - Current word (double-press: spell word)
+		NVDA+Alt+L - Next word
+
+	Navigation (Character-based):
+		NVDA+Alt+M          - Previous character
+		NVDA+Alt+Comma      - Current character (double: phonetic, triple: code)
+		NVDA+Alt+Period     - Next character
+
+	Navigation (Boundary Movement):
+		NVDA+Alt+Home       - Move to start of current line
+		NVDA+Alt+End        - Move to end of current line
+		NVDA+Alt+PageUp     - Move to top of buffer
+		NVDA+Alt+PageDown   - Move to bottom of buffer
+
+	Reading (Directional):
+		NVDA+Alt+Shift+Left  - Read from cursor to start of line
+		NVDA+Alt+Shift+Right - Read from cursor to end of line
+		NVDA+Alt+Shift+Up    - Read from cursor to top of buffer
+		NVDA+Alt+Shift+Down  - Read from cursor to bottom of buffer
+
+	Information and Attributes:
+		NVDA+Alt+P           - Announce cursor position (row, column)
+		NVDA+Alt+A           - Say All (continuous reading)
+		NVDA+Alt+Shift+A     - Read color and formatting attributes
+
+	Selection and Copying:
+		NVDA+Alt+R           - Toggle mark (start/end/clear)
+		NVDA+Alt+C           - Copy linear selection (between marks)
+		NVDA+Alt+Shift+C     - Copy rectangular selection (columns)
+		NVDA+Alt+X           - Clear selection marks
+		NVDA+Alt+V           - Enter copy mode (line/screen)
+
+	Window Management:
+		NVDA+Alt+F2          - Define screen window (two-step)
+		NVDA+Alt+F3          - Clear screen window
+		NVDA+Alt+Plus        - Read window content
+		NVDA+Alt+Asterisk    - Cycle cursor tracking mode
+
+	Configuration:
+		NVDA+Alt+Q           - Toggle quiet mode
+		NVDA+Alt+[           - Decrease punctuation level
+		NVDA+Alt+]           - Increase punctuation level
+		NVDA+Alt+Shift+S     - Open TDSR settings dialog
+
+	Help:
+		NVDA+Shift+F1        - Open TDSR user guide
+
+	==== DESIGN PATTERNS ====
+	- Base navigation: NVDA+Alt+{letter}
+	- Extended operations: NVDA+Alt+Shift+{letter}
+	- Line navigation: U/I/O (vertical cluster on keyboard)
+	- Word navigation: J/K/L (horizontal cluster on keyboard)
+	- Character navigation: M/Comma/Period (right hand cluster)
+	- Boundaries: Home/End/PageUp/PageDown (standard nav keys)
+	- Directional reading: Arrow keys with Shift modifier
+	- Selection: R (mark), C (copy), X (clear)
+	- Punctuation: Bracket keys [ and ]
+
+	==== CURSOR TRACKING MODES ====
+	0 - Off: No automatic tracking
+	1 - Standard: Follow system caret
+	2 - Highlight: Track highlighted/selected text
+	3 - Window: Track within defined screen region
 	"""
 	
 	def __init__(self):
@@ -1880,7 +1956,76 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		]
 		
 		return any(term in appName for term in supportedTerminals)
-	
+
+	def _getPositionContext(self, textInfo=None) -> str:
+		"""
+		Get current position context for verbose announcements.
+
+		Args:
+			textInfo: TextInfo object to get position from (optional)
+
+		Returns:
+			String with position information (e.g., "Row 5, column 10")
+		"""
+		try:
+			if textInfo is None:
+				textInfo = api.getReviewPosition()
+
+			terminal = self._boundTerminal if self._boundTerminal else api.getForegroundObject()
+			if not terminal:
+				return ""
+
+			row, col = self._positionCalculator.calculate(textInfo, terminal)
+			# Translators: Position context for verbose mode
+			return _("Row {row}, column {col}").format(row=row + 1, col=col + 1)
+		except Exception:
+			return ""
+
+	def _announceWithContext(self, message: str, includePosition: bool = True, includeApp: bool = False):
+		"""
+		Announce a message with optional context information in verbose mode.
+
+		Args:
+			message: The main message to announce
+			includePosition: Whether to include position information
+			includeApp: Whether to include application name
+		"""
+		if not message:
+			return
+
+		# In quiet mode, suppress all announcements
+		if self._configManager.get("quietMode"):
+			return
+
+		# Build announcement with context if verbose mode is enabled
+		if self._configManager.get("verboseMode"):
+			context_parts = []
+
+			if includeApp and self._boundTerminal:
+				try:
+					appName = self._boundTerminal.appModule.appName
+					context_parts.append(appName)
+				except Exception:
+					pass
+
+			if includePosition:
+				position = self._getPositionContext()
+				if position:
+					context_parts.append(position)
+
+			if context_parts:
+				# Translators: Format for verbose announcements with context
+				full_message = _("{message}. {context}").format(
+					message=message,
+					context=", ".join(context_parts)
+				)
+				ui.message(full_message)
+			else:
+				ui.message(message)
+		else:
+			# Standard mode - just announce the message
+			ui.message(message)
+
 	def event_gainFocus(self, obj, nextHandler):
 		"""
 		Handle focus gain events.
@@ -3257,13 +3402,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			if self._markStart is None:
 				# Set start mark
 				self._markStart = reviewPos.bookmark
-				# Translators: Message when start mark is set
-				ui.message(_("Mark start set"))
+				# Translators: Message when start mark is set (Phase 6: Enhanced with context)
+				self._announceWithContext(_("Mark start set"), includePosition=True)
 			elif self._markEnd is None:
 				# Set end mark
 				self._markEnd = reviewPos.bookmark
-				# Translators: Message when end mark is set
-				ui.message(_("Mark end set"))
+				# Translators: Message when end mark is set (Phase 6: Enhanced with context)
+				self._announceWithContext(_("Mark end set"), includePosition=True)
 			else:
 				# Clear marks and start over
 				self._markStart = None
@@ -3373,10 +3518,25 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 				ui.message(_("Processing large selection ({rows} rows), please wait...").format(rows=rowCount))
 
+				# Create progress dialog for large operations (Phase 6: Progress Indicators)
+				progressDialog = None
+				if rowCount > 500:  # Show visual progress for very large selections
+					def createProgressDialog():
+						dlg = wx.ProgressDialog(
+							_("TDSR - Copying Selection"),
+							_("Preparing to copy {rows} rows...").format(rows=rowCount),
+							maximum=100,
+							parent=gui.mainFrame,
+							style=wx.PD_APP_MODAL | wx.PD_AUTO_HIDE | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME
+						)
+						return dlg
+
+					progressDialog = wx.CallAfter(createProgressDialog)
+
 				# Start background thread
 				self._backgroundCalculationThread = threading.Thread(
 					target=self._copyRectangularSelectionBackground,
-					args=(terminal, startRow, endRow, startCol, endCol)
+					args=(terminal, startRow, endRow, startCol, endCol, progressDialog)
 				)
 				self._backgroundCalculationThread.daemon = True
 				self._backgroundCalculationThread.start()
@@ -3394,7 +3554,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			logHandler.log.error(f"TDSR: Unexpected error in rectangular selection - {type(e).__name__}: {e}")
 			ui.message(_("Unable to copy"))
 
-	def _copyRectangularSelectionBackground(self, terminal, startRow, endRow, startCol, endCol):
+	def _copyRectangularSelectionBackground(self, terminal, startRow, endRow, startCol, endCol, progressDialog=None):
 		"""
 		Background thread worker for large rectangular selections.
 
@@ -3404,19 +3564,24 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			endRow: Ending row (1-based)
 			startCol: Starting column (1-based)
 			endCol: Ending column (1-based)
+			progressDialog: Optional wx.ProgressDialog for visual feedback
 		"""
 		try:
-			self._performRectangularCopy(terminal, startRow, endRow, startCol, endCol)
+			self._performRectangularCopy(terminal, startRow, endRow, startCol, endCol, progressDialog)
 		except (RuntimeError, AttributeError) as e:
 			import logHandler
 			logHandler.log.error(f"TDSR: Background rectangular copy failed - {type(e).__name__}: {e}")
+			if progressDialog:
+				wx.CallAfter(lambda: progressDialog.Destroy() if progressDialog else None)
 			wx.CallAfter(ui.message, _("Background copy failed: terminal not accessible"))
 		except Exception as e:
 			import logHandler
 			logHandler.log.error(f"TDSR: Unexpected error in background copy - {type(e).__name__}: {e}")
+			if progressDialog:
+				wx.CallAfter(lambda: progressDialog.Destroy() if progressDialog else None)
 			wx.CallAfter(ui.message, _("Background copy failed"))
 
-	def _performRectangularCopy(self, terminal, startRow, endRow, startCol, endCol):
+	def _performRectangularCopy(self, terminal, startRow, endRow, startCol, endCol, progressDialog=None):
 		"""
 		Perform the actual rectangular copy operation with Unicode/CJK support.
 
@@ -3426,6 +3591,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			endRow: Ending row (1-based)
 			startCol: Starting column (1-based)
 			endCol: Ending column (1-based)
+			progressDialog: Optional wx.ProgressDialog for visual feedback
 		"""
 		# Extract rectangular region line by line
 		lines = []
@@ -3434,8 +3600,21 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Move to start row
 		currentInfo.move(textInfos.UNIT_LINE, startRow - 1)
 
+		# Calculate total rows for progress tracking
+		totalRows = endRow - startRow + 1
+
 		# Extract each line in range
-		for row in range(startRow, endRow + 1):
+		for idx, row in enumerate(range(startRow, endRow + 1)):
+			# Update progress dialog if provided (Phase 6: Progress Indicators)
+			if progressDialog and idx % 10 == 0:  # Update every 10 rows
+				progress = int((idx / totalRows) * 100)
+				wx.CallAfter(
+					lambda p=progress, r=idx: progressDialog.Update(
+						p,
+						_("Copying row {current} of {total}...").format(current=r, total=totalRows)
+					) if progressDialog else None
+				)
+
 			lineInfo = currentInfo.copy()
 			lineInfo.expand(textInfos.UNIT_LINE)
 			lineText = lineInfo.text.rstrip('\n\r')
@@ -3455,6 +3634,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Join lines and copy to clipboard
 		rectangularText = '\n'.join(lines)
+
+		# Close progress dialog if provided (Phase 6: Progress Indicators)
+		if progressDialog:
+			wx.CallAfter(lambda: progressDialog.Update(100, _("Copy complete!")) if progressDialog else None)
+			wx.CallAfter(lambda: progressDialog.Destroy() if progressDialog else None)
 
 		if rectangularText and self._copyToClipboard(rectangularText):
 			# Translators: Message for successful rectangular selection copy
@@ -3661,6 +3845,29 @@ class TDSRSettingsPanel(SettingsPanel):
 			"Use NVDA+Alt+[ and ] to adjust quickly."
 		))
 
+		# Quiet mode checkbox
+		# Translators: Label for quiet mode checkbox
+		self.quietModeCheckBox = feedbackGroup.addItem(
+			wx.CheckBox(self, label=_("&Quiet mode"))
+		)
+		self.quietModeCheckBox.SetValue(config.conf["TDSR"]["quietMode"])
+		# Translators: Tooltip for quiet mode
+		self.quietModeCheckBox.SetToolTip(_(
+			"Suppress most TDSR announcements. Use NVDA+Alt+Q to toggle quickly."
+		))
+
+		# Verbose mode checkbox (Phase 6: Verbose Mode with Context)
+		# Translators: Label for verbose mode checkbox
+		self.verboseModeCheckBox = feedbackGroup.addItem(
+			wx.CheckBox(self, label=_("&Verbose mode (detailed feedback)"))
+		)
+		self.verboseModeCheckBox.SetValue(config.conf["TDSR"]["verboseMode"])
+		# Translators: Tooltip for verbose mode
+		self.verboseModeCheckBox.SetToolTip(_(
+			"Include position and context information with announcements. "
+			"Useful for debugging and understanding terminal layout."
+		))
+
 		# === Advanced Settings Section ===
 		# Translators: Label for advanced settings group
 		advancedGroup = guiHelper.BoxSizerHelper(self, sizer=wx.StaticBoxSizer(
@@ -3723,6 +3930,8 @@ class TDSRSettingsPanel(SettingsPanel):
 			config.conf["TDSR"]["repeatedSymbols"] = False
 			config.conf["TDSR"]["repeatedSymbolsValues"] = "-_=!"
 			config.conf["TDSR"]["cursorDelay"] = 20
+			config.conf["TDSR"]["quietMode"] = False
+			config.conf["TDSR"]["verboseMode"] = False  # Phase 6: Verbose Mode
 
 			# Update UI to reflect defaults
 			self.cursorTrackingCheckBox.SetValue(True)
@@ -3733,6 +3942,8 @@ class TDSRSettingsPanel(SettingsPanel):
 			self.repeatedSymbolsCheckBox.SetValue(False)
 			self.repeatedSymbolsValuesText.SetValue("-_=!")
 			self.cursorDelaySpinner.SetValue(20)
+			self.quietModeCheckBox.SetValue(False)
+			self.verboseModeCheckBox.SetValue(False)  # Phase 6: Verbose Mode
 
 			# Translators: Message after resetting to defaults
 			gui.messageBox(
@@ -3754,6 +3965,8 @@ class TDSRSettingsPanel(SettingsPanel):
 		config.conf["TDSR"]["keyEcho"] = self.keyEchoCheckBox.GetValue()
 		config.conf["TDSR"]["linePause"] = self.linePauseCheckBox.GetValue()
 		config.conf["TDSR"]["repeatedSymbols"] = self.repeatedSymbolsCheckBox.GetValue()
+		config.conf["TDSR"]["quietMode"] = self.quietModeCheckBox.GetValue()
+		config.conf["TDSR"]["verboseMode"] = self.verboseModeCheckBox.GetValue()  # Phase 6: Verbose Mode
 
 		# Validate and save punctuation level
 		punctLevel = self.punctuationLevelChoice.GetSelection()

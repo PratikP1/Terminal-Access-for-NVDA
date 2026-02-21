@@ -16,7 +16,7 @@ addon_info = {
 	# Translators: Long description to be shown for this add-on on add-on information from add-ons manager
 	"addon_description": _("""Provides enhanced terminal accessibility for Windows Terminal and PowerShell, enabling screen reader users to efficiently navigate and interact with command-line interfaces using TDSR-inspired features."""),
 	# version
-	"addon_version": "1.0.19",
+	"addon_version": "1.0.20",
 	# Author(s)
 	"addon_author": "TDSR for NVDA Contributors",
 	# URL for the add-on documentation support
