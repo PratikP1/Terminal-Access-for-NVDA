@@ -22,6 +22,8 @@ import addonHandler
 import wx
 import os
 import re
+import time
+import threading
 from scriptHandler import script
 import scriptHandler
 import globalCommands
@@ -75,6 +77,82 @@ confspec = {
 config.conf.spec["TDSR"] = confspec
 
 
+class PositionCache:
+	"""
+	Cache for terminal position calculations with timestamp-based invalidation.
+
+	Stores bookmark→(row, col, timestamp) mappings to avoid repeated O(n) calculations.
+	Cache entries expire after CACHE_TIMEOUT_MS milliseconds.
+	"""
+
+	CACHE_TIMEOUT_MS = 1000  # 1 second timeout
+	MAX_CACHE_SIZE = 100  # Maximum number of cached positions
+
+	def __init__(self):
+		"""Initialize an empty position cache."""
+		self._cache = {}
+		self._lock = threading.Lock()
+
+	def get(self, bookmark):
+		"""
+		Retrieve cached position for a bookmark if valid.
+
+		Args:
+			bookmark: TextInfo bookmark object
+
+		Returns:
+			tuple: (row, col) if cache hit and not expired, None otherwise
+		"""
+		with self._lock:
+			key = str(bookmark)
+			if key in self._cache:
+				row, col, timestamp = self._cache[key]
+				# Check if cache entry is still valid
+				if (time.time() * 1000 - timestamp) < self.CACHE_TIMEOUT_MS:
+					return (row, col)
+				else:
+					# Expired entry, remove it
+					del self._cache[key]
+		return None
+
+	def set(self, bookmark, row, col):
+		"""
+		Store position in cache with current timestamp.
+
+		Args:
+			bookmark: TextInfo bookmark object
+			row: Row number
+			col: Column number
+		"""
+		with self._lock:
+			# Enforce size limit - remove oldest entry if needed
+			if len(self._cache) >= self.MAX_CACHE_SIZE:
+				# Remove oldest entry (simple FIFO strategy)
+				oldest_key = next(iter(self._cache))
+				del self._cache[oldest_key]
+
+			key = str(bookmark)
+			timestamp = time.time() * 1000  # Current time in milliseconds
+			self._cache[key] = (row, col, timestamp)
+
+	def clear(self):
+		"""Clear all cached positions."""
+		with self._lock:
+			self._cache.clear()
+
+	def invalidate(self, bookmark):
+		"""
+		Invalidate a specific cached position.
+
+		Args:
+			bookmark: TextInfo bookmark to invalidate
+		"""
+		with self._lock:
+			key = str(bookmark)
+			if key in self._cache:
+				del self._cache[key]
+
+
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	"""
 	TDSR Global Plugin for NVDA
@@ -113,6 +191,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Enhanced selection state
 		self._markStart = None
 		self._markEnd = None
+
+		# Performance optimization: position caching and incremental tracking
+		self._positionCache = PositionCache()
+		self._lastKnownPosition = None  # (bookmark, row, col) for incremental tracking
+		self._backgroundCalculationThread = None  # Thread for long-running operations
 
 		# Add settings panel to NVDA preferences
 		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(TDSRSettingsPanel)
@@ -169,6 +252,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# Store the terminal object and route the review cursor to it via the navigator
 			self._boundTerminal = obj
 			api.setNavigatorObject(obj)
+
+			# Clear position cache when switching terminals
+			self._positionCache.clear()
+			self._lastKnownPosition = None
+
 			# Bind review cursor to the terminal; try caret first, fall back to last position
 			try:
 				info = obj.makeTextInfo(textInfos.POSITION_CARET)
@@ -204,6 +292,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Don't echo if in quiet mode
 		if config.conf["TDSR"]["quietMode"]:
 			return
+
+		# Clear position cache on content change
+		self._positionCache.clear()
+		self._lastKnownPosition = None
 
 		# Process the character for speech
 		if ch:
@@ -1627,50 +1719,111 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			if startCol > endCol:
 				startCol, endCol = endCol, startCol
 
-			# Extract rectangular region line by line
-			lines = []
-			currentInfo = terminal.makeTextInfo(textInfos.POSITION_FIRST)
+			# Calculate selection size
+			rowCount = endRow - startRow + 1
 
-			# Move to start row
-			currentInfo.move(textInfos.UNIT_LINE, startRow - 1)
+			# Use background thread for large selections (>100 rows)
+			if rowCount > 100:
+				# Check if a background thread is already running
+				if self._backgroundCalculationThread and self._backgroundCalculationThread.is_alive():
+					ui.message(_("Background operation in progress, please wait"))
+					return
 
-			# Extract each line in range
-			for row in range(startRow, endRow + 1):
-				lineInfo = currentInfo.copy()
-				lineInfo.expand(textInfos.UNIT_LINE)
-				lineText = lineInfo.text.rstrip('\n\r')
+				ui.message(_("Processing large selection ({rows} rows), please wait...").format(rows=rowCount))
 
-				# Extract column range (convert to 0-based indexing)
-				startIdx = max(0, startCol - 1)
-				endIdx = min(len(lineText), endCol)
+				# Start background thread
+				self._backgroundCalculationThread = threading.Thread(
+					target=self._copyRectangularSelectionBackground,
+					args=(terminal, startRow, endRow, startCol, endCol)
+				)
+				self._backgroundCalculationThread.daemon = True
+				self._backgroundCalculationThread.start()
+				return
 
-				if startIdx < len(lineText):
-					columnText = lineText[startIdx:endIdx]
-				else:
-					columnText = ''  # Line too short
-
-				lines.append(columnText)
-
-				# Move to next line
-				moved = currentInfo.move(textInfos.UNIT_LINE, 1)
-				if moved == 0:
-					break
-
-			# Join lines and copy to clipboard
-			rectangularText = '\n'.join(lines)
-
-			if rectangularText and self._copyToClipboard(rectangularText):
-				# Translators: Message for successful rectangular selection copy
-				ui.message(_("Rectangular selection copied: {rows} rows, columns {start} to {end}").format(
-					rows=len(lines),
-					start=startCol,
-					end=endCol
-				))
-			else:
-				ui.message(_("Unable to copy"))
+			# For smaller selections, process synchronously
+			self._performRectangularCopy(terminal, startRow, endRow, startCol, endCol)
 
 		except Exception:
 			ui.message(_("Unable to copy"))
+
+	def _copyRectangularSelectionBackground(self, terminal, startRow, endRow, startCol, endCol):
+		"""
+		Background thread worker for large rectangular selections.
+
+		Args:
+			terminal: Terminal object
+			startRow: Starting row (1-based)
+			endRow: Ending row (1-based)
+			startCol: Starting column (1-based)
+			endCol: Ending column (1-based)
+		"""
+		try:
+			self._performRectangularCopy(terminal, startRow, endRow, startCol, endCol)
+		except Exception:
+			# Schedule UI message on main thread
+			wx.CallAfter(ui.message, _("Background copy failed"))
+
+	def _performRectangularCopy(self, terminal, startRow, endRow, startCol, endCol):
+		"""
+		Perform the actual rectangular copy operation.
+
+		Args:
+			terminal: Terminal object
+			startRow: Starting row (1-based)
+			endRow: Ending row (1-based)
+			startCol: Starting column (1-based)
+			endCol: Ending column (1-based)
+		"""
+		# Extract rectangular region line by line
+		lines = []
+		currentInfo = terminal.makeTextInfo(textInfos.POSITION_FIRST)
+
+		# Move to start row
+		currentInfo.move(textInfos.UNIT_LINE, startRow - 1)
+
+		# Extract each line in range
+		for row in range(startRow, endRow + 1):
+			lineInfo = currentInfo.copy()
+			lineInfo.expand(textInfos.UNIT_LINE)
+			lineText = lineInfo.text.rstrip('\n\r')
+
+			# Extract column range (convert to 0-based indexing)
+			startIdx = max(0, startCol - 1)
+			endIdx = min(len(lineText), endCol)
+
+			if startIdx < len(lineText):
+				columnText = lineText[startIdx:endIdx]
+			else:
+				columnText = ''  # Line too short
+
+			lines.append(columnText)
+
+			# Move to next line
+			moved = currentInfo.move(textInfos.UNIT_LINE, 1)
+			if moved == 0:
+				break
+
+		# Join lines and copy to clipboard
+		rectangularText = '\n'.join(lines)
+
+		if rectangularText and self._copyToClipboard(rectangularText):
+			# Translators: Message for successful rectangular selection copy
+			message = _("Rectangular selection copied: {rows} rows, columns {start} to {end}").format(
+				rows=len(lines),
+				start=startCol,
+				end=endCol
+			)
+			# If called from background thread, schedule message on main thread
+			if threading.current_thread() != threading.main_thread():
+				wx.CallAfter(ui.message, message)
+			else:
+				ui.message(message)
+		else:
+			message = _("Unable to copy")
+			if threading.current_thread() != threading.main_thread():
+				wx.CallAfter(ui.message, message)
+			else:
+				ui.message(message)
 
 	@script(
 		# Translators: Description for clearing marks
@@ -1733,10 +1886,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	def _calculatePosition(self, textInfo):
 		"""
-		Calculate row and column coordinates from TextInfo.
+		Calculate row and column coordinates from TextInfo with caching and incremental tracking.
 
-		This method counts from the beginning of the terminal buffer to determine
-		the row (line number) and column (character position) of a given TextInfo position.
+		This method uses a multi-tiered approach for performance optimization:
+		1. Check position cache for recent calculations (1000ms timeout)
+		2. Use incremental tracking from last known position for small movements
+		3. Fall back to full O(n) calculation from buffer start if needed
 
 		Args:
 			textInfo: TextInfo object to get position for
@@ -1749,7 +1904,36 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			return (0, 0)
 
 		try:
-			# Calculate row (line number from start of buffer)
+			# Try to get bookmark for caching
+			bookmark = textInfo.bookmark
+
+			# Check cache first
+			cached = self._positionCache.get(bookmark)
+			if cached is not None:
+				return cached
+
+			# Try incremental tracking if we have a last known position
+			if self._lastKnownPosition is not None:
+				lastBookmark, lastRow, lastCol = self._lastKnownPosition
+				try:
+					lastInfo = terminal.makeTextInfo(lastBookmark)
+					# Calculate distance between positions
+					comparison = lastInfo.compareEndPoints(textInfo, "startToStart")
+
+					# If positions are close (within 10 lines), calculate incrementally
+					if abs(comparison) <= 10:
+						result = self._calculatePositionIncremental(textInfo, lastInfo, lastRow, lastCol, comparison)
+						if result is not None:
+							row, col = result
+							# Cache and store the result
+							self._positionCache.set(bookmark, row, col)
+							self._lastKnownPosition = (bookmark, row, col)
+							return (row, col)
+				except Exception:
+					# Fall back to full calculation
+					pass
+
+			# Full O(n) calculation from start
 			startInfo = terminal.makeTextInfo(textInfos.POSITION_FIRST)
 			lineCount = 1
 
@@ -1773,9 +1957,67 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 					break
 				colCount += 1
 
+			# Cache and store the result
+			self._positionCache.set(bookmark, lineCount, colCount)
+			self._lastKnownPosition = (bookmark, lineCount, colCount)
+
 			return (lineCount, colCount)
 		except (RuntimeError, AttributeError, Exception):
 			return (0, 0)
+
+	def _calculatePositionIncremental(self, targetInfo, lastInfo, lastRow, lastCol, comparison):
+		"""
+		Calculate position incrementally from a known position.
+
+		Args:
+			targetInfo: Target TextInfo to calculate position for
+			lastInfo: Last known TextInfo position
+			lastRow: Row of last known position
+			lastCol: Column of last known position
+			comparison: Result of compareEndPoints (negative = before, positive = after)
+
+		Returns:
+			Tuple of (row, col) or None if incremental calculation fails
+		"""
+		try:
+			if comparison == 0:
+				# Same position
+				return (lastRow, lastCol)
+			elif comparison < 0:
+				# Target is before last position - count backwards
+				testInfo = lastInfo.copy()
+				lineCount = lastRow
+				while testInfo.compareEndPoints(targetInfo, "startToStart") > 0:
+					moved = testInfo.move(textInfos.UNIT_LINE, -1)
+					if moved == 0:
+						break
+					lineCount -= 1
+			else:
+				# Target is after last position - count forwards
+				testInfo = lastInfo.copy()
+				lineCount = lastRow
+				while testInfo.compareEndPoints(targetInfo, "startToStart") < 0:
+					moved = testInfo.move(textInfos.UNIT_LINE, 1)
+					if moved == 0:
+						break
+					lineCount += 1
+
+			# Calculate column for target position
+			lineInfo = targetInfo.copy()
+			lineInfo.expand(textInfos.UNIT_LINE)
+			lineInfo.collapse()
+
+			colCount = 1
+			testInfo = lineInfo.copy()
+			while testInfo.compareEndPoints(targetInfo, "startToStart") < 0:
+				moved = testInfo.move(textInfos.UNIT_CHARACTER, 1)
+				if moved == 0:
+					break
+				colCount += 1
+
+			return (lineCount, colCount)
+		except Exception:
+			return None
 
 	def _processSymbol(self, char):
 		"""
