@@ -535,8 +535,36 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		# Use NVDA's built-in review cursor functionality
-		globalCommands.commands.script_review_previousCharacter(gesture)
+		# Implement character reading directly for consistency with current/next character
+		try:
+			info = api.getReviewPosition()
+			if info is None:
+				return
+			# Move to previous character
+			if info.move(textInfos.UNIT_CHARACTER, -1) == 0:
+				ui.reviewMessage(_("top"))
+				return
+			api.setReviewPosition(info)
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+			if char:
+				# Use processSymbols setting if enabled
+				if config.conf["TDSR"]["processSymbols"]:
+					charToSpeak = self._processSymbol(char)
+				else:
+					charToSpeak = char
+				# Speak space as "space" instead of silence
+				if char == ' ':
+					ui.message(_("space"))
+				elif char == '\r' or char == '\n':
+					ui.message(_("new line"))
+				else:
+					ui.message(charToSpeak)
+			else:
+				ui.message(_("blank"))
+		except Exception:
+			# Silently fail
+			pass
 
 	@script(
 		# Translators: Description for reading the current character
@@ -548,8 +576,31 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		# Use NVDA's built-in review cursor functionality
-		globalCommands.commands.script_review_currentCharacter(None)
+		# Implement character reading directly to prevent gesture passthrough
+		try:
+			info = api.getReviewPosition()
+			if info is None:
+				return
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+			if char:
+				# Use processSymbols setting if enabled
+				if config.conf["TDSR"]["processSymbols"]:
+					charToSpeak = self._processSymbol(char)
+				else:
+					charToSpeak = char
+				# Speak space as "space" instead of silence
+				if char == ' ':
+					ui.message(_("space"))
+				elif char == '\r' or char == '\n':
+					ui.message(_("new line"))
+				else:
+					ui.message(charToSpeak)
+			else:
+				ui.message(_("blank"))
+		except Exception:
+			# Silently fail
+			pass
 
 	@script(
 		# Translators: Description for reading the current character phonetically
@@ -561,8 +612,31 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		# Use NVDA's built-in review cursor functionality (repeating current character gives phonetic)
-		globalCommands.commands.script_review_currentCharacter(None)
+		# Implement phonetic reading directly to prevent gesture passthrough
+		try:
+			import characterProcessing
+			info = api.getReviewPosition()
+			if info is None:
+				return
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+			if char:
+				# Get phonetic description for the character
+				try:
+					# Use NVDA's characterProcessing to get phonetic name
+					phonetic = characterProcessing.getCharacterDescription(char)
+					if phonetic:
+						ui.message(phonetic)
+					else:
+						ui.message(char)
+				except:
+					# Fallback to character itself
+					ui.message(char)
+			else:
+				ui.message(_("blank"))
+		except Exception:
+			# Silently fail
+			pass
 
 	@script(
 		# Translators: Description for reading the next character
@@ -574,8 +648,36 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		# Use NVDA's built-in review cursor functionality
-		globalCommands.commands.script_review_nextCharacter(None)
+		# Implement character reading directly to prevent gesture passthrough
+		try:
+			info = api.getReviewPosition()
+			if info is None:
+				return
+			# Move to next character
+			if info.move(textInfos.UNIT_CHARACTER, 1) == 0:
+				ui.reviewMessage(_("bottom"))
+				return
+			api.setReviewPosition(info)
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+			if char:
+				# Use processSymbols setting if enabled
+				if config.conf["TDSR"]["processSymbols"]:
+					charToSpeak = self._processSymbol(char)
+				else:
+					charToSpeak = char
+				# Speak space as "space" instead of silence
+				if char == ' ':
+					ui.message(_("space"))
+				elif char == '\r' or char == '\n':
+					ui.message(_("new line"))
+				else:
+					ui.message(charToSpeak)
+			else:
+				ui.message(_("blank"))
+		except Exception:
+			# Silently fail
+			pass
 	
 	@script(
 		# Translators: Description for toggling quiet mode
