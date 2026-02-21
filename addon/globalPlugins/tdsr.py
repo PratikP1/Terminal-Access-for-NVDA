@@ -37,13 +37,28 @@ CT_STANDARD = 1
 CT_HIGHLIGHT = 2
 CT_WINDOW = 3
 
+# Punctuation level constants and sets
+PUNCT_NONE = 0
+PUNCT_SOME = 1
+PUNCT_MOST = 2
+PUNCT_ALL = 3
+
+# Punctuation character sets for each level
+PUNCTUATION_SETS = {
+	PUNCT_NONE: set(),  # No punctuation
+	PUNCT_SOME: set('.,?!;:'),  # Basic punctuation
+	PUNCT_MOST: set('.,?!;:@#$%^&*()_+=[]{}\\|<>/'),  # Most punctuation
+	PUNCT_ALL: None  # All punctuation (process everything)
+}
+
 # Configuration spec for TDSR settings
 confspec = {
 	"cursorTracking": "boolean(default=True)",
 	"cursorTrackingMode": "integer(default=1, min=0, max=3)",  # 0=Off, 1=Standard, 2=Highlight, 3=Window
 	"keyEcho": "boolean(default=True)",
 	"linePause": "boolean(default=True)",
-	"processSymbols": "boolean(default=False)",
+	"processSymbols": "boolean(default=False)",  # Deprecated, use punctuationLevel
+	"punctuationLevel": "integer(default=2, min=0, max=3)",  # 0=None, 1=Some, 2=Most, 3=All
 	"repeatedSymbols": "boolean(default=False)",
 	"repeatedSymbolsValues": "string(default='-_=!')",
 	"cursorDelay": "integer(default=20, min=0, max=1000)",
@@ -70,6 +85,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		"""Initialize the TDSR global plugin."""
 		super(GlobalPlugin, self).__init__()
 
+		# Migrate old processSymbols setting to punctuationLevel (one-time migration)
+		if "processSymbols" in config.conf["TDSR"] and "punctuationLevel" not in config.conf["TDSR"]:
+			oldValue = config.conf["TDSR"]["processSymbols"]
+			# True -> Level 2 (most punctuation), False -> Level 0 (no punctuation)
+			config.conf["TDSR"]["punctuationLevel"] = PUNCT_MOST if oldValue else PUNCT_NONE
+
 		# Initialize state variables
 		self.lastTerminalAppName = None
 		self.announcedHelp = False
@@ -88,6 +109,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Highlight tracking state
 		self._lastHighlightedText = None
 		self._lastHighlightPosition = None
+
+		# Enhanced selection state
+		self._markStart = None
+		self._markEnd = None
 
 		# Add settings panel to NVDA preferences
 		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(TDSRSettingsPanel)
@@ -1315,6 +1340,347 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		except Exception:
 			ui.message(_("Unable to read character"))
 
+	# Phase 2 Core Enhancement Features
+
+	def _shouldProcessSymbol(self, char):
+		"""
+		Determine if a symbol should be processed/announced based on current punctuation level.
+
+		Args:
+			char: The character to check.
+
+		Returns:
+			bool: True if the symbol should be announced, False otherwise.
+		"""
+		level = config.conf["TDSR"]["punctuationLevel"]
+
+		if level == PUNCT_ALL:
+			# Level 3: Process all symbols
+			return True
+		if level == PUNCT_NONE:
+			# Level 0: Process no symbols
+			return False
+
+		# Level 1 or 2: Check if character is in the level's punctuation set
+		punctSet = PUNCTUATION_SETS.get(level, set())
+		return char in punctSet
+
+	@script(
+		# Translators: Description for decreasing punctuation level
+		description=_("Decrease punctuation level"),
+		gesture="kb:NVDA+alt+["
+	)
+	def script_decreasePunctuationLevel(self, gesture):
+		"""Decrease the punctuation level (wraps from 0 to 3)."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		currentLevel = config.conf["TDSR"]["punctuationLevel"]
+		newLevel = (currentLevel - 1) % 4
+		config.conf["TDSR"]["punctuationLevel"] = newLevel
+
+		# Announce new level
+		levelNames = {
+			PUNCT_NONE: _("Punctuation level none"),
+			PUNCT_SOME: _("Punctuation level some"),
+			PUNCT_MOST: _("Punctuation level most"),
+			PUNCT_ALL: _("Punctuation level all")
+		}
+		ui.message(levelNames.get(newLevel, _("Punctuation level unknown")))
+
+	@script(
+		# Translators: Description for increasing punctuation level
+		description=_("Increase punctuation level"),
+		gesture="kb:NVDA+alt+]"
+	)
+	def script_increasePunctuationLevel(self, gesture):
+		"""Increase the punctuation level (wraps from 3 to 0)."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		currentLevel = config.conf["TDSR"]["punctuationLevel"]
+		newLevel = (currentLevel + 1) % 4
+		config.conf["TDSR"]["punctuationLevel"] = newLevel
+
+		# Announce new level
+		levelNames = {
+			PUNCT_NONE: _("Punctuation level none"),
+			PUNCT_SOME: _("Punctuation level some"),
+			PUNCT_MOST: _("Punctuation level most"),
+			PUNCT_ALL: _("Punctuation level all")
+		}
+		ui.message(levelNames.get(newLevel, _("Punctuation level unknown")))
+
+	@script(
+		# Translators: Description for reading to left edge
+		description=_("Read from cursor to beginning of line"),
+		gesture="kb:NVDA+alt+shift+leftArrow"
+	)
+	def script_readToLeft(self, gesture):
+		"""Read from current cursor position to beginning of line."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				ui.message(_("Unable to read"))
+				return
+
+			# Get the current line
+			lineInfo = reviewPos.copy()
+			lineInfo.expand(textInfos.UNIT_LINE)
+
+			# Create range from line start to cursor
+			lineInfo.setEndPoint(reviewPos, "endToStart")
+
+			text = lineInfo.text
+			if not text or not text.strip():
+				# Translators: Message when region is empty
+				ui.message(_("Nothing"))
+				return
+
+			speech.speakText(text)
+		except Exception:
+			ui.message(_("Unable to read"))
+
+	@script(
+		# Translators: Description for reading to right edge
+		description=_("Read from cursor to end of line"),
+		gesture="kb:NVDA+alt+shift+rightArrow"
+	)
+	def script_readToRight(self, gesture):
+		"""Read from current cursor position to end of line."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				ui.message(_("Unable to read"))
+				return
+
+			# Get the current line
+			lineInfo = reviewPos.copy()
+			lineInfo.expand(textInfos.UNIT_LINE)
+
+			# Create range from cursor to line end
+			lineInfo.setEndPoint(reviewPos, "startToStart")
+
+			text = lineInfo.text
+			if not text or not text.strip():
+				ui.message(_("Nothing"))
+				return
+
+			speech.speakText(text)
+		except Exception:
+			ui.message(_("Unable to read"))
+
+	@script(
+		# Translators: Description for reading to top
+		description=_("Read from cursor to top of buffer"),
+		gesture="kb:NVDA+alt+shift+upArrow"
+	)
+	def script_readToTop(self, gesture):
+		"""Read from current cursor position to top of buffer."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				ui.message(_("Unable to read"))
+				return
+
+			terminal = self._boundTerminal
+			if not terminal:
+				ui.message(_("Unable to read"))
+				return
+
+			# Get range from buffer start to cursor
+			startInfo = terminal.makeTextInfo(textInfos.POSITION_FIRST)
+			startInfo.setEndPoint(reviewPos, "endToStart")
+
+			text = startInfo.text
+			if not text or not text.strip():
+				ui.message(_("Nothing"))
+				return
+
+			speech.speakText(text)
+		except Exception:
+			ui.message(_("Unable to read"))
+
+	@script(
+		# Translators: Description for reading to bottom
+		description=_("Read from cursor to bottom of buffer"),
+		gesture="kb:NVDA+alt+shift+downArrow"
+	)
+	def script_readToBottom(self, gesture):
+		"""Read from current cursor position to bottom of buffer."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				ui.message(_("Unable to read"))
+				return
+
+			terminal = self._boundTerminal
+			if not terminal:
+				ui.message(_("Unable to read"))
+				return
+
+			# Get range from cursor to buffer end
+			endInfo = terminal.makeTextInfo(textInfos.POSITION_LAST)
+			reviewPos.setEndPoint(endInfo, "endToEnd")
+
+			text = reviewPos.text
+			if not text or not text.strip():
+				ui.message(_("Nothing"))
+				return
+
+			speech.speakText(text)
+		except Exception:
+			ui.message(_("Unable to read"))
+
+	@script(
+		# Translators: Description for toggling mark position
+		description=_("Toggle mark for selection (enhanced)"),
+		gesture="kb:NVDA+alt+r"
+	)
+	def script_toggleMark(self, gesture):
+		"""Toggle marking positions for enhanced selection."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				ui.message(_("Unable to set mark"))
+				return
+
+			if self._markStart is None:
+				# Set start mark
+				self._markStart = reviewPos.bookmark
+				# Translators: Message when start mark is set
+				ui.message(_("Mark start set"))
+			elif self._markEnd is None:
+				# Set end mark
+				self._markEnd = reviewPos.bookmark
+				# Translators: Message when end mark is set
+				ui.message(_("Mark end set"))
+			else:
+				# Clear marks and start over
+				self._markStart = None
+				self._markEnd = None
+				# Translators: Message when marks are cleared
+				ui.message(_("Marks cleared"))
+		except Exception:
+			ui.message(_("Unable to set mark"))
+
+	@script(
+		# Translators: Description for copying linear selection
+		description=_("Copy linear selection between marks"),
+		gesture="kb:NVDA+alt+c"
+	)
+	def script_copyLinearSelection(self, gesture):
+		"""Copy text from start mark to end mark (continuous selection)."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		if not self._markStart or not self._markEnd:
+			# Translators: Message when marks are not set
+			ui.message(_("Set start and end marks first"))
+			return
+
+		try:
+			terminal = self._boundTerminal
+			if not terminal:
+				ui.message(_("Unable to copy"))
+				return
+
+			# Get text from start to end mark
+			startInfo = terminal.makeTextInfo(self._markStart)
+			endInfo = terminal.makeTextInfo(self._markEnd)
+			startInfo.setEndPoint(endInfo, "endToEnd")
+
+			text = startInfo.text
+			if text and self._copyToClipboard(text):
+				# Translators: Message when selection copied
+				ui.message(_("Selection copied"))
+			else:
+				ui.message(_("Unable to copy"))
+		except Exception:
+			ui.message(_("Unable to copy"))
+
+	@script(
+		# Translators: Description for copying rectangular selection
+		description=_("Copy rectangular selection between marks"),
+		gesture="kb:NVDA+alt+shift+c"
+	)
+	def script_copyRectangularSelection(self, gesture):
+		"""Copy rectangular region (column-based) between marks."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		if not self._markStart or not self._markEnd:
+			ui.message(_("Set start and end marks first"))
+			return
+
+		try:
+			terminal = self._boundTerminal
+			if not terminal:
+				ui.message(_("Unable to copy"))
+				return
+
+			# Get start and end positions
+			startInfo = terminal.makeTextInfo(self._markStart)
+			endInfo = terminal.makeTextInfo(self._markEnd)
+
+			# Calculate row and column bounds
+			# This is a simplified implementation - a full implementation would
+			# need to accurately track row/column coordinates
+			startInfo.expand(textInfos.UNIT_LINE)
+			endInfo.expand(textInfos.UNIT_LINE)
+
+			# For now, just copy the lines (simplified rectangular selection)
+			startInfo.setEndPoint(endInfo, "endToEnd")
+			text = startInfo.text
+
+			if text and self._copyToClipboard(text):
+				# Translators: Message for rectangular selection
+				ui.message(_("Rectangular selection copied"))
+			else:
+				ui.message(_("Unable to copy"))
+		except Exception:
+			ui.message(_("Unable to copy"))
+
+	@script(
+		# Translators: Description for clearing marks
+		description=_("Clear selection marks"),
+		gesture="kb:NVDA+alt+x"
+	)
+	def script_clearMarks(self, gesture):
+		"""Clear the selection marks."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		self._markStart = None
+		self._markEnd = None
+		# Translators: Message when marks cleared
+		ui.message(_("Marks cleared"))
+
 
 	def _copyToClipboard(self, text):
 		"""
@@ -1456,12 +1822,19 @@ class TDSRSettingsPanel(SettingsPanel):
 		)
 		self.linePauseCheckBox.SetValue(config.conf["TDSR"]["linePause"])
 
-		# Process symbols checkbox
-		# Translators: Label for process symbols checkbox
-		self.processSymbolsCheckBox = sHelper.addItem(
-			wx.CheckBox(self, label=_("Process &symbols"))
+		# Punctuation level choice
+		# Translators: Label for punctuation level choice
+		self.punctuationLevelChoice = sHelper.addLabeledControl(
+			_("&Punctuation level:"),
+			wx.Choice,
+			choices=[
+				_("None"),
+				_("Some (.,?!;:)"),
+				_("Most (adds @#$%^&*()_+=[]{}\\|<>/)"),
+				_("All")
+			]
 		)
-		self.processSymbolsCheckBox.SetValue(config.conf["TDSR"]["processSymbols"])
+		self.punctuationLevelChoice.SetSelection(config.conf["TDSR"]["punctuationLevel"])
 
 		# Repeated symbols checkbox
 		# Translators: Label for repeated symbols checkbox
@@ -1494,7 +1867,7 @@ class TDSRSettingsPanel(SettingsPanel):
 		config.conf["TDSR"]["cursorTrackingMode"] = self.cursorTrackingModeChoice.GetSelection()
 		config.conf["TDSR"]["keyEcho"] = self.keyEchoCheckBox.GetValue()
 		config.conf["TDSR"]["linePause"] = self.linePauseCheckBox.GetValue()
-		config.conf["TDSR"]["processSymbols"] = self.processSymbolsCheckBox.GetValue()
+		config.conf["TDSR"]["punctuationLevel"] = self.punctuationLevelChoice.GetSelection()
 		config.conf["TDSR"]["repeatedSymbols"] = self.repeatedSymbolsCheckBox.GetValue()
 		config.conf["TDSR"]["repeatedSymbolsValues"] = self.repeatedSymbolsValuesText.GetValue()
 		config.conf["TDSR"]["cursorDelay"] = self.cursorDelaySpinner.GetValue()

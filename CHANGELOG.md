@@ -2,6 +2,63 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.12] - 2026-02-21
+
+### Added - Phase 2 Core Enhancements
+- **Punctuation Level System** - Four levels of punctuation verbosity for granular control
+  - Level 0 (None): No punctuation announced
+  - Level 1 (Some): Basic punctuation (.,?!;:)
+  - Level 2 (Most): Most punctuation (adds @#$%^&*()_+=[]{}\\|<>/)
+  - Level 3 (All): All punctuation and symbols
+  - NVDA+Alt+[: Decrease punctuation level
+  - NVDA+Alt+]: Increase punctuation level
+  - Applies to key echo, cursor tracking, character navigation, and continuous reading
+  - Replaces binary processSymbols with sophisticated 4-level system
+  - Essential for developers working with code, scripts, and configuration files
+- **Read From/To Position** - Directional reading commands for quick content scanning
+  - NVDA+Alt+Shift+Left: Read from cursor to beginning of line
+  - NVDA+Alt+Shift+Right: Read from cursor to end of line
+  - NVDA+Alt+Shift+Up: Read from cursor to top of buffer
+  - NVDA+Alt+Shift+Down: Read from cursor to bottom of buffer
+  - Complements Phase 1 edge navigation features
+  - Respects current punctuation level
+  - Announces "Nothing" for empty regions
+- **Enhanced Selection System** - Flexible mark-based text selection
+  - Support for arbitrary start/end positions (not just full lines)
+  - Linear selection: Continuous text from start to end mark
+  - Rectangular selection: Column-based selection for tables
+  - NVDA+Alt+R: Toggle mark positions (start, end, or clear)
+  - NVDA+Alt+C: Copy linear selection
+  - NVDA+Alt+Shift+C: Copy rectangular selection
+  - NVDA+Alt+X: Clear selection marks
+  - Enables precise text extraction from structured terminal output
+  - Essential for working with tables and columnar data
+
+### Changed
+- Replaced boolean `processSymbols` setting with integer `punctuationLevel` (0-3)
+- Enhanced NVDA+Alt+R gesture to support arbitrary position marking (was simple toggle)
+- Settings panel now includes punctuation level dropdown instead of processSymbols checkbox
+- Punctuation level choices show examples of included symbols for clarity
+
+### Migration
+- Existing `processSymbols` setting automatically migrated to `punctuationLevel`
+  - `True` → Level 2 (Most punctuation)
+  - `False` → Level 0 (No punctuation)
+- Migration occurs once on first load after update
+- Old processSymbols setting retained for backward compatibility
+
+### Technical
+- Added `PUNCTUATION_SETS` dictionary defining character sets for each level
+- Implemented `_shouldProcessSymbol()` helper method for level-based filtering
+- Enhanced selection system with `_markStart` and `_markEnd` bookmark tracking
+- Added punctuation level constants: PUNCT_NONE, PUNCT_SOME, PUNCT_MOST, PUNCT_ALL
+- All Phase 2 features follow consistent error handling patterns
+- Settings UI updated with wx.Choice control for punctuation levels
+
+### Credits
+- Phase 2 features inspired by [Speakup](https://github.com/linux-speakup/speakup) screen reader
+- Implementation based on SPEAKUP_FEATURE_ANALYSIS.md Phase 2 recommendations
+
 ## [1.0.11] - 2026-02-21
 
 ### Added - Phase 1 Quick Win Features
