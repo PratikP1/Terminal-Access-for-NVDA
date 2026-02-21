@@ -1802,6 +1802,192 @@ class PositionCalculator:
 		self._cache.invalidate(bookmark)
 
 
+class SelectionProgressDialog:
+	"""
+	Properly managed progress dialog with cancellation support.
+
+	This class provides thread-safe progress dialog management for long-running
+	selection operations. It handles wx threading issues by ensuring all dialog
+	operations happen on the main GUI thread.
+
+	Features:
+	- Thread-safe updates using wx.CallAfter
+	- User cancellation support
+	- Automatic cleanup on completion or cancellation
+	- Progress percentage with elapsed/remaining time
+	"""
+
+	def __init__(self, parent, title: str, maximum: int) -> None:
+		"""
+		Initialize progress dialog.
+
+		Args:
+			parent: Parent window (typically gui.mainFrame)
+			title: Dialog title
+			maximum: Maximum progress value (typically 100 for percentage)
+		"""
+		self._dialog: Optional[Any] = None
+		self._cancelled: bool = False
+		self._lock: threading.Lock = threading.Lock()
+		# Create dialog on main thread
+		wx.CallAfter(self._create, parent, title, maximum)
+		# Give time for dialog to be created
+		time.sleep(0.1)
+
+	def _create(self, parent, title: str, maximum: int) -> None:
+		"""
+		Create the progress dialog (must be called on main thread).
+
+		Args:
+			parent: Parent window
+			title: Dialog title
+			maximum: Maximum progress value
+		"""
+		try:
+			self._dialog = wx.ProgressDialog(
+				title,
+				_("Initializing..."),
+				maximum=maximum,
+				parent=parent,
+				style=wx.PD_APP_MODAL | wx.PD_AUTO_HIDE |
+				      wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME |
+				      wx.PD_REMAINING_TIME
+			)
+		except Exception as e:
+			import logHandler
+			logHandler.log.error(f"TDSR: Failed to create progress dialog: {e}")
+
+	def update(self, value: int, message: str) -> bool:
+		"""
+		Update progress dialog (thread-safe).
+
+		Args:
+			value: Current progress value (0 to maximum)
+			message: Status message to display
+
+		Returns:
+			True if operation should continue, False if cancelled
+		"""
+		with self._lock:
+			if self._cancelled:
+				return False
+
+			if self._dialog:
+				# Schedule update on main thread
+				wx.CallAfter(self._safe_update, value, message)
+
+			return not self._cancelled
+
+	def _safe_update(self, value: int, message: str) -> None:
+		"""
+		Perform the actual dialog update (called on main thread).
+
+		Args:
+			value: Current progress value
+			message: Status message to display
+		"""
+		if self._dialog and not self._cancelled:
+			try:
+				cont, skip = self._dialog.Update(value, message)
+				if not cont:
+					# User clicked cancel
+					with self._lock:
+						self._cancelled = True
+			except Exception as e:
+				import logHandler
+				logHandler.log.error(f"TDSR: Progress dialog update failed: {e}")
+				with self._lock:
+					self._cancelled = True
+
+	def is_cancelled(self) -> bool:
+		"""
+		Check if operation was cancelled by user.
+
+		Returns:
+			True if cancelled, False otherwise
+		"""
+		with self._lock:
+			return self._cancelled
+
+	def close(self) -> None:
+		"""
+		Close and destroy the progress dialog (thread-safe).
+		"""
+		with self._lock:
+			if self._dialog:
+				wx.CallAfter(self._destroy)
+				self._dialog = None
+
+	def _destroy(self) -> None:
+		"""
+		Destroy the dialog (called on main thread).
+		"""
+		if self._dialog:
+			try:
+				self._dialog.Destroy()
+			except Exception as e:
+				import logHandler
+				logHandler.log.error(f"TDSR: Failed to destroy progress dialog: {e}")
+
+
+class OperationQueue:
+	"""
+	Queue system to prevent overlapping background operations.
+
+	Ensures only one long-running operation executes at a time, preventing
+	resource exhaustion and UI confusion from multiple simultaneous progress dialogs.
+	"""
+
+	def __init__(self) -> None:
+		"""Initialize the operation queue."""
+		self._active_operation: Optional[threading.Thread] = None
+		self._lock: threading.Lock = threading.Lock()
+
+	def is_busy(self) -> bool:
+		"""
+		Check if an operation is currently running.
+
+		Returns:
+			True if operation in progress, False otherwise
+		"""
+		with self._lock:
+			return self._active_operation is not None and self._active_operation.is_alive()
+
+	def start_operation(self, thread: threading.Thread) -> bool:
+		"""
+		Start a new operation if queue is free.
+
+		Args:
+			thread: Thread to start
+
+		Returns:
+			True if operation started, False if queue busy
+		"""
+		with self._lock:
+			# Clean up completed thread
+			if self._active_operation and not self._active_operation.is_alive():
+				self._active_operation = None
+
+			# Check if queue is free
+			if self._active_operation:
+				return False
+
+			# Start new operation
+			self._active_operation = thread
+			thread.start()
+			return True
+
+	def clear(self) -> None:
+		"""
+		Clear the active operation reference.
+
+		Note: This does not stop the thread, just clears the reference.
+		The thread should complete or be cancelled naturally.
+		"""
+		with self._lock:
+			self._active_operation = None
+
+
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	"""
 	TDSR Global Plugin for NVDA - Terminal Data Structure Reader
@@ -1912,6 +2098,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Background calculation thread for long operations
 		self._backgroundCalculationThread = None
+
+		# Operation queue to prevent overlapping background operations (Section 1.3)
+		self._operationQueue = OperationQueue()
 
 		# Application profile management
 		self._profileManager = ProfileManager()
@@ -3509,35 +3698,36 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 			# Use background thread for large selections (>100 rows)
 			if rowCount > 100:
-				# Check if a background thread is already running
-				if self._backgroundCalculationThread and self._backgroundCalculationThread.is_alive():
+				# Check if operation queue is busy (Section 1.3: Queue system)
+				if self._operationQueue.is_busy():
 					ui.message(_("Background operation in progress, please wait"))
 					return
 
 				ui.message(_("Processing large selection ({rows} rows), please wait...").format(rows=rowCount))
 
-				# Create progress dialog for large operations (Phase 6: Progress Indicators)
+				# Create progress dialog for large operations (Section 1.3: Improved progress dialog)
 				progressDialog = None
 				if rowCount > 500:  # Show visual progress for very large selections
-					def createProgressDialog():
-						dlg = wx.ProgressDialog(
-							_("TDSR - Copying Selection"),
-							_("Preparing to copy {rows} rows...").format(rows=rowCount),
-							maximum=100,
-							parent=gui.mainFrame,
-							style=wx.PD_APP_MODAL | wx.PD_AUTO_HIDE | wx.PD_CAN_ABORT | wx.PD_ELAPSED_TIME | wx.PD_REMAINING_TIME
-						)
-						return dlg
-
-					progressDialog = wx.CallAfter(createProgressDialog)
+					progressDialog = SelectionProgressDialog(
+						gui.mainFrame,
+						_("TDSR - Copying Selection"),
+						100  # Percentage-based progress
+					)
 
 				# Start background thread
-				self._backgroundCalculationThread = threading.Thread(
+				thread = threading.Thread(
 					target=self._copyRectangularSelectionBackground,
 					args=(terminal, startRow, endRow, startCol, endCol, progressDialog)
 				)
-				self._backgroundCalculationThread.daemon = True
-				self._backgroundCalculationThread.start()
+				thread.daemon = True
+
+				# Start operation using queue (Section 1.3: Queue system)
+				if not self._operationQueue.start_operation(thread):
+					ui.message(_("Failed to start background operation"))
+					if progressDialog:
+						progressDialog.close()
+					return
+
 				return
 
 			# For smaller selections, process synchronously
@@ -3562,7 +3752,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			endRow: Ending row (1-based)
 			startCol: Starting column (1-based)
 			endCol: Ending column (1-based)
-			progressDialog: Optional wx.ProgressDialog for visual feedback
+			progressDialog: Optional SelectionProgressDialog for visual feedback
 		"""
 		try:
 			self._performRectangularCopy(terminal, startRow, endRow, startCol, endCol, progressDialog)
@@ -3570,14 +3760,17 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			import logHandler
 			logHandler.log.error(f"TDSR: Background rectangular copy failed - {type(e).__name__}: {e}")
 			if progressDialog:
-				wx.CallAfter(lambda: progressDialog.Destroy() if progressDialog else None)
+				progressDialog.close()
 			wx.CallAfter(ui.message, _("Background copy failed: terminal not accessible"))
 		except Exception as e:
 			import logHandler
 			logHandler.log.error(f"TDSR: Unexpected error in background copy - {type(e).__name__}: {e}")
 			if progressDialog:
-				wx.CallAfter(lambda: progressDialog.Destroy() if progressDialog else None)
+				progressDialog.close()
 			wx.CallAfter(ui.message, _("Background copy failed"))
+		finally:
+			# Clear operation from queue
+			self._operationQueue.clear()
 
 	def _performRectangularCopy(self, terminal, startRow, endRow, startCol, endCol, progressDialog=None):
 		"""
@@ -3589,7 +3782,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			endRow: Ending row (1-based)
 			startCol: Starting column (1-based)
 			endCol: Ending column (1-based)
-			progressDialog: Optional wx.ProgressDialog for visual feedback
+			progressDialog: Optional SelectionProgressDialog for visual feedback
 		"""
 		# Extract rectangular region line by line
 		lines = []
@@ -3603,15 +3796,19 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Extract each line in range
 		for idx, row in enumerate(range(startRow, endRow + 1)):
-			# Update progress dialog if provided (Phase 6: Progress Indicators)
+			# Update progress dialog if provided (Section 1.3: Improved progress tracking)
 			if progressDialog and idx % 10 == 0:  # Update every 10 rows
 				progress = int((idx / totalRows) * 100)
-				wx.CallAfter(
-					lambda p=progress, r=idx: progressDialog.Update(
-						p,
-						_("Copying row {current} of {total}...").format(current=r, total=totalRows)
-					) if progressDialog else None
-				)
+				message = _("Copying row {current} of {total}...").format(current=idx + 1, total=totalRows)
+				# Check for cancellation (Section 1.3: Cancellation support)
+				if not progressDialog.update(progress, message):
+					# User cancelled - stop processing
+					if threading.current_thread() != threading.main_thread():
+						wx.CallAfter(ui.message, _("Copy operation cancelled by user"))
+					else:
+						ui.message(_("Copy operation cancelled by user"))
+					progressDialog.close()
+					return
 
 			lineInfo = currentInfo.copy()
 			lineInfo.expand(textInfos.UNIT_LINE)
@@ -3633,10 +3830,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Join lines and copy to clipboard
 		rectangularText = '\n'.join(lines)
 
-		# Close progress dialog if provided (Phase 6: Progress Indicators)
+		# Close progress dialog if provided (Section 1.3: Proper cleanup)
 		if progressDialog:
-			wx.CallAfter(lambda: progressDialog.Update(100, _("Copy complete!")) if progressDialog else None)
-			wx.CallAfter(lambda: progressDialog.Destroy() if progressDialog else None)
+			progressDialog.update(100, _("Copy complete!"))
+			progressDialog.close()
 
 		if rectangularText and self._copyToClipboard(rectangularText):
 			# Translators: Message for successful rectangular selection copy

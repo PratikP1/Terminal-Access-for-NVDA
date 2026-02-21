@@ -2,6 +2,59 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.22] - 2026-02-21
+
+### Enhancements - Background Calculation Improvements (Section 1.3)
+
+**Enhancement Release**: Implements comprehensive improvements to background calculation system for large selections with proper progress dialog management, cancellation support, and operation queuing.
+
+#### Added
+
+- **SelectionProgressDialog Class**: Properly managed progress dialog with cancellation support
+  - Thread-safe updates using `wx.CallAfter` to handle wx threading issues
+  - User cancellation support via `is_cancelled()` method
+  - Automatic cleanup on completion or cancellation
+  - Progress percentage with elapsed/remaining time display
+  - Safe error handling for all dialog operations
+
+- **OperationQueue Class**: Queue system to prevent overlapping background operations
+  - Ensures only one long-running operation executes at a time
+  - Prevents resource exhaustion from multiple simultaneous operations
+  - Prevents UI confusion from multiple progress dialogs
+  - Thread-safe operation management with automatic cleanup
+
+#### Enhanced
+
+- **Background Calculation System**: Improved progress tracking and cancellation
+  - Progress dialog updates now use proper SelectionProgressDialog API
+  - Cancellation support: users can abort long-running copy operations
+  - Progress percentage accuracy improved (updates every 10 rows)
+  - Proper cleanup of progress dialogs on completion, error, or cancellation
+  - Queue system prevents overlapping operations
+
+- **Rectangular Selection Copy**: Better handling of large selections
+  - Uses OperationQueue to prevent concurrent operations
+  - Improved error messages when operations are cancelled
+  - Proper thread cleanup after operation completion
+  - Better progress tracking with accurate row counts
+
+#### Technical Details
+
+- SelectionProgressDialog (lines 1805-1931) provides thread-safe dialog management
+- OperationQueue (lines 1933-1989) manages background operation lifecycle
+- GlobalPlugin.__init__ now initializes OperationQueue (line 2103)
+- script_copyRectangularSelection uses new queue system (lines 3700-3731)
+- _performRectangularCopy supports cancellation checking (lines 3800-3811)
+- All background operations properly clean up queue on completion
+
+#### Impact
+
+- Large selection copies can now be cancelled by users
+- No more multiple progress dialogs appearing simultaneously
+- Better UX with accurate progress tracking
+- More robust threading with proper wx integration
+- Reduced risk of threading issues and resource leaks
+
 ## [1.0.21] - 2026-02-21
 
 ### Bug Fixes - Position Cache Integration
