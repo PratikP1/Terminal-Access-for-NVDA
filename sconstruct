@@ -1,5 +1,5 @@
 """
-SCons build script for TDSR for NVDA add-on.
+SCons build script for Terminal Access for NVDA add-on.
 
 This script is used to build the NVDA add-on package.
 Run with: scons

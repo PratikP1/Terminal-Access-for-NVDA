@@ -1,4 +1,4 @@
-# Development dependencies for TDSR for NVDA testing
+# Development dependencies for Terminal Access for NVDA testing
 
 # Testing framework
 pytest>=7.4.0

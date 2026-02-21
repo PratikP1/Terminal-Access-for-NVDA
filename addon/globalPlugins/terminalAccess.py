@@ -124,7 +124,7 @@ MAX_SELECTION_COLS = 1000   # Maximum columns for selection operations
 MAX_WINDOW_DIMENSION = 10000  # Maximum window boundary value
 MAX_REPEATED_SYMBOLS_LENGTH = 50  # Maximum length for repeated symbols string
 
-# Configuration spec for TDSR settings
+# Configuration spec for Terminal Access settings
 confspec = {
 	"cursorTracking": "boolean(default=True)",
 	"cursorTrackingMode": "integer(default=1, min=0, max=3)",  # 0=Off, 1=Standard, 2=Highlight, 3=Window
@@ -1156,7 +1156,7 @@ class ApplicationProfile:
 	"""
 	Application-specific configuration profile for terminal applications.
 
-	Allows customizing TDSR behavior for different applications (vim, tmux, htop, etc.).
+	Allows customizing Terminal Access behavior for different applications (vim, tmux, htop, etc.).
 
 	Example usage:
 		>>> # Create a custom profile for Vim
@@ -1185,7 +1185,7 @@ class ApplicationProfile:
 		>>> restored_profile = ApplicationProfile.fromDict(data)
 
 	Profile Inheritance:
-		Settings set to None inherit from global TDSR settings.
+		Settings set to None inherit from global Terminal Access settings.
 		Non-None values override global settings for this application.
 
 	Window Tracking:
@@ -1392,7 +1392,7 @@ class ProfileManager:
 		self.profiles['irssi'] = irssi
 
 		# Section 5.1: Third-party terminal profiles (v1.0.26+)
-		# These profiles optimize TDSR for popular third-party terminal emulators
+		# These profiles optimize Terminal Access for popular third-party terminal emulators
 
 		# Cmder profile
 		cmder = ApplicationProfile('cmder', 'Cmder')
@@ -1569,7 +1569,7 @@ def _validateInteger(value: Any, minValue: int, maxValue: int, default: int, fie
 	except (ValueError, TypeError):
 		import logHandler
 		logHandler.log.warning(
-			f"TDSR: Invalid {fieldName} value {value}, using default {default}"
+			f"Terminal Access: Invalid {fieldName} value {value}, using default {default}"
 		)
 		return default
 
@@ -1600,7 +1600,7 @@ def _validateString(value: Any, maxLength: int, default: str, fieldName: str) ->
 	except (ValueError, TypeError):
 		import logHandler
 		logHandler.log.warning(
-			f"TDSR: Invalid {fieldName} value, using default"
+			f"Terminal Access: Invalid {fieldName} value, using default"
 		)
 		return default
 
@@ -1636,7 +1636,7 @@ def _validateSelectionSize(startRow: int, endRow: int, startCol: int, endCol: in
 
 class ConfigManager:
 	"""
-	Centralized configuration management for TDSR settings.
+	Centralized configuration management for Terminal Access settings.
 
 	Handles all interactions with config.conf["terminalAccess"], including:
 	- Getting and setting configuration values
@@ -1722,7 +1722,7 @@ class ConfigManager:
 			return True
 		except Exception as e:
 			import logHandler
-			logHandler.log.error(f"TDSR ConfigManager: Failed to set {key}={value}: {e}")
+			logHandler.log.error(f"Terminal Access ConfigManager: Failed to set {key}={value}: {e}")
 			return False
 
 	def _validate_key(self, key: str, value: Any) -> Any:
@@ -1793,7 +1793,7 @@ class ConfigManager:
 
 class WindowManager:
 	"""
-	Centralized window tracking and management for TDSR.
+	Centralized window tracking and management for Terminal Access.
 
 	Handles window definition, position tracking, and state management.
 	Windows are rectangular regions of the terminal screen that can be
@@ -2047,11 +2047,11 @@ class PositionCalculator:
 
 		except (RuntimeError, AttributeError) as e:
 			import logHandler
-			logHandler.log.error(f"TDSR PositionCalculator: Position access error - {type(e).__name__}: {e}")
+			logHandler.log.error(f"Terminal Access PositionCalculator: Position access error - {type(e).__name__}: {e}")
 			return (0, 0)
 		except Exception as e:
 			import logHandler
-			logHandler.log.error(f"TDSR PositionCalculator: Unexpected error - {type(e).__name__}: {e}")
+			logHandler.log.error(f"Terminal Access PositionCalculator: Unexpected error - {type(e).__name__}: {e}")
 			return (0, 0)
 
 	def _try_incremental_calculation(self, textInfo: Any, terminal: Any,
@@ -2269,7 +2269,7 @@ class SelectionProgressDialog:
 			)
 		except Exception as e:
 			import logHandler
-			logHandler.log.error(f"TDSR: Failed to create progress dialog: {e}")
+			logHandler.log.error(f"Terminal Access: Failed to create progress dialog: {e}")
 
 	def update(self, value: int, message: str) -> bool:
 		"""
@@ -2309,7 +2309,7 @@ class SelectionProgressDialog:
 						self._cancelled = True
 			except Exception as e:
 				import logHandler
-				logHandler.log.error(f"TDSR: Progress dialog update failed: {e}")
+				logHandler.log.error(f"Terminal Access: Progress dialog update failed: {e}")
 				with self._lock:
 					self._cancelled = True
 
@@ -2341,7 +2341,7 @@ class SelectionProgressDialog:
 				self._dialog.Destroy()
 			except Exception as e:
 				import logHandler
-				logHandler.log.error(f"TDSR: Failed to destroy progress dialog: {e}")
+				logHandler.log.error(f"Terminal Access: Failed to destroy progress dialog: {e}")
 
 
 class OperationQueue:
@@ -3352,10 +3352,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		NVDA+Alt+Q           - Toggle quiet mode
 		NVDA+Alt+[           - Decrease punctuation level
 		NVDA+Alt+]           - Increase punctuation level
-		NVDA+Alt+Shift+S     - Open TDSR settings dialog
+		NVDA+Alt+Shift+S     - Open Terminal Access settings dialog
 
 	Help:
-		NVDA+Shift+F1        - Open TDSR user guide
+		NVDA+Shift+F1        - Open Terminal Access user guide
 
 	==== DESIGN PATTERNS ====
 	- Base navigation: NVDA+Alt+{letter}
@@ -3376,7 +3376,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	"""
 	
 	def __init__(self):
-		"""Initialize the TDSR global plugin."""
+		"""Initialize the Terminal Access global plugin."""
 		super(GlobalPlugin, self).__init__()
 
 		# Initialize manager classes for configuration, windows, and position tracking
@@ -3916,7 +3916,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		gesture="kb:NVDA+shift+f1"
 	)
 	def script_showHelp(self, gesture):
-		"""Open the TDSR user guide."""
+		"""Open the Terminal Access user guide."""
 		# Get the add-on directory
 		addon = addonHandler.getCodeAddon()
 		if addon:
@@ -3929,7 +3929,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				ui.message(_("Help file not found. Please reinstall the add-on."))
 		else:
 			# Translators: Error message when add-on is not properly installed
-			ui.message(_("TDSR add-on not properly installed."))
+			ui.message(_("Terminal Access add-on not properly installed."))
 	
 	@script(
 		# Translators: Description for reading the previous line
@@ -4208,12 +4208,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		gesture="kb:NVDA+alt+shift+s"
 	)
 	def script_openSettings(self, gesture):
-		"""Open the TDSR settings dialog."""
+		"""Open the Terminal Access settings dialog."""
 		if not self.isTerminalApp():
 			gesture.send()
 			return
 
-		# Open NVDA settings dialog to TDSR category
+		# Open NVDA settings dialog to Terminal Access category
 		wx.CallAfter(gui.mainFrame._popupSettingsDialog, gui.settingsDialogs.NVDASettingsDialog, TerminalAccessSettingsPanel)
 
 	@script(
@@ -4416,7 +4416,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		except Exception as e:
 			import logHandler
-			logHandler.log.error(f"TDSR: Error reading attributes: {e}")
+			logHandler.log.error(f"Terminal Access: Error reading attributes: {e}")
 			ui.message(_("Unable to read attributes"))
 
 	# Phase 1 Quick Win Features
@@ -5004,11 +5004,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				ui.message(_("Unable to copy"))
 		except (RuntimeError, AttributeError) as e:
 			import logHandler
-			logHandler.log.error(f"TDSR: Linear selection copy failed - {type(e).__name__}: {e}")
+			logHandler.log.error(f"Terminal Access: Linear selection copy failed - {type(e).__name__}: {e}")
 			ui.message(_("Unable to copy: terminal not accessible"))
 		except Exception as e:
 			import logHandler
-			logHandler.log.error(f"TDSR: Unexpected error in linear selection - {type(e).__name__}: {e}")
+			logHandler.log.error(f"Terminal Access: Unexpected error in linear selection - {type(e).__name__}: {e}")
 			ui.message(_("Unable to copy"))
 
 	@script(
@@ -5074,7 +5074,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				if rowCount > 500:  # Show visual progress for very large selections
 					progressDialog = SelectionProgressDialog(
 						gui.mainFrame,
-						_("TDSR - Copying Selection"),
+						_("Terminal Access - Copying Selection"),
 						100  # Percentage-based progress
 					)
 
@@ -5099,11 +5099,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		except (RuntimeError, AttributeError) as e:
 			import logHandler
-			logHandler.log.error(f"TDSR: Rectangular selection failed - {type(e).__name__}: {e}")
+			logHandler.log.error(f"Terminal Access: Rectangular selection failed - {type(e).__name__}: {e}")
 			ui.message(_("Unable to copy: terminal not accessible"))
 		except Exception as e:
 			import logHandler
-			logHandler.log.error(f"TDSR: Unexpected error in rectangular selection - {type(e).__name__}: {e}")
+			logHandler.log.error(f"Terminal Access: Unexpected error in rectangular selection - {type(e).__name__}: {e}")
 			ui.message(_("Unable to copy"))
 
 	def _copyRectangularSelectionBackground(self, terminal, startRow, endRow, startCol, endCol, progressDialog=None):
@@ -5122,13 +5122,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self._performRectangularCopy(terminal, startRow, endRow, startCol, endCol, progressDialog)
 		except (RuntimeError, AttributeError) as e:
 			import logHandler
-			logHandler.log.error(f"TDSR: Background rectangular copy failed - {type(e).__name__}: {e}")
+			logHandler.log.error(f"Terminal Access: Background rectangular copy failed - {type(e).__name__}: {e}")
 			if progressDialog:
 				progressDialog.close()
 			wx.CallAfter(ui.message, _("Background copy failed: terminal not accessible"))
 		except Exception as e:
 			import logHandler
-			logHandler.log.error(f"TDSR: Unexpected error in background copy - {type(e).__name__}: {e}")
+			logHandler.log.error(f"Terminal Access: Unexpected error in background copy - {type(e).__name__}: {e}")
 			if progressDialog:
 				progressDialog.close()
 			wx.CallAfter(ui.message, _("Background copy failed"))
@@ -5763,7 +5763,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		self.quietModeCheckBox.SetValue(config.conf["terminalAccess"]["quietMode"])
 		# Translators: Tooltip for quiet mode
 		self.quietModeCheckBox.SetToolTip(_(
-			"Suppress most TDSR announcements. Use NVDA+Alt+Q to toggle quickly."
+			"Suppress most Terminal Access announcements. Use NVDA+Alt+Q to toggle quickly."
 		))
 
 		# Verbose mode checkbox (Phase 6: Verbose Mode with Context)
@@ -5830,7 +5830,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		# Translators: Tooltip for profile list
 		self.profileList.SetToolTip(_(
 			"Select an application profile to view or edit. "
-			"Profiles customize TDSR behavior for specific applications."
+			"Profiles customize Terminal Access behavior for specific applications."
 		))
 
 		# Profile action buttons
@@ -5899,7 +5899,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		)
 		# Translators: Tooltip for reset button
 		self.resetButton.SetToolTip(_(
-			"Reset all TDSR settings to their default values"
+			"Reset all Terminal Access settings to their default values"
 		))
 		self.resetButton.Bind(wx.EVT_BUTTON, self.onResetToDefaults)
 
@@ -5982,9 +5982,9 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		"""Get list of profile names for the dropdown."""
 		try:
 			# Get the global plugin instance to access ProfileManager
-			from . import tdsr
+			from . import terminalAccess
 			for plugin in globalPluginHandler.runningPlugins:
-				if isinstance(plugin, tdsr.GlobalPlugin):
+				if isinstance(plugin, terminalAccess.GlobalPlugin):
 					if hasattr(plugin, '_profileManager') and plugin._profileManager:
 						names = list(plugin._profileManager.profiles.keys())
 						# Sort with default profiles first, then custom profiles
@@ -6059,9 +6059,9 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		if result == wx.YES:
 			try:
 				# Get the global plugin instance to access ProfileManager
-				from . import tdsr
+				from . import terminalAccess
 				for plugin in globalPluginHandler.runningPlugins:
-					if isinstance(plugin, tdsr.GlobalPlugin):
+					if isinstance(plugin, terminalAccess.GlobalPlugin):
 						if hasattr(plugin, '_profileManager') and plugin._profileManager:
 							plugin._profileManager.removeProfile(profileName)
 							# Update the profile list
@@ -6078,7 +6078,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 							return
 			except Exception as e:
 				import logHandler
-				logHandler.log.error(f"TDSR: Failed to delete profile: {e}")
+				logHandler.log.error(f"Terminal Access: Failed to delete profile: {e}")
 				# Translators: Error message for profile deletion
 				gui.messageBox(
 					_("Failed to delete profile. See NVDA log for details."),
@@ -6106,9 +6106,9 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 					profileData = json.load(f)
 
 				# Get the global plugin instance to access ProfileManager
-				from . import tdsr
+				from . import terminalAccess
 				for plugin in globalPluginHandler.runningPlugins:
-					if isinstance(plugin, tdsr.GlobalPlugin):
+					if isinstance(plugin, terminalAccess.GlobalPlugin):
 						if hasattr(plugin, '_profileManager') and plugin._profileManager:
 							profile = plugin._profileManager.importProfile(profileData)
 							# Update the profile list
@@ -6129,7 +6129,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 							return
 			except Exception as e:
 				import logHandler
-				logHandler.log.error(f"TDSR: Failed to import profile: {e}")
+				logHandler.log.error(f"Terminal Access: Failed to import profile: {e}")
 				# Translators: Error message for profile import
 				gui.messageBox(
 					_("Failed to import profile. The file may be invalid or corrupted."),
@@ -6145,9 +6145,9 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 
 		try:
 			# Get the global plugin instance to access ProfileManager
-			from . import tdsr
+			from . import terminalAccess
 			for plugin in globalPluginHandler.runningPlugins:
-				if isinstance(plugin, tdsr.GlobalPlugin):
+				if isinstance(plugin, terminalAccess.GlobalPlugin):
 					if hasattr(plugin, '_profileManager') and plugin._profileManager:
 						profileData = plugin._profileManager.exportProfile(profileName)
 						if not profileData:
@@ -6179,7 +6179,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 							return
 		except Exception as e:
 			import logHandler
-			logHandler.log.error(f"TDSR: Failed to export profile: {e}")
+			logHandler.log.error(f"Terminal Access: Failed to export profile: {e}")
 			# Translators: Error message for profile export
 			gui.messageBox(
 				_("Failed to export profile. See NVDA log for details."),

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple build script for TDSR for NVDA add-on.
+Simple build script for Terminal Access for NVDA add-on.
 
 This script creates an NVDA add-on package without requiring SCons.
 Usage: python build.py [--non-interactive | -y]
