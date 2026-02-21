@@ -2,6 +2,11 @@
 
 All notable changes to the TDSR for NVDA add-on will be documented in this file.
 
+## [1.0.10] - 2026-02-21
+
+### Changed
+- Version bump and rebuild for distribution
+
 ## [1.0.9] - 2026-02-20
 
 ### Changed
