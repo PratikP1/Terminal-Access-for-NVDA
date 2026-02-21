@@ -1,11 +1,11 @@
-# TDSR for NVDA - Translation Guide
+# Terminal Access for NVDA - Translation Guide
 
 **Version:** 1.0.32+
 **Last Updated:** 2026-02-21
 
 ## Overview
 
-This guide explains how to contribute translations for TDSR for NVDA. The add-on uses the standard gettext internationalization framework used by NVDA itself.
+This guide explains how to contribute translations for Terminal Access for NVDA. The add-on uses the standard gettext internationalization framework used by NVDA itself.
 
 ## Translation Files
 
@@ -187,7 +187,7 @@ scons
 ### 2. Install in NVDA
 
 ```bash
-# The build process creates TDSR-1.0.32.nvda-addon
+# The build process creates terminalAccess-1.0.32.nvda-addon
 # Install it in NVDA: NVDA Menu → Tools → Manage Add-ons → Install
 ```
 
@@ -199,7 +199,7 @@ scons
 # Restart NVDA
 ```
 
-### 4. Test TDSR Features
+### 4. Test Terminal Access Features
 
 - Open a terminal application
 - Test all gestures and features
@@ -216,7 +216,7 @@ scons
 
 | Language | Code | Status | Completeness | Maintainer |
 |----------|------|--------|--------------|------------|
-| English | en | Native | 100% | TDSR Team |
+| English | en | Native | 100% | Terminal Access Team |
 | Spanish | es | In Progress | 0% | Open |
 | French | fr | In Progress | 0% | Open |
 | German | de | In Progress | 0% | Open |
@@ -393,10 +393,10 @@ Translations are made possible by our community contributors. Thank you to all t
 
 ## License
 
-All translations are distributed under the same license as TDSR for NVDA (GPL v2). By contributing translations, you agree to license your work under this license.
+All translations are distributed under the same license as Terminal Access for NVDA (GPL v2). By contributing translations, you agree to license your work under this license.
 
 ---
 
-**Thank you for contributing to TDSR for NVDA!**
+**Thank you for contributing to Terminal Access for NVDA!**
 
 For questions or assistance, please open an issue on GitHub or contact the maintainers.

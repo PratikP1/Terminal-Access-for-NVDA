@@ -1,4 +1,4 @@
-# TDSR for NVDA - Frequently Asked Questions (FAQ)
+# Terminal Access for NVDA - Frequently Asked Questions (FAQ)
 
 ## Table of Contents
 
@@ -14,13 +14,13 @@
 
 ## General Questions
 
-### What is TDSR for NVDA?
+### What is Terminal Access for NVDA?
 
-TDSR (Terminal Data Structure Reader) is an NVDA add-on that provides enhanced accessibility for Windows terminal applications. It enables screen reader users to efficiently navigate and interact with command-line interfaces using features inspired by the Speakup screen reader.
+Terminal Access is an NVDA add-on that provides enhanced accessibility for Windows terminal applications. It enables screen reader users to efficiently navigate and interact with command-line interfaces using features inspired by the Speakup screen reader and TDSR (Terminal Data Structure Reader).
 
-### What terminals does TDSR support?
+### What terminals does Terminal Access support?
 
-**As of v1.0.26**, TDSR supports 18 terminal applications:
+**As of v1.0.26**, Terminal Access supports 18 terminal applications:
 
 **Built-in Windows Terminals (5)**:
 - Windows Terminal
@@ -42,9 +42,9 @@ TDSR (Terminal Data Structure Reader) is an NVDA add-on that provides enhanced a
 - Tabby
 - FluentTerminal
 
-### How is TDSR different from NVDA's built-in terminal support?
+### How is Terminal Access different from NVDA's built-in terminal support?
 
-TDSR provides additional features specifically designed for terminal workflows:
+Terminal Access provides additional features specifically designed for terminal workflows:
 - **Enhanced Navigation**: Navigate by line, word, character, column, and row
 - **Rectangular Selection**: Select columns of text (useful for tables and formatted output)
 - **Application Profiles**: Automatic optimization for vim, tmux, git, and other CLI tools
@@ -53,15 +53,15 @@ TDSR provides additional features specifically designed for terminal workflows:
 - **Symbol Processing**: Configurable punctuation levels
 - **Advanced Unicode**: RTL text support (Arabic, Hebrew) and emoji sequences
 
-### Is TDSR free and open source?
+### Is Terminal Access free and open source?
 
-Yes! TDSR is free and open source under the GNU General Public License v3.0. Source code is available at https://github.com/PratikP1/TDSR-for-NVDA
+Yes! Terminal Access is free and open source under the GNU General Public License v3.0. Source code is available at https://github.com/PratikP1/TDSR-for-NVDA
 
 ---
 
 ## Installation and Setup
 
-### How do I install TDSR?
+### How do I install Terminal Access?
 
 1. Download the latest `.nvda-addon` file from the [GitHub Releases page](https://github.com/PratikP1/TDSR-for-NVDA/releases)
 2. Press Enter on the downloaded file
@@ -69,10 +69,10 @@ Yes! TDSR is free and open source under the GNU General Public License v3.0. Sou
 4. Click "Yes" to install
 5. Restart NVDA when prompted
 
-### How do I configure TDSR?
+### How do I configure Terminal Access?
 
 1. Open NVDA Settings (NVDA+N → Preferences → Settings)
-2. Navigate to the "TDSR" category
+2. Navigate to the "Terminal Access" category
 3. Adjust settings as desired
 4. Click "OK" to save changes
 
@@ -86,10 +86,10 @@ Default settings are optimized for general use:
 
 You can adjust these later as you become more comfortable.
 
-### Can I reset TDSR to default settings?
+### Can I reset Terminal Access to default settings?
 
 Yes:
-1. Open NVDA Settings → TDSR
+1. Open NVDA Settings → Terminal Access
 2. Click the "Reset to Defaults" button at the bottom
 3. Click "OK" to apply
 
@@ -97,9 +97,9 @@ Yes:
 
 ## Terminal Compatibility
 
-### Does TDSR work with third-party terminals?
+### Does Terminal Access work with third-party terminals?
 
-Yes! As of v1.0.26, TDSR supports 13 popular third-party terminal emulators including Cmder, ConEmu, mintty (Git Bash), PuTTY, Terminus, Hyper, Alacritty, WezTerm, and more.
+Yes! As of v1.0.26, Terminal Access supports 13 popular third-party terminal emulators including Cmder, ConEmu, mintty (Git Bash), PuTTY, Terminus, Hyper, Alacritty, WezTerm, and more.
 
 ### How do I request support for a new terminal?
 
@@ -110,13 +110,13 @@ Yes! As of v1.0.26, TDSR supports 13 popular third-party terminal emulators incl
    - Why you prefer this terminal
 3. We'll review and consider adding support in a future release
 
-### Does TDSR work with WSL (Windows Subsystem for Linux)?
+### Does Terminal Access work with WSL (Windows Subsystem for Linux)?
 
 WSL terminals should work as they run through Windows Terminal or other supported terminals. However, WSL-specific testing has not been comprehensive. If you encounter issues, please report them on GitHub.
 
-### Can I use TDSR with SSH connections?
+### Can I use Terminal Access with SSH connections?
 
-Yes! TDSR works well with:
+Yes! Terminal Access works well with:
 - PuTTY and KiTTY for SSH/telnet
 - Windows Terminal with SSH
 - Any supported terminal running SSH clients
@@ -127,7 +127,7 @@ The application profile for PuTTY is optimized for remote terminal sessions.
 
 ## Features and Usage
 
-### What keyboard shortcuts does TDSR provide?
+### What keyboard shortcuts does Terminal Access provide?
 
 Key navigation commands (customize in NVDA Input Gestures):
 - **Line Navigation**: NVDA+Up/Down arrows
@@ -154,7 +154,7 @@ To create a rectangular selection:
 
 ### What are application profiles?
 
-Application profiles allow TDSR to automatically adjust settings when you switch between applications. For example:
+Application profiles allow Terminal Access to automatically adjust settings when you switch between applications. For example:
 - **vim**: Higher punctuation level (for code), silent status line
 - **tmux**: Silent status bar
 - **git**: Optimized for diffs and logs
@@ -165,7 +165,7 @@ You can create custom profiles for any application.
 ### Can I export and share profiles?
 
 Yes! (v1.0.24+)
-1. Open NVDA Settings → TDSR → Application Profiles
+1. Open NVDA Settings → Terminal Access → Application Profiles
 2. Select a profile
 3. Click "Export..."
 4. Save the JSON file
@@ -178,7 +178,7 @@ To import:
 
 ### What is cursor tracking?
 
-Cursor tracking automatically announces the cursor's position as you navigate. TDSR offers four modes:
+Cursor tracking automatically announces the cursor's position as you navigate. Terminal Access offers four modes:
 
 - **Off**: No automatic announcements
 - **Standard**: Announces character at cursor
@@ -199,12 +199,12 @@ This prevents repetitive announcements of status bars and other UI elements.
 
 ## Troubleshooting
 
-### TDSR gestures don't work in my terminal
+### Terminal Access gestures don't work in my terminal
 
 **Check**:
 1. Is the terminal supported? (See compatibility list)
 2. Is focus in the terminal window?
-3. Are TDSR gestures conflicting with terminal shortcuts?
+3. Are Terminal Access gestures conflicting with terminal shortcuts?
    - Try remapping conflicting gestures in NVDA Input Gestures
 
 **If the terminal isn't supported**:
@@ -223,7 +223,7 @@ This prevents repetitive announcements of status bars and other UI elements.
 ### Rectangular selection copies strange text
 
 **Possible causes**:
-1. **CJK characters**: TDSR handles double-width characters, but ensure your terminal displays them correctly
+1. **CJK characters**: Terminal Access handles double-width characters, but ensure your terminal displays them correctly
 2. **Tab characters**: Tabs may not align as expected
 3. **ANSI codes**: Some terminals include escape sequences
 
@@ -235,7 +235,7 @@ This prevents repetitive announcements of status bars and other UI elements.
 
 **Troubleshooting steps**:
 1. Check NVDA log (NVDA+F1) for profile detection messages
-2. Verify the profile exists in TDSR Settings → Application Profiles
+2. Verify the profile exists in Terminal Access Settings → Application Profiles
 3. Check the application module name matches the profile:
    - Open NVDA Python Console (NVDA+Control+Z)
    - Run: `api.getForegroundObject().appModule.appName`
@@ -252,7 +252,7 @@ pip install python-bidi arabic-reshaper
 1. Restart NVDA
 2. Verify dependencies loaded successfully in NVDA log
 
-Without these libraries, TDSR provides basic Unicode support but not full RTL handling.
+Without these libraries, Terminal Access provides basic Unicode support but not full RTL handling.
 
 ### Performance is slow in large buffers
 
@@ -320,9 +320,9 @@ Coordinates are 1-based. Use 9999 for "last row/column".
 - `silent`: No speech
 - `monitor`: Track changes (future feature)
 
-### Can I use TDSR with screen or tmux?
+### Can I use Terminal Access with screen or tmux?
 
-Yes! TDSR has a built-in profile for tmux:
+Yes! Terminal Access has a built-in profile for tmux:
 - Silent status bar (bottom line)
 - Standard cursor tracking
 - Optimized for multiplexed workflows
@@ -332,9 +332,9 @@ For screen, you can:
 2. Rename it to "screen"
 3. Import it back
 
-### Does TDSR support emoji?
+### Does Terminal Access support emoji?
 
-Yes! (v1.0.25+) TDSR handles:
+Yes! (v1.0.25+) Terminal Access handles:
 - Basic emoji
 - Emoji with skin tone modifiers
 - Zero-width joiner sequences (family, flags, professions)
@@ -345,7 +345,7 @@ Yes! (v1.0.25+) TDSR handles:
 pip install emoji
 ```
 
-### What Unicode features does TDSR support?
+### What Unicode features does Terminal Access support?
 
 **v1.0.25 Unicode features**:
 - **CJK characters**: Double-width calculation and column extraction
@@ -358,9 +358,9 @@ pip install emoji
 pip install python-bidi arabic-reshaper emoji
 ```
 
-TDSR gracefully degrades without these libraries.
+Terminal Access gracefully degrades without these libraries.
 
-### Can I contribute to TDSR development?
+### Can I contribute to Terminal Access development?
 
 Yes! Contributions are welcome:
 - **Code**: Submit pull requests on GitHub
@@ -381,7 +381,7 @@ See CONTRIBUTING.md for guidelines.
 
 For support, open a GitHub issue with:
 - NVDA version
-- TDSR version
+- Terminal Access version
 - Terminal application
 - Detailed steps to reproduce
 - Expected vs. actual behavior

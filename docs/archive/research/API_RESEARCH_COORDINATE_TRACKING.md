@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This document provides comprehensive API research for implementing rectangular selection with column tracking and window coordinate tracking in TDSR for NVDA. These features require accessing terminal row/column coordinates, which is not directly exposed through NVDA's standard TextInfo API.
+This document provides comprehensive API research for implementing rectangular selection with column tracking and window coordinate tracking in Terminal Access for NVDA. These features require accessing terminal row/column coordinates, which is not directly exposed through NVDA's standard TextInfo API.
 
 **Key Finding**: NVDA's TextInfo API provides character offsets and bookmarks but **does not expose terminal row/column coordinates directly**. To implement true coordinate-based features, we need to either:
 1. Calculate coordinates manually by counting lines/characters from TextInfo
@@ -11,7 +11,7 @@ This document provides comprehensive API research for implementing rectangular s
 
 ## Current Implementation Status
 
-### What TDSR Currently Has
+### What Terminal Access Currently Has
 
 The current implementation in `/home/runner/work/TDSR-for-NVDA/TDSR-for-NVDA/addon/globalPlugins/tdsr.py` uses:
 
@@ -1378,7 +1378,7 @@ def script_readWindow(self, gesture):
 
 ## Conclusion
 
-Implementing rectangular selection and coordinate tracking in TDSR for NVDA is **feasible but requires working within TextInfo API limitations**. True terminal coordinate access is not available through standard NVDA APIs, but practical solutions exist:
+Implementing rectangular selection and coordinate tracking in Terminal Access for NVDA is **feasible but requires working within TextInfo API limitations**. True terminal coordinate access is not available through standard NVDA APIs, but practical solutions exist:
 
 **For Rectangular Selection**:
 - Use line-by-line extraction with column slicing

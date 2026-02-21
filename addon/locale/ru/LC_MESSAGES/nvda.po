@@ -1,14 +1,14 @@
-# TDSR for NVDA - Russian Translation
-# Copyright (C) 2026 TDSR for NVDA Contributors
-# This file is distributed under the same license as the TDSR package.
+# Terminal Access for NVDA - Russian Translation
+# Copyright (C) 2026 Terminal Access for NVDA Contributors
+# This file is distributed under the same license as the Terminal Access package.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: TDSR 1.0.32\n"
+"Project-Id-Version: Terminal Access 1.0.32\n"
 "Report-Msgid-Bugs-To: https://github.com/PratikP1/TDSR-for-NVDA/issues\n"
 "POT-Creation-Date: 2026-02-21 09:00+0000\n"
 "PO-Revision-Date: 2026-02-21 09:00+0000\n"
-"Last-Translator: TDSR Team\n"
+"Last-Translator: Terminal Access Team\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
@@ -17,11 +17,11 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. Translators: Long description to be shown for this add-on on add-on information from add-ons manager
-msgid "Provides enhanced terminal accessibility for Windows Terminal and PowerShell, enabling screen reader users to efficiently navigate and interact with command-line interfaces using TDSR-inspired features."
+msgid "Provides enhanced terminal accessibility for Windows Terminal and PowerShell, enabling screen reader users to efficiently navigate and interact with command-line interfaces using Terminal Access features."
 msgstr ""
 
-#. Translators: Category name for TDSR commands in Input Gestures dialog
-msgid "TDSR (Terminal Data Structure Reader)"
+#. Translators: Category name for Terminal Access commands in Input Gestures dialog
+msgid "Terminal Access"
 msgstr ""
 
 #. Translators: Progress dialog initialization message
@@ -43,8 +43,8 @@ msgstr ""
 msgid "{message}. {context}"
 msgstr ""
 
-#. Translators: Welcome message when TDSR becomes active
-msgid "TDSR terminal support active. Press NVDA+shift+f1 for help."
+#. Translators: Welcome message when Terminal Access becomes active
+msgid "Terminal Access active. Press NVDA+shift+f1 for help."
 msgstr ""
 
 #. Translators: Space character announcement
@@ -62,7 +62,7 @@ msgid "Highlighted: {text}"
 msgstr ""
 
 #. Translators: Description for opening user guide
-msgid "Opens the TDSR user guide"
+msgid "Opens the Terminal Access user guide"
 msgstr ""
 
 #. Translators: Error when help file not found
@@ -70,7 +70,7 @@ msgid "Help file not found. Please reinstall the add-on."
 msgstr ""
 
 #. Translators: Error when add-on not properly installed
-msgid "TDSR add-on not properly installed."
+msgid "Terminal Access add-on not properly installed."
 msgstr ""
 
 #. Translators: Description for reading previous line
@@ -275,7 +275,7 @@ msgid "Jump to previous search match"
 msgstr ""
 
 #. Translators: Settings dialog title
-msgid "TDSR Settings"
+msgid "Terminal Access Settings"
 msgstr ""
 
 #. Translators: General settings group

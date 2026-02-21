@@ -1,10 +1,10 @@
-# Speakup Feature Analysis and TDSR Enhancement Plan
+# Speakup Feature Analysis and Terminal Access Enhancement Plan
 
 ## Executive Summary
 
-This document provides a comprehensive analysis of the Speakup screen reader for Linux terminals and identifies valuable features that can be adapted for TDSR for NVDA to improve the Windows terminal experience.
+This document provides a comprehensive analysis of the Speakup screen reader for Linux terminals and identifies valuable features that can be adapted for Terminal Access for NVDA to improve the Windows terminal experience.
 
-**Key Finding**: While TDSR already implements core navigation features comparable to Speakup, there are 12 significant feature categories that would dramatically improve terminal accessibility in Windows.
+**Key Finding**: While Terminal Access already implements core navigation features comparable to Speakup, there are 12 significant feature categories that would dramatically improve terminal accessibility in Windows.
 
 ## About Speakup
 
@@ -19,9 +19,9 @@ Speakup is a kernel-level screen reader for Linux that provides speech access at
 
 ## Current Feature Parity
 
-### Features TDSR Already Has (Comparable to Speakup)
+### Features Terminal Access Already Has (Comparable to Speakup)
 
-| Feature | TDSR Implementation | Speakup Implementation |
+| Feature | Terminal Access Implementation | Speakup Implementation |
 |---------|---------------------|------------------------|
 | Line Navigation | NVDA+Alt+U/I/O | Keypad 7/8/9 |
 | Word Navigation | NVDA+Alt+J/K/L | Keypad 4/5/6 |
@@ -53,7 +53,7 @@ These features would have the most significant impact on terminal usability and 
 - Separate levels for typing vs. reading
 - Configurable character sets per level
 
-**Why TDSR needs this**:
+**Why Terminal Access needs this**:
 - Current binary processSymbols is too limiting
 - Developers need to hear punctuation in code/commands
 - But don't want overwhelming verbosity in prose
@@ -84,7 +84,7 @@ These features would have the most significant impact on terminal usability and 
 - Silence changes within window
 - Monitor only window changes
 
-**Why TDSR needs this**:
+**Why Terminal Access needs this**:
 - Modern terminals have complex layouts (status bars, split panes, tmux/screen)
 - Clock displays and status lines create noise
 - Need to focus on specific output regions
@@ -117,7 +117,7 @@ These features would have the most significant impact on terminal usability and 
 2. **Highlight Tracking**: Tracks highlighted text in menus/selection lists
 3. **Read Window**: Only announces changes within defined window
 
-**Why TDSR needs this**:
+**Why Terminal Access needs this**:
 - TUI (Text User Interface) applications like htop, vim, mc (Midnight Commander)
 - Menu navigation in terminal applications
 - Reduces verbosity in specific contexts
@@ -141,7 +141,7 @@ Standard → Highlight → Window → Off → Standard
 - Can be interrupted with any key
 - Respects punctuation level settings
 
-**Why TDSR needs this**:
+**Why Terminal Access needs this**:
 - Essential for reading long log files
 - Reading documentation in terminal (man pages, --help output)
 - Reviewing command output without manual navigation
@@ -163,7 +163,7 @@ Standard → Highlight → Window → Off → Standard
 - Double-press Keypad 8 (current line)
 - Announces number of leading spaces/tabs
 
-**Why TDSR needs this**:
+**Why Terminal Access needs this**:
 - Critical for Python code (indentation-based syntax)
 - Essential for YAML configuration files
 - Helpful for any structured/hierarchical output
@@ -199,7 +199,7 @@ These features improve navigation efficiency and should be implemented after Tie
 - Left edge (column 1)
 - Right edge (last column)
 
-**Why TDSR needs this**:
+**Why Terminal Access needs this**:
 - Faster navigation in large terminal buffers
 - Quick access to line boundaries
 - Essential for wide output (tables, logs with timestamps)
@@ -222,7 +222,7 @@ These features improve navigation efficiency and should be implemented after Tie
 - Say from cursor to top
 - Say from cursor to bottom
 
-**Why TDSR needs this**:
+**Why Terminal Access needs this**:
 - Quickly scan portions of terminal content
 - Useful for reviewing partial lines or regions
 - Complements edge navigation
@@ -243,7 +243,7 @@ These features improve navigation efficiency and should be implemented after Tie
 - Speakup+Keypad Period: Announce attributes
 - Announces foreground/background color, bold, blink, etc.
 
-**Why TDSR needs this**:
+**Why Terminal Access needs this**:
 - Syntax highlighting identification (red=error, yellow=warning)
 - Distinguishing emphasized text
 - Understanding terminal color schemes
@@ -273,7 +273,7 @@ These features improve navigation efficiency and should be implemented after Tie
 - Supports rectangular selections
 - Persistent paste buffer
 
-**Why TDSR needs this**:
+**Why Terminal Access needs this**:
 - Current implementation only copies lines or entire screen
 - Need column-based selections for tables
 - Paste buffer across terminal sessions
@@ -530,7 +530,7 @@ Final enhancements and refinements:
 
 ## Conclusion
 
-Speakup offers a mature, feature-rich model for terminal accessibility that has been refined over 25+ years. By adapting its most valuable features to the Windows/NVDA context, TDSR can provide a significantly enhanced terminal experience.
+Speakup offers a mature, feature-rich model for terminal accessibility that has been refined over 25+ years. By adapting its most valuable features to the Windows/NVDA context, Terminal Access can provide a significantly enhanced terminal experience.
 
 **Recommended Implementation Priority**:
 1. Start with Tier 1 features (highest impact)
@@ -547,4 +547,4 @@ Speakup offers a mature, feature-rich model for terminal accessibility that has 
 - Better experience with complex TUI applications
 - Improved accessibility for code and configuration review
 
-This enhancement plan positions TDSR as the most comprehensive terminal accessibility solution for Windows, matching and in some areas exceeding Speakup's capabilities while being optimized for the Windows/NVDA ecosystem.
+This enhancement plan positions Terminal Access as the most comprehensive terminal accessibility solution for Windows, matching and in some areas exceeding Speakup's capabilities while being optimized for the Windows/NVDA ecosystem.

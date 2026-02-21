@@ -2,7 +2,7 @@
 
 ## Document Purpose
 
-This document consolidates the research, analysis, and specifications for implementing Speakup-inspired features in TDSR for NVDA, with special focus on the API requirements for rectangular selection and window coordinate tracking.
+This document consolidates the research, analysis, and specifications for implementing Speakup-inspired features in Terminal Access for NVDA, with special focus on the API requirements for rectangular selection and window coordinate tracking.
 
 **Related Documents**:
 - `docs/archive/research/SPEAKUP_FEATURE_ANALYSIS.md` - Original feature analysis
@@ -27,7 +27,7 @@ Terminal users, especially developers and system administrators, need powerful a
 
 ### Implementation Status
 
-**Already Implemented in TDSR v1.0.13**:
+**Already Implemented in Terminal Access v1.0.13**:
 - Basic line/word/character navigation ✅
 - Cursor tracking with multiple modes ✅
 - Key echo with symbol processing ✅
@@ -930,5 +930,5 @@ Implementing Speakup-inspired features in TDSR requires working within NVDA's Te
 
 **Document Version**: 1.0
 **Last Updated**: 2026-02-21
-**Author**: TDSR Development Team
+**Author**: Terminal Access Development Team
 **Status**: Final - Ready for Implementation

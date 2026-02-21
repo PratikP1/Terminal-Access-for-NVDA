@@ -1,6 +1,6 @@
 # Archived Documentation
 
-This directory contains historical documentation from the TDSR for NVDA project. These documents are preserved for reference but have been superseded by current documentation.
+This directory contains historical documentation from the Terminal Access for NVDA project. These documents are preserved for reference but have been superseded by current documentation.
 
 ## Why Archive Documentation?
 
