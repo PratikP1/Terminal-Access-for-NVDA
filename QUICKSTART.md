@@ -61,7 +61,6 @@ Position on any text and try:
 | **NVDA+Shift+F1** | Open full user guide |
 | **NVDA+Alt+Q** | Toggle quiet mode |
 | **NVDA+Alt+5** | Toggle automatic indentation announcement |
-| **NVDA+Alt+Shift+S** | Open settings |
 | **NVDA+Alt+I** | Read current line |
 | **NVDA+Alt+I** (twice) | Announce line indentation |
 | **NVDA+Alt+K** | Read current word |
@@ -74,7 +73,7 @@ Position on any text and try:
 
 ## Settings (2 minutes)
 
-Open settings with **NVDA+Alt+Shift+S** or:
+Open settings:
 1. Press **NVDA+N** (NVDA menu)
 2. Go to Preferences > Settings
 3. Select "Terminal Settings"
@@ -202,7 +201,6 @@ Try these settings:
 - **NVDA+Shift+F3** - Previous search match
 
 ### Settings & Help
-- **NVDA+Alt+Shift+S** - Open settings
 - **NVDA+Shift+F1** - Open user guide
 
 ## Getting Help

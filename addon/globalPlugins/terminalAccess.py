@@ -3380,7 +3380,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		NVDA+Alt+Q           - Toggle quiet mode
 		NVDA+Alt+[           - Decrease punctuation level
 		NVDA+Alt+]           - Increase punctuation level
-		NVDA+Alt+Shift+S     - Open Terminal Access settings dialog
 
 	Help:
 		NVDA+Shift+F1        - Open Terminal Access user guide
@@ -4267,8 +4266,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	
 	@script(
 		# Translators: Description for opening terminal settings
-		description=_("Open Terminal Access settings"),
-		gesture="kb:NVDA+alt+shift+s"
+		description=_("Open Terminal Access settings")
 	)
 	def script_openSettings(self, gesture):
 		"""Open the Terminal Access settings dialog."""

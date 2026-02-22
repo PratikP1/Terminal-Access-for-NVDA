@@ -168,9 +168,6 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 - **NVDA+F3** - Jump to next search match
 - **NVDA+Shift+F3** - Jump to previous search match
 
-### Settings
-- **NVDA+Alt+Shift+S** - Open Terminal Access settings
-
 ### Special Features
 - **NVDA+Alt+K** (twice) - Spell current word
 - **NVDA+Alt+Q** - Toggle quiet mode
@@ -183,7 +180,6 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 
 Access Terminal Access settings through:
 - NVDA menu > Preferences > Settings > Terminal Settings
-- Or press **NVDA+Alt+Shift+S** while in a terminal
 
 ### Available Settings
 
