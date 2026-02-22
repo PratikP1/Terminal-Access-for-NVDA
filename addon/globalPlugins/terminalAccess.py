@@ -146,6 +146,7 @@ confspec = {
 	"windowLeft": "integer(default=0, min=0)",
 	"windowRight": "integer(default=0, min=0)",
 	"windowEnabled": "boolean(default=False)",
+	"defaultProfile": "string(default='')",  # Default profile to use when no app profile is detected
 }
 
 # Register configuration
@@ -3650,7 +3651,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 					import logHandler
 					logHandler.log.info(f"Terminal Access: Activated profile for {profile.displayName}")
 			else:
-				self._currentProfile = None
+				# No app-specific profile detected, check for default profile setting
+				defaultProfileName = config.conf["terminalAccess"].get("defaultProfile", "")
+				if defaultProfileName and defaultProfileName in self._profileManager.profiles:
+					self._currentProfile = self._profileManager.getProfile(defaultProfileName)
+					import logHandler
+					logHandler.log.info(f"Terminal Access: Using default profile {self._currentProfile.displayName}")
+				else:
+					self._currentProfile = None
 
 			# Bind review cursor to the terminal; try caret first, fall back to last position
 			try:
@@ -4691,6 +4699,40 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		except Exception:
 			ui.message(_("Position unavailable"))
 
+	@script(
+		# Translators: Description for announcing active profile
+		description=_("Announce which profile is currently active and which is set as default"),
+		gesture="kb:NVDA+alt+0"
+	)
+	def script_announceActiveProfile(self, gesture):
+		"""Announce the currently active profile and default profile."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		# Get active profile name
+		if self._currentProfile:
+			activeProfileName = self._currentProfile.displayName
+		else:
+			# Translators: Message when no profile is active
+			activeProfileName = _("None (using global settings)")
+
+		# Get default profile name
+		defaultProfileName = config.conf["terminalAccess"].get("defaultProfile", "")
+		if defaultProfileName and defaultProfileName in self._profileManager.profiles:
+			defaultProfile = self._profileManager.getProfile(defaultProfileName)
+			defaultProfileDisplay = defaultProfile.displayName
+		else:
+			# Translators: Message when no default profile is set
+			defaultProfileDisplay = _("None")
+
+		# Announce both active and default profiles
+		# Translators: Message announcing active and default profiles
+		ui.message(_("Active profile: {active}. Default profile: {default}").format(
+			active=activeProfileName,
+			default=defaultProfileDisplay
+		))
+
 	def _announceIndentation(self):
 		"""Announce the indentation level of the current line."""
 		try:
@@ -5438,12 +5480,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	@scriptHandler.script(
 		# Translators: Description for setting bookmark
-		description=_("Set a bookmark at the current review position (use with 0-9)"),
+		description=_("Set a bookmark at the current review position (use with 1-9)"),
 		category=SCRCAT_TERMINALACCESS,
-		gestures=["kb:NVDA+alt+shift+0", "kb:NVDA+alt+shift+1", "kb:NVDA+alt+shift+2",
-		          "kb:NVDA+alt+shift+3", "kb:NVDA+alt+shift+4", "kb:NVDA+alt+shift+5",
-		          "kb:NVDA+alt+shift+6", "kb:NVDA+alt+shift+7", "kb:NVDA+alt+shift+8",
-		          "kb:NVDA+alt+shift+9"]
+		gestures=["kb:NVDA+alt+shift+1", "kb:NVDA+alt+shift+2",
+		          "kb:NVDA+alt+shift+3", "kb:NVDA+alt+shift+4", "kb:NVDA+alt+shift+6",
+		          "kb:NVDA+alt+shift+7", "kb:NVDA+alt+shift+8", "kb:NVDA+alt+shift+9"]
 	)
 	def script_setBookmark(self, gesture):
 		"""Set a bookmark at current position."""
@@ -5473,12 +5514,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	@scriptHandler.script(
 		# Translators: Description for jumping to bookmark
-		description=_("Jump to a previously set bookmark (use with 0-9)"),
+		description=_("Jump to a previously set bookmark (use with 1-9)"),
 		category=SCRCAT_TERMINALACCESS,
-		gestures=["kb:NVDA+alt+0", "kb:NVDA+alt+1", "kb:NVDA+alt+2",
-		          "kb:NVDA+alt+3", "kb:NVDA+alt+4", "kb:NVDA+alt+5",
-		          "kb:NVDA+alt+6", "kb:NVDA+alt+7", "kb:NVDA+alt+8",
-		          "kb:NVDA+alt+9"]
+		gestures=["kb:NVDA+alt+1", "kb:NVDA+alt+2",
+		          "kb:NVDA+alt+3", "kb:NVDA+alt+4", "kb:NVDA+alt+6",
+		          "kb:NVDA+alt+7", "kb:NVDA+alt+8", "kb:NVDA+alt+9"]
 	)
 	def script_jumpToBookmark(self, gesture):
 		"""Jump to a bookmark."""
@@ -6035,14 +6075,40 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		self.profileList = profileGroup.addLabeledControl(
 			_("Installed &profiles:"),
 			wx.Choice,
-			choices=self._getProfileNames()
+			choices=self._getProfileNames(withIndicators=True)
 		)
 		if len(self._getProfileNames()) > 0:
 			self.profileList.SetSelection(0)
 		# Translators: Tooltip for profile list
 		self.profileList.SetToolTip(_(
 			"Select an application profile to view or edit. "
-			"Profiles customize Terminal Access behavior for specific applications."
+			"Profiles customize Terminal Access behavior for specific applications. "
+			"Active and default profiles are marked."
+		))
+
+		# Default profile dropdown
+		# Translators: Label for default profile choice
+		defaultProfileChoices = [_("None (use global settings)")] + self._getProfileNames()
+		self.defaultProfileChoice = profileGroup.addLabeledControl(
+			_("&Default profile:"),
+			wx.Choice,
+			choices=defaultProfileChoices
+		)
+		# Set current default profile selection
+		currentDefault = config.conf["terminalAccess"].get("defaultProfile", "")
+		if currentDefault and currentDefault in self._profileManager.profiles:
+			# Find index (+1 because "None" is at index 0)
+			profileNames = self._getProfileNames()
+			if currentDefault in profileNames:
+				self.defaultProfileChoice.SetSelection(profileNames.index(currentDefault) + 1)
+			else:
+				self.defaultProfileChoice.SetSelection(0)
+		else:
+			self.defaultProfileChoice.SetSelection(0)
+		# Translators: Tooltip for default profile
+		self.defaultProfileChoice.SetToolTip(_(
+			"Profile to use when no application-specific profile is detected. "
+			"Use NVDA+Alt+0 to check which profile is active."
 		))
 
 		# Profile action buttons
@@ -6193,8 +6259,25 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 			cursorDelay, 0, 1000, 20, "cursorDelay"
 		)
 
-	def _getProfileNames(self):
-		"""Get list of profile names for the dropdown."""
+		# Save default profile setting
+		defaultProfileIndex = self.defaultProfileChoice.GetSelection()
+		if defaultProfileIndex == 0:
+			# "None" was selected
+			config.conf["terminalAccess"]["defaultProfile"] = ""
+		else:
+			# Get the profile name (subtract 1 for "None" offset)
+			profileNames = self._getProfileNames()
+			if defaultProfileIndex - 1 < len(profileNames):
+				config.conf["terminalAccess"]["defaultProfile"] = profileNames[defaultProfileIndex - 1]
+			else:
+				config.conf["terminalAccess"]["defaultProfile"] = ""
+
+	def _getProfileNames(self, withIndicators=False):
+		"""Get list of profile names for the dropdown.
+
+		Args:
+			withIndicators: If True, add indicators for active/default profiles
+		"""
 		try:
 			# Get the global plugin instance to access ProfileManager
 			from . import terminalAccess
@@ -6206,16 +6289,46 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 						default_profiles = ['vim', 'nvim', 'tmux', 'htop', 'less', 'more', 'git', 'nano', 'irssi']
 						defaults = [n for n in names if n in default_profiles]
 						customs = [n for n in names if n not in default_profiles]
-						return sorted(defaults) + sorted(customs)
+						sortedNames = sorted(defaults) + sorted(customs)
+
+						if withIndicators:
+							# Add indicators for active and default profiles
+							activeProfile = plugin._currentProfile
+							defaultProfileName = config.conf["terminalAccess"].get("defaultProfile", "")
+
+							indicatorNames = []
+							for name in sortedNames:
+								indicators = []
+								# Check if this is the active profile
+								if activeProfile and activeProfile.appName == name:
+									# Translators: Indicator for currently active profile
+									indicators.append(_("Active"))
+								# Check if this is the default profile
+								if name == defaultProfileName:
+									# Translators: Indicator for default profile
+									indicators.append(_("Default"))
+
+								if indicators:
+									indicatorNames.append(f"{name} ({', '.join(indicators)})")
+								else:
+									indicatorNames.append(name)
+							return indicatorNames
+						else:
+							return sortedNames
 			return []
 		except Exception:
 			return []
 
 	def _getSelectedProfileName(self):
-		"""Get the currently selected profile name."""
+		"""Get the currently selected profile name (without indicators)."""
 		selection = self.profileList.GetSelection()
 		if selection != wx.NOT_FOUND:
-			return self.profileList.GetString(selection)
+			displayName = self.profileList.GetString(selection)
+			# Strip indicators like " (Active)" or " (Default)" or " (Active, Default)"
+			# Extract the profile name before any parentheses
+			if ' (' in displayName:
+				return displayName.split(' (')[0]
+			return displayName
 		return None
 
 	def _isDefaultProfile(self, profileName):
