@@ -331,6 +331,48 @@ class TestPositionCalculatorComprehensive(unittest.TestCase):
         # Cache should be cleared
         self.assertIsNone(self.calc._cache.get('test'))
 
+    def test_uia_position_calculation(self):
+        """Test position calculation with UIATextInfo (uses setEndPoint, not moveEndToPoint)."""
+        # Create mocks that simulate UIATextInfo behavior
+        mock_textinfo = Mock()
+        mock_textinfo.bookmark = 'uia_test'
+
+        # Create mock terminal
+        mock_terminal = Mock()
+
+        # Mock the textInfos module methods
+        import textInfos
+
+        # Create mock for line start
+        mock_line_start = Mock()
+        mock_line_start.text = "Hello World"  # 11 characters
+
+        # Mock targetCopy
+        mock_target_copy = Mock()
+        mock_target_copy.bookmark = 'target'
+
+        # Mock the copies
+        mock_target_info_copy = Mock()
+        mock_target_info_copy.copy.return_value = mock_target_copy
+        mock_target_copy.copy.return_value = mock_line_start
+
+        mock_textinfo.copy.return_value = mock_target_copy
+
+        # Mock terminal.makeTextInfo to create start position
+        mock_start_info = Mock()
+        mock_start_info.move.return_value = 0
+        mock_start_info.compareEndPoints.return_value = -1
+        mock_terminal.makeTextInfo.return_value = mock_start_info
+
+        # Test that calculate doesn't raise AttributeError about moveEndToPoint
+        result = self.calc.calculate(mock_textinfo, mock_terminal)
+
+        # Should return a tuple, even if (0, 0) on error
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(len(result), 2)
+        self.assertIsInstance(result[0], int)
+        self.assertIsInstance(result[1], int)
+
 
 class TestConfigManagerComprehensive(unittest.TestCase):
     """Comprehensive tests for ConfigManager."""

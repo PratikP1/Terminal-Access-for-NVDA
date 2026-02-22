@@ -298,11 +298,11 @@ This defines:
 
 ## Unicode and CJK Text
 
-**New in v1.0.25**: TDSR supports advanced Unicode features including right-to-left text and complex emoji sequences.
+**New in v1.0.25**: Terminal Access supports advanced Unicode features including right-to-left text and complex emoji sequences.
 
 ### CJK Character Support
 
-TDSR correctly handles double-width characters used in Chinese, Japanese, and Korean:
+Terminal Access correctly handles double-width characters used in Chinese, Japanese, and Korean:
 
 - **Accurate Width Calculation**: CJK characters count as 2 columns
 - **Column Extraction**: Rectangular selection works correctly with CJK
@@ -315,7 +315,7 @@ Hello世界  # "Hello" = 5 columns, "世界" = 4 columns, total = 9 columns
 
 ### Right-to-Left (RTL) Text Support (v1.0.25)
 
-TDSR automatically detects and processes RTL text:
+Terminal Access automatically detects and processes RTL text:
 
 **Supported Languages**:
 - Arabic (U+0600-U+06FF, U+0750-U+077F)
@@ -334,11 +334,11 @@ For full RTL support, install:
 pip install python-bidi arabic-reshaper
 ```
 
-Without these libraries, TDSR gracefully degrades to basic Unicode support.
+Without these libraries, Terminal Access gracefully degrades to basic Unicode support.
 
 ### Emoji Support (v1.0.25)
 
-TDSR handles complex emoji sequences:
+Terminal Access handles complex emoji sequences:
 
 **Supported Features**:
 - **Zero-Width Joiners (ZWJ)**: Family emoji, profession emoji
@@ -362,7 +362,7 @@ Example emoji sequences:
 
 ## Performance Optimization
 
-TDSR includes several performance optimizations for large terminal buffers.
+Terminal Access includes several performance optimizations for large terminal buffers.
 
 ### Position Caching (v1.0.21)
 
@@ -404,10 +404,10 @@ Large rectangular selections (>100 rows) run in background threads:
 **Solutions**:
 1. Check application name detection:
    - Open NVDA log (NVDA+F1)
-   - Look for TDSR profile detection messages
+   - Look for Terminal Access profile detection messages
 
 2. Verify profile exists:
-   - Open TDSR Settings → Application Profiles
+   - Open Terminal Access Settings → Application Profiles
    - Check if profile is in the list
 
 3. Manual profile application:
@@ -432,7 +432,7 @@ Large rectangular selections (>100 rows) run in background threads:
 
 ### Third-Party Terminal Not Detected
 
-**Symptoms**: TDSR doesn't activate in a third-party terminal
+**Symptoms**: Terminal Access doesn't activate in a third-party terminal
 
 **Solutions**:
 1. Verify terminal is supported (see list above)
@@ -490,7 +490,7 @@ Large rectangular selections (>100 rows) run in background threads:
 
 For support, please open an issue on GitHub with:
 - NVDA version
-- TDSR version
+- Terminal Access version
 - Terminal application and version
 - Steps to reproduce
 - Expected vs. actual behavior

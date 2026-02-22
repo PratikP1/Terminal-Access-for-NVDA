@@ -6,7 +6,7 @@
 
 ## Overview
 
-TDSR for NVDA v1.0.27+ includes support for Windows Subsystem for Linux (WSL), enabling screen reader users to work effectively in Linux terminal environments directly from Windows.
+Terminal Access for NVDA v1.0.27+ includes support for Windows Subsystem for Linux (WSL), enabling screen reader users to work effectively in Linux terminal environments directly from Windows.
 
 ## What is WSL?
 
@@ -22,7 +22,7 @@ Windows Subsystem for Linux (WSL) is a compatibility layer for running Linux bin
 ### Prerequisites
 
 1. **NVDA** 2019.3 or later
-2. **TDSR for NVDA** v1.0.27 or later
+2. **Terminal Access for NVDA** v1.0.27 or later
 3. **Windows 10** version 2004+ or **Windows 11**
 4. **WSL** installed with a Linux distribution
 
@@ -53,7 +53,7 @@ wsl --list --verbose
 wsl --status
 ```
 
-## Using TDSR with WSL
+## Using Terminal Access with WSL
 
 ### Launching WSL
 
@@ -72,17 +72,17 @@ wt -p "Ubuntu"
 ubuntu2204.exe
 ```
 
-### Detecting WSL in TDSR
+### Detecting WSL in Terminal Access
 
-TDSR automatically detects WSL environments by identifying:
+Terminal Access automatically detects WSL environments by identifying:
 - Process name: `wsl` or `wsl.exe`
 - Process name: `bash` (when running as WSL bash)
 
-The WSL profile is automatically activated when TDSR detects a WSL terminal.
+The WSL profile is automatically activated when Terminal Access detects a WSL terminal.
 
 ## WSL Profile Settings
 
-TDSR's WSL profile (v1.0.27+) includes optimizations for Linux command-line usage:
+Terminal Access's WSL profile (v1.0.27+) includes optimizations for Linux command-line usage:
 
 ### Default Settings
 
@@ -106,9 +106,9 @@ TDSR's WSL profile (v1.0.27+) includes optimizations for Linux command-line usag
 
 ### Basic Functionality
 
-- [ ] WSL terminal is detected by TDSR
+- [ ] WSL terminal is detected by Terminal Access
 - [ ] WSL profile automatically activates
-- [ ] NVDA+Alt+H gesture shows TDSR help in WSL
+- [ ] NVDA+Alt+H gesture shows Terminal Access help in WSL
 - [ ] Standard terminal navigation works (lines, words, characters)
 
 ### Command Execution
@@ -195,12 +195,12 @@ Test cursor tracking and output handling:
 
 ## Troubleshooting
 
-### TDSR Not Detecting WSL
+### Terminal Access Not Detecting WSL
 
-**Issue**: TDSR gestures don't work in WSL terminal
+**Issue**: Terminal Access gestures don't work in WSL terminal
 
 **Solutions**:
-1. Verify TDSR version: Check NVDA Add-ons Manager for v1.0.27+
+1. Verify Terminal Access version: Check NVDA Add-ons Manager for v1.0.27+
 2. Check application module:
    - Open NVDA Python console (NVDA+Control+Z)
    - Run: `api.getForegroundObject().appModule.appName`
@@ -213,13 +213,13 @@ Test cursor tracking and output handling:
 **Issue**: WSL profile settings not applied
 
 **Solutions**:
-1. Manually activate profile: TDSR Settings → Select "Windows Subsystem for Linux"
+1. Manually activate profile: Terminal Access Settings → Select "Windows Subsystem for Linux"
 2. Check for conflicting profiles
-3. Reset to defaults: TDSR Settings → Reset
+3. Reset to defaults: Terminal Access Settings → Reset
 
 ### Slow Performance
 
-**Issue**: TDSR is slow in WSL
+**Issue**: Terminal Access is slow in WSL
 
 **Solutions**:
 1. Upgrade to WSL 2: `wsl --set-version <distro> 2`
@@ -243,7 +243,7 @@ Test cursor tracking and output handling:
 
 You can create a custom profile for specific Linux distributions:
 
-1. Open TDSR Settings (NVDA → Preferences → TDSR Settings)
+1. Open Terminal Access Settings (NVDA → Preferences → Terminal Access Settings)
 2. Import/Export Profiles → Create New
 3. Name: "Ubuntu-Custom" or "Arch-Custom"
 4. Customize settings:
@@ -315,7 +315,7 @@ If you encounter issues with WSL support:
 
 1. **Check this guide** for known limitations and solutions
 2. **Gather information**:
-   - TDSR version (NVDA Add-ons Manager)
+   - Terminal Access version (NVDA Add-ons Manager)
    - WSL version (`wsl --version`)
    - Distribution (`cat /etc/os-release` in WSL)
    - Terminal application (Windows Terminal, ConHost, etc.)
@@ -328,12 +328,12 @@ If you encounter issues with WSL support:
 ### Official Documentation
 
 - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/)
-- [TDSR Documentation](README.md)
-- [TDSR Advanced User Guide](ADVANCED_USER_GUIDE.md)
+- [Terminal Access Documentation](README.md)
+- [Terminal Access Advanced User Guide](ADVANCED_USER_GUIDE.md)
 
 ### Community Support
 
-- [TDSR Issues](https://github.com/PratikP1/Terminal-Access-for-NVDA/issues)
+- [Terminal Access Issues](https://github.com/PratikP1/Terminal-Access-for-NVDA/issues)
 - [NVDA Community](https://www.nvaccess.org/community/)
 
 ### Related Guides
@@ -346,7 +346,7 @@ If you encounter issues with WSL support:
 
 Help improve WSL support by:
 
-1. **Testing**: Try TDSR with different WSL distributions
+1. **Testing**: Try Terminal Access with different WSL distributions
 2. **Reporting**: Share your experience (what works, what doesn't)
 3. **Documenting**: Suggest improvements to this guide
 4. **Developing**: Submit patches for WSL-specific issues

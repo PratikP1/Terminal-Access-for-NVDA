@@ -2137,7 +2137,10 @@ class PositionCalculator:
 				targetCopy = targetInfo.copy()
 				targetCopy.collapse()
 
-				charsFromLineStart = lineStart.moveEndToPoint(targetCopy)
+				# Create range from line start to target and count characters
+				charRange = lineStart.copy()
+				charRange.setEndPoint(targetCopy, "endToStart")
+				charsFromLineStart = len(charRange.text) if charRange.text else 0
 				newCol = charsFromLineStart + 1
 
 				return (newRow, newCol)
@@ -2155,7 +2158,10 @@ class PositionCalculator:
 				targetCopy = targetInfo.copy()
 				targetCopy.collapse()
 
-				charsFromLineStart = lineStart.moveEndToPoint(targetCopy)
+				# Create range from line start to target and count characters
+				charRange = lineStart.copy()
+				charRange.setEndPoint(targetCopy, "endToStart")
+				charsFromLineStart = len(charRange.text) if charRange.text else 0
 				newCol = charsFromLineStart + 1
 
 				return (newRow, newCol)
@@ -2202,7 +2208,10 @@ class PositionCalculator:
 		lineStart.expand(textInfos.UNIT_LINE)
 		lineStart.collapse()
 
-		charsFromLineStart = lineStart.moveEndToPoint(targetCopy)
+		# Create range from line start to target and count characters
+		charRange = lineStart.copy()
+		charRange.setEndPoint(targetCopy, "endToStart")
+		charsFromLineStart = len(charRange.text) if charRange.text else 0
 		col = charsFromLineStart + 1
 
 		# Cache and store

@@ -84,7 +84,7 @@ addon/
 
 2. **Update Header**
    ```po
-   "Project-Id-Version: TDSR 1.0.32\n"
+   "Project-Id-Version: Terminal Access 1.0.32\n"
    "PO-Revision-Date: 2026-02-21 09:00+0000\n"
    "Last-Translator: Your Name <your.email@example.com>\n"
    "Language-Team: Spanish\n"
@@ -389,7 +389,7 @@ msgstr "Se encontraron {count} coincidencias"  # {count} stays as-is
 
 ## Credits
 
-Translations are made possible by our community contributors. Thank you to all translators who make TDSR accessible to users worldwide!
+Translations are made possible by our community contributors. Thank you to all translators who make Terminal Access accessible to users worldwide!
 
 ## License
 
