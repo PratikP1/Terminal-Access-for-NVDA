@@ -4080,8 +4080,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		# Use NVDA's built-in review cursor functionality
-		globalCommands.commands.script_review_previousCharacter(gesture)
+		# Directly implement review cursor functionality to avoid gesture propagation
+		self._readReviewCharacter(movement=-1)
 
 	@script(
 		# Translators: Description for reading the current character
@@ -4101,10 +4101,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self._announceCharacterCode()
 		elif repeatCount == 1:
 			# Double press - phonetic reading
-			globalCommands.commands.script_review_currentCharacter(None)
+			self._readReviewCharacter(movement=0, phonetic=True)
 		else:
 			# Single press - read character
-			globalCommands.commands.script_review_currentCharacter(None)
+			self._readReviewCharacter(movement=0)
 
 	@script(
 		# Translators: Description for reading the next character
@@ -4116,8 +4116,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp():
 			gesture.send()
 			return
-		# Use NVDA's built-in review cursor functionality
-		globalCommands.commands.script_review_nextCharacter(None)
+		# Directly implement review cursor functionality to avoid gesture propagation
+		self._readReviewCharacter(movement=1)
 	
 	@script(
 		# Translators: Description for toggling quiet mode
@@ -4837,6 +4837,48 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Announce indentation after line is read, if enabled
 		if indentInfo:
 			ui.message(indentInfo)
+
+	def _readReviewCharacter(self, movement=0, phonetic=False):
+		"""
+		Read a character at the review cursor position.
+
+		Args:
+			movement: -1 for previous, 0 for current, 1 for next
+			phonetic: Whether to use phonetic reading
+		"""
+		try:
+			reviewPos = self._getReviewPosition()
+			if reviewPos is None:
+				# Translators: Message when no review position
+				ui.message(_("No review position"))
+				return
+
+			# Move review cursor if needed
+			if movement != 0:
+				info = reviewPos.copy()
+				result = info.move(textInfos.UNIT_CHARACTER, movement)
+				if result == 0:
+					# Translators: Message when at edge of text
+					ui.message(_("Edge") if movement > 0 else _("Top"))
+					return
+				api.setReviewPosition(info)
+				reviewPos = info
+
+			# Expand to character and read
+			info = reviewPos.copy()
+			info.expand(textInfos.UNIT_CHARACTER)
+
+			# Use speech to speak the character
+			if phonetic:
+				# For phonetic reading, speak with spelling mode
+				speech.speakSpelling(info.text)
+			else:
+				# Normal character reading
+				speech.speakTextInfo(info, unit=textInfos.UNIT_CHARACTER, reason=speech.OutputReason.CARET)
+
+		except Exception:
+			# Translators: Message when unable to read character
+			ui.message(_("Unable to read character"))
 
 	def _announceCharacterCode(self):
 		"""Announce the ASCII/Unicode code of the current character."""
