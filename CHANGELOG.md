@@ -10,13 +10,13 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
   - New config setting: `defaultProfile` (empty string by default)
   - UI: Default profile dropdown in Application Profiles section
   - Automatically applies when no app-specific profile matches
-  - Use NVDA+Alt+0 to check active and default profiles
+  - Use NVDA+Alt+F10 to check active and default profiles
 - **Profile Status Indicators**: Profile list now shows which profiles are active and set as default
   - Active profile marked with "(Active)" indicator
   - Default profile marked with "(Default)" indicator
   - Combined indicator when profile is both: "(Active, Default)"
   - Tooltip updated to explain indicators
-- **NVDA+Alt+0 Shortcut**: Announce which profile is currently active and which is set as default
+- **NVDA+Alt+F10 Shortcut**: Announce which profile is currently active and which is set as default
   - New `script_announceActiveProfile` command
   - Reports active profile or "None (using global settings)" if no profile active
   - Reports default profile setting
@@ -29,10 +29,11 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
   - Settings now accessible only via NVDA menu > Preferences > Settings > Terminal Settings
   - Updated all documentation to remove shortcut references
   - Updated help text in plugin to remove shortcut reference
-- **Bookmark Shortcuts Adjusted**: To accommodate new profile announcement shortcut
-  - NVDA+Alt+0 no longer sets/jumps to bookmark (now announces profiles)
-  - NVDA+Alt+5 no longer sets/jumps to bookmark (conflict with indentation toggle)
-  - Bookmarks now use NVDA+Alt+1-9 and NVDA+Alt+Shift+1-9 (8 bookmarks instead of 10)
+- **Bookmark Shortcuts Restored**: Bookmarks now support full 0-9 range
+  - NVDA+Alt+0-9 jumps to bookmarks 0-9 (all 10 bookmarks)
+  - NVDA+Alt+Shift+0-9 sets bookmarks 0-9 (all 10 bookmarks)
+  - Profile announcement moved to NVDA+Alt+F10 to free up NVDA+Alt+0
+  - Indentation toggle moved to NVDA+Alt+F5 to free up NVDA+Alt+5
 
 ### Fixed
 

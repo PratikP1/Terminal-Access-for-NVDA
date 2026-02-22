@@ -46,7 +46,7 @@ Position on any text and try:
 ### Step 5: Try Advanced Features
 - **NVDA+Alt+A** - Continuous reading (say all) from cursor to end
 - **NVDA+Alt+I** (twice) - Announce line indentation
-- **NVDA+Alt+5** - Toggle automatic indentation announcement on line read
+- **NVDA+Alt+F5** - Toggle automatic indentation announcement on line read
 - **NVDA+Alt+P** - Announce current position (row and column)
 
 ### Step 6: Control Punctuation Levels
@@ -60,7 +60,7 @@ Position on any text and try:
 |---------|--------|
 | **NVDA+Shift+F1** | Open full user guide |
 | **NVDA+Alt+Q** | Toggle quiet mode |
-| **NVDA+Alt+5** | Toggle automatic indentation announcement |
+| **NVDA+Alt+F5** | Toggle automatic indentation announcement |
 | **NVDA+Alt+I** | Read current line |
 | **NVDA+Alt+I** (twice) | Announce line indentation |
 | **NVDA+Alt+K** | Read current word |
@@ -120,12 +120,12 @@ Try these settings:
 4. Use **NVDA+Alt+PageUp/PageDown** to jump to top or bottom
 
 ### Working with Python or YAML Code
-1. Enable automatic indentation announcement with **NVDA+Alt+5**
+1. Enable automatic indentation announcement with **NVDA+Alt+F5**
 2. Navigate to a line of code with **NVDA+Alt+U/I/O**
 3. Indentation level is announced automatically after the line content
 4. Or press **NVDA+Alt+I** twice to query indentation of current line
 5. Use line navigation to review code structure
-6. Toggle off with **NVDA+Alt+5** when not needed
+6. Toggle off with **NVDA+Alt+F5** when not needed
 
 ### Debugging Character Issues
 1. Navigate to a suspicious character
@@ -157,7 +157,7 @@ Try these settings:
 ### Advanced Reading
 - **NVDA+Alt+A** - Continuous reading (say all)
 - **NVDA+Alt+I** (twice) - Announce indentation level
-- **NVDA+Alt+5** - Toggle automatic indentation announcement
+- **NVDA+Alt+F5** - Toggle automatic indentation announcement
 - **NVDA+Alt+Comma** (twice) - Read character phonetically
 - **NVDA+Alt+Comma** (three times) - Announce character code
 - **NVDA+Alt+K** (twice) - Spell current word
@@ -186,11 +186,9 @@ Try these settings:
 - **NVDA+Alt+Shift+A** - Read text attributes/colors
 
 ### Bookmarks (v1.0.29+)
-- **NVDA+Alt+Shift+1-9** - Set bookmark (1-9)
-- **NVDA+Alt+1-9** - Jump to bookmark (1-9)
+- **NVDA+Alt+Shift+0-9** - Set bookmark (0-9)
+- **NVDA+Alt+0-9** - Jump to bookmark (0-9)
 - **NVDA+Alt+Shift+B** - List bookmarks
-
-**Note**: Bookmarks 0 and 5 are not available. NVDA+Alt+0 announces profiles, and NVDA+Alt+5 toggles indentation.
 
 ### Command History (v1.0.31+)
 - **NVDA+Alt+Shift+H** - Scan command history
@@ -204,7 +202,7 @@ Try these settings:
 
 ### Settings & Help
 - **NVDA+Shift+F1** - Open user guide
-- **NVDA+Alt+0** - Announce active and default profiles
+- **NVDA+Alt+F10** - Announce active and default profiles
 
 ## Getting Help
 

@@ -3381,7 +3381,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		NVDA+Alt+Q           - Toggle quiet mode
 		NVDA+Alt+[           - Decrease punctuation level
 		NVDA+Alt+]           - Increase punctuation level
-		NVDA+Alt+0           - Announce active and default profiles
+		NVDA+Alt+F5          - Toggle automatic indentation announcement
+		NVDA+Alt+F10         - Announce active and default profiles
 
 	Help:
 		NVDA+Shift+F1        - Open Terminal Access user guide
@@ -4151,7 +4152,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for toggling indentation announcement
 		description=_("Toggle indentation announcement on line read in terminal"),
-		gesture="kb:NVDA+alt+5"
+		gesture="kb:NVDA+alt+f5"
 	)
 	def script_toggleIndentation(self, gesture):
 		"""Toggle indentation announcement on/off."""
@@ -4703,7 +4704,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for announcing active profile
 		description=_("Announce which profile is currently active and which is set as default"),
-		gesture="kb:NVDA+alt+0"
+		gesture="kb:NVDA+alt+f10"
 	)
 	def script_announceActiveProfile(self, gesture):
 		"""Announce the currently active profile and default profile."""
@@ -5481,11 +5482,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	@scriptHandler.script(
 		# Translators: Description for setting bookmark
-		description=_("Set a bookmark at the current review position (use with 1-9)"),
+		description=_("Set a bookmark at the current review position (use with 0-9)"),
 		category=SCRCAT_TERMINALACCESS,
-		gestures=["kb:NVDA+alt+shift+1", "kb:NVDA+alt+shift+2",
-		          "kb:NVDA+alt+shift+3", "kb:NVDA+alt+shift+4", "kb:NVDA+alt+shift+6",
-		          "kb:NVDA+alt+shift+7", "kb:NVDA+alt+shift+8", "kb:NVDA+alt+shift+9"]
+		gestures=["kb:NVDA+alt+shift+0", "kb:NVDA+alt+shift+1", "kb:NVDA+alt+shift+2",
+		          "kb:NVDA+alt+shift+3", "kb:NVDA+alt+shift+4", "kb:NVDA+alt+shift+5",
+		          "kb:NVDA+alt+shift+6", "kb:NVDA+alt+shift+7", "kb:NVDA+alt+shift+8",
+		          "kb:NVDA+alt+shift+9"]
 	)
 	def script_setBookmark(self, gesture):
 		"""Set a bookmark at current position."""
@@ -5515,11 +5517,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	@scriptHandler.script(
 		# Translators: Description for jumping to bookmark
-		description=_("Jump to a previously set bookmark (use with 1-9)"),
+		description=_("Jump to a previously set bookmark (use with 0-9)"),
 		category=SCRCAT_TERMINALACCESS,
-		gestures=["kb:NVDA+alt+1", "kb:NVDA+alt+2",
-		          "kb:NVDA+alt+3", "kb:NVDA+alt+4", "kb:NVDA+alt+6",
-		          "kb:NVDA+alt+7", "kb:NVDA+alt+8", "kb:NVDA+alt+9"]
+		gestures=["kb:NVDA+alt+0", "kb:NVDA+alt+1", "kb:NVDA+alt+2",
+		          "kb:NVDA+alt+3", "kb:NVDA+alt+4", "kb:NVDA+alt+5",
+		          "kb:NVDA+alt+6", "kb:NVDA+alt+7", "kb:NVDA+alt+8", "kb:NVDA+alt+9"]
 	)
 	def script_jumpToBookmark(self, gesture):
 		"""Jump to a bookmark."""
@@ -6028,7 +6030,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		# Translators: Tooltip for indentation announcement
 		self.indentationOnLineReadCheckBox.SetToolTip(_(
 			"Automatically announce indentation level when reading lines. "
-			"Use NVDA+Alt+5 to toggle quickly. NVDA+Alt+I pressed twice still reads indentation."
+			"Use NVDA+Alt+F5 to toggle quickly. NVDA+Alt+I pressed twice still reads indentation."
 		))
 
 		# === Advanced Settings Section ===
