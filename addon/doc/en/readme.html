@@ -283,7 +283,7 @@
 	<h4>Configurable Settings</h4>
 	<p>Customize behavior through NVDA's settings dialog to match your workflow.</p>
 	<div class="info">
-		<strong>Example Usage:</strong> Press <code>NVDA+Alt+Shift+S</code> to open Terminal Access settings.
+		<strong>Example Usage:</strong> Access Terminal Access settings through NVDA menu > Preferences > Settings > Terminal Settings.
 		You can adjust cursor tracking delay (useful if holding arrow keys causes too many announcements),
 		enable symbol condensing (so "====" is announced as "4 equals" instead of repeating), customize
 		which symbols to process, and more. See the Settings section below for detailed explanations.
@@ -337,10 +337,6 @@
 			<tr>
 				<td><code>NVDA+Shift+F1</code></td>
 				<td>Open this user guide</td>
-			</tr>
-			<tr>
-				<td><code>NVDA+Alt+Shift+S</code></td>
-				<td>Open Terminal Access settings</td>
 			</tr>
 		</tbody>
 	</table>
@@ -447,7 +443,7 @@
 				<td>Announce line indentation level</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+5</code></td>
+				<td><code>NVDA+Alt+F5</code></td>
 				<td>Toggle automatic indentation announcement on line read</td>
 			</tr>
 			<tr>
@@ -694,7 +690,7 @@
 				<td>Toggle quiet mode (disables automatic announcements)</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+5</code></td>
+				<td><code>NVDA+Alt+F5</code></td>
 				<td>Toggle automatic indentation announcement on line read</td>
 			</tr>
 		</tbody>
@@ -804,15 +800,15 @@
 		<br><br>
 		<strong>Workflow:</strong>
 		<ol>
-			<li>Press <code>NVDA+Alt+5</code> to enable automatic indentation announcement</li>
+			<li>Press <code>NVDA+Alt+F5</code> to enable automatic indentation announcement</li>
 			<li>Navigate to a function definition with <code>NVDA+Alt+I</code></li>
 			<li>Hear the line content followed by "No indentation" (top level function)</li>
 			<li>Move to the next line with <code>NVDA+Alt+O</code></li>
 			<li>Hear the line content followed by "4 spaces" (function body)</li>
 			<li>Continue navigating with indentation announced automatically after each line</li>
 			<li>Or press <code>NVDA+Alt+I</code> twice to query indentation of current line only</li>
-			<li>Use <code>NVDA+Alt+Shift+1</code> through <code>NVDA+Alt+Shift+9</code> to bookmark important functions</li>
-			<li>Toggle off automatic announcement with <code>NVDA+Alt+5</code> when not needed</li>
+			<li>Use <code>NVDA+Alt+Shift+0</code> through <code>NVDA+Alt+Shift+9</code> to bookmark important functions</li>
+			<li>Toggle off automatic announcement with <code>NVDA+Alt+F5</code> when not needed</li>
 		</ol>
 	</div>
 
@@ -857,7 +853,7 @@
 		<br><br>
 		<strong>Workflow:</strong>
 		<ol>
-			<li>Press <code>NVDA+Alt+Shift+S</code> to open settings</li>
+			<li>Open settings through NVDA menu > Preferences > Settings > Terminal Settings</li>
 			<li>Enable "Process Symbols" so symbols are announced by name</li>
 			<li>Set punctuation level to "All" for maximum detail</li>
 			<li>Start typing your regex: <code>grep -E '^[0-9]{3}-[0-9]{2}-[0-9]{4}$' file.txt</code></li>
@@ -870,8 +866,7 @@
 	<h2 id="settings">Settings</h2>
 	<p>
 		Terminal Access settings can be accessed through NVDA's preferences dialog. Press <code>NVDA+N</code>
-		to open the NVDA menu, select Preferences, then Settings. Alternatively, use
-		<code>NVDA+Alt+Shift+S</code> while in a terminal to jump directly to the Terminal Settings category.
+		to open the NVDA menu, select Preferences, then Settings, and choose the Terminal Settings category.
 	</p>
 	
 	<h3>Available Settings</h3>

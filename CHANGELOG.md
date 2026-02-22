@@ -4,6 +4,52 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- **Default Profile Setting**: Choose a default profile to use when no application-specific profile is detected
+  - New config setting: `defaultProfile` (empty string by default)
+  - UI: Default profile dropdown in Application Profiles section
+  - Automatically applies when no app-specific profile matches
+  - Use NVDA+Alt+F10 to check active and default profiles
+- **Profile Status Indicators**: Profile list now shows which profiles are active and set as default
+  - Active profile marked with "(Active)" indicator
+  - Default profile marked with "(Default)" indicator
+  - Combined indicator when profile is both: "(Active, Default)"
+  - Tooltip updated to explain indicators
+- **NVDA+Alt+F10 Shortcut**: Announce which profile is currently active and which is set as default
+  - New `script_announceActiveProfile` command
+  - Reports active profile or "None (using global settings)" if no profile active
+  - Reports default profile setting
+  - Example: "Active profile: Vim/Neovim. Default profile: None"
+
+### Changed
+
+- **Settings Shortcut Removed**: NVDA+Alt+Shift+S no longer opens settings
+  - Removed gesture binding from `script_openSettings`
+  - Settings now accessible only via NVDA menu > Preferences > Settings > Terminal Settings
+  - Updated all documentation to remove shortcut references
+  - Updated help text in plugin to remove shortcut reference
+- **Bookmark Shortcuts Restored**: Bookmarks now support full 0-9 range
+  - NVDA+Alt+0-9 jumps to bookmarks 0-9 (all 10 bookmarks)
+  - NVDA+Alt+Shift+0-9 sets bookmarks 0-9 (all 10 bookmarks)
+  - Profile announcement moved to NVDA+Alt+F10 to free up NVDA+Alt+0
+  - Indentation toggle moved to NVDA+Alt+F5 to free up NVDA+Alt+5
+
+### Fixed
+
+- **Profile Detection**: Profiles now apply automatically when terminal applications are detected
+  - Profile detection on `event_appModule_gainFocus` verified and working
+  - Default profile properly applied when no app-specific profile found
+  - Log messages added for profile activation tracking
+
+### Documentation
+
+- Removed NVDA+Alt+Shift+S references from:
+  - README.md (Settings and Configuration sections)
+  - QUICKSTART.md (Essential Commands and Settings sections)
+  - addon/doc/en/readme.html (multiple references)
+  - Help text in terminalAccess.py
+
 ## [1.0.37] - 2026-02-22
 
 ### Added
