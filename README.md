@@ -172,6 +172,7 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 - **NVDA+Alt+K** (twice) - Spell current word
 - **NVDA+Alt+Q** - Toggle quiet mode
 - **NVDA+Alt+5** - Toggle automatic indentation announcement
+- **NVDA+Alt+0** - Announce active and default profiles
 
 ### Help
 - **NVDA+Shift+F1** - Open user guide
@@ -209,6 +210,8 @@ Access Terminal Access settings through:
 **Repeated Symbols to Condense** - Specifies which symbols to condense (default: `-_=!`). Customize for your workflow (e.g., `-=#` for Markdown users).
 
 **Cursor Delay** - Delay in milliseconds (0-1000) before announcing cursor position changes. Lower values provide instant feedback but may overwhelm during rapid movement. Default: 20ms.
+
+**Default Profile** - Select a profile to use when no application-specific profile is detected. Allows you to have custom settings apply by default rather than global settings. Use NVDA+Alt+0 to check which profile is currently active and which is set as default.
 
 ### Settings Interactions
 

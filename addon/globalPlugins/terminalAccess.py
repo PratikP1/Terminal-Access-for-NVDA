@@ -3381,6 +3381,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		NVDA+Alt+Q           - Toggle quiet mode
 		NVDA+Alt+[           - Decrease punctuation level
 		NVDA+Alt+]           - Increase punctuation level
+		NVDA+Alt+0           - Announce active and default profiles
 
 	Help:
 		NVDA+Shift+F1        - Open Terminal Access user guide

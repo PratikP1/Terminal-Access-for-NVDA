@@ -186,9 +186,11 @@ Try these settings:
 - **NVDA+Alt+Shift+A** - Read text attributes/colors
 
 ### Bookmarks (v1.0.29+)
-- **NVDA+Alt+Shift+0-9** - Set bookmark
-- **NVDA+Alt+0-9** - Jump to bookmark
+- **NVDA+Alt+Shift+1-9** - Set bookmark (1-9)
+- **NVDA+Alt+1-9** - Jump to bookmark (1-9)
 - **NVDA+Alt+Shift+B** - List bookmarks
+
+**Note**: Bookmarks 0 and 5 are not available. NVDA+Alt+0 announces profiles, and NVDA+Alt+5 toggles indentation.
 
 ### Command History (v1.0.31+)
 - **NVDA+Alt+Shift+H** - Scan command history
@@ -202,6 +204,7 @@ Try these settings:
 
 ### Settings & Help
 - **NVDA+Shift+F1** - Open user guide
+- **NVDA+Alt+0** - Announce active and default profiles
 
 ## Getting Help
 
