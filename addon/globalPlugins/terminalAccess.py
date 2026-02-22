@@ -4092,10 +4092,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self._announceCharacterCode()
 		elif repeatCount == 1:
 			# Double press - phonetic reading
-			globalCommands.commands.script_review_currentCharacter(gesture)
+			globalCommands.commands.script_review_currentCharacter(None)
 		else:
 			# Single press - read character
-			globalCommands.commands.script_review_currentCharacter(gesture)
+			globalCommands.commands.script_review_currentCharacter(None)
 
 	@script(
 		# Translators: Description for reading the next character
@@ -4108,7 +4108,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			gesture.send()
 			return
 		# Use NVDA's built-in review cursor functionality
-		globalCommands.commands.script_review_nextCharacter(gesture)
+		globalCommands.commands.script_review_nextCharacter(None)
 	
 	@script(
 		# Translators: Description for toggling quiet mode
