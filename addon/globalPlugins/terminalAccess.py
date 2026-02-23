@@ -2150,7 +2150,7 @@ class PositionCalculator:
 
 				# Create range from line start to target and count characters
 				charRange = lineStart.copy()
-				charRange.setEndPoint(targetCopy, "endToStart")
+				charRange.setEndPoint(targetCopy, "endToEnd")
 				charsFromLineStart = len(charRange.text) if charRange.text else 0
 				newCol = charsFromLineStart + 1
 
@@ -2171,7 +2171,7 @@ class PositionCalculator:
 
 				# Create range from line start to target and count characters
 				charRange = lineStart.copy()
-				charRange.setEndPoint(targetCopy, "endToStart")
+				charRange.setEndPoint(targetCopy, "endToEnd")
 				charsFromLineStart = len(charRange.text) if charRange.text else 0
 				newCol = charsFromLineStart + 1
 
@@ -2221,7 +2221,7 @@ class PositionCalculator:
 
 		# Create range from line start to target and count characters
 		charRange = lineStart.copy()
-		charRange.setEndPoint(targetCopy, "endToStart")
+		charRange.setEndPoint(targetCopy, "endToEnd")
 		charsFromLineStart = len(charRange.text) if charRange.text else 0
 		col = charsFromLineStart + 1
 
@@ -4950,10 +4950,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			lineStart.expand(textInfos.UNIT_LINE)
 			lineStart.collapse()
 
-			# Get text from line start to cursor
+			# Get text from line start to cursor, including the character at cursor
 			textToCursor = lineStart.copy()
-			textToCursor.setEndPoint(reviewPos, "endToStart")
-			textToCursor.expand(textInfos.UNIT_CHARACTER)
+			cursorChar = reviewPos.copy()
+			cursorChar.expand(textInfos.UNIT_CHARACTER)
+			textToCursor.setEndPoint(cursorChar, "endToEnd")
 
 			# Get the text with ANSI codes
 			text = textToCursor.text
@@ -5587,7 +5588,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			lineInfo.expand(textInfos.UNIT_LINE)
 
 			# Create range from line start to cursor
-			lineInfo.setEndPoint(reviewPos, "endToStart")
+			lineInfo.setEndPoint(reviewPos, "endToEnd")
 
 			text = lineInfo.text
 			if not text or not text.strip():
@@ -5656,7 +5657,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 			# Get range from buffer start to cursor
 			startInfo = terminal.makeTextInfo(textInfos.POSITION_FIRST)
-			startInfo.setEndPoint(reviewPos, "endToStart")
+			startInfo.setEndPoint(reviewPos, "endToEnd")
 
 			text = startInfo.text
 			if not text or not text.strip():
