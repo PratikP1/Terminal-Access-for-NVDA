@@ -3845,6 +3845,16 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Command history manager for navigation (Section 8.1 - v1.0.31+)
 		self._commandHistoryManager = None  # Initialized when terminal is bound
 
+		# Track and scope gesture bindings to terminal focus only
+		self._terminalGestures = self._collectTerminalGestures()
+		self._gesturesBound = False
+		self._disableTerminalGestures()
+		try:
+			self._updateGestureBindingsForFocus(api.getForegroundObject())
+		except Exception:
+			# Foreground detection can fail during early startup
+			pass
+
 		# Add settings panel to NVDA preferences
 		try:
 			gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(TerminalAccessSettingsPanel)
@@ -3852,6 +3862,62 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# GUI may not be fully initialized yet, which is acceptable
 			# Settings panel will not be available in this case
 			pass
+
+	def _collectTerminalGestures(self) -> Dict[str, str]:
+		"""Collect gestures defined on script methods for conditional binding."""
+		existing = getattr(self.__class__, "__gestures__", {}) or {}
+		if isinstance(existing, dict) and existing:
+			return dict(existing)
+
+		gesture_map: Dict[str, str] = {}
+		for attr_name in dir(self.__class__):
+			if not attr_name.startswith("script_"):
+				continue
+			method = getattr(self.__class__, attr_name)
+			gestures = getattr(method, "__gestures__", None) or getattr(method, "gestures", None)
+			if not gestures:
+				continue
+			if isinstance(gestures, str):
+				gestures = [gestures]
+			for gesture in gestures:
+				gesture_map.setdefault(gesture, attr_name)
+		return gesture_map
+
+	def _enableTerminalGestures(self):
+		"""Bind Terminal Access gestures when a terminal is focused."""
+		if self._gesturesBound or not self._terminalGestures:
+			return
+		try:
+			self.bindGestures(self._terminalGestures)
+		except Exception:
+			# Fallback for test mocks without bindGestures
+			try:
+				self.__class__.__gestures__ = self._terminalGestures
+			except Exception:
+				pass
+		self._gesturesBound = True
+
+	def _disableTerminalGestures(self):
+		"""Unbind Terminal Access gestures outside terminal focus."""
+		if not self._terminalGestures:
+			return
+		for gesture in self._terminalGestures:
+			try:
+				self.removeGestureBinding(gesture)
+			except Exception:
+				pass
+		if getattr(self, "copyMode", False):
+			self._exitCopyModeBindings()
+			self.copyMode = False
+		self._gesturesBound = False
+
+	def _updateGestureBindingsForFocus(self, obj) -> bool:
+		"""Enable gestures when a terminal is focused, otherwise disable them."""
+		if self.isTerminalApp(obj):
+			self._enableTerminalGestures()
+			return True
+		self._disableTerminalGestures()
+		return False
 
 	def terminate(self):
 		"""Clean up when the plugin is terminated."""
@@ -4009,6 +4075,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		Detects and activates application-specific profiles.
 		"""
 		nextHandler()
+
+		if not self._updateGestureBindingsForFocus(obj):
+			self._boundTerminal = None
+			return
 
 		if self.isTerminalApp(obj):
 			try:
