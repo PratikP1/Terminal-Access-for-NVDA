@@ -1,0 +1,100 @@
+name: Delete Old Releases
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "DELETE" to confirm deletion of old releases'
+        required: true
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  delete-old-releases:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify confirmation
+        if: github.event.inputs.confirm != 'DELETE'
+        run: |
+          echo "::error::Confirmation not provided. Please type DELETE to confirm."
+          exit 1
+
+      - name: Delete old releases
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # List of releases to delete (all except v1.0.40)
+          RELEASES_TO_DELETE=(
+            "v1.0.38"
+            "v1.0.37"
+            "v1.0.36"
+            "v1.0.35"
+            "v1.0.34"
+            "v1.0.33"
+            "v1.0.32"
+            "v1.0.10"
+            "v1.0.9"
+            "v1.0.8"
+            "v1.0.7"
+            "v1.0.6"
+            "v1.0.5"
+            "v1.0.4"
+            "v1.0.3"
+            "v1.0.2"
+            "v1.0.1"
+          )
+
+          echo "Deleting ${#RELEASES_TO_DELETE[@]} old releases..."
+          echo "Keeping only: v1.0.40 (latest release)"
+          echo ""
+
+          SUCCESS=0
+          FAILED=0
+
+          for tag in "${RELEASES_TO_DELETE[@]}"; do
+            echo "Deleting release $tag..."
+            if gh release delete "$tag" --repo ${{ github.repository }} --yes 2>&1; then
+              echo "✓ Deleted release $tag"
+              ((SUCCESS++))
+
+              # Also delete the git tag
+              if git ls-remote --tags origin | grep -q "refs/tags/$tag"; then
+                git push origin :refs/tags/$tag 2>&1 && echo "  ✓ Deleted tag $tag" || echo "  ⚠ Failed to delete tag $tag"
+              else
+                echo "  ℹ Tag $tag not found"
+              fi
+            else
+              echo "✗ Failed to delete release $tag"
+              ((FAILED++))
+            fi
+            echo ""
+          done
+
+          echo "============================================================"
+          echo "Summary: $SUCCESS releases deleted, $FAILED failed"
+          echo "============================================================"
+
+          if [ $FAILED -gt 0 ]; then
+            exit 1
+          fi
+
+      - name: Verify only v1.0.40 remains
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Verifying remaining releases..."
+          REMAINING=$(gh release list --repo ${{ github.repository }} --limit 100 --json tagName --jq '.[].tagName' | wc -l)
+
+          echo "Number of remaining releases: $REMAINING"
+
+          if [ $REMAINING -eq 1 ]; then
+            echo "✓ Only 1 release remains (expected)"
+            gh release list --repo ${{ github.repository }} --limit 10
+          else
+            echo "⚠ Expected 1 release but found $REMAINING"
+            gh release list --repo ${{ github.repository }} --limit 10
+            exit 1
+          fi
