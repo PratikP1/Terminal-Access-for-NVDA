@@ -2867,6 +2867,18 @@ class BookmarkManager:
 		"""Get number of bookmarks."""
 		return len(self._bookmarks)
 
+	def update_terminal(self, terminal_obj):
+		"""
+		Update the terminal reference.
+
+		This should be called when the terminal is rebound to ensure
+		bookmarks can be properly retrieved.
+
+		Args:
+			terminal_obj: New terminal TextInfo object
+		"""
+		self._terminal = terminal_obj
+
 
 class OutputSearchManager:
 	"""
@@ -3075,6 +3087,20 @@ class OutputSearchManager:
 		self._pattern = None
 		self._matches = []
 		self._current_match_index = -1
+
+	def update_terminal(self, terminal_obj):
+		"""
+		Update the terminal reference.
+
+		This should be called when the terminal is rebound to ensure
+		searches can be properly performed.
+
+		Args:
+			terminal_obj: New terminal TextInfo object
+		"""
+		self._terminal = terminal_obj
+		# Clear search results when terminal changes
+		self.clear_search()
 
 
 class CommandHistoryManager:
@@ -3321,6 +3347,20 @@ class CommandHistoryManager:
 	def get_history_count(self) -> int:
 		"""Get number of commands in history."""
 		return len(self._history)
+
+	def update_terminal(self, terminal_obj):
+		"""
+		Update the terminal reference.
+
+		This should be called when the terminal is rebound to ensure
+		history navigation can be properly performed.
+
+		Args:
+			terminal_obj: New terminal TextInfo object
+		"""
+		self._terminal = terminal_obj
+		# Clear history when terminal changes
+		self.clear_history()
 
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
@@ -3632,14 +3672,23 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# Initialize BookmarkManager for this terminal (Section 8.3 - v1.0.29+)
 			if not self._bookmarkManager:
 				self._bookmarkManager = BookmarkManager(obj)
+			else:
+				# Update terminal reference when terminal is rebound
+				self._bookmarkManager.update_terminal(obj)
 
 			# Initialize OutputSearchManager for this terminal (Section 8.2 - v1.0.30+)
 			if not self._searchManager:
 				self._searchManager = OutputSearchManager(obj)
+			else:
+				# Update terminal reference when terminal is rebound
+				self._searchManager.update_terminal(obj)
 
 			# Initialize CommandHistoryManager for this terminal (Section 8.1 - v1.0.31+)
 			if not self._commandHistoryManager:
 				self._commandHistoryManager = CommandHistoryManager(obj, max_history=100)
+			else:
+				# Update terminal reference when terminal is rebound
+				self._commandHistoryManager.update_terminal(obj)
 
 			# Clear position cache when switching terminals
 			self._positionCalculator.clear_cache()
