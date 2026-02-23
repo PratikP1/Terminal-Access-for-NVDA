@@ -112,6 +112,7 @@ conf_dict = {
         "cursorDelay": 20,
         "quietMode": False,
         "verboseMode": False,  # Added verboseMode
+        "indentationOnLineRead": False,
         "windowTop": 0,
         "windowBottom": 0,
         "windowLeft": 0,
@@ -166,6 +167,7 @@ def reset_config():
         "cursorDelay": 20,
         "quietMode": False,
         "verboseMode": False,
+        "indentationOnLineRead": False,
         "windowTop": 0,
         "windowBottom": 0,
         "windowLeft": 0,

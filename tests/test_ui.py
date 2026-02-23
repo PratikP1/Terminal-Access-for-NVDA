@@ -102,6 +102,23 @@ class TestConfigManager(unittest.TestCase):
 		self.assertTrue(hasattr(config_mgr, 'get'))
 		self.assertTrue(hasattr(config_mgr, 'set'))
 
+	def test_settings_panel_handles_missing_profile_manager(self):
+		"""Ensure settings panel builds without a profile manager."""
+		from globalPlugins.terminalAccess import TerminalAccessSettingsPanel
+		import globalPluginHandler
+
+		# Simulate no running plugins / profile manager
+		globalPluginHandler.runningPlugins = []
+
+		panel = TerminalAccessSettingsPanel(None)
+		settingsSizer = MagicMock()
+
+		# Should not raise when building the UI
+		panel.makeSettings(settingsSizer)
+
+		# Default profile selection should fall back to "None"
+		self.assertEqual(panel.defaultProfileChoice.SetSelection.call_args[0][0], 0)
+
 
 if __name__ == '__main__':
 	unittest.main()
