@@ -5956,6 +5956,77 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# Translators: Message when no bookmarks exist
 			ui.message(_("No bookmarks set"))
 
+	# Section 9: Tab management gestures (v1.0.39+)
+
+	@scriptHandler.script(
+		# Translators: Description for creating a new terminal tab
+		description=_("Create a new tab in the terminal"),
+		category=SCRCAT_TERMINALACCESS,
+		gesture="kb:NVDA+shift+alt+t"
+	)
+	def script_createNewTab(self, gesture):
+		"""Create a new tab in the terminal."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		# Send the standard keyboard shortcut for creating a new tab
+		# Most modern terminals use Ctrl+Shift+T
+		try:
+			import keyboardHandler
+			# Press Ctrl+Shift+T to create new tab
+			keyboardHandler.KeyboardInputGesture.fromName("control+shift+t").send()
+			# Announce that we're creating a new tab
+			# Translators: Message when creating a new tab
+			ui.message(_("Creating new tab"))
+		except Exception:
+			# Translators: Error message when tab creation fails
+			ui.message(_("Unable to create new tab"))
+
+	@scriptHandler.script(
+		# Translators: Description for listing/navigating tabs
+		description=_("List tabs or switch to tab bar"),
+		category=SCRCAT_TERMINALACCESS,
+		gesture="kb:NVDA+alt+t"
+	)
+	def script_listTabs(self, gesture):
+		"""List all tabs or focus tab bar."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		if not self._tabManager:
+			# Translators: Error message when tab manager not initialized
+			ui.message(_("Tab manager not available"))
+			return
+
+		# Get list of known tabs
+		tabs = self._tabManager.list_tabs()
+		tab_count = self._tabManager.get_tab_count()
+		current_tab_id = self._tabManager.get_current_tab_id()
+
+		if tab_count == 0:
+			# Translators: Message when no tabs are detected
+			ui.message(_("No tabs detected"))
+		elif tab_count == 1:
+			# Only one tab, announce it
+			# Translators: Message for single tab
+			ui.message(_("Single tab: {title}").format(title=tabs[0].get('title', 'Unknown')))
+		else:
+			# Multiple tabs - show simple announcement for now
+			# (Full dialog implementation would go here)
+			# Translators: Message listing tab count
+			ui.message(_("{count} tabs detected").format(count=tab_count))
+
+			# Also send Ctrl+Tab to switch to next tab
+			try:
+				import keyboardHandler
+				keyboardHandler.KeyboardInputGesture.fromName("control+tab").send()
+				# Translators: Message when switching tabs
+				ui.message(_("Switching to next tab"))
+			except Exception:
+				pass
+
 	# Section 8.1: Command history navigation gestures (v1.0.31+)
 
 	@scriptHandler.script(
