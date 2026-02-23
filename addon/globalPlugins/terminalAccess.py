@@ -6362,13 +6362,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		try:
 			result = api.copyToClip(text, notify=False)
 			return result if isinstance(result, bool) else True
-		except TypeError:
-			# Older NVDA versions do not support the notify parameter
-			try:
-				result = api.copyToClip(text)
-				return result if isinstance(result, bool) else True
-			except Exception:
-				return False
 		except Exception:
 			return False
 
