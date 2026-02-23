@@ -80,6 +80,7 @@ class TestCharacterReading(unittest.TestCase):
 		mock_copy = MagicMock()
 		mock_copy.move.return_value = 1  # Successful move
 		mock_copy.text = 'b'
+		mock_copy.compareEndPoints.return_value = -1
 		mock_info.copy.return_value = mock_copy
 		mock_api.getReviewPosition.return_value = mock_info
 
