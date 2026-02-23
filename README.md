@@ -93,7 +93,7 @@ Terminal Access enables screen reader users to efficiently navigate and interact
 
 **Total: 19 supported terminal applications (including WSL)**
 
-For detailed information about each terminal and third-party terminal support, see the [User Guide](#user-guide). For WSL-specific information, see [WSL_TESTING_GUIDE.md](docs/user/WSL_TESTING_GUIDE.md).
+For detailed information about each terminal and third-party terminal support, see the [User Guide](addon/doc/en/readme.html). For WSL-specific information, see [WSL_TESTING_GUIDE.md](docs/user/WSL_TESTING_GUIDE.md).
 
 ## System Requirements
 
@@ -120,7 +120,7 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 Terminal Access provides keyboard shortcuts for efficient terminal navigation. For the complete list of gestures and detailed usage instructions, see:
 
 - Press **NVDA+Shift+F1** while using the add-on to view the built-in guide
-- View the [User Guide](#user-guide) section below
+- View the [User Guide](addon/doc/en/readme.html) for detailed documentation
 - Refer to `addon/doc/en/readme.html` file
 
 **Most Common Gestures:**
@@ -130,7 +130,7 @@ Terminal Access provides keyboard shortcuts for efficient terminal navigation. F
 - **NVDA+Alt+[/]** - Adjust punctuation level
 - **NVDA+Alt+Q** - Toggle quiet mode
 
-See the [User Guide](#user-guide) section for complete gesture documentation.
+For complete gesture documentation and advanced features, see the [User Guide](addon/doc/en/readme.html).
 
 ## Configuration
 
@@ -180,156 +180,17 @@ Access Terminal Access settings through:
 
 For troubleshooting common issues, please refer to the **[FAQ.md](docs/user/FAQ.md#troubleshooting)** which provides comprehensive solutions for common problems.
 
-## User Guide
-
-Terminal Access provides comprehensive documentation:
-
-### Getting Started
-- **Quick Reference**: See [Key Gestures](#key-gestures) above for most common commands
-- **Built-in Help**: Press **NVDA+Shift+F1** while using the add-on
-- **Installation Guide**: See [Installation](#installation) section above
+## Additional Documentation
 
 ### User Documentation
-- **[FAQ.md](docs/user/FAQ.md)** - Frequently asked questions covering:
-  - General questions and getting started
-  - Terminal compatibility
-  - Feature usage and workflows
-  - Troubleshooting common issues
-  - Advanced topics
-
-### Advanced Topics
-The following documentation covers advanced features and configuration:
-
-#### Application Profiles
-Application profiles automatically adjust settings for specific applications like Vim, tmux, git, and htop.
-
-**Viewing and Managing Profiles:**
-1. Open NVDA Settings (NVDA+N → Preferences → Settings)
-2. Navigate to "Terminal Access" category
-3. Go to "Application Profiles" section
-4. View, export, import, or delete profiles
-
-**Built-in Profiles:**
-- **vim/nvim**: Enhanced punctuation for code, silent status line
-- **tmux**: Silent status bar for cleaner navigation
-- **htop**: Optimized regions for header and process list
-- **less/more**: Quiet mode for document reading
-- **git**: Enhanced punctuation for diffs and logs
-- **nano**: Silent shortcut bar
-- **irssi**: Chat-optimized settings
-- **WSL**: Linux command-line optimized settings
-
-**Custom Profiles:**
-Export an existing profile, edit the JSON file to customize settings, and import it back.
-
-#### Third-Party Terminal Support
-Terminal Access supports 13 popular third-party terminal emulators including:
-- Cmder, ConEmu, mintty (Git Bash/Cygwin)
-- PuTTY, KiTTY (SSH/telnet clients)
-- Terminus, Hyper (modern Electron-based)
-- Alacritty, WezTerm (GPU-accelerated)
-- Tabby, FluentTerminal (connection management)
-
-All Terminal Access features work with third-party terminals including navigation, selection, cursor tracking, and profiles.
-
-#### Window Definitions
-Define specific screen regions with different speech behaviors:
-- **Silent zones**: Suppress status bars and repetitive UI elements
-- **Announce regions**: Normal speech for content areas
-- **Monitor regions**: Track changes in specific areas
-
-Use NVDA+Alt+F2 to set window boundaries, NVDA+Alt+F3 to clear.
-
-#### Unicode and International Text
-- **CJK Support**: Accurate double-width character handling
-- **RTL Text**: Arabic and Hebrew with bidirectional algorithm (requires `python-bidi` and `arabic-reshaper`)
-- **Emoji**: Complex emoji sequences including ZWJ, skin tones, and flags (requires `emoji` package)
-
-#### Performance Features
-- **Position Caching**: Up to 500x faster for repeated navigation (v1.0.21+)
-- **Incremental Tracking**: 10-20x faster for small cursor movements
-- **Background Processing**: Long operations with progress dialogs
-
-### Complete Keyboard Reference
-
-**Navigation:**
-- **NVDA+Alt+U/I/O** - Read previous/current/next line
-- **NVDA+Alt+I** (twice) - Announce line indentation level
-- **NVDA+Alt+F5** - Toggle automatic indentation announcement
-- **NVDA+Alt+J/K/L** - Read previous/current/next word
-- **NVDA+Alt+M/Comma/Period** - Read previous/current/next character
-- **NVDA+Alt+Comma** (twice) - Read character phonetically
-- **NVDA+Alt+Comma** (three times) - Announce character code
-
-**Screen Edge Navigation:**
-- **NVDA+Alt+Home** - Jump to first character of line
-- **NVDA+Alt+End** - Jump to last character of line
-- **NVDA+Alt+PageUp** - Jump to top of terminal buffer
-- **NVDA+Alt+PageDown** - Jump to bottom of terminal buffer
-
-**Directional Reading:**
-- **NVDA+Alt+Shift+Left** - Read from cursor to beginning of line
-- **NVDA+Alt+Shift+Right** - Read from cursor to end of line
-- **NVDA+Alt+Shift+Up** - Read from cursor to top of buffer
-- **NVDA+Alt+Shift+Down** - Read from cursor to bottom of buffer
-
-**Reading & Position:**
-- **NVDA+Alt+A** - Continuous reading (Say All) from cursor to end
-- **NVDA+Alt+P** - Announce current row and column position
-
-**Punctuation Levels:**
-- **NVDA+Alt+[** - Decrease punctuation level
-- **NVDA+Alt+]** - Increase punctuation level
-- Levels: None (0) → Some (1) → Most (2) → All (3)
-
-**Cursor Tracking & Attributes:**
-- **NVDA+Alt+Asterisk** - Cycle cursor tracking mode
-- **NVDA+Alt+Shift+A** - Read text attributes/colors at cursor
-
-**Screen Windowing:**
-- **NVDA+Alt+F2** - Set screen window (press twice: start, then end)
-- **NVDA+Alt+F3** - Clear screen window
-- **NVDA+Alt+Plus** - Read window content
-
-**Selection & Copy:**
-- **NVDA+Alt+R** - Toggle mark (start/end/clear for enhanced selection)
-- **NVDA+Alt+C** - Copy linear selection
-- **NVDA+Alt+Shift+C** - Copy rectangular selection
-- **NVDA+Alt+X** - Clear selection marks
-- **NVDA+Alt+V** - Enter legacy copy mode
-
-**Bookmarks (v1.0.29+):**
-- **NVDA+Alt+Shift+0-9** - Set bookmark at current position
-- **NVDA+Alt+0-9** - Jump to bookmark
-- **NVDA+Alt+Shift+B** - List all bookmarks
-
-**Tab Management (v1.0.39+):**
-- **NVDA+Shift+Alt+T** - Create a new tab in the terminal
-- **NVDA+Alt+T** - List tabs or switch to next tab
-
-**Command History (v1.0.31+):**
-- **NVDA+Alt+Shift+H** - Scan and detect command history
-- **NVDA+Alt+Up/Down Arrow** - Navigate commands
-- **NVDA+Alt+Shift+L** - List command history
-
-**Search (v1.0.30+):**
-- **NVDA+Alt+F** - Search terminal output
-- **NVDA+F3** - Jump to next search match
-- **NVDA+Shift+F3** - Jump to previous search match
-
-**Special Features:**
-- **NVDA+Alt+K** (twice) - Spell current word
-- **NVDA+Alt+Q** - Toggle quiet mode
-- **NVDA+Alt+F10** - Announce active and default profiles
-- **NVDA+Shift+F1** - Open user guide
-
-### Additional Documentation
+- **[User Guide](addon/doc/en/readme.html)** - Comprehensive guide covering basic and advanced features including application profiles, third-party terminal support, window definitions, Unicode/CJK support, and performance optimization
+- **[FAQ.md](docs/user/FAQ.md)** - Frequently asked questions covering general questions, terminal compatibility, feature usage, troubleshooting, and advanced topics
 - **[WSL_TESTING_GUIDE.md](docs/user/WSL_TESTING_GUIDE.md)** - Windows Subsystem for Linux guide
 - **[TRANSLATION_GUIDE.md](docs/user/TRANSLATION_GUIDE.md)** - Guide for translators (v1.0.32+)
+
+### Development Documentation
 - **[CHANGELOG.md](CHANGELOG.md)** - Detailed version history
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development setup and contribution guidelines
-
-### Developer Documentation
 - **[ARCHITECTURE.md](docs/developer/ARCHITECTURE.md)** - System design and architecture
 - **[API_REFERENCE.md](docs/developer/API_REFERENCE.md)** - Complete API documentation
 - **[ROADMAP.md](docs/developer/ROADMAP.md)** - Project roadmap and future plans

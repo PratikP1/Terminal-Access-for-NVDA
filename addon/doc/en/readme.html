@@ -79,6 +79,7 @@
 		<li><a href="#keyboard-commands">Keyboard Commands</a></li>
 		<li><a href="#practical-scenarios">Practical Usage Scenarios</a></li>
 		<li><a href="#settings">Settings</a></li>
+		<li><a href="#advanced-topics">Advanced Topics</a></li>
 		<li><a href="#tips">Tips and Best Practices</a></li>
 		<li><a href="#troubleshooting">Troubleshooting</a></li>
 		<li><a href="#license">License</a></li>
@@ -1067,7 +1068,321 @@
 			<li><strong>Cursor Delay</strong> only affects cursor tracking announcements</li>
 		</ul>
 	</div>
-	
+
+	<h2 id="advanced-topics">Advanced Topics</h2>
+
+	<h3>Application Profiles</h3>
+	<p>
+		Application profiles allow Terminal Access to automatically adjust its settings based on the terminal
+		application you're using. Each profile can customize punctuation levels, cursor tracking modes, and
+		define window regions for specialized behavior.
+	</p>
+
+	<h4>Built-in Application Profiles</h4>
+	<p>Terminal Access comes with default profiles for popular applications:</p>
+	<ul>
+		<li><strong>vim/nvim</strong>: Optimized for Vim/Neovim editors
+			<ul>
+				<li>Punctuation: MOST (for code symbols)</li>
+				<li>Cursor Tracking: WINDOW mode</li>
+				<li>Silent zones: Status line (bottom line), Command line (second from bottom)</li>
+			</ul>
+		</li>
+		<li><strong>tmux</strong>: Terminal multiplexer support
+			<ul>
+				<li>Cursor Tracking: STANDARD mode</li>
+				<li>Silent zones: Status bar (bottom line)</li>
+			</ul>
+		</li>
+		<li><strong>htop</strong>: Process viewer optimization
+			<ul>
+				<li>Repeated symbols: Disabled (progress bars have many repeated characters)</li>
+				<li>Window regions: Header (lines 1-4), Process list (lines 5+)</li>
+			</ul>
+		</li>
+		<li><strong>less/more</strong>: Pager applications
+			<ul>
+				<li>Quiet mode: Enabled</li>
+				<li>Key echo: Disabled (navigation keys not announced)</li>
+			</ul>
+		</li>
+		<li><strong>git</strong>: Version control operations
+			<ul>
+				<li>Punctuation: MOST (symbols in diffs)</li>
+				<li>Repeated symbols: Disabled (many dashes/equals)</li>
+			</ul>
+		</li>
+		<li><strong>nano</strong>: GNU nano editor
+			<ul>
+				<li>Cursor Tracking: STANDARD mode</li>
+				<li>Silent zones: Status bar, Shortcut bar (bottom two lines)</li>
+			</ul>
+		</li>
+		<li><strong>irssi</strong>: IRC client
+			<ul>
+				<li>Punctuation: SOME (for chat)</li>
+				<li>Line pause: Disabled (fast reading for chat)</li>
+				<li>Silent zones: Status bar (bottom line)</li>
+			</ul>
+		</li>
+		<li><strong>WSL</strong>: Windows Subsystem for Linux
+			<ul>
+				<li>Punctuation: MOST (code-friendly for Linux commands and paths)</li>
+				<li>Cursor Tracking: STANDARD mode</li>
+				<li>Repeated symbols: OFF (progress bars and separators common in Linux tools)</li>
+			</ul>
+		</li>
+	</ul>
+
+	<h4>Managing Profiles</h4>
+	<p>To view and manage installed profiles:</p>
+	<ol>
+		<li>Open NVDA Settings (NVDA+N → Preferences → Settings)</li>
+		<li>Navigate to "Terminal Access" category</li>
+		<li>Go to "Application Profiles" section</li>
+		<li>The "Installed profiles" dropdown shows all available profiles</li>
+	</ol>
+
+	<p><strong>Exporting a Profile:</strong></p>
+	<ol>
+		<li>Open Terminal Access Settings</li>
+		<li>Navigate to "Application Profiles" section</li>
+		<li>Select the profile you want to export from the dropdown</li>
+		<li>Click "Export..." button</li>
+		<li>Choose a location and filename (default: profilename_profile.json)</li>
+		<li>Click "Save"</li>
+	</ol>
+
+	<p><strong>Importing a Profile:</strong></p>
+	<ol>
+		<li>Open Terminal Access Settings</li>
+		<li>Navigate to "Application Profiles" section</li>
+		<li>Click "Import..." button</li>
+		<li>Browse to the profile JSON file</li>
+		<li>Click "Open"</li>
+	</ol>
+
+	<p><strong>Deleting a Custom Profile:</strong></p>
+	<ol>
+		<li>Open Terminal Access Settings</li>
+		<li>Navigate to "Application Profiles" section</li>
+		<li>Select the custom profile from the dropdown</li>
+		<li>Click "Delete Profile" button</li>
+		<li>Confirm deletion</li>
+	</ol>
+
+	<div class="note">
+		<strong>Note:</strong> Default profiles (vim, tmux, htop, less, git, nano, irssi, WSL) cannot be deleted.
+	</div>
+
+	<h3>Third-Party Terminal Support</h3>
+	<p>
+		Terminal Access supports 13 popular third-party terminal emulators in addition to the 5 built-in Windows terminals.
+	</p>
+
+	<h4>Supported Third-Party Terminals</h4>
+	<ul>
+		<li><strong>Cmder</strong>: Portable console emulator for Windows
+			<ul>
+				<li>Popular among developers</li>
+				<li>Includes Unix tools</li>
+				<li>Default profile: Balanced settings for general use</li>
+			</ul>
+		</li>
+		<li><strong>ConEmu</strong>: Windows console emulator with tabs
+			<ul>
+				<li>Both 32-bit and 64-bit versions supported</li>
+				<li>Highly customizable</li>
+				<li>Supports multiple console processes</li>
+			</ul>
+		</li>
+		<li><strong>mintty</strong>: Terminal emulator for Git Bash and Cygwin
+			<ul>
+				<li>Lightweight and fast</li>
+				<li>Popular for Git operations</li>
+				<li>Default profile: MOST punctuation (for development)</li>
+			</ul>
+		</li>
+		<li><strong>PuTTY / KiTTY</strong>: SSH and telnet clients
+			<ul>
+				<li>Industry-standard for remote access</li>
+				<li>Optimized for SSH sessions</li>
+			</ul>
+		</li>
+		<li><strong>Terminus</strong>: Modern, highly configurable terminal
+			<ul>
+				<li>Electron-based</li>
+				<li>Cross-platform support</li>
+				<li>Tab and split pane features</li>
+			</ul>
+		</li>
+		<li><strong>Hyper</strong>: Terminal with web technologies
+			<ul>
+				<li>Electron-based</li>
+				<li>Extensible with plugins</li>
+				<li>Modern UI</li>
+			</ul>
+		</li>
+		<li><strong>Alacritty</strong>: GPU-accelerated terminal emulator
+			<ul>
+				<li>Extremely fast</li>
+				<li>Minimal, focused design</li>
+				<li>Written in Rust</li>
+			</ul>
+		</li>
+		<li><strong>WezTerm</strong>: GPU-accelerated terminal with multiplexing
+			<ul>
+				<li>Advanced features</li>
+				<li>Both standard and GUI variants supported</li>
+				<li>Excellent Unicode support</li>
+			</ul>
+		</li>
+		<li><strong>Tabby</strong>: Modern terminal with SSH and serial support
+			<ul>
+				<li>Electron-based</li>
+				<li>Built-in SSH client</li>
+				<li>Connection management</li>
+			</ul>
+		</li>
+		<li><strong>FluentTerminal</strong>: UWP-based terminal with modern UI
+			<ul>
+				<li>Windows 10/11 native</li>
+				<li>Fluent Design System</li>
+				<li>Touch-friendly</li>
+			</ul>
+		</li>
+	</ul>
+
+	<div class="info">
+		All Terminal Access features work with third-party terminals including navigation, selection,
+		cursor tracking, and profiles. Terminal Access automatically detects third-party terminals
+		when you switch to them.
+	</div>
+
+	<h3>Window Definitions</h3>
+	<p>
+		Window definitions allow you to define specific regions of the terminal screen with different speech behaviors.
+		This is useful for applications with status bars, command areas, or split panes.
+	</p>
+
+	<h4>Window Definition Basics</h4>
+	<p>Each window definition has:</p>
+	<ul>
+		<li><strong>Name</strong>: Identifier for the window</li>
+		<li><strong>Coordinates</strong>: Top, bottom, left, right (1-based)</li>
+		<li><strong>Mode</strong>: How content is announced</li>
+		<li><strong>Enabled</strong>: Whether the window is active</li>
+	</ul>
+
+	<h4>Window Modes</h4>
+	<ul>
+		<li><strong>announce</strong>: Read content normally (default)</li>
+		<li><strong>silent</strong>: Suppress all speech for this region</li>
+		<li><strong>monitor</strong>: Track changes but announce differently</li>
+	</ul>
+
+	<h4>Coordinate System</h4>
+	<p>Coordinates are 1-based (row 1, col 1 is top-left):</p>
+	<ul>
+		<li><strong>Top/Bottom</strong>: Row numbers (1 to screen height)</li>
+		<li><strong>Left/Right</strong>: Column numbers (1 to screen width)</li>
+		<li><strong>9999</strong>: Special value meaning "last row/column"</li>
+	</ul>
+
+	<h4>Use Cases</h4>
+	<ul>
+		<li><strong>Status Bars</strong>: Silence repetitive status information</li>
+		<li><strong>Split Panes</strong>: Define regions for tmux/screen panes</li>
+		<li><strong>Headers</strong>: Special handling for htop/top headers</li>
+		<li><strong>Command Areas</strong>: Monitor command input regions</li>
+	</ul>
+
+	<h3>Unicode and International Text</h3>
+
+	<h4>CJK Character Support</h4>
+	<p>Terminal Access correctly handles double-width characters used in Chinese, Japanese, and Korean:</p>
+	<ul>
+		<li><strong>Accurate Width Calculation</strong>: CJK characters count as 2 columns</li>
+		<li><strong>Column Extraction</strong>: Rectangular selection works correctly with CJK</li>
+		<li><strong>Combining Characters</strong>: Zero-width combining marks handled properly</li>
+	</ul>
+	<div class="info">
+		<strong>Example:</strong> In the text "Hello世界", "Hello" = 5 columns, "世界" = 4 columns, total = 9 columns
+	</div>
+
+	<h4>Right-to-Left (RTL) Text Support</h4>
+	<p>Terminal Access automatically detects and processes RTL text:</p>
+	<p><strong>Supported Languages:</strong></p>
+	<ul>
+		<li>Arabic (U+0600-U+06FF, U+0750-U+077F)</li>
+		<li>Hebrew (U+0590-U+05FF)</li>
+	</ul>
+
+	<p><strong>Features:</strong></p>
+	<ul>
+		<li><strong>Automatic Detection</strong>: Analyzes character ranges to detect RTL text</li>
+		<li><strong>Bidirectional Algorithm</strong>: Unicode UAX #9 implementation</li>
+		<li><strong>Arabic Reshaping</strong>: Contextual forms (initial, medial, final, isolated)</li>
+		<li><strong>Mixed Text</strong>: Handles RTL and LTR text together</li>
+		<li><strong>Column Extraction</strong>: RTL-aware column operations</li>
+	</ul>
+
+	<div class="note">
+		<strong>Optional Dependencies:</strong> For full RTL support, install:<br>
+		<code>pip install python-bidi arabic-reshaper</code><br>
+		Without these libraries, Terminal Access gracefully degrades to basic Unicode support.
+	</div>
+
+	<h4>Emoji Support</h4>
+	<p>Terminal Access handles complex emoji sequences:</p>
+	<p><strong>Supported Features:</strong></p>
+	<ul>
+		<li><strong>Zero-Width Joiners (ZWJ)</strong>: Family emoji, profession emoji</li>
+		<li><strong>Skin Tone Modifiers</strong>: U+1F3FB through U+1F3FF</li>
+		<li><strong>Variation Selectors</strong>: Emoji vs. text presentation</li>
+		<li><strong>Flag Sequences</strong>: Country flags</li>
+		<li><strong>Width Calculation</strong>: Emoji typically 2 columns wide</li>
+	</ul>
+
+	<div class="note">
+		<strong>Optional Dependency:</strong> For full emoji support, install:<br>
+		<code>pip install emoji</code>
+	</div>
+
+	<h3>Performance Optimization</h3>
+	<p>Terminal Access includes several performance optimizations for large terminal buffers.</p>
+
+	<h4>Position Caching</h4>
+	<p>Position calculations are cached for fast repeated access:</p>
+	<ul>
+		<li><strong>Cache Timeout</strong>: 1000ms (1 second)</li>
+		<li><strong>Cache Size</strong>: Up to 100 positions</li>
+		<li><strong>Automatic Invalidation</strong>: On content changes, window resize, terminal switch</li>
+	</ul>
+
+	<p><strong>Performance Impact:</strong></p>
+	<ul>
+		<li>First calculation: O(n) where n = row number</li>
+		<li>Cached calculation: O(1) constant time</li>
+		<li>Row 1000: ~500ms → &lt;1ms with cache</li>
+	</ul>
+
+	<h4>Incremental Position Tracking</h4>
+	<p>For small cursor movements (within 10 positions):</p>
+	<ul>
+		<li><strong>10-20x faster</strong> than full calculation</li>
+		<li><strong>No cache required</strong> for simple movements</li>
+		<li><strong>Automatic fallback</strong> for large jumps</li>
+	</ul>
+
+	<h4>Background Processing</h4>
+	<p>Large rectangular selections (&gt;100 rows) run in background threads:</p>
+	<ul>
+		<li><strong>Progress Dialog</strong>: Shows completion percentage</li>
+		<li><strong>Cancellation Support</strong>: Cancel long-running operations</li>
+		<li><strong>Operation Queue</strong>: Prevents overlapping operations</li>
+	</ul>
+
 	<h2 id="tips">Tips and Best Practices</h2>
 	
 	<h3>Efficient Terminal Usage</h3>
