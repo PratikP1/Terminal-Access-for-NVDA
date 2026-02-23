@@ -8,6 +8,12 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 - Raised minimum NVDA requirement to 2025.1 (Python 3.11 runtime); compatibility with earlier versions removed
 
+## [1.0.44] - 2026-02-23
+
+### Changed
+
+- Version bump for release
+
 ## [1.0.43] - 2026-02-23
 
 ### Changed

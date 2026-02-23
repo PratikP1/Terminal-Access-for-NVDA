@@ -72,5 +72,37 @@ class TestGestureExecution(unittest.TestCase):
 	pass
 
 
+class TestGestureScoping(unittest.TestCase):
+	"""Test that gestures only activate when a terminal has focus."""
+
+	def test_gestures_disable_when_not_terminal(self):
+		from globalPlugins.terminalAccess import GlobalPlugin
+
+		plugin = GlobalPlugin()
+		plugin._terminalGestures = {"kb:NVDA+alt+u": "script_readPreviousLine"}
+		plugin._gesturesBound = True
+
+		non_terminal = MagicMock()
+		non_terminal.appModule = MagicMock()
+		non_terminal.appModule.appName = "notepad"
+
+		plugin._updateGestureBindingsForFocus(non_terminal)
+		self.assertFalse(plugin._gesturesBound)
+
+	def test_gestures_enable_for_terminal(self):
+		from globalPlugins.terminalAccess import GlobalPlugin
+
+		plugin = GlobalPlugin()
+		plugin._terminalGestures = {"kb:NVDA+alt+u": "script_readPreviousLine"}
+		plugin._gesturesBound = False
+
+		terminal = MagicMock()
+		terminal.appModule = MagicMock()
+		terminal.appModule.appName = "windowsterminal"
+
+		plugin._updateGestureBindingsForFocus(terminal)
+		self.assertTrue(plugin._gesturesBound)
+
+
 if __name__ == '__main__':
 	unittest.main()
