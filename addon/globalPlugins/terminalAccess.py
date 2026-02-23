@@ -4466,7 +4466,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the current character
 		description=_("Read current character in terminal. Press twice for phonetic. Press three times for character code."),
-		gesture="kb:NVDA+alt+comma"
+		gesture="kb:NVDA+alt+,"
 	)
 	def script_readCurrentChar(self, gesture):
 		"""Read the current character. Double-press for phonetic. Triple-press for character code."""
@@ -4489,7 +4489,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the next character
 		description=_("Read next character in terminal"),
-		gesture="kb:NVDA+alt+period"
+		gesture="kb:NVDA+alt+."
 	)
 	def script_readNextChar(self, gesture):
 		"""Read the next character in the terminal."""
@@ -5260,34 +5260,49 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			phonetic: Whether to use phonetic reading
 		"""
 		try:
-			reviewPos = self._getReviewPosition()
-			if reviewPos is None:
+			reviewInfo = self._getReviewPosition()
+			if reviewInfo is None:
 				# Translators: Message when no review position
 				ui.message(_("No review position"))
 				return
 
+			reviewInfo = reviewInfo.copy()
+
 			# Move review cursor if needed
 			if movement != 0:
-				info = reviewPos.copy()
-				result = info.move(textInfos.UNIT_CHARACTER, movement)
-				if result == 0:
+				lineInfo = reviewInfo.copy()
+				lineInfo.expand(textInfos.UNIT_LINE)
+
+				reviewInfo.expand(textInfos.UNIT_CHARACTER)
+				reviewInfo.collapse()
+
+				result = reviewInfo.move(textInfos.UNIT_CHARACTER, movement)
+				isEdge = (
+					result == 0
+					or (movement > 0 and reviewInfo.compareEndPoints(lineInfo, "endToEnd") >= 0)
+					or (movement < 0 and reviewInfo.compareEndPoints(lineInfo, "startToStart") <= 0)
+				)
+				if isEdge:
 					# Translators: Message when at edge of text
 					ui.message(_("Edge") if movement > 0 else _("Top"))
 					return
-				api.setReviewPosition(info)
-				reviewPos = info
+
+				api.setReviewPosition(reviewInfo)
 
 			# Expand to character and read
-			info = reviewPos.copy()
-			info.expand(textInfos.UNIT_CHARACTER)
+			reviewInfo.expand(textInfos.UNIT_CHARACTER)
 
 			# Use speech to speak the character
 			if phonetic:
 				# For phonetic reading, speak with spelling mode
-				speech.speakSpelling(info.text)
+				speech.speakSpelling(reviewInfo.text)
 			else:
 				# Normal character reading
-				speech.speakTextInfo(info, unit=textInfos.UNIT_CHARACTER, reason=speech.OutputReason.CARET)
+				speech.speakTextInfo(
+					reviewInfo,
+					unit=textInfos.UNIT_CHARACTER,
+					reason=speech.OutputReason.CARET
+				)
 
 		except Exception:
 			# Translators: Message when unable to read character

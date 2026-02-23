@@ -3,6 +3,7 @@ pytest configuration and fixtures for Terminal Access tests.
 """
 import sys
 import os
+import types
 from unittest.mock import Mock, MagicMock
 
 import pytest
@@ -61,7 +62,32 @@ gui_mock.settingsDialogs = settings_dialogs_mock
 
 sys.modules['textInfos'] = MagicMock()
 sys.modules['addonHandler'] = MagicMock()
-sys.modules['scriptHandler'] = MagicMock()
+
+# Provide a scriptHandler module with a real decorator and repeat counter
+scriptHandler_mock = types.ModuleType("scriptHandler")
+
+def _script_decorator(description=None, gesture=None, gestures=None, **kwargs):
+    """Return the function unchanged while preserving gesture metadata for tests."""
+    def decorator(func):
+        gesture_list = []
+        if gesture:
+            gesture_list.append(gesture)
+        if gestures:
+            if isinstance(gestures, (list, tuple, set)):
+                gesture_list.extend(list(gestures))
+            else:
+                gesture_list.append(gestures)
+        # Store gestures on the function for introspection in tests if needed
+        func.__gestures__ = gesture_list
+        return func
+    return decorator
+
+def _get_last_script_repeat_count():
+    return 0
+
+scriptHandler_mock.script = _script_decorator
+scriptHandler_mock.getLastScriptRepeatCount = _get_last_script_repeat_count
+sys.modules['scriptHandler'] = scriptHandler_mock
 sys.modules['globalCommands'] = MagicMock()
 sys.modules['speech'] = MagicMock()
 sys.modules['logHandler'] = MagicMock()
@@ -154,7 +180,7 @@ def ensure_mocks():
     """Ensure NVDA mocks are always available in sys.modules."""
     # This fixture runs automatically before each test
     # It ensures that if any test deleted a mock, it's restored
-    required_modules = ['config', 'api', 'ui', 'gui', 'globalPluginHandler']
+    required_modules = ['config', 'api', 'ui', 'gui', 'globalPluginHandler', 'textInfos', 'scriptHandler']
 
     for module_name in required_modules:
         if module_name not in sys.modules:
@@ -186,6 +212,11 @@ def ensure_mocks():
                 config_mock.conf.__setitem__ = lambda self, key, value: conf_dict.__setitem__(key, value)
                 config_mock.conf.spec = {}
                 sys.modules['config'] = config_mock
+            elif module_name == 'scriptHandler':
+                scriptHandler_reset = types.ModuleType("scriptHandler")
+                scriptHandler_reset.script = _script_decorator
+                scriptHandler_reset.getLastScriptRepeatCount = _get_last_script_repeat_count
+                sys.modules['scriptHandler'] = scriptHandler_reset
             else:
                 sys.modules[module_name] = MagicMock()
 
