@@ -3229,6 +3229,19 @@ class OutputSearchManager:
 		if not self._terminal or not pattern:
 			return 0
 
+		def _store_match(line_info, line_text, line_num):
+			"""
+			Store a search match with a bookmark and fallback position.
+
+			Fallback is needed when bookmarks aren't supported by the TextInfo implementation.
+			"""
+			bookmark = getattr(line_info, "bookmark", None)
+			try:
+				fallback_pos = line_info.copy()
+			except Exception:
+				fallback_pos = line_info
+			self._matches.append((bookmark, line_text, line_num, fallback_pos))
+
 		self._pattern = pattern
 		self._case_sensitive = case_sensitive
 		self._use_regex = use_regex
@@ -3257,7 +3270,7 @@ class OutputSearchManager:
 						# Create bookmark for this line
 						line_info = self._terminal.makeTextInfo(textInfos.POSITION_FIRST)
 						line_info.move(textInfos.UNIT_LINE, line_num - 1)
-						self._matches.append((line_info.bookmark, line_text, line_num))
+						_store_match(line_info, line_text, line_num)
 			else:
 				# Simple text search
 				search_pattern = pattern if case_sensitive else pattern.lower()
@@ -3268,7 +3281,7 @@ class OutputSearchManager:
 						# Create bookmark for this line
 						line_info = self._terminal.makeTextInfo(textInfos.POSITION_FIRST)
 						line_info.move(textInfos.UNIT_LINE, line_num - 1)
-						self._matches.append((line_info.bookmark, line_text, line_num))
+						_store_match(line_info, line_text, line_num)
 
 			return len(self._matches)
 
@@ -3329,6 +3342,13 @@ class OutputSearchManager:
 		self._current_match_index = len(self._matches) - 1
 		return self._jump_to_current_match()
 
+	def _unpack_match(self, match):
+		"""Handle legacy (bookmark, text, line) and new (bookmark, text, line, pos) tuples."""
+		if len(match) == 4:
+			return match[0], match[1], match[2], match[3]
+		bookmark, line_text, line_num = match
+		return bookmark, line_text, line_num, None
+
 	def _jump_to_current_match(self) -> bool:
 		"""
 		Jump to current match index.
@@ -3340,8 +3360,23 @@ class OutputSearchManager:
 			return False
 
 		try:
-			bookmark, line_text, line_num = self._matches[self._current_match_index]
-			pos = self._terminal.makeTextInfo(bookmark)
+			bookmark, line_text, line_num, pos_info = self._unpack_match(
+				self._matches[self._current_match_index]
+			)
+
+			pos = None
+			if bookmark is not None:
+				try:
+					pos = self._terminal.makeTextInfo(bookmark)
+				except Exception:
+					pos = None
+
+			if pos is None and pos_info is not None:
+				try:
+					pos = pos_info.copy()
+				except Exception:
+					pos = pos_info
+
 			if pos:
 				api.setReviewPosition(pos)
 				return True
@@ -3369,7 +3404,7 @@ class OutputSearchManager:
 		if not self._matches or self._current_match_index < 0:
 			return None
 
-		_, line_text, line_num = self._matches[self._current_match_index]
+		_, line_text, line_num, _ = self._unpack_match(self._matches[self._current_match_index])
 		return (self._current_match_index + 1, len(self._matches), line_text, line_num)
 
 	def clear_search(self) -> None:
