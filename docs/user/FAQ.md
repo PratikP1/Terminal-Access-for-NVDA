@@ -501,7 +501,7 @@ See CONTRIBUTING.md for guidelines.
 ## Still Have Questions?
 
 - **GitHub Issues**: https://github.com/PratikP1/Terminal-Access-for-NVDA/issues
-- **Documentation**: See README.md, ADVANCED_USER_GUIDE.md, API_REFERENCE.md
+- **Documentation**: See README.md, FAQ.md (this file), API_REFERENCE.md
 - **Code**: Explore the source on GitHub
 
 For support, open a GitHub issue with:

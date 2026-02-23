@@ -328,8 +328,9 @@ If you encounter issues with WSL support:
 ### Official Documentation
 
 - [WSL Documentation](https://docs.microsoft.com/en-us/windows/wsl/)
-- [Terminal Access Documentation](README.md)
-- [Terminal Access Advanced User Guide](ADVANCED_USER_GUIDE.md)
+- [Terminal Access Documentation](../../README.md)
+- [Terminal Access User Guide](../../README.md#user-guide)
+- [Terminal Access Advanced Topics](ADVANCED_USER_GUIDE.md)
 
 ### Community Support
 
@@ -338,7 +339,7 @@ If you encounter issues with WSL support:
 
 ### Related Guides
 
-- [Third-Party Terminal Support](ADVANCED_USER_GUIDE.md#third-party-terminal-emulator-support)
+- [Third-Party Terminal Support](ADVANCED_USER_GUIDE.md#third-party-terminal-support)
 - [Application Profiles](ADVANCED_USER_GUIDE.md#application-profiles)
 - [Troubleshooting](FAQ.md#troubleshooting)
 
