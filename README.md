@@ -180,22 +180,6 @@ Access Terminal Access settings through:
 
 For troubleshooting common issues, please refer to the **[FAQ.md](docs/user/FAQ.md#troubleshooting)** which provides comprehensive solutions for common problems.
 
-## Additional Documentation
-
-### User Documentation
-- **[User Guide](addon/doc/en/readme.html)** - Comprehensive guide covering basic and advanced features including application profiles, third-party terminal support, window definitions, Unicode/CJK support, and performance optimization
-- **[FAQ.md](docs/user/FAQ.md)** - Frequently asked questions covering general questions, terminal compatibility, feature usage, troubleshooting, and advanced topics
-- **[WSL_TESTING_GUIDE.md](docs/user/WSL_TESTING_GUIDE.md)** - Windows Subsystem for Linux guide
-- **[TRANSLATION_GUIDE.md](docs/user/TRANSLATION_GUIDE.md)** - Guide for translators (v1.0.32+)
-
-### Development Documentation
-- **[CHANGELOG.md](CHANGELOG.md)** - Detailed version history
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Development setup and contribution guidelines
-- **[ARCHITECTURE.md](docs/developer/ARCHITECTURE.md)** - System design and architecture
-- **[API_REFERENCE.md](docs/developer/API_REFERENCE.md)** - Complete API documentation
-- **[ROADMAP.md](docs/developer/ROADMAP.md)** - Project roadmap and future plans
-- **[TESTING_GUIDE.md](docs/testing/TESTING_GUIDE.md)** - Testing procedures
-
 ## Releases
 
 ### Latest Release
