@@ -6342,6 +6342,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 	def makeSettings(self, settingsSizer):
 		"""Create the settings UI elements with logical grouping."""
 		sHelper = guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
+		profileManager = self._getProfileManager()
 
 		# === Cursor Tracking Section ===
 		# Translators: Label for cursor tracking settings group
@@ -6556,7 +6557,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		)
 		# Set current default profile selection
 		currentDefault = config.conf["terminalAccess"].get("defaultProfile", "")
-		if currentDefault and currentDefault in self._profileManager.profiles:
+		if currentDefault and profileManager and currentDefault in profileManager.profiles:
 			# Find index (+1 because "None" is at index 0)
 			profileNames = self._getProfileNames()
 			if currentDefault in profileNames:
@@ -6731,6 +6732,17 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 				config.conf["terminalAccess"]["defaultProfile"] = profileNames[defaultProfileIndex - 1]
 			else:
 				config.conf["terminalAccess"]["defaultProfile"] = ""
+
+	def _getProfileManager(self):
+		"""Return the shared ProfileManager from the running global plugin, if available."""
+		try:
+			from . import terminalAccess
+			for plugin in globalPluginHandler.runningPlugins:
+				if isinstance(plugin, terminalAccess.GlobalPlugin):
+					return getattr(plugin, "_profileManager", None)
+		except Exception:
+			return None
+		return None
 
 	def _getProfileNames(self, withIndicators=False):
 		"""Get list of profile names for the dropdown.
