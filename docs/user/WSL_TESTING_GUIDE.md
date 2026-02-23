@@ -21,7 +21,7 @@ Windows Subsystem for Linux (WSL) is a compatibility layer for running Linux bin
 
 ### Prerequisites
 
-1. **NVDA** 2019.3 or later
+1. **NVDA** 2025.1 or later
 2. **Terminal Access for NVDA** v1.0.27 or later
 3. **Windows 10** version 2004+ or **Windows 11**
 4. **WSL** installed with a Linux distribution

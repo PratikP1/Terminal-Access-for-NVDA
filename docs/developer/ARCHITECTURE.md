@@ -25,7 +25,7 @@ TDSR for NVDA is implemented as an NVDA global plugin that enhances terminal acc
 
 ### Technology Stack
 
-- **Language**: Python 3.7+
+- **Language**: Python 3.11+
 - **Framework**: NVDA Global Plugin API
 - **UI**: wxPython (via NVDA's GUI helpers)
 - **Dependencies**: wcwidth (for Unicode/CJK support)
@@ -471,7 +471,7 @@ Files:
 
 - **Framework**: pytest with unittest.TestCase
 - **Mocking**: NVDA modules mocked in conftest.py
-- **CI/CD**: GitHub Actions (Python 3.7-3.11)
+- **CI/CD**: GitHub Actions (Python 3.11)
 - **Coverage**: 70%+ target, enforced in CI
 
 ### Manual Testing

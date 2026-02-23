@@ -98,8 +98,8 @@ For detailed information about each terminal and third-party terminal support, s
 ## System Requirements
 
 - **Operating Systems:** Windows 10, Windows 11
-- **NVDA Versions:** 2019.3 and later
-- **Python:** 3.7+ (included with NVDA)
+- **NVDA Versions:** 2025.1 and later
+- **Python:** 3.11+ (included with NVDA 2025.1+)
 
 ## Installation
 

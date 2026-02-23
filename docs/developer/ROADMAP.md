@@ -62,7 +62,7 @@
 ### Non-Functional Requirements
 
 #### NFR1: Compatibility
-- **NFR1.1:** Support NVDA versions 2019.3 and later
+- **NFR1.1:** Support NVDA versions 2025.1 and later
 - **NFR1.2:** Support Windows 10 (all editions)
 - **NFR1.3:** Support Windows 11 (all editions)
 - **NFR1.4:** Maintain forward compatibility with future NVDA versions
@@ -148,7 +148,7 @@
 #### Activities:
 - [ ] Manual testing on Windows 10
 - [ ] Manual testing on Windows 11
-- [ ] Testing with NVDA 2019.3 (minimum version)
+- [ ] Testing with NVDA 2025.1 (minimum version)
 - [ ] Testing with latest NVDA version
 - [ ] Testing with all supported terminals
 - [ ] Accessibility testing
@@ -267,7 +267,7 @@ linePause = True
 2. **Compatibility Testing**
    - Windows 10 versions
    - Windows 11 versions
-   - NVDA versions 2019.3+
+   - NVDA versions 2025.1+
    - All supported terminals
 
 3. **Accessibility Testing**
@@ -289,7 +289,7 @@ linePause = True
 
 - Windows 10 (21H2, 22H2)
 - Windows 11 (21H2, 22H2, 23H2)
-- NVDA 2019.3, 2020.x, 2021.x, 2022.x, 2023.x, 2024.x
+- NVDA 2025.1, 2025.x, 2026.x
 - Windows Terminal, PowerShell, cmd.exe
 
 ## Success Metrics

@@ -8,10 +8,10 @@ This comprehensive guide covers both automated and manual testing procedures for
 
 ### Python Version Requirements
 
-**TDSR is compatible with NVDA 2019.3 and later**, which corresponds to:
-- **Minimum Python Version**: 3.7 (NVDA 2019.3)
+**TDSR is compatible with NVDA 2025.1 and later**, which corresponds to:
+- **Minimum Python Version**: 3.11 (NVDA 2025.1 runtime)
 - **Maximum Python Version**: 3.11 (latest tested)
-- **Tested Versions**: 3.7, 3.8, 3.9, 3.10, 3.11
+- **Tested Versions**: 3.11 (NVDA runtime)
 
 The test suite runs on all these Python versions via CI/CD to ensure compatibility.
 
@@ -89,7 +89,7 @@ Tests run automatically on:
 - Every pull request
 
 #### GitHub Actions Workflow
-- **Test Matrix**: Python 3.7, 3.8, 3.9, 3.10, 3.11 on Windows
+- **Test Matrix**: Python 3.11 on Windows
 - **Linting**: flake8 on Ubuntu
 - **Coverage**: 70%+ required (enforced)
 - **Build**: scons build verification
@@ -137,7 +137,7 @@ def test_with_terminal(mock_terminal):
 
 #### Required Environment
 - [ ] Windows 10 or Windows 11
-- [ ] NVDA 2019.3 or later installed
+- [ ] NVDA 2025.1 or later installed
 - [ ] At least one supported terminal application
 - [ ] TDSR add-on installed
 

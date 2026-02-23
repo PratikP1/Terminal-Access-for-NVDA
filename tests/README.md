@@ -17,10 +17,10 @@ This directory contains comprehensive unit tests for Terminal Access functionali
 
 ## Python Version Compatibility
 
-Tests are designed to run on Python 3.7-3.11, matching NVDA 2019.3+ support:
-- **Minimum**: Python 3.7 (NVDA 2019.3)
+Tests are designed to run on Python 3.11, matching NVDA 2025.1+ support:
+- **Minimum**: Python 3.11 (NVDA 2025.1 runtime)
 - **Maximum**: Python 3.11 (current NVDA)
-- **CI/CD**: Tests run on all versions automatically
+- **CI/CD**: Tests run on the NVDA runtime version
 
 ## Quick Start
 

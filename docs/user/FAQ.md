@@ -371,7 +371,7 @@ Without these libraries, Terminal Access provides basic Unicode support but not 
 **Problem**: Can't build or install the add-on.
 
 **Solutions**:
-1. **Python version**: Ensure Python 3.7 or later is installed
+1. **Python version**: Ensure Python 3.11 or later is installed
 2. **Dependencies**: Run `pip install -r requirements-dev.txt` for development
 3. **Build command**: Use `python build.py` or `scons` from project root
 4. **NVDA restart**: Always restart NVDA after installing/updating add-on

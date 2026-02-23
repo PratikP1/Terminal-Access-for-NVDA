@@ -57,8 +57,8 @@ Feature requests are welcome! Please include:
 
 ### Prerequisites
 
-- **Python 3.7 or later** (Python 3.7-3.11 tested in CI)
-- **NVDA screen reader** (2019.3 or later) for testing
+- **Python 3.11 or later** (matches NVDA 2025.1 runtime)
+- **NVDA screen reader** (2025.1 or later) for testing
 - **Git** for version control
 - **Text editor or IDE** (VS Code recommended with Python extension)
 
@@ -168,7 +168,7 @@ Tests run automatically on:
 - All pull requests
 
 **Workflow stages**:
-1. **Test**: pytest on Python 3.7-3.11 (Windows)
+1. **Test**: pytest on Python 3.11 (Windows)
 2. **Lint**: flake8 code quality check (Ubuntu)
 3. **Build**: scons build verification
 

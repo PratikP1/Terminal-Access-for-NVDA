@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Windows 10 or Windows 11
-- NVDA screen reader version 2019.3 or later
+- NVDA screen reader version 2025.1 or later
 - One or more supported terminal applications:
   - Windows Terminal
   - PowerShell
@@ -90,7 +90,7 @@ If you need to uninstall the add-on:
 ## Troubleshooting Installation
 
 ### Add-on Won't Install
-- Ensure you're using NVDA 2019.3 or later
+- Ensure you're using NVDA 2025.1 or later
 - Check that the file downloaded completely (not corrupted)
 - Try downloading the file again
 - Ensure NVDA has proper permissions to write to its configuration directory
