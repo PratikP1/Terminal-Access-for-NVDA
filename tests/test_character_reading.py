@@ -197,6 +197,28 @@ class TestCharacterReading(unittest.TestCase):
 		# Verify character code function was called
 		plugin._announceCharacterCode.assert_called_once()
 
+	@patch('globalPlugins.terminalAccess.ui')
+	def test_processSymbol_returns_unicode_name(self, mock_ui):
+		"""Ensure _processSymbol returns readable name for symbols."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+
+		plugin = GlobalPlugin()
+		self.assertEqual(plugin._processSymbol('!'), 'exclamation mark')
+		self.assertEqual(plugin._processSymbol('a'), 'a')
+
+	@patch('globalPlugins.terminalAccess.ui')
+	def test_event_typedCharacter_speaks_symbol_name(self, mock_ui):
+		"""Typed punctuation should speak symbol names instead of raising errors."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+
+		plugin = GlobalPlugin()
+		plugin.isTerminalApp = MagicMock(return_value=True)
+		plugin._positionCalculator = MagicMock()
+
+		plugin.event_typedCharacter(Mock(), lambda: None, '!')
+
+		mock_ui.message.assert_called_with('exclamation mark')
+
 	def test_gestures_dont_propagate_to_globalCommands(self):
 		"""Test that comma and period gestures don't call globalCommands."""
 		from globalPlugins.terminalAccess import GlobalPlugin

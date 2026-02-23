@@ -4,6 +4,12 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.42] - 2026-02-23
+
+### Changed
+
+- Version bump for release
+
 ## [1.0.41] - 2026-02-23
 
 ### Changed

@@ -84,6 +84,7 @@ import os
 import re
 import time
 import threading
+import unicodedata
 from scriptHandler import script
 import scriptHandler
 import globalCommands
@@ -5259,16 +5260,20 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			movement: -1 for previous, 0 for current, 1 for next
 			phonetic: Whether to use phonetic reading
 		"""
+		reviewInfo = self._getReviewPosition()
+		if reviewInfo is None:
+			# Translators: Message when no review position
+			ui.message(_("No review position"))
+			return
+
 		try:
-			reviewInfo = self._getReviewPosition()
-			if reviewInfo is None:
-				# Translators: Message when no review position
-				ui.message(_("No review position"))
-				return
-
 			reviewInfo = reviewInfo.copy()
+		except Exception:
+			ui.message(_("Unable to read character"))
+			return
 
-			# Move review cursor if needed
+		# Move review cursor if needed
+		try:
 			if movement != 0:
 				lineInfo = reviewInfo.copy()
 				lineInfo.expand(textInfos.UNIT_LINE)
@@ -5289,24 +5294,35 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 				api.setReviewPosition(reviewInfo)
 
-			# Expand to character and read
 			reviewInfo.expand(textInfos.UNIT_CHARACTER)
-
-			# Use speech to speak the character
-			if phonetic:
-				# For phonetic reading, speak with spelling mode
-				speech.speakSpelling(reviewInfo.text)
-			else:
-				# Normal character reading
-				speech.speakTextInfo(
-					reviewInfo,
-					unit=textInfos.UNIT_CHARACTER,
-					reason=speech.OutputReason.CARET
-				)
-
+			charText = reviewInfo.text
 		except Exception:
-			# Translators: Message when unable to read character
 			ui.message(_("Unable to read character"))
+			return
+
+		if not charText:
+			ui.message(_("Unable to read character"))
+			return
+
+		if phonetic:
+			try:
+				speech.speakSpelling(charText)
+			except Exception:
+				ui.message(charText)
+			return
+
+		speak_kwargs = {"unit": textInfos.UNIT_CHARACTER}
+		try:
+			speak_reason = speech.OutputReason.CARET
+			speak_kwargs["reason"] = speak_reason
+		except Exception:
+			# Older/limited speech modules may not expose OutputReason
+			pass
+
+		try:
+			speech.speakTextInfo(reviewInfo, **speak_kwargs)
+		except Exception:
+			ui.message(charText)
 
 	def _announceCharacterCode(self):
 		"""Announce the ASCII/Unicode code of the current character."""
@@ -5377,6 +5393,22 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Level 1 or 2: Check if character is in the level's punctuation set
 		punctSet = PUNCTUATION_SETS.get(level, set())
 		return char in punctSet
+
+	def _processSymbol(self, char):
+		"""
+		Return a human-friendly name for a symbol based on Unicode data.
+
+		Falls back to the character itself if no name is available.
+		"""
+		if char.isalnum():
+			return char
+
+		try:
+			name = unicodedata.name(char, "")
+		except Exception:
+			name = ""
+
+		return name.lower() if name else char
 
 	@script(
 		# Translators: Description for decreasing punctuation level
