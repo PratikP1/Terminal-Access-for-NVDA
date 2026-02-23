@@ -961,7 +961,7 @@ class CommandHistoryManager:
 - Regular expression support for advanced patterns
 - Navigate forward/backward through matches with wrap-around
 - Jump to first/last match
-- Interactive search dialog (NVDA+Control+F)
+- Interactive search dialog (NVDA+Alt+F)
 - Keyboard shortcuts: F3 (next), Shift+F3 (previous)
 - Location: `addon/globalPlugins/tdsr.py` lines 2839-3046 (OutputSearchManager)
 - Location: `addon/globalPlugins/tdsr.py` lines 5089-5213 (search gestures)

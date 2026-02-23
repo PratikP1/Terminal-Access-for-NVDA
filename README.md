@@ -181,7 +181,7 @@ Press **NVDA+Shift+F1** to open the comprehensive user guide.
 - **NVDA+Alt+Shift+L** - List command history
 
 ### Search (v1.0.30+)
-- **NVDA+Control+F** - Search terminal output
+- **NVDA+Alt+F** - Search terminal output
 - **NVDA+F3** - Jump to next search match
 - **NVDA+Shift+F3** - Jump to previous search match
 

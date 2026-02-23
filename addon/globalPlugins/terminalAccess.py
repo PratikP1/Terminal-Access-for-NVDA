@@ -6151,7 +6151,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for searching output
 		description=_("Search terminal output for text pattern"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+control+f"
+		gesture="kb:NVDA+alt+f"
 	)
 	def script_searchOutput(self, gesture):
 		"""Search terminal output."""
@@ -6227,7 +6227,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		if self._searchManager.get_match_count() == 0:
 			# Translators: No search results
-			ui.message(_("No search results. Use NVDA+Control+F to search."))
+			ui.message(_("No search results. Use NVDA+Alt+F to search."))
 			return
 
 		if self._searchManager.next_match():
@@ -6257,7 +6257,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		if self._searchManager.get_match_count() == 0:
 			# Translators: No search results
-			ui.message(_("No search results. Use NVDA+Control+F to search."))
+			ui.message(_("No search results. Use NVDA+Alt+F to search."))
 			return
 
 		if self._searchManager.previous_match():

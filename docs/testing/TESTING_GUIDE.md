@@ -395,7 +395,7 @@ def test_with_terminal(mock_terminal):
 
 #### Test 9.1: Output Search (v1.0.30+)
 **Steps:**
-1. Press `NVDA+Control+F`
+1. Press `NVDA+Alt+F`
 2. Enter search text
 3. Press `NVDA+F3` (next match)
 4. Press `NVDA+Shift+F3` (previous match)

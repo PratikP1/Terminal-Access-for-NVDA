@@ -382,7 +382,7 @@ history = manager.list_history()
   - Location: `addon/globalPlugins/tdsr.py` lines 2839-3046
 
 - **Search Gestures**:
-  - `NVDA+Control+F` - Search terminal output (shows dialog)
+  - `NVDA+Alt+F` - Search terminal output (shows dialog)
   - `NVDA+F3` - Jump to next search match
   - `NVDA+Shift+F3` - Jump to previous search match
 

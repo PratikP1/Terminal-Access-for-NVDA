@@ -196,7 +196,7 @@ Try these settings:
 - **NVDA+Alt+Shift+L** - List command history
 
 ### Search (v1.0.30+)
-- **NVDA+Control+F** - Search terminal output
+- **NVDA+Alt+F** - Search terminal output
 - **NVDA+F3** - Next search match
 - **NVDA+Shift+F3** - Previous search match
 
