@@ -192,21 +192,23 @@ class TestWindowMonitor(unittest.TestCase):
 
 	@patch('globalPlugins.terminalAccess.ui.message')
 	def test_announce_change_first_content(self, mock_ui_message):
-		"""Test that first content is not announced."""
+		"""Test that non-trivial change (old_content=None) speaks the region content."""
 		self.monitor._announce_change("test", "new content", None)
 
-		# Should not announce first content (old_content is None)
-		mock_ui_message.assert_not_called()
+		# old_content=None signals a non-trivial change: the region content is spoken
+		mock_ui_message.assert_called_once()
+		call_args = str(mock_ui_message.call_args)
+		self.assertIn("new content", call_args)
 
 	@patch('globalPlugins.terminalAccess.ui.message')
 	def test_announce_change_with_old_content(self, mock_ui_message):
-		"""Test announcing changes when old content exists."""
+		"""Test announcing appended text: the new (appended) portion is spoken directly."""
 		self.monitor._announce_change("test_window", "new content", "old content")
 
-		# Should announce the change
+		# Should announce the new/appended portion
 		mock_ui_message.assert_called_once()
 		call_args = str(mock_ui_message.call_args)
-		self.assertIn("test_window", call_args.lower())
+		self.assertIn("new content", call_args)
 
 	def test_thread_safety_add_remove(self):
 		"""Test thread safety of adding and removing monitors."""
