@@ -4069,6 +4069,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		NVDA+Alt+F3      - Clear screen window
 		NVDA+Alt+Plus    - Read window content
 		NVDA+Alt+Asterisk - Cycle cursor tracking mode
+		(Note: Window management retains the Alt modifier as these are advanced,
+		 infrequently-used features where the extra modifier prevents accidental activation.)
 
 	Configuration:
 		NVDA+Shift+Q     - Toggle quiet mode
