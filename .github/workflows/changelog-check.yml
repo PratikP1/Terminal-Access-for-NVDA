@@ -1,0 +1,99 @@
+name: Changelog Check
+
+# Enforce that every PR and every direct commit to main includes a CHANGELOG.md update.
+# To skip this check for truly non-user-facing changes (e.g., pure CI tweaks), add
+#   [skip changelog]
+# to the PR title (for pull requests) or the commit message (for direct pushes).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  changelog-check:
+    name: Require CHANGELOG.md update
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Need enough history to compare base vs. head for both PRs and pushes
+          fetch-depth: 0
+
+      # ── Pull-request path ────────────────────────────────────────────────────
+      - name: Check CHANGELOG.md updated (pull request)
+        if: github.event_name == 'pull_request'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # Allow skipping via marker in PR title
+          if echo "$PR_TITLE" | grep -qi '\[skip changelog\]'; then
+            echo "⏭️  Skipping changelog check: '[skip changelog]' found in PR title."
+            exit 0
+          fi
+
+          # Fetch the base branch so we can diff against it
+          git fetch origin "$BASE_REF"
+
+          CHANGED=$(git diff --name-only "origin/${BASE_REF}...HEAD")
+          echo "Files changed in this PR:"
+          echo "$CHANGED"
+          echo ""
+
+          if echo "$CHANGED" | grep -q '^CHANGELOG\.md$'; then
+            echo "✅ CHANGELOG.md was updated in this PR."
+          else
+            echo "❌ ERROR: CHANGELOG.md was not updated in this PR."
+            echo ""
+            echo "All pull requests merged to main must include a CHANGELOG.md update."
+            echo "Please add an entry under the [Unreleased] section or the appropriate"
+            echo "version block. Follow the format of existing entries."
+            echo ""
+            echo "To skip this check for purely non-user-facing changes (e.g., CI fixes,"
+            echo "whitespace-only edits), add  [skip changelog]  to your PR title."
+            exit 1
+          fi
+
+      # ── Direct-push-to-main path ─────────────────────────────────────────────
+      - name: Check CHANGELOG.md updated (direct push to main)
+        if: github.event_name == 'push'
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+        run: |
+          # Allow skipping via marker in commit message
+          if echo "$COMMIT_MSG" | grep -qi '\[skip changelog\]'; then
+            echo "⏭️  Skipping changelog check: '[skip changelog]' found in commit message."
+            exit 0
+          fi
+
+          # Compare the pushed commit against its parent.
+          # Fall back to listing all files if this is the very first commit (no parent).
+          if git rev-parse HEAD~1 >/dev/null 2>&1; then
+            CHANGED=$(git diff --name-only HEAD~1 HEAD)
+          else
+            CHANGED=$(git ls-tree --name-only HEAD)
+          fi
+
+          echo "Files changed in this commit:"
+          echo "$CHANGED"
+          echo ""
+
+          if echo "$CHANGED" | grep -q '^CHANGELOG\.md$'; then
+            echo "✅ CHANGELOG.md was updated in this commit."
+          else
+            echo "❌ ERROR: CHANGELOG.md was not updated in this commit."
+            echo ""
+            echo "All commits pushed directly to main must include a CHANGELOG.md update."
+            echo "Please update CHANGELOG.md to document your changes."
+            echo ""
+            echo "To skip this check for purely non-user-facing changes, add"
+            echo "  [skip changelog]"
+            echo "to your commit message."
+            exit 1
+          fi
