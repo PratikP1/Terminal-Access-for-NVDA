@@ -4,6 +4,40 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.47] - 2026-02-24
+
+### Changed
+
+- **Simplified keyboard shortcuts**: All terminal-scoped commands now use simpler 2-modifier combinations instead of 3-modifier combinations
+  - **Dropped Alt modifier entirely** (key unchanged) for most commands:
+    - Line navigation: `NVDA+Alt+U/I/O` → `NVDA+U/I/O`
+    - Word navigation: `NVDA+Alt+J/K/L` → `NVDA+J/K/L`
+    - Character navigation: `NVDA+Alt+M/,/.` → `NVDA+M/,.`
+    - Copy/selection: `NVDA+Alt+R/C/X/V` → `NVDA+R/C/X/V`
+    - Punctuation: `NVDA+Alt+[/]` → `NVDA+[/]`
+    - Search: `NVDA+Alt+F` → `NVDA+F`
+    - Say all: `NVDA+Alt+A` → `NVDA+A`
+  - **Dropped Alt, key changed** (to avoid NVDA global conflicts):
+    - Quiet mode: `NVDA+Alt+Q` → `NVDA+Shift+Q`
+    - Announce new output: `NVDA+Alt+N` → `NVDA+Shift+N`
+    - Position: `NVDA+Alt+P` → `NVDA+;`
+    - List tabs: `NVDA+Alt+T` → `NVDA+W`
+    - Indentation toggle: `NVDA+Alt+F5` → `NVDA+F5`
+    - Profile announcement: `NVDA+Alt+F10` → `NVDA+F10`
+    - Buffer navigation: `NVDA+Alt+Home/End` → `NVDA+Shift+Home/End`
+    - Buffer navigation: `NVDA+Alt+PageUp/Down` → `NVDA+F4/F6`
+    - Command history: `NVDA+Alt+Up/Down` → `NVDA+H/G`
+  - **3-key → 2-key** (dropped Alt from Shift combinations):
+    - Directional reading: `NVDA+Alt+Shift+Arrow` → `NVDA+Shift+Arrow`
+    - Advanced commands: `NVDA+Alt+Shift+A/C/B/H/L/T` → `NVDA+Shift+A/C/B/H/L/T`
+    - Set bookmark: `NVDA+Alt+Shift+0-9` → `NVDA+Shift+0-9`
+  - **Unchanged** (advanced features retain Alt modifier for safety):
+    - Help: `NVDA+Shift+F1`
+    - Jump to bookmark: `NVDA+Alt+0-9`
+    - Window management: `NVDA+Alt+F2/F3/Plus/Asterisk`
+    - Find next/previous: `NVDA+F3` / `NVDA+Shift+F3`
+- Updated all documentation (README.md, addon/doc/en/readme.html, terminalAccess.py) to reflect new keyboard shortcuts
+
 ## [1.0.46] - 2026-02-24
 
 ### Added
