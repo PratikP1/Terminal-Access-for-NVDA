@@ -80,6 +80,8 @@ from gui import guiHelper, nvdaControls
 from gui.settingsDialogs import SettingsPanel
 import addonHandler
 import wx
+import collections
+import functools
 import os
 import re
 import time
@@ -89,7 +91,7 @@ from scriptHandler import script
 import scriptHandler
 import globalCommands
 import speech
-from typing import Optional, Tuple, Dict, List, Union, Any
+from typing import Any
 
 try:
 	addonHandler.initTranslation()
@@ -157,6 +159,74 @@ confspec = {
 # Register configuration
 config.conf.spec["terminalAccess"] = confspec
 
+# ---------------------------------------------------------------------------
+# Module-level constants (hoisted from hot-path methods)
+# ---------------------------------------------------------------------------
+
+# Frozenset of all supported terminal application names (used in isTerminalApp)
+_SUPPORTED_TERMINALS: frozenset[str] = frozenset([
+	# Built-in Windows terminal applications
+	"windowsterminal",  # Windows Terminal
+	"cmd",              # Command Prompt
+	"powershell",       # Windows PowerShell
+	"pwsh",             # PowerShell Core
+	"conhost",          # Console Host
+	# Third-party terminal emulators
+	"cmder",            # Cmder
+	"conemu",           # ConEmu (32-bit)
+	"conemu64",         # ConEmu (64-bit)
+	"mintty",           # Git Bash (mintty)
+	"putty",            # PuTTY
+	"kitty",            # KiTTY (PuTTY fork)
+	"terminus",         # Terminus
+	"hyper",            # Hyper
+	"alacritty",        # Alacritty
+	"wezterm",          # WezTerm
+	"wezterm-gui",      # WezTerm GUI
+	"tabby",            # Tabby
+	"fluent",           # FluentTerminal
+	# WSL (Windows Subsystem for Linux)
+	"wsl",              # WSL executable
+	"bash",             # WSL bash
+])
+
+# Frozenset of built-in profile names that cannot be removed
+_BUILTIN_PROFILE_NAMES: frozenset[str] = frozenset([
+	'vim', 'tmux', 'htop', 'less', 'git', 'nano', 'irssi',
+])
+
+# Compiled regex for stripping ANSI highlight codes (used in _extractHighlightedText)
+_ANSI_HIGHLIGHT_RE: re.Pattern[str] = re.compile(r'\x1b\[[0-9;]*m')
+
+# Compiled prompt patterns for CommandHistoryManager (avoids re-compilation per instance)
+_PROMPT_PATTERNS: list[re.Pattern[str]] = [
+	# Bash prompts: user@host:~$, root@host:#, simple $/#
+	re.compile(r'^[\w\-\.]+@[\w\-\.]+:[^\$#]*[\$#]\s*(.+)$'),
+	re.compile(r'^[\$#]\s*(.+)$'),
+	# PowerShell prompts: PS>, PS C:\>, PS /home/user>
+	re.compile(r'^PS\s+[A-Za-z]:[^>]*>\s*(.+)$'),
+	re.compile(r'^PS\s+/[^>]*>\s*(.+)$'),
+	re.compile(r'^PS>\s*(.+)$'),
+	# Windows CMD prompts: C:\>, D:\Users\name>
+	re.compile(r'^[A-Za-z]:[^>]*>\s*(.+)$'),
+	# Generic prompt with colon or arrow
+	re.compile(r'^[^\s>:]+[>:]\s*(.+)$'),
+]
+
+
+@functools.cache
+def _get_unicode_symbol_name(char: str) -> str:
+	"""
+	Return the lowercased Unicode name of *char*, or the character itself on failure.
+
+	Cached with ``functools.cache`` so that repeated lookups for the same
+	character (common during typing) pay the ``unicodedata`` cost only once.
+	"""
+	if char.isalnum():
+		return char
+	name = unicodedata.name(char, "")
+	return name.lower() if name else char
+
 
 class PositionCache:
 	"""
@@ -196,10 +266,10 @@ class PositionCache:
 
 	def __init__(self) -> None:
 		"""Initialize an empty position cache."""
-		self._cache: Dict[str, Tuple[int, int, float]] = {}
+		self._cache: dict[str, tuple[int, int, float]] = {}
 		self._lock: threading.Lock = threading.Lock()
 
-	def get(self, bookmark: Any) -> Optional[Tuple[int, int]]:
+	def get(self, bookmark: Any) -> tuple[int, int] | None:
 		"""
 		Retrieve cached position for a bookmark if valid.
 
@@ -293,11 +363,13 @@ class TextDiffer:
 	KIND_APPENDED = "appended"  # New text was appended after old text
 	KIND_CHANGED = "changed"    # Non-trivial change (edit, clear, etc.)
 
+	__slots__ = ('_last_text',)
+
 	def __init__(self) -> None:
 		"""Initialise with no previous snapshot."""
-		self._last_text: Optional[str] = None
+		self._last_text: str | None = None
 
-	def update(self, current_text: str) -> Tuple[str, str]:
+	def update(self, current_text: str) -> tuple[str, str]:
 		"""
 		Compare *current_text* to the stored snapshot and return a diff result.
 
@@ -332,7 +404,7 @@ class TextDiffer:
 		self._last_text = None
 
 	@property
-	def last_text(self) -> Optional[str]:
+	def last_text(self) -> str | None:
 		"""The last snapshot text, or ``None`` if no snapshot has been taken."""
 		return self._last_text
 
@@ -411,10 +483,14 @@ class ANSIParser:
 		9: 'strikethrough',
 	}
 
+	# Compiled regex patterns (class-level to avoid recompilation per call)
+	_SGR_PATTERN: re.Pattern[str] = re.compile(r'\x1b\[([0-9;]+)m')
+	_STRIP_PATTERN: re.Pattern[str] = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]')
+
 	def __init__(self) -> None:
 		"""Initialize the ANSI parser."""
-		self.foreground: Optional[Union[str, Tuple[int, int, int]]] = None
-		self.background: Optional[Union[str, Tuple[int, int, int]]] = None
+		self.foreground: str | tuple[int, int, int] | None = None
+		self.background: str | tuple[int, int, int] | None = None
 		self.bold: bool = False
 		self.dim: bool = False
 		self.italic: bool = False
@@ -438,7 +514,7 @@ class ANSIParser:
 		self.hidden = False
 		self.strikethrough = False
 
-	def parse(self, text: str) -> Dict[str, Any]:
+	def parse(self, text: str) -> dict[str, Any]:
 		"""
 		Parse ANSI escape sequences from text and return attributes.
 
@@ -454,8 +530,7 @@ class ANSIParser:
 			}
 		"""
 		# Find all ANSI escape sequences
-		pattern = re.compile(r'\x1b\[([0-9;]+)m')
-		matches = pattern.findall(text)
+		matches = self._SGR_PATTERN.findall(text)
 
 		for match in matches:
 			codes = [int(c) for c in match.split(';') if c]
@@ -463,7 +538,7 @@ class ANSIParser:
 
 		return self._getCurrentAttributes()
 
-	def _processCodes(self, codes: List[int]) -> None:
+	def _processCodes(self, codes: list[int]) -> None:
 		"""Process a list of ANSI codes."""
 		i = 0
 		while i < len(codes):
@@ -542,7 +617,7 @@ class ANSIParser:
 
 			i += 1
 
-	def _getCurrentAttributes(self) -> Dict[str, Any]:
+	def _getCurrentAttributes(self) -> dict[str, Any]:
 		"""Get current attribute state as a dictionary."""
 		return {
 			'foreground': self.foreground,
@@ -633,9 +708,7 @@ class ANSIParser:
 		Returns:
 			str: Text with ANSI codes removed
 		"""
-		# Remove all ANSI escape sequences
-		ansi_pattern = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]')
-		return ansi_pattern.sub('', text)
+		return ANSIParser._STRIP_PATTERN.sub('', text)
 
 
 class UnicodeWidthHelper:
@@ -1046,7 +1119,7 @@ class EmojiHelper:
 		except Exception:
 			return False
 
-	def extract_emoji_list(self, text: str) -> List[str]:
+	def extract_emoji_list(self, text: str) -> list[str]:
 		"""
 		Extract all emoji from text.
 
@@ -1054,7 +1127,7 @@ class EmojiHelper:
 			text: Text to analyze
 
 		Returns:
-			List[str]: List of emoji found in text
+			list[str]: List of emoji found in text
 		"""
 		if not text or not self._available:
 			return []
@@ -1177,6 +1250,8 @@ class WindowDefinition:
 		All coordinates are 1-based (row 1, col 1 is top-left).
 	"""
 
+	__slots__ = ('name', 'top', 'bottom', 'left', 'right', 'mode', 'enabled')
+
 	def __init__(self, name: str, top: int, bottom: int, left: int, right: int,
 				 mode: str = 'announce', enabled: bool = True) -> None:
 		"""
@@ -1214,7 +1289,7 @@ class WindowDefinition:
 				self.top <= row <= self.bottom and
 				self.left <= col <= self.right)
 
-	def toDict(self) -> Dict[str, Any]:
+	def toDict(self) -> dict[str, Any]:
 		"""Convert window definition to dictionary for serialization."""
 		return {
 			'name': self.name,
@@ -1227,7 +1302,7 @@ class WindowDefinition:
 		}
 
 	@classmethod
-	def fromDict(cls, data: Dict[str, Any]) -> 'WindowDefinition':
+	def fromDict(cls, data: dict[str, Any]) -> 'WindowDefinition':
 		"""Create window definition from dictionary."""
 		return cls(
 			name=data.get('name', ''),
@@ -1281,7 +1356,7 @@ class ApplicationProfile:
 		Windows are checked in order; first match wins.
 	"""
 
-	def __init__(self, appName: str, displayName: Optional[str] = None) -> None:
+	def __init__(self, appName: str, displayName: str | None = None) -> None:
 		"""
 		Initialize an application profile.
 
@@ -1293,23 +1368,23 @@ class ApplicationProfile:
 		self.displayName: str = displayName or appName
 
 		# Settings overrides (None = use global setting)
-		self.punctuationLevel: Optional[int] = None
-		self.cursorTrackingMode: Optional[int] = None
-		self.keyEcho: Optional[bool] = None
-		self.linePause: Optional[bool] = None
-		self.processSymbols: Optional[bool] = None
-		self.repeatedSymbols: Optional[bool] = None
-		self.repeatedSymbolsValues: Optional[str] = None
-		self.cursorDelay: Optional[int] = None
-		self.quietMode: Optional[bool] = None
-		self.announceIndentation: Optional[bool] = None
-		self.indentationOnLineRead: Optional[bool] = None
+		self.punctuationLevel: int | None = None
+		self.cursorTrackingMode: int | None = None
+		self.keyEcho: bool | None = None
+		self.linePause: bool | None = None
+		self.processSymbols: bool | None = None
+		self.repeatedSymbols: bool | None = None
+		self.repeatedSymbolsValues: str | None = None
+		self.cursorDelay: int | None = None
+		self.quietMode: bool | None = None
+		self.announceIndentation: bool | None = None
+		self.indentationOnLineRead: bool | None = None
 
 		# Window definitions (list of WindowDefinition objects)
-		self.windows: List[WindowDefinition] = []
+		self.windows: list[WindowDefinition] = []
 
 		# Custom gestures (dict of gesture -> function name)
-		self.customGestures: Dict[str, str] = {}
+		self.customGestures: dict[str, str] = {}
 
 	def addWindow(self, name: str, top: int, bottom: int, left: int, right: int,
 				  mode: str = 'announce') -> WindowDefinition:
@@ -1318,14 +1393,14 @@ class ApplicationProfile:
 		self.windows.append(window)
 		return window
 
-	def getWindowAtPosition(self, row: int, col: int) -> Optional[WindowDefinition]:
+	def getWindowAtPosition(self, row: int, col: int) -> WindowDefinition | None:
 		"""Get the window containing the specified position."""
 		for window in self.windows:
 			if window.contains(row, col):
 				return window
 		return None
 
-	def toDict(self) -> Dict[str, Any]:
+	def toDict(self) -> dict[str, Any]:
 		"""Convert profile to dictionary for serialization."""
 		return {
 			'appName': self.appName,
@@ -1346,7 +1421,7 @@ class ApplicationProfile:
 		}
 
 	@classmethod
-	def fromDict(cls, data: Dict[str, Any]) -> 'ApplicationProfile':
+	def fromDict(cls, data: dict[str, Any]) -> 'ApplicationProfile':
 		"""Create profile from dictionary."""
 		profile = cls(data.get('appName', ''), data.get('displayName'))
 		profile.punctuationLevel = data.get('punctuationLevel')
@@ -1423,8 +1498,8 @@ class ProfileManager:
 
 	def __init__(self) -> None:
 		"""Initialize the profile manager with default profiles."""
-		self.profiles: Dict[str, ApplicationProfile] = {}
-		self.activeProfile: Optional[ApplicationProfile] = None
+		self.profiles: dict[str, ApplicationProfile] = {}
+		self.activeProfile: ApplicationProfile | None = None
 		self._initializeDefaultProfiles()
 
 	def _initializeDefaultProfiles(self) -> None:
@@ -1604,7 +1679,7 @@ class ProfileManager:
 
 		return 'default'
 
-	def getProfile(self, appName: str) -> Optional[ApplicationProfile]:
+	def getProfile(self, appName: str) -> ApplicationProfile | None:
 		"""Get profile for specified application."""
 		return self.profiles.get(appName)
 
@@ -1618,17 +1693,17 @@ class ProfileManager:
 
 	def removeProfile(self, appName: str) -> None:
 		"""Remove a profile."""
-		if appName in self.profiles and appName not in ['vim', 'tmux', 'htop', 'less', 'git', 'nano', 'irssi']:
+		if appName in self.profiles and appName not in _BUILTIN_PROFILE_NAMES:
 			del self.profiles[appName]
 
-	def exportProfile(self, appName: str) -> Optional[Dict[str, Any]]:
+	def exportProfile(self, appName: str) -> dict[str, Any] | None:
 		"""Export profile to dictionary."""
 		profile = self.profiles.get(appName)
 		if profile:
 			return profile.toDict()
 		return None
 
-	def importProfile(self, data: Dict[str, Any]) -> ApplicationProfile:
+	def importProfile(self, data: dict[str, Any]) -> ApplicationProfile:
 		"""Import profile from dictionary."""
 		profile = ApplicationProfile.fromDict(data)
 		self.addProfile(profile)
@@ -1706,7 +1781,7 @@ def _validateString(value: Any, maxLength: int, default: str, fieldName: str) ->
 		return default
 
 
-def _validateSelectionSize(startRow: int, endRow: int, startCol: int, endCol: int) -> Tuple[bool, Optional[str]]:
+def _validateSelectionSize(startRow: int, endRow: int, startCol: int, endCol: int) -> tuple[bool, str | None]:
 	"""
 	Validate selection size against resource limits.
 
@@ -2056,7 +2131,7 @@ class WindowManager:
 
 		return (top <= row <= bottom and left <= col <= right)
 
-	def get_window_bounds(self) -> Dict[str, int]:
+	def get_window_bounds(self) -> dict[str, int]:
 		"""
 		Get the current window bounds.
 
@@ -2118,9 +2193,9 @@ class PositionCalculator:
 	def __init__(self) -> None:
 		"""Initialize the position calculator with empty cache."""
 		self._cache = PositionCache()
-		self._last_known_position: Optional[Tuple[Any, int, int]] = None
+		self._last_known_position: tuple[Any, int, int] | None = None
 
-	def calculate(self, textInfo: Any, terminal: Any) -> Tuple[int, int]:
+	def calculate(self, textInfo: Any, terminal: Any) -> tuple[int, int]:
 		"""
 		Calculate row and column coordinates from TextInfo.
 
@@ -2168,7 +2243,7 @@ class PositionCalculator:
 			return (0, 0)
 
 	def _try_incremental_calculation(self, textInfo: Any, terminal: Any,
-									 bookmark: Any) -> Optional[Tuple[int, int]]:
+									 bookmark: Any) -> tuple[int, int] | None:
 		"""
 		Try to calculate position incrementally from last known position.
 
@@ -2206,7 +2281,7 @@ class PositionCalculator:
 
 	def _calculate_incremental(self, targetInfo: Any, lastInfo: Any,
 							   lastRow: int, lastCol: int,
-							   comparison: int) -> Optional[Tuple[int, int]]:
+							   comparison: int) -> tuple[int, int] | None:
 		"""
 		Calculate position incrementally from known position.
 
@@ -2274,7 +2349,7 @@ class PositionCalculator:
 			return None
 
 	def _calculate_full(self, textInfo: Any, terminal: Any,
-					   bookmark: Any) -> Tuple[int, int]:
+					   bookmark: Any) -> tuple[int, int]:
 		"""
 		Perform full O(n) position calculation from buffer start.
 
@@ -2363,7 +2438,7 @@ class SelectionProgressDialog:
 			title: Dialog title
 			maximum: Maximum progress value (typically 100 for percentage)
 		"""
-		self._dialog: Optional[Any] = None
+		self._dialog: Any | None = None
 		self._cancelled: bool = False
 		self._lock: threading.Lock = threading.Lock()
 		# Create dialog on main thread
@@ -2477,7 +2552,7 @@ class OperationQueue:
 
 	def __init__(self) -> None:
 		"""Initialize the operation queue."""
-		self._active_operation: Optional[threading.Thread] = None
+		self._active_operation: threading.Thread | None = None
 		self._lock: threading.Lock = threading.Lock()
 
 	def is_busy(self) -> bool:
@@ -2551,7 +2626,7 @@ class NewOutputAnnouncer:
 		"""Initialise with no previous snapshot."""
 		self._differ = TextDiffer()
 		self._lock = threading.Lock()
-		self._timer: Optional[threading.Timer] = None
+		self._timer: threading.Timer | None = None
 		self._pending_text: str = ""
 
 	def feed(self, text: str) -> None:
@@ -3727,31 +3802,15 @@ class CommandHistoryManager:
 		self._terminal = terminal_obj
 		self._max_history = max_history
 		self._tab_manager = tab_manager
-		# Legacy single-tab storage
-		self._history = []  # List of (line_num, command_text, bookmark) tuples
+		# Legacy single-tab storage (deque for O(1) pop-from-front when limiting size)
+		self._history: collections.deque = collections.deque(maxlen=max_history)
 		self._current_index = -1  # Current position in history (-1 = not navigating)
 		self._last_scan_line = 0  # Last line scanned for commands
 		# Per-tab storage
 		self._tab_histories = {}  # tab_id -> {history, current_index, last_scan_line}
 
-		# Common prompt patterns (regex)
-		import re
-		self._prompt_patterns = [
-			# Bash prompts: user@host:~$, root@host:#, simple $/#
-			re.compile(r'^[\w\-\.]+@[\w\-\.]+:[^\$#]*[\$#]\s*(.+)$'),
-			re.compile(r'^[\$#]\s*(.+)$'),
-
-			# PowerShell prompts: PS>, PS C:\>, PS /home/user>
-			re.compile(r'^PS\s+[A-Za-z]:[^>]*>\s*(.+)$'),
-			re.compile(r'^PS\s+/[^>]*>\s*(.+)$'),
-			re.compile(r'^PS>\s*(.+)$'),
-
-			# Windows CMD prompts: C:\>, D:\Users\name>
-			re.compile(r'^[A-Za-z]:[^>]*>\s*(.+)$'),
-
-			# Generic prompt with colon or arrow
-			re.compile(r'^[^\s>:]+[>:]\s*(.+)$'),
-		]
+		# Use module-level compiled prompt patterns
+		self._prompt_patterns = _PROMPT_PATTERNS
 
 	def detect_and_store_commands(self) -> int:
 		"""
@@ -3808,9 +3867,7 @@ class CommandHistoryManager:
 							self._history.append((line_num, command_text, bookmark))
 							new_commands += 1
 
-							# Limit history size
-							if len(self._history) > self._max_history:
-								self._history.pop(0)
+							# deque(maxlen=...) handles size limiting automatically
 
 						except Exception:
 							# Bookmark creation failed, skip this command
@@ -4049,7 +4106,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	
 	def __init__(self):
 		"""Initialize the Terminal Access global plugin."""
-		super(GlobalPlugin, self).__init__()
+		super().__init__()
 
 		# Initialize manager classes for configuration, windows, and position tracking
 		self._configManager = ConfigManager()
@@ -4074,15 +4131,15 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Stores the text of the last line visited so that moving within the
 		# same line (and with no intervening content change) avoids extra COM
 		# calls.
-		self._lastLineText: Optional[str] = None
-		self._lastLineStartOffset: Optional[int] = None
-		self._lastLineEndOffset: Optional[int] = None
+		self._lastLineText: str | None = None
+		self._lastLineStartOffset: int | None = None
+		self._lastLineEndOffset: int | None = None
 		self._lastLineGeneration: int = -1
 
 		# Timestamp of the last Enter/Return key press.
 		# Used to suppress premature blank announcements in _announceStandardCursor
 		# when the caret lands on an empty line before terminal output has arrived.
-		self._lastEnterTime: Optional[float] = None
+		self._lastEnterTime: float | None = None
 
 		# Highlight tracking state
 		self._lastHighlightedText = None
@@ -4138,13 +4195,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# Settings panel will not be available in this case
 			pass
 
-	def _collectTerminalGestures(self) -> Dict[str, str]:
+	def _collectTerminalGestures(self) -> dict[str, str]:
 		"""Collect gestures defined on script methods for conditional binding."""
 		existing = getattr(self.__class__, "__gestures__", {}) or {}
 		if isinstance(existing, dict) and existing:
 			return dict(existing)
 
-		gesture_map: Dict[str, str] = {}
+		gesture_map: dict[str, str] = {}
 		for attr_name in dir(self.__class__):
 			if not attr_name.startswith("script_"):
 				continue
@@ -4206,7 +4263,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			gui.settingsDialogs.NVDASettingsDialog.categoryClasses.remove(TerminalAccessSettingsPanel)
 		except (ValueError, AttributeError):
 			pass
-		super(GlobalPlugin, self).terminate()
+		super().terminate()
 	
 	def isTerminalApp(self, obj=None):
 		"""
@@ -4237,42 +4294,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not isinstance(appName, str):
 			return False
 
-		# Built-in Windows terminal applications (v1.0.0+)
-		builtinTerminals = [
-			"windowsterminal",  # Windows Terminal
-			"cmd",              # Command Prompt
-			"powershell",       # Windows PowerShell
-			"pwsh",             # PowerShell Core
-			"conhost",          # Console Host
-		]
-
-		# Third-party terminal emulators (v1.0.26+)
-		# Section 5.1: Additional Terminal Emulator Support
-		thirdPartyTerminals = [
-			"cmder",            # Cmder
-			"conemu",           # ConEmu (32-bit)
-			"conemu64",         # ConEmu (64-bit)
-			"mintty",           # Git Bash (mintty)
-			"putty",            # PuTTY
-			"kitty",            # KiTTY (PuTTY fork)
-			"terminus",         # Terminus
-			"hyper",            # Hyper
-			"alacritty",        # Alacritty
-			"wezterm",          # WezTerm
-			"wezterm-gui",      # WezTerm GUI
-			"tabby",            # Tabby
-			"fluent",           # FluentTerminal
-		]
-
-		# WSL (Windows Subsystem for Linux) (v1.0.27+)
-		# Section 5.2: WSL Support
-		wslTerminals = [
-			"wsl",              # WSL executable
-			"bash",             # WSL bash (may appear as this)
-		]
-
-		allSupported = builtinTerminals + thirdPartyTerminals + wslTerminals
-		return any(term in appName for term in allSupported)
+		return any(term in appName for term in _SUPPORTED_TERMINALS)
 
 	def _getPositionContext(self, textInfo=None) -> str:
 		"""
@@ -4546,15 +4568,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Feed terminal content to the new output announcer when enabled.
 		# This is done before the quiet/cursorTracking guards so that the
 		# announcer's own quiet-mode check governs output independently.
-		if self.isTerminalApp(obj):
-			self._feedNewOutputAnnouncer(obj)
-
-		# Only handle if in a terminal and cursor tracking is enabled
-		if not self.isTerminalApp(obj) or not config.conf["terminalAccess"]["cursorTracking"]:
+		if not self.isTerminalApp(obj):
 			return
 
-		# Don't track if in quiet mode
-		if config.conf["terminalAccess"]["quietMode"]:
+		self._feedNewOutputAnnouncer(obj)
+
+		# Only handle if cursor tracking is enabled
+		ta_conf = config.conf["terminalAccess"]
+		if not ta_conf["cursorTracking"] or ta_conf["quietMode"]:
 			return
 
 		# Cancel any pending cursor tracking announcement
@@ -4562,11 +4583,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self._cursorTrackingTimer.Stop()
 			self._cursorTrackingTimer = None
 
-		# Get cursor delay setting
-		delay = config.conf["terminalAccess"]["cursorDelay"]
-
 		# Schedule announcement with delay
-		self._cursorTrackingTimer = wx.CallLater(delay, self._announceCursorPosition, obj)
+		self._cursorTrackingTimer = wx.CallLater(ta_conf["cursorDelay"], self._announceCursorPosition, obj)
 
 	def _feedNewOutputAnnouncer(self, obj) -> None:
 		"""
@@ -4592,18 +4610,16 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			obj: The terminal object.
 		"""
 		try:
-			# Get cursor tracking mode
 			trackingMode = config.conf["terminalAccess"]["cursorTrackingMode"]
-
-			# Handle different tracking modes
-			if trackingMode == CT_OFF:
-				return
-			elif trackingMode == CT_STANDARD:
-				self._announceStandardCursor(obj)
-			elif trackingMode == CT_HIGHLIGHT:
-				self._announceHighlightCursor(obj)
-			elif trackingMode == CT_WINDOW:
-				self._announceWindowCursor(obj)
+			match trackingMode:
+				case 0:  # CT_OFF
+					return
+				case 1:  # CT_STANDARD
+					self._announceStandardCursor(obj)
+				case 2:  # CT_HIGHLIGHT
+					self._announceHighlightCursor(obj)
+				case 3:  # CT_WINDOW
+					self._announceWindowCursor(obj)
 		except Exception:
 			# Silently fail - cursor tracking is a non-critical feature
 			pass
@@ -4634,18 +4650,20 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		#   (a) content generation hasn't changed (no typing/text changes), and
 		#   (b) the new caret offset falls within the cached line's range.
 		char = None
+		lls = self._lastLineStartOffset
+		lle = self._lastLineEndOffset
 		cache_valid = (
 			self._lastLineText is not None
 			and self._lastLineGeneration == self._contentGeneration
 			and currentPos is not None
-			and self._lastLineStartOffset is not None
-			and self._lastLineEndOffset is not None
-			and self._lastLineStartOffset <= currentPos < self._lastLineEndOffset
+			and lls is not None
+			and lle is not None
+			and lls <= currentPos < lle
 		)
 
 		if cache_valid:
 			# Compute character index within the cached line text.
-			char_index = currentPos - self._lastLineStartOffset
+			char_index = currentPos - lls
 			if 0 <= char_index < len(self._lastLineText):
 				char = self._lastLineText[char_index]
 
@@ -4797,12 +4815,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		Returns:
 			str: The highlighted text, or None if no highlighting detected.
 		"""
-		# This is a simplified implementation
-		# Real implementation would need robust ANSI escape sequence parsing
-		# Remove ANSI escape codes to get clean text
-		ansiPattern = re.compile(r'\x1b\[[0-9;]*m')
-		cleanText = ansiPattern.sub('', text)
-		return cleanText.strip() if cleanText.strip() else None
+		cleanText = _ANSI_HIGHLIGHT_RE.sub('', text).strip()
+		return cleanText if cleanText else None
 
 	@script(
 		# Translators: Description for the show help gesture
@@ -5893,16 +5907,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		Return a human-friendly name for a symbol based on Unicode data.
 
 		Falls back to the character itself if no name is available.
+		Delegates to the module-level cached ``_get_unicode_symbol_name``.
 		"""
-		if char.isalnum():
-			return char
-
-		try:
-			name = unicodedata.name(char, "")
-		except Exception:
-			name = ""
-
-		return name.lower() if name else char
+		return _get_unicode_symbol_name(char)
 
 	@script(
 		# Translators: Description for decreasing punctuation level
