@@ -4,11 +4,11 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
-## [1.0.47] - 2026-02-24
+## [1.0.47] - 2026-02-24 (#53, #54)
 
 ### Changed
 
-- **Simplified keyboard shortcuts**: All terminal-scoped commands now use simpler 2-modifier combinations instead of 3-modifier combinations
+- **Simplified keyboard shortcuts** (#53): All terminal-scoped commands now use simpler 2-modifier combinations instead of 3-modifier combinations
   - **Dropped Alt modifier entirely** (key unchanged) for most commands:
     - Line navigation: `NVDA+Alt+U/I/O` → `NVDA+U/I/O`
     - Word navigation: `NVDA+Alt+J/K/L` → `NVDA+J/K/L`
@@ -36,13 +36,39 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
     - Jump to bookmark: `NVDA+Alt+0-9`
     - Window management: `NVDA+Alt+F2/F3/Plus/Asterisk`
     - Find next/previous: `NVDA+F3` / `NVDA+Shift+F3`
-- Updated all documentation (README.md, addon/doc/en/readme.html, terminalAccess.py) to reflect new keyboard shortcuts
+- Updated all documentation (README.md, addon/doc/en/readme.html, terminalAccess.py) to reflect new keyboard shortcuts (#54)
 
-## [1.0.46] - 2026-02-24
+### Fixed (also included in this release)
+
+- **Suppress premature "Blank" announcements after pressing Enter** (#51): After pressing Enter,
+  the caret moves to a new empty line before terminal output arrives, causing the add-on to
+  prematurely announce "Blank". A 300 ms suppression window (`_ENTER_SUPPRESSION_WINDOW = 0.3`)
+  after Enter key presses now prevents the false announcement while preserving correct "Blank"
+  readback for genuine blank lines reached via explicit navigation scripts.
+
+### Changed (also included in this release)
+
+- **Python 3.11 code modernization** (#52): Modernized `terminalAccess.py` with Python 3.11
+  idioms:
+  - Removed deprecated `typing` imports; all annotations now use built-in generics and `X | None`
+    unions
+  - Hoisted per-call allocations to module-level constants (`_SUPPORTED_TERMINALS`,
+    `_BUILTIN_PROFILE_NAMES`, `_ANSI_HIGHLIGHT_RE`, `_PROMPT_PATTERNS`) eliminating repeated
+    object construction in hot paths
+  - Added `__slots__` to `TextDiffer` and `WindowDefinition` for reduced per-instance memory
+  - Replaced `CommandHistoryManager` `list` with `collections.deque(maxlen=…)` for O(1)
+    auto-pruning instead of O(n) `pop(0)`
+  - Optimised `event_caret` to call `isTerminalApp()` once and cache the `terminalAccess` config
+    sub-dict, eliminating redundant lookups on every caret event
+  - Added `@functools.cache` to Unicode symbol name lookups so `unicodedata.name()` is paid
+    once per unique character, not once per keystroke
+  - `super()` calls modernised from `super(ClassName, self)` to `super()`
+
+## [1.0.46] - 2026-02-24 (#44, #48, #49, #50)
 
 ### Added
 
-- **Announce New Output feature**: New `NewOutputAnnouncer` class automatically speaks newly
+- **Announce New Output feature** (#50): New `NewOutputAnnouncer` class automatically speaks newly
   appended terminal output as it arrives, without any manual navigation required.
   - Enabled/disabled with `NVDA+Alt+N` (new toggle gesture) — announces "Announce new output on/off"
   - Coalesces rapid output within a configurable window (default 200 ms) so fast-scrolling
@@ -101,55 +127,122 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
   - `ConfigManager` validation and `reset_to_defaults` for all four new settings
   - Confspec key presence check
 
-## [1.0.45] - 2026-02-23
+### Fixed (prerequisite PRs included in this release)
+
+- **Fix text range extraction for cursor attribute reading** (#48): Resolved a critical bug where
+  `setEndPoint(reviewPos, "endToStart")` produced empty or reversed text ranges, silently
+  breaking `NVDA+Alt+Shift+A` (cursor attributes), `NVDA+Alt+Shift+LeftArrow` (read to left),
+  `NVDA+Alt+Shift+UpArrow` (read to top), and column position calculations. Fixed by expanding
+  the cursor character with `UNIT_CHARACTER` then using `setEndPoint(cursorChar, "endToEnd")` in
+  `script_readAttributes`, `script_readToLeft`, `script_readToTop`, and three
+  `PositionCalculator` methods. Added `tests/test_cursor_attributes.py` with coverage for range
+  construction, ANSI code detection, and error handling.
+
+### Changed (prerequisite PRs included in this release)
+
+- **Hot-path performance: TextDiffer, line-level cache, single-pass search** (#49): Introduced
+  `TextDiffer` class for O(n) appended-output detection without UIA/COM calls. Added
+  `_contentGeneration` counter and a four-field line-level TextInfo cache to `GlobalPlugin`
+  reducing `_announceStandardCursor` from 2–3 UIA/COM calls per caret event to 1 on cache hit.
+  Refactored `OutputSearchManager.search()` from O(n_matches × avg_line_num) repeated
+  `.move()` walks to a single O(total_lines) forward pass. 25 new unit tests in
+  `tests/test_hot_path_optimizations.py`.
+
+## [1.0.45] - 2026-02-23 (#47)
 
 ### Fixed
 
-- Fixed keyboard command binding error by stripping "script_" prefix in _collectTerminalGestures()
+- Fixed keyboard command binding error by stripping "script_" prefix in _collectTerminalGestures() (#47)
 - Keyboard gestures now bind correctly without "Error binding script" messages
 - Gestures remain properly scoped to terminal windows only (not global)
 
-## [1.0.44] - 2026-02-23
+## [1.0.44] - 2026-02-23 (#46)
 
 ### Changed
 
+- **Terminal gestures scoped to focused terminal windows only** (#46): Previously, Terminal Access
+  gestures fired globally; they now activate only when a terminal window is focused using
+  `_updateGestureBindingsForFocus()`. Gesture bindings and copy-mode keys are disabled when
+  focus leaves a terminal and re-enabled on terminal focus.
 - Version bump for release
 
-## [1.0.43] - 2026-02-23
+## [1.0.43] - 2026-02-23 (#43, #45)
+
+### Fixed
+
+- **Output search now moves review cursor to first match** (#43): Previously the search dialog
+  found matches but left the review cursor unmoved, so nothing was read aloud. Now search always
+  moves to the first match and reads the line, even when bookmark-based jumps are not supported
+  by the terminal's TextInfo implementation.
 
 ### Changed
 
-- Version bump for release
+- Version bump for release (#45)
 
-## [1.0.42] - 2026-02-23
+## [1.0.42] - 2026-02-23 (#42)
+
+### Fixed
+
+- **Hardened character reading and punctuation echo** (#42): Read previous/current/next character
+  commands were announcing "unable to read character", and typed punctuation raised errors instead
+  of speaking symbol names. Added `_processSymbol()` with `unicodedata.name()` lookup and an
+  alphanumeric guard so symbols such as `!` are spoken by name. Safely copies review position and
+  falls back to speaking character text if speech APIs fail.
+
+## [1.0.41] - 2026-02-23 (#40, #41)
+
+### Fixed
+
+- **Guard settings panel when profile manager is absent** (#40): Opening Terminal Access settings
+  could crash because the panel assumed `_profileManager` was always available. Settings panel
+  now retrieves the shared `ProfileManager` from running plugins via a helper, and skips
+  default-profile wiring gracefully when none exists.
 
 ### Changed
 
-- Version bump for release
+- Version bump for release (#41)
 
-## [1.0.41] - 2026-02-23
-
-### Changed
-
-- Version bump for release
-
-## [1.0.40] - 2026-02-23
+## [1.0.40] - 2026-02-23 (#34, #36, #37, #38, #39)
 
 ### Release Notes
 
 This is the **first public release** of Terminal Access for NVDA. The add-on is now ready for general use by the screen reader community.
 
+### Fixed
+
+- **Search shortcut changed from NVDA+Control+F to NVDA+Alt+F** (#34): The previous shortcut
+  `NVDA+Control+F` conflicted with NVDA's native Find functionality. Changed to `NVDA+Alt+F`
+  across the gesture binding, user messages, README.md, QUICKSTART.md, CHANGELOG.md, HTML docs,
+  and testing guides.
+
 ### Documentation
 
-- All documentation reviewed and updated for public release
+- All documentation reviewed and updated for public release (#38)
 - README.md now includes direct links to CONTRIBUTING.md and docs/README.md
 - Contributing section enhanced with clear navigation to contribution guidelines
 - Documentation structure verified for completeness and accessibility
+- Consolidated advanced user guide content into the main HTML documentation (#36):
+  added "Advanced Topics" section covering Application Profiles, Third-Party Terminal Support,
+  Window Definitions, Unicode/International Text, and Performance Optimization to
+  `addon/doc/en/readme.html`; README.md updated to reference the HTML guide as primary doc
+- Streamlined README.md by removing redundant "Additional Documentation" section (#37)
 
-## [1.0.38] - 2026-02-23
+### Maintenance
+
+- Added automated workflow to remove old GitHub releases after new ones are created, keeping
+  only the latest release at any given time (#39)
+
+## [1.0.38] - 2026-02-23 (#29, #30, #31, #32, #33)
 
 ### Added
 
+- **Tab management with per-tab state isolation** (#32): New `TabManager` class generates unique
+  tab IDs from window properties and tracks multiple tabs. `BookmarkManager`,
+  `OutputSearchManager`, and `CommandHistoryManager` now maintain isolated state per tab (bookmarks
+  in Tab 1 do not leak to Tab 2). Compatible with Windows Terminal, PowerShell 7+, and other
+  modern multi-tab terminals. Backward-compatible legacy mode when `TabManager` is `None`.
+  - `NVDA+Alt+Shift+T` — Create new tab (sends Ctrl+Shift+T)
+  - `NVDA+Alt+T` — List tabs and switch to next (sends Ctrl+Tab)
 - **Default Profile Setting**: Choose a default profile to use when no application-specific profile is detected
   - New config setting: `defaultProfile` (empty string by default)
   - UI: Default profile dropdown in Application Profiles section
@@ -178,7 +271,7 @@ This is the **first public release** of Terminal Access for NVDA. The add-on is 
   - NVDA+Alt+Shift+0-9 sets bookmarks 0-9 (all 10 bookmarks)
   - Profile announcement moved to NVDA+Alt+F10 to free up NVDA+Alt+0
   - Indentation toggle moved to NVDA+Alt+F5 to free up NVDA+Alt+5
-- **Author Information**: Updated author to Pratik Patel
+- **Author Information**: Updated author to Pratik Patel (#31)
 
 ### Fixed
 
@@ -186,6 +279,11 @@ This is the **first public release** of Terminal Access for NVDA. The add-on is 
   - Profile detection on `event_appModule_gainFocus` verified and working
   - Default profile properly applied when no app-specific profile found
   - Log messages added for profile activation tracking
+- **Character navigation no longer types comma or period** (#29): `NVDA+Alt+Comma` and
+  `NVDA+Alt+Period` were typing literal characters into the terminal. Replaced
+  `globalCommands` delegation with a direct `_readReviewCharacter()` helper using
+  `api.getReviewPosition()` and `speech.speakTextInfo()`, bypassing the gesture handling layer
+  entirely to prevent key passthrough.
 
 ### Documentation
 
@@ -194,12 +292,16 @@ This is the **first public release** of Terminal Access for NVDA. The add-on is 
   - QUICKSTART.md (Essential Commands and Settings sections)
   - addon/doc/en/readme.html (multiple references)
   - Help text in terminalAccess.py
+- Consolidated troubleshooting documentation into FAQ.md and updated WSL support docs to reflect
+  complete WSL implementation since v1.0.27 (#33)
+- Updated documentation across README.md, QUICKSTART.md, and addon/doc/en/readme.html to
+  reflect F-key shortcuts (NVDA+Alt+F5 / NVDA+Alt+F10) and full 0-9 bookmark range (#30)
 
-## [1.0.37] - 2026-02-22
+## [1.0.37] - 2026-02-22 (#27, #28)
 
 ### Added
 
-- **Indentation Reading Feature**: Automatic announcement of indentation when reading lines
+- **Indentation Reading Feature** (#28): Automatic announcement of indentation when reading lines
   - New setting: "Announce indentation when reading lines" (default: disabled)
   - **NVDA+Alt+5**: Quick toggle for indentation announcement (announces "Indentation announcement on/off")
   - Works with all line reading commands: NVDA+Alt+U (previous line), NVDA+Alt+I (current line), NVDA+Alt+O (next line)
@@ -212,25 +314,31 @@ This is the **first public release** of Terminal Access for NVDA. The add-on is 
 
 ### Fixed
 
-- **Keyboard Commands**: Fixed NVDA+Alt+Comma and NVDA+Alt+Period commands typing characters
+- **Keyboard Commands**: Fixed NVDA+Alt+Comma and NVDA+Alt+Period commands typing characters (#28)
   - Commands now pass `None` to globalCommands review functions instead of gesture object
   - Prevents comma and period keys from being typed when reading current/next character
   - Affected commands: NVDA+Alt+Comma (read current character), NVDA+Alt+Period (read next character)
   - Applied pattern for all gestures containing typeable characters
+- **UIATextInfo position calculation** (#27): Resolved `AttributeError: 'UIATextInfo' object has
+  no attribute 'moveEndToPoint'` when calculating cursor position in Windows Terminal/PowerShell.
+  Replaced the non-existent `moveEndToPoint()` call with the standard TextInfo API (`setEndPoint()`
+  + `len(text)`) in three locations inside `PositionCalculator._calculate_incremental()` and
+  `_calculate_full()`.
 
 ### Documentation
 
-- Updated README.md with indentation reading feature and NVDA+Alt+5 toggle
+- Updated README.md with indentation reading feature and NVDA+Alt+5 toggle (#28)
 - Updated QUICKSTART.md with indentation usage examples for Python/YAML code
 - Updated addon/doc/en/readme.html with complete keyboard commands and practical scenarios
 - Added indentation to Settings Interactions section
 - Updated Scenario 7 (Python Code Navigation) with automatic indentation workflow
+- Replaced 43 instances of "TDSR" with "Terminal Access" across user-facing documentation (#27)
 
-## [1.0.36] - 2026-02-21
+## [1.0.36] - 2026-02-21 (#26)
 
 ### Fixed
 
-- **Global Plugin Initialization**: Fixed "Error initializing global plugin" caused by config migration attempting to delete keys
+- **Global Plugin Initialization**: Fixed "Error initializing global plugin" caused by config migration attempting to delete keys (#26)
   - Fixed `AttributeError: __delitem__` in `ConfigManager._migrate_legacy_settings()` (line 1695)
   - Removed unsupported `del config.conf["terminalAccess"]["processSymbols"]` operation
   - NVDA's config objects don't support deletion; old deprecated keys now remain in config spec
@@ -244,11 +352,11 @@ This is the **first public release** of Terminal Access for NVDA. The add-on is 
   - Test migration from `processSymbols=False` to `punctuationLevel=0`
   - Test that existing `punctuationLevel` values are preserved during migration
 
-## [1.0.35] - 2026-02-21
+## [1.0.35] - 2026-02-21 (#25)
 
 ### Fixed
 
-- **Global Plugin Initialization**: Fixed "Error initializing global plugin" caused by GUI not being fully initialized
+- **Global Plugin Initialization**: Fixed "Error initializing global plugin" caused by GUI not being fully initialized (#25)
   - Added error handling in `GlobalPlugin.__init__` for GUI operations (line 3437-3442)
   - Added error handling in `script_openSettings` for GUI errors (line 4241-4245)
   - Plugin now initializes successfully even when GUI subsystem is not ready
@@ -257,7 +365,7 @@ This is the **first public release** of Terminal Access for NVDA. The add-on is 
 
 ### Code Quality
 
-- **Lint Compliance**: Fixed all critical lint errors to ensure code quality
+- **Lint Compliance**: Fixed all critical lint errors to ensure code quality (#25)
   - Fixed F401: Removed unused `Set` import from typing
   - Fixed F541: Removed 2 unnecessary f-string prefixes (lines 491, 496)
   - Fixed F821: Fixed undefined variable `terminal` → `self._boundTerminal` (line 4644)
@@ -274,11 +382,11 @@ This is the **first public release** of Terminal Access for NVDA. The add-on is 
   - Documents all fixed lint errors with line numbers
   - Provides validation steps for future development
 
-## [1.0.34] - 2026-02-21
+## [1.0.34] - 2026-02-21 (#24)
 
 ### Fixed
 
-- **Translation Initialization**: Fixed "Error initializing global plugin" that occurred when `addonHandler.initTranslation()` failed
+- **Translation Initialization**: Fixed "Error initializing global plugin" that occurred when `addonHandler.initTranslation()` failed (#24)
   - Added fallback translation function `def _(text): return text` in exception handler
   - Prevents `NameError` when translation system is unavailable
   - Plugin now initializes successfully even when NVDA translation modules fail to load
@@ -289,7 +397,7 @@ This is the **first public release** of Terminal Access for NVDA. The add-on is 
 - **Test Coverage**: Added 3 new tests for translation fallback functionality
 - **Build Configuration**: Updated `.gitignore` to exclude coverage artifacts (`.coverage`, `coverage.xml`, `htmlcov/`)
 
-## [1.0.33] - 2026-02-21
+## [1.0.33] - 2026-02-21 (#23)
 
 ### Documentation - User Guide Enhancements
 
