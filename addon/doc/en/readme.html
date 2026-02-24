@@ -194,6 +194,20 @@
 		again to re-enable announcements and review the output manually.
 	</div>
 
+	<h4>Announce New Output</h4>
+	<p>Automatically hear newly appended terminal output as it arrives, without any manual navigation.</p>
+	<div class="info">
+		<strong>Example Usage:</strong> While running <code>ping google.com</code>, press
+		<code>NVDA+Alt+N</code> to enable "Announce New Output". Each new line from the ping command
+		is automatically spoken as it appears—"Reply from 142.250.185.46: bytes=32 time=12ms TTL=117"—so
+		you can monitor the output hands-free. Press <code>NVDA+Alt+N</code> again to turn it off when done.
+		<br><br>
+		<strong>Flood protection:</strong> If a command produces rapid output (like <code>cat largefile.txt</code>),
+		the add-on coalesces lines within a configurable window (default 200 ms) and, if more than
+		20 lines arrive at once, speaks a concise summary such as "47 new lines" rather than overwhelming
+		the synthesiser.
+	</div>
+
 	<h4>Selection and Copy</h4>
 	<p>Select and copy terminal content using mark-based selection or legacy copy mode.</p>
 	<div class="info">
@@ -691,6 +705,10 @@
 				<td>Toggle quiet mode (disables automatic announcements)</td>
 			</tr>
 			<tr>
+				<td><code>NVDA+Alt+N</code></td>
+				<td>Toggle announce new output (automatically speaks new terminal lines as they arrive)</td>
+			</tr>
+			<tr>
 				<td><code>NVDA+Alt+F5</code></td>
 				<td>Toggle automatic indentation announcement on line read</td>
 			</tr>
@@ -793,6 +811,32 @@
 			<li>Use <code>NVDA+Alt+U</code> repeatedly to review the last few lines and check for errors</li>
 			<li>Or press <code>NVDA+Alt+F</code> and search for "error" or "warn" to find any issues</li>
 		</ol>
+	</div>
+
+	<h3>Scenario 6b: Hands-Free Real-Time Output Monitoring</h3>
+	<div class="note">
+		<strong>Situation:</strong> You want to monitor the live output of a command—such as a test runner,
+		a build tool, or a server log tail—without having to navigate manually after each update.
+		<br><br>
+		<strong>Workflow:</strong>
+		<ol>
+			<li>Press <code>NVDA+Alt+N</code> to enable "Announce New Output" (you'll hear "Announce new output on")</li>
+			<li>Run your command, for example: <code>pytest -v</code></li>
+			<li>Each new result line is automatically spoken as it appears:
+				<ul>
+					<li>"tests/test_login.py::test_valid_user PASSED"</li>
+					<li>"tests/test_login.py::test_invalid_password FAILED"</li>
+					<li>"5 passed, 1 failed in 2.31s"</li>
+				</ul>
+			</li>
+			<li>You can continue working (e.g., review code in another window) while the test suite runs—you'll
+				hear important lines without switching focus</li>
+			<li>If a fast command floods the terminal (e.g., <code>cat /var/log/syslog</code>), the add-on
+				automatically summarises: "342 new lines" so speech is never overwhelming</li>
+			<li>When done, press <code>NVDA+Alt+N</code> again to turn the feature off</li>
+		</ol>
+		<strong>Tip:</strong> You can adjust the coalesce delay and maximum line count in NVDA Preferences &gt;
+		Settings &gt; Terminal Settings &gt; "Announce New Output" to tune responsiveness vs. verbosity.
 	</div>
 
 	<h3>Scenario 7: Reviewing Python Code Indentation</h3>
@@ -1058,14 +1102,132 @@
 	<p><strong>Default:</strong> 20 milliseconds</p>
 	<p><strong>Range:</strong> 0 to 1000 milliseconds</p>
 
+	<h4>Announce New Output Automatically</h4>
+	<p>
+		<strong>What it does:</strong> When enabled, Terminal Access listens for newly appended terminal
+		output and speaks it automatically without requiring manual navigation.  Only <em>appended</em>
+		text (new lines added at the bottom) is spoken; mid-screen edits and full clears are ignored to
+		avoid false-positive announcements.
+	</p>
+	<p>
+		<strong>How it affects your experience:</strong> You can run a command and keep focus elsewhere
+		while hearing results as they stream in:
+	</p>
+	<ul>
+		<li>Test runner results (<code>pytest</code>, <code>jest</code>) are spoken line-by-line as they appear</li>
+		<li>Build tool status (<code>make</code>, <code>cargo build</code>) is announced without manual review</li>
+		<li>Server logs tailed in a split pane are spoken as new entries arrive</li>
+		<li>Interactive commands like <code>ping</code> or <code>traceroute</code> provide hands-free monitoring</li>
+	</ul>
+	<p>
+		<strong>Flood protection:</strong> Rapid output is coalesced using the "Coalesce Delay" setting, and
+		if too many lines arrive at once (more than "Max Lines"), a brief summary is spoken instead—for example,
+		"342 new lines"—so speech is never overwhelming.
+	</p>
+	<p>
+		<strong>Quiet mode interaction:</strong> When quiet mode is active (<code>NVDA+Alt+Q</code>), new
+		output announcements are suppressed regardless of this setting.
+	</p>
+	<p>
+		<strong>Toggle quickly:</strong> Use <code>NVDA+Alt+N</code> to turn the feature on and off without
+		opening the settings dialog.  Enabling the toggle also resets the internal snapshot so stale
+		buffered content is not replayed.
+	</p>
+	<p>
+		<strong>Example:</strong>
+	</p>
+	<div class="info">
+		<code>
+			$ pytest -v&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # you run the tests<br>
+			tests/test_auth.py::test_login PASSED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # spoken automatically<br>
+			tests/test_auth.py::test_logout PASSED&nbsp;&nbsp;&nbsp;&nbsp; # spoken automatically<br>
+			tests/test_api.py::test_create FAILED&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # spoken automatically<br>
+			2 passed, 1 failed in 1.42s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # spoken automatically
+		</code>
+	</div>
+	<p><strong>Default:</strong> Disabled</p>
+
+	<h4>Coalesce Delay (milliseconds)</h4>
+	<p>
+		<strong>What it does:</strong> Sets how long the add-on waits after detecting new output before
+		speaking it.  Within this window, multiple rapid additions are merged into a single announcement.
+	</p>
+	<p>
+		<strong>How it affects your experience:</strong>
+	</p>
+	<ul>
+		<li><strong>Short delay (50–100 ms):</strong> Near-instant speech for line-by-line commands.
+		Best for interactive commands like <code>ping</code> where each line matters individually.</li>
+		<li><strong>Medium delay (200 ms, default):</strong> Balances responsiveness and clarity.
+		Lines that arrive within 200 ms are batched and spoken together.</li>
+		<li><strong>Long delay (500–2000 ms):</strong> Reduces interruptions for fast-scrolling output
+		(e.g., compilation logs).  More lines are batched, resulting in fewer but larger announcements.</li>
+	</ul>
+	<p>
+		<strong>Only active when:</strong> "Announce New Output Automatically" is enabled.
+	</p>
+	<p><strong>Default:</strong> 200 milliseconds</p>
+	<p><strong>Range:</strong> 50 to 2000 milliseconds</p>
+
+	<h4>Max Lines Before Summarising</h4>
+	<p>
+		<strong>What it does:</strong> Sets the maximum number of lines that will be spoken verbatim per
+		announcement cycle.  When more lines than this threshold arrive at once, the add-on speaks a brief
+		count instead—for example, "47 new lines".
+	</p>
+	<p>
+		<strong>How to choose a value:</strong>
+	</p>
+	<ul>
+		<li><strong>Low (5–10):</strong> Very concise; most multi-line output is summarised.
+		Best when you only care whether output arrived, not what it said.</li>
+		<li><strong>Medium (20, default):</strong> A sensible balance—short outputs are fully spoken,
+		large dumps get a count.</li>
+		<li><strong>High (50–200):</strong> More output is spoken verbatim.  Increases verbosity but
+		ensures you miss less detail.</li>
+	</ul>
+	<p>
+		<strong>Example (threshold = 5):</strong> Running <code>ls -l /usr/bin</code> produces hundreds
+		of lines; you hear "243 new lines" instead of all filenames.
+	</p>
+	<p>
+		<strong>Only active when:</strong> "Announce New Output Automatically" is enabled.
+	</p>
+	<p><strong>Default:</strong> 20 lines</p>
+	<p><strong>Range:</strong> 1 to 200 lines</p>
+
+	<h4>Strip ANSI Escape Codes from Output</h4>
+	<p>
+		<strong>What it does:</strong> Removes ANSI colour and formatting escape sequences from announced
+		output before it is passed to the speech synthesiser.
+	</p>
+	<p>
+		<strong>Why it matters:</strong> Many terminal programs emit colour codes (e.g.,
+		<code>\x1b[32mPASSED\x1b[0m</code> for green text).  Without stripping, the synthesiser
+		announces the raw escape sequences as gibberish.  With stripping enabled (the default), only the
+		human-readable text—"PASSED"—is spoken.
+	</p>
+	<p>
+		<strong>When to disable:</strong> Rarely needed, but if you specifically need to audit ANSI codes
+		in raw terminal output, you can turn this off.
+	</p>
+	<p>
+		<strong>Only active when:</strong> "Announce New Output Automatically" is enabled.
+	</p>
+	<p><strong>Default:</strong> Enabled</p>
+
 	<div class="info">
 		<strong>Settings Interaction Summary:</strong>
 		<ul>
-			<li><strong>Quiet Mode</strong> (toggled with NVDA+Alt+Q) temporarily disables cursor tracking
-			and key echo, regardless of their settings</li>
+			<li><strong>Quiet Mode</strong> (toggled with NVDA+Alt+Q) temporarily disables cursor tracking,
+			key echo, <em>and</em> new output announcements, regardless of their individual settings</li>
 			<li><strong>Process Symbols</strong> affects cursor tracking, key echo, and manual character navigation</li>
 			<li><strong>Condense Repeated Symbols</strong> only works with Key Echo enabled</li>
 			<li><strong>Cursor Delay</strong> only affects cursor tracking announcements</li>
+			<li><strong>Announce New Output</strong> (toggled with NVDA+Alt+N) works independently of cursor
+			tracking; it monitors the terminal buffer for newly appended lines</li>
+			<li><strong>Coalesce Delay</strong> and <strong>Max Lines</strong> and <strong>Strip ANSI Codes</strong>
+			only apply when "Announce New Output" is enabled</li>
 		</ul>
 	</div>
 

@@ -4,9 +4,68 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.46] - 2026-02-24
+
+### Added
+
+- **Announce New Output feature**: New `NewOutputAnnouncer` class automatically speaks newly
+  appended terminal output as it arrives, without any manual navigation required.
+  - Enabled/disabled with `NVDA+Alt+N` (new toggle gesture) — announces "Announce new output on/off"
+  - Coalesces rapid output within a configurable window (default 200 ms) so fast-scrolling
+    commands do not overwhelm the speech synthesiser
+  - When more than the configured line limit arrives at once (default 20 lines), speaks a
+    concise summary: e.g. "47 new lines"
+  - Strips ANSI colour/formatting escape codes before speech (configurable, on by default)
+  - Automatically suppressed when quiet mode is active
+  - Four new settings exposed in **NVDA Preferences → Settings → Terminal Settings**:
+    - **Announce new terminal output automatically** (boolean, default off)
+    - **Coalesce delay** in milliseconds (50–2000, default 200)
+    - **Max lines before summarising** (1–200, default 20)
+    - **Strip ANSI escape codes from output** (boolean, default on)
+
+- **TextDiffer integration in WindowMonitor**: Each monitored region now carries its own
+  `TextDiffer` instance for precise, efficient change detection.
+  - First poll per region establishes a silent baseline (no false announcements on startup)
+  - Subsequent polls only speak when content actually changed
+  - For appended output (the common case) only the newly appended text is spoken — not the
+    entire region
+  - For non-trivial changes (screen clear, mid-screen edit) the full region content is spoken
+  - Eliminates redundant UIA/COM reads and unnecessary speech on every poll cycle
+
 ### Changed
 
-- Raised minimum NVDA requirement to 2025.1 (Python 3.11 runtime); compatibility with earlier versions removed
+- **Minimum NVDA version raised to 2025.1** (Python 3.11 runtime); compatibility with earlier
+  NVDA versions removed
+- `WindowMonitor._announce_change` now speaks the relevant content directly instead of the
+  generic "Window {name} changed" string
+- `ConfigManager` validation and `reset_to_defaults` extended to cover the four new
+  `announceNewOutput` settings
+- Settings panel `onSave` and `onResetToDefaults` updated to persist and reset new settings
+- `GlobalPlugin.event_caret` feeds the current terminal buffer to `NewOutputAnnouncer` on
+  every caret event (best-effort, silently skipped on any error)
+- `NVDA+Alt+N` toggle resets the announcer snapshot on enable so stale buffered content is
+  never replayed when the feature is turned on mid-session
+
+### Documentation
+
+- Added "Announce New Output" feature description with usage example to the Features section
+  of the user guide (`addon/doc/en/readme.html`)
+- Added `NVDA+Alt+N` row to the Modes and Toggles keyboard commands table
+- Added detailed settings reference for all four new options with examples, ranges, and
+  interaction notes
+- Added **Scenario 6b: Hands-Free Real-Time Output Monitoring** (pytest workflow example)
+- Updated Settings Interaction Summary to document how quiet mode and the new settings interact
+
+### Tests
+
+- 23 new unit tests in `tests/test_new_output_announcer.py` covering:
+  - Appended output detection, ANSI stripping (on and off), coalescing, max-lines summary
+  - Quiet mode and feature-disabled suppression
+  - `TextDiffer` state reset, unchanged-content silence, changed-content silence
+  - `WindowMonitor` per-region `TextDiffer` instances, initial-poll silence, silent mode,
+    appended-only speech
+  - `ConfigManager` validation and `reset_to_defaults` for all four new settings
+  - Confspec key presence check
 
 ## [1.0.45] - 2026-02-23
 

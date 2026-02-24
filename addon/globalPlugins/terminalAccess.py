@@ -148,6 +148,10 @@ confspec = {
 	"windowRight": "integer(default=0, min=0)",
 	"windowEnabled": "boolean(default=False)",
 	"defaultProfile": "string(default='')",  # Default profile to use when no app profile is detected
+	"announceNewOutput": "boolean(default=False)",  # Announce newly appended terminal output
+	"newOutputCoalesceMs": "integer(default=200, min=50, max=2000)",  # ms to wait before announcing accumulated output
+	"newOutputMaxLines": "integer(default=20, min=1, max=200)",  # max lines before summarising
+	"stripAnsiInOutput": "boolean(default=True)",  # strip ANSI codes from announced output
 }
 
 # Register configuration
@@ -1849,8 +1853,15 @@ class ConfigManager:
 
 		# Boolean values - no validation needed
 		elif key in ["cursorTracking", "keyEcho", "linePause", "repeatedSymbols",
-					 "quietMode", "verboseMode", "windowEnabled"]:
+					 "quietMode", "verboseMode", "windowEnabled",
+					 "announceNewOutput", "stripAnsiInOutput"]:
 			return bool(value)
+
+		# New output coalesce window (ms)
+		elif key == "newOutputCoalesceMs":
+			return _validateInteger(value, 50, 2000, 200, key)
+		elif key == "newOutputMaxLines":
+			return _validateInteger(value, 1, 200, 20, key)
 
 		# Unknown key - return as-is (for forward compatibility)
 		return value
@@ -1887,6 +1898,10 @@ class ConfigManager:
 		config.conf["terminalAccess"]["windowLeft"] = 0
 		config.conf["terminalAccess"]["windowRight"] = 0
 		config.conf["terminalAccess"]["windowEnabled"] = False
+		config.conf["terminalAccess"]["announceNewOutput"] = False
+		config.conf["terminalAccess"]["newOutputCoalesceMs"] = 200
+		config.conf["terminalAccess"]["newOutputMaxLines"] = 20
+		config.conf["terminalAccess"]["stripAnsiInOutput"] = True
 
 
 class WindowManager:
@@ -2510,6 +2525,119 @@ class OperationQueue:
 			self._active_operation = None
 
 
+class NewOutputAnnouncer:
+	"""
+	Announces newly appended terminal output using TextDiffer.
+
+	When the "announce new output" feature is enabled, this class monitors
+	terminal content fed via :meth:`feed` and speaks newly appended lines
+	as they arrive.  Rapid bursts are coalesced by a short timer so that
+	fast-scrolling output (``cat`` of a large file, ``apt`` progress bars,
+	etc.) does not overwhelm the speech synthesiser.
+
+	Features:
+	- Coalescing: accumulates text within a configurable window (newOutputCoalesceMs)
+	- Max-lines guard: if more than newOutputMaxLines arrive at once, a summary
+	  "{N} new lines" is spoken instead of the full text
+	- ANSI stripping: controlled by stripAnsiInOutput config key
+	- Quiet-mode awareness: no output when quietMode is active
+
+	Thread Safety:
+		:meth:`feed` may be called from any thread.  Internal state is
+		protected by a ``threading.Lock``.
+	"""
+
+	def __init__(self) -> None:
+		"""Initialise with no previous snapshot."""
+		self._differ = TextDiffer()
+		self._lock = threading.Lock()
+		self._timer: Optional[threading.Timer] = None
+		self._pending_text: str = ""
+
+	def feed(self, text: str) -> None:
+		"""
+		Feed the current terminal text and queue an announcement if new output
+		was appended.
+
+		Args:
+			text: The full current terminal buffer text.
+		"""
+		# Respect quiet mode and master toggle
+		try:
+			if config.conf["terminalAccess"]["quietMode"]:
+				return
+			if not config.conf["terminalAccess"]["announceNewOutput"]:
+				return
+		except Exception:
+			return
+
+		kind, new_content = self._differ.update(text)
+
+		if kind != TextDiffer.KIND_APPENDED or not new_content.strip():
+			return
+
+		# Strip ANSI escape codes if configured
+		try:
+			if config.conf["terminalAccess"]["stripAnsiInOutput"]:
+				new_content = ANSIParser.stripANSI(new_content)
+		except Exception:
+			pass
+
+		if not new_content.strip():
+			return
+
+		# Accumulate and (re)start coalesce timer
+		with self._lock:
+			self._pending_text += new_content
+			if self._timer is not None:
+				self._timer.cancel()
+			try:
+				coalesce_ms = int(config.conf["terminalAccess"]["newOutputCoalesceMs"])
+			except Exception:
+				coalesce_ms = 200
+			self._timer = threading.Timer(coalesce_ms / 1000.0, self._announce_pending)
+			self._timer.daemon = True
+			self._timer.start()
+
+	def _announce_pending(self) -> None:
+		"""Announce the accumulated pending text (called from timer thread)."""
+		with self._lock:
+			text = self._pending_text
+			self._pending_text = ""
+			self._timer = None
+
+		if not text.strip():
+			return
+
+		# Re-check quiet mode (might have changed while timer was running)
+		try:
+			if config.conf["terminalAccess"]["quietMode"]:
+				return
+		except Exception:
+			return
+
+		lines = [ln for ln in text.split('\n') if ln.strip()]
+		try:
+			max_lines = int(config.conf["terminalAccess"]["newOutputMaxLines"])
+		except Exception:
+			max_lines = 20
+
+		if len(lines) > max_lines:
+			# Translators: Summary when many new lines arrive at once
+			ui.message(_("{n} new lines").format(n=len(lines)))
+		else:
+			ui.message(text.strip())
+
+	def reset(self) -> None:
+		"""Reset internal state (call when toggling the feature on/off)."""
+		with self._lock:
+			if self._timer is not None:
+				self._timer.cancel()
+				self._timer = None
+			self._pending_text = ""
+		self._differ.reset()
+
+
 class WindowMonitor:
 	"""
 	Monitor multiple windows for content changes with background polling.
@@ -2588,7 +2716,8 @@ class WindowMonitor:
 				'interval': interval_ms,
 				'mode': mode,
 				'last_check': 0,
-				'enabled': True
+				'enabled': True,
+				'differ': TextDiffer(),  # Per-monitor differ for change detection
 			}
 			self._monitors.append(monitor)
 			self._last_content[name] = None
@@ -2694,7 +2823,11 @@ class WindowMonitor:
 
 	def _check_window(self, monitor: dict, current_time: float) -> None:
 		"""
-		Check if window content changed.
+		Check if window content changed using TextDiffer.
+
+		For appended output (the common case) only the new lines are announced.
+		For non-trivial changes (screen clears, edits in the middle) the
+		full region content is announced.
 
 		Args:
 			monitor: Monitor configuration dictionary
@@ -2704,19 +2837,33 @@ class WindowMonitor:
 			# Extract window content
 			content = self._extract_window_content(monitor['bounds'])
 			name = monitor['name']
-			last_content = self._last_content.get(name)
 
-			# Content changed?
-			if content != last_content:
-				self._last_content[name] = content
+			# Use per-monitor TextDiffer for change detection
+			differ: TextDiffer = monitor['differ']
+			kind, new_content = differ.update(content)
 
-				# Should we announce this change?
-				if monitor['mode'] == 'changes':
-					# Rate limiting: check if enough time passed since last announcement
-					time_since_announcement = current_time - self._last_announcement.get(name, 0)
-					if time_since_announcement >= self._min_announcement_interval:
-						self._announce_change(name, content, last_content)
-						self._last_announcement[name] = current_time
+			# Nothing to do for initial snapshot or unchanged content
+			if kind in (TextDiffer.KIND_INITIAL, TextDiffer.KIND_UNCHANGED):
+				return
+
+			# Keep legacy _last_content dict in sync for external callers
+			self._last_content[name] = content
+
+			# Only announce in 'changes' mode and when rate-limit allows it
+			if monitor['mode'] != 'changes':
+				return
+
+			time_since_announcement = current_time - self._last_announcement.get(name, 0)
+			if time_since_announcement < self._min_announcement_interval:
+				return
+
+			if kind == TextDiffer.KIND_APPENDED:
+				# Speak only the newly appended portion
+				self._announce_change(name, new_content, content)
+			else:
+				# Non-trivial change (clear / mid-edit): speak the full region
+				self._announce_change(name, content, None)
+			self._last_announcement[name] = current_time
 
 		except Exception:
 			# Silently ignore errors to avoid disrupting monitoring
@@ -2760,25 +2907,31 @@ class WindowMonitor:
 		except Exception:
 			return ""
 
-	def _announce_change(self, name: str, new_content: str, old_content: str) -> None:
+	def _announce_change(self, name: str, new_content: str, old_content) -> None:
 		"""
 		Announce content change to user.
 
+		When called with the appended text as *new_content* and the full
+		region as *old_content*, the appended text is spoken directly.
+		When *old_content* is ``None`` (non-trivial change / full region), a
+		brief summary is spoken instead.
+
 		Args:
 			name: Monitor name
-			new_content: New window content
-			old_content: Previous window content
+			new_content: Appended text or full region content
+			old_content: Previous window content, or None for non-trivial changes
 		"""
-		# Calculate change summary
-		if old_content is None:
-			# First content - don't announce
-			return
-
-		# Simple announcement: just say window changed
-		# More sophisticated diff could be added here
 		try:
-			message = _("Window {name} changed").format(name=name)
-			ui.message(message)
+			if old_content is None:
+				# Non-trivial change (clear / edit): speak the region content
+				text = new_content.strip()
+				if text:
+					ui.message(text)
+			else:
+				# Appended output: speak only the new portion
+				text = new_content.strip()
+				if text:
+					ui.message(text)
 		except Exception:
 			pass
 
@@ -3862,6 +4015,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	Configuration:
 		NVDA+Alt+Q           - Toggle quiet mode
+		NVDA+Alt+N           - Toggle announce new output
 		NVDA+Alt+[           - Decrease punctuation level
 		NVDA+Alt+]           - Increase punctuation level
 		NVDA+Alt+F5          - Toggle automatic indentation announcement
@@ -3940,6 +4094,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Window monitor for multi-window monitoring (Section 6.1 - v1.0.28+)
 		self._windowMonitor = None  # Initialized when terminal is bound
+
+		# New output announcer for automatically speaking appended terminal output
+		self._newOutputAnnouncer = NewOutputAnnouncer()
 
 		# Tab manager for managing terminal tabs (Section 9 - v1.0.39+)
 		self._tabManager = None  # Initialized when terminal is bound
@@ -4366,6 +4523,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		"""
 		nextHandler()
 
+		# Feed terminal content to the new output announcer when enabled.
+		# This is done before the quiet/cursorTracking guards so that the
+		# announcer's own quiet-mode check governs output independently.
+		if self.isTerminalApp(obj):
+			self._feedNewOutputAnnouncer(obj)
+
 		# Only handle if in a terminal and cursor tracking is enabled
 		if not self.isTerminalApp(obj) or not config.conf["terminalAccess"]["cursorTracking"]:
 			return
@@ -4384,6 +4547,22 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Schedule announcement with delay
 		self._cursorTrackingTimer = wx.CallLater(delay, self._announceCursorPosition, obj)
+
+	def _feedNewOutputAnnouncer(self, obj) -> None:
+		"""
+		Read the current terminal buffer and feed it to the new output announcer.
+
+		This is a best-effort helper: any exception is silently ignored so it
+		never disrupts normal caret handling.
+
+		Args:
+			obj: The focused terminal object.
+		"""
+		try:
+			info = obj.makeTextInfo(textInfos.POSITION_ALL)
+			self._newOutputAnnouncer.feed(info.text)
+		except Exception:
+			pass
 
 	def _announceCursorPosition(self, obj):
 		"""
@@ -4783,6 +4962,29 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		else:
 			# Translators: Message when quiet mode is disabled
 			ui.message(_("Quiet mode off"))
+
+	@script(
+		# Translators: Description for toggling announce new output
+		description=_("Toggle announce new output in terminal"),
+		gesture="kb:NVDA+alt+n"
+	)
+	def script_toggleAnnounceNewOutput(self, gesture):
+		"""Toggle announce new output on/off."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		currentState = config.conf["terminalAccess"]["announceNewOutput"]
+		config.conf["terminalAccess"]["announceNewOutput"] = not currentState
+
+		if config.conf["terminalAccess"]["announceNewOutput"]:
+			# Reset the announcer so it doesn't speak stale buffered content
+			self._newOutputAnnouncer.reset()
+			# Translators: Message when announce new output is enabled
+			ui.message(_("Announce new output on"))
+		else:
+			# Translators: Message when announce new output is disabled
+			ui.message(_("Announce new output off"))
 
 	@script(
 		# Translators: Description for toggling indentation announcement
@@ -6780,6 +6982,65 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 			"Use NVDA+Alt+F5 to toggle quickly. NVDA+Alt+I pressed twice still reads indentation."
 		))
 
+		# === Announce New Output Section ===
+		# Translators: Label for the announce new output group
+		newOutputGroup = guiHelper.BoxSizerHelper(self, sizer=wx.StaticBoxSizer(
+			wx.StaticBox(self, label=_("Announce New Output")),
+			wx.VERTICAL
+		))
+		sHelper.addItem(newOutputGroup)
+
+		# Announce new output master toggle
+		# Translators: Label for announce new output checkbox
+		self.announceNewOutputCheckBox = newOutputGroup.addItem(
+			wx.CheckBox(self, label=_("&Announce new terminal output automatically"))
+		)
+		self.announceNewOutputCheckBox.SetValue(config.conf["terminalAccess"]["announceNewOutput"])
+		# Translators: Tooltip for announce new output
+		self.announceNewOutputCheckBox.SetToolTip(_(
+			"Automatically speak newly appended terminal output as it arrives. "
+			"Use NVDA+Alt+N to toggle quickly."
+		))
+
+		# Coalesce delay spinner
+		# Translators: Label for coalesce delay spinner
+		self.newOutputCoalesceSpinner = newOutputGroup.addLabeledControl(
+			_("&Coalesce delay (ms):"),
+			wx.SpinCtrl,
+			min=50, max=2000
+		)
+		self.newOutputCoalesceSpinner.SetValue(config.conf["terminalAccess"]["newOutputCoalesceMs"])
+		# Translators: Tooltip for coalesce delay
+		self.newOutputCoalesceSpinner.SetToolTip(_(
+			"Milliseconds to wait before announcing accumulated new output. "
+			"Larger values reduce interruptions during fast output."
+		))
+
+		# Max lines spinner
+		# Translators: Label for max lines spinner
+		self.newOutputMaxLinesSpinner = newOutputGroup.addLabeledControl(
+			_("&Max lines before summarising:"),
+			wx.SpinCtrl,
+			min=1, max=200
+		)
+		self.newOutputMaxLinesSpinner.SetValue(config.conf["terminalAccess"]["newOutputMaxLines"])
+		# Translators: Tooltip for max lines
+		self.newOutputMaxLinesSpinner.SetToolTip(_(
+			"When more than this many lines arrive at once, speak a summary "
+			"('N new lines') instead of the full text."
+		))
+
+		# Strip ANSI checkbox
+		# Translators: Label for strip ANSI checkbox
+		self.stripAnsiInOutputCheckBox = newOutputGroup.addItem(
+			wx.CheckBox(self, label=_("&Strip ANSI escape codes from output"))
+		)
+		self.stripAnsiInOutputCheckBox.SetValue(config.conf["terminalAccess"]["stripAnsiInOutput"])
+		# Translators: Tooltip for strip ANSI
+		self.stripAnsiInOutputCheckBox.SetToolTip(_(
+			"Remove ANSI colour and formatting codes before speaking new output."
+		))
+
 		# === Advanced Settings Section ===
 		# Translators: Label for advanced settings group
 		advancedGroup = guiHelper.BoxSizerHelper(self, sizer=wx.StaticBoxSizer(
@@ -6966,6 +7227,14 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 			self.quietModeCheckBox.SetValue(False)
 			self.verboseModeCheckBox.SetValue(False)  # Phase 6: Verbose Mode
 			self.indentationOnLineReadCheckBox.SetValue(False)
+			config.conf["terminalAccess"]["announceNewOutput"] = False
+			config.conf["terminalAccess"]["newOutputCoalesceMs"] = 200
+			config.conf["terminalAccess"]["newOutputMaxLines"] = 20
+			config.conf["terminalAccess"]["stripAnsiInOutput"] = True
+			self.announceNewOutputCheckBox.SetValue(False)
+			self.newOutputCoalesceSpinner.SetValue(200)
+			self.newOutputMaxLinesSpinner.SetValue(20)
+			self.stripAnsiInOutputCheckBox.SetValue(True)
 
 			# Translators: Message after resetting to defaults
 			gui.messageBox(
@@ -6990,6 +7259,16 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		config.conf["terminalAccess"]["quietMode"] = self.quietModeCheckBox.GetValue()
 		config.conf["terminalAccess"]["verboseMode"] = self.verboseModeCheckBox.GetValue()  # Phase 6: Verbose Mode
 		config.conf["terminalAccess"]["indentationOnLineRead"] = self.indentationOnLineReadCheckBox.GetValue()
+		config.conf["terminalAccess"]["announceNewOutput"] = self.announceNewOutputCheckBox.GetValue()
+		config.conf["terminalAccess"]["stripAnsiInOutput"] = self.stripAnsiInOutputCheckBox.GetValue()
+
+		# Validate and save new output coalesce/max-lines settings
+		config.conf["terminalAccess"]["newOutputCoalesceMs"] = _validateInteger(
+			self.newOutputCoalesceSpinner.GetValue(), 50, 2000, 200, "newOutputCoalesceMs"
+		)
+		config.conf["terminalAccess"]["newOutputMaxLines"] = _validateInteger(
+			self.newOutputMaxLinesSpinner.GetValue(), 1, 200, 20, "newOutputMaxLines"
+		)
 
 		# Validate and save punctuation level
 		punctLevel = self.punctuationLevelChoice.GetSelection()

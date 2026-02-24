@@ -118,6 +118,10 @@ conf_dict = {
         "windowLeft": 0,
         "windowRight": 0,
         "windowEnabled": False,
+        "announceNewOutput": False,
+        "newOutputCoalesceMs": 200,
+        "newOutputMaxLines": 20,
+        "stripAnsiInOutput": True,
     }
 }
 # Create a mock conf object that acts like a dict but also has a spec attribute
@@ -173,6 +177,10 @@ def reset_config():
         "windowLeft": 0,
         "windowRight": 0,
         "windowEnabled": False,
+        "announceNewOutput": False,
+        "newOutputCoalesceMs": 200,
+        "newOutputMaxLines": 20,
+        "stripAnsiInOutput": True,
     }
     yield
 
@@ -207,6 +215,10 @@ def ensure_mocks():
                         "windowLeft": 0,
                         "windowRight": 0,
                         "windowEnabled": False,
+                        "announceNewOutput": False,
+                        "newOutputCoalesceMs": 200,
+                        "newOutputMaxLines": 20,
+                        "stripAnsiInOutput": True,
                     }
                 }
                 config_mock.conf = Mock()
