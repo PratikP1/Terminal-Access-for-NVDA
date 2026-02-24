@@ -4023,72 +4023,74 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	Provides enhanced terminal accessibility for Windows Terminal, PowerShell,
 	Command Prompt, and other console applications.
 
-	==== KEYBOARD GESTURES (Phase 7: Documented Gesture Patterns) ====
+	==== KEYBOARD GESTURES ====
 
 	Navigation (Line-based):
-		NVDA+Alt+U - Previous line
-		NVDA+Alt+I - Current line (double-press: indentation level)
-		NVDA+Alt+O - Next line
+		NVDA+U - Previous line
+		NVDA+I - Current line (double-press: indentation level)
+		NVDA+O - Next line
 
 	Navigation (Word-based):
-		NVDA+Alt+J - Previous word
-		NVDA+Alt+K - Current word (double-press: spell word)
-		NVDA+Alt+L - Next word
+		NVDA+J - Previous word
+		NVDA+K - Current word (double-press: spell word)
+		NVDA+L - Next word
 
 	Navigation (Character-based):
-		NVDA+Alt+M          - Previous character
-		NVDA+Alt+Comma      - Current character (double: phonetic, triple: code)
-		NVDA+Alt+Period     - Next character
+		NVDA+M          - Previous character
+		NVDA+Comma      - Current character (double: phonetic, triple: code)
+		NVDA+Period     - Next character
 
 	Navigation (Boundary Movement):
-		NVDA+Alt+Home       - Move to start of current line
-		NVDA+Alt+End        - Move to end of current line
-		NVDA+Alt+PageUp     - Move to top of buffer
-		NVDA+Alt+PageDown   - Move to bottom of buffer
+		NVDA+Shift+Home     - Move to first character of current line
+		NVDA+Shift+End      - Move to last character of current line
+		NVDA+F4             - Move to top of buffer
+		NVDA+F6             - Move to bottom of buffer
 
 	Reading (Directional):
-		NVDA+Alt+Shift+Left  - Read from cursor to start of line
-		NVDA+Alt+Shift+Right - Read from cursor to end of line
-		NVDA+Alt+Shift+Up    - Read from cursor to top of buffer
-		NVDA+Alt+Shift+Down  - Read from cursor to bottom of buffer
+		NVDA+Shift+Left  - Read from cursor to start of line
+		NVDA+Shift+Right - Read from cursor to end of line
+		NVDA+Shift+Up    - Read from cursor to top of buffer
+		NVDA+Shift+Down  - Read from cursor to bottom of buffer
 
 	Information and Attributes:
-		NVDA+Alt+P           - Announce cursor position (row, column)
-		NVDA+Alt+A           - Say All (continuous reading)
-		NVDA+Alt+Shift+A     - Read color and formatting attributes
+		NVDA+;           - Announce cursor position (row, column)
+		NVDA+A           - Say All (continuous reading)
+		NVDA+Shift+A     - Read color and formatting attributes
 
 	Selection and Copying:
-		NVDA+Alt+R           - Toggle mark (start/end/clear)
-		NVDA+Alt+C           - Copy linear selection (between marks)
-		NVDA+Alt+Shift+C     - Copy rectangular selection (columns)
-		NVDA+Alt+X           - Clear selection marks
-		NVDA+Alt+V           - Enter copy mode (line/screen)
+		NVDA+R           - Toggle mark (start/end/clear)
+		NVDA+C           - Copy linear selection (between marks)
+		NVDA+Shift+C     - Copy rectangular selection (columns)
+		NVDA+X           - Clear selection marks
+		NVDA+V           - Enter copy mode (line/screen)
 
 	Window Management:
-		NVDA+Alt+F2          - Define screen window (two-step)
-		NVDA+Alt+F3          - Clear screen window
-		NVDA+Alt+Plus        - Read window content
-		NVDA+Alt+Asterisk    - Cycle cursor tracking mode
+		NVDA+Alt+F2      - Define screen window (two-step)
+		NVDA+Alt+F3      - Clear screen window
+		NVDA+Alt+Plus    - Read window content
+		NVDA+Alt+Asterisk - Cycle cursor tracking mode
+		(Note: Window management retains the Alt modifier as these are advanced,
+		 infrequently-used features where the extra modifier prevents accidental activation.)
 
 	Configuration:
-		NVDA+Alt+Q           - Toggle quiet mode
-		NVDA+Alt+N           - Toggle announce new output
-		NVDA+Alt+[           - Decrease punctuation level
-		NVDA+Alt+]           - Increase punctuation level
-		NVDA+Alt+F5          - Toggle automatic indentation announcement
-		NVDA+Alt+F10         - Announce active and default profiles
+		NVDA+Shift+Q     - Toggle quiet mode
+		NVDA+Shift+N     - Toggle announce new output
+		NVDA+[           - Decrease punctuation level
+		NVDA+]           - Increase punctuation level
+		NVDA+F5          - Toggle automatic indentation announcement
+		NVDA+F10         - Announce active and default profiles
 
 	Help:
-		NVDA+Shift+F1        - Open Terminal Access user guide
+		NVDA+Shift+F1    - Open Terminal Access user guide
 
 	==== DESIGN PATTERNS ====
-	- Base navigation: NVDA+Alt+{letter}
-	- Extended operations: NVDA+Alt+Shift+{letter}
+	- Base navigation: NVDA+{letter} (no Alt required)
+	- Extended operations: NVDA+Shift+{letter}
 	- Line navigation: U/I/O (vertical cluster on keyboard)
 	- Word navigation: J/K/L (horizontal cluster on keyboard)
 	- Character navigation: M/Comma/Period (right hand cluster)
-	- Boundaries: Home/End/PageUp/PageDown (standard nav keys)
-	- Directional reading: Arrow keys with Shift modifier
+	- Boundaries: Shift+Home/End (line), F4/F6 (buffer top/bottom)
+	- Directional reading: Shift+Arrow keys
 	- Selection: R (mark), C (copy), X (clear)
 	- Punctuation: Bracket keys [ and ]
 
@@ -4842,7 +4844,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the previous line
 		description=_("Read previous line in terminal"),
-		gesture="kb:NVDA+alt+u"
+		gesture="kb:NVDA+u"
 	)
 	def script_readPreviousLine(self, gesture):
 		"""Read the previous line in the terminal."""
@@ -4855,7 +4857,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the current line
 		description=_("Read current line in terminal. Press twice for indentation level."),
-		gesture="kb:NVDA+alt+i"
+		gesture="kb:NVDA+i"
 	)
 	def script_readCurrentLine(self, gesture):
 		"""Read the current line in the terminal. Double-press announces indentation level."""
@@ -4873,7 +4875,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the next line
 		description=_("Read next line in terminal"),
-		gesture="kb:NVDA+alt+o"
+		gesture="kb:NVDA+o"
 	)
 	def script_readNextLine(self, gesture):
 		"""Read the next line in the terminal."""
@@ -4886,7 +4888,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the previous word
 		description=_("Read previous word in terminal"),
-		gesture="kb:NVDA+alt+j"
+		gesture="kb:NVDA+j"
 	)
 	def script_readPreviousWord(self, gesture):
 		"""Read the previous word in the terminal."""
@@ -4899,7 +4901,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the current word
 		description=_("Read current word in terminal"),
-		gesture="kb:NVDA+alt+k"
+		gesture="kb:NVDA+k"
 	)
 	def script_readCurrentWord(self, gesture):
 		"""Read the current word in the terminal."""
@@ -4912,7 +4914,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for spelling the current word
 		description=_("Spell current word in terminal"),
-		gesture="kb:NVDA+alt+k,kb:NVDA+alt+k"
+		gesture="kb:NVDA+k,kb:NVDA+k"
 	)
 	def script_spellCurrentWord(self, gesture):
 		"""Spell out the current word letter by letter."""
@@ -4925,7 +4927,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the next word
 		description=_("Read next word in terminal"),
-		gesture="kb:NVDA+alt+l"
+		gesture="kb:NVDA+l"
 	)
 	def script_readNextWord(self, gesture):
 		"""Read the next word in the terminal."""
@@ -4938,7 +4940,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the previous character
 		description=_("Read previous character in terminal"),
-		gesture="kb:NVDA+alt+m"
+		gesture="kb:NVDA+m"
 	)
 	def script_readPreviousChar(self, gesture):
 		"""Read the previous character in the terminal."""
@@ -4951,7 +4953,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the current character
 		description=_("Read current character in terminal. Press twice for phonetic. Press three times for character code."),
-		gesture="kb:NVDA+alt+,"
+		gesture="kb:NVDA+,"
 	)
 	def script_readCurrentChar(self, gesture):
 		"""Read the current character. Double-press for phonetic. Triple-press for character code."""
@@ -4974,7 +4976,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading the next character
 		description=_("Read next character in terminal"),
-		gesture="kb:NVDA+alt+."
+		gesture="kb:NVDA+."
 	)
 	def script_readNextChar(self, gesture):
 		"""Read the next character in the terminal."""
@@ -4987,7 +4989,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for toggling quiet mode
 		description=_("Toggle quiet mode in terminal"),
-		gesture="kb:NVDA+alt+q"
+		gesture="kb:NVDA+shift+q"
 	)
 	def script_toggleQuietMode(self, gesture):
 		"""Toggle quiet mode on/off."""
@@ -5008,7 +5010,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for toggling announce new output
 		description=_("Toggle announce new output in terminal"),
-		gesture="kb:NVDA+alt+n"
+		gesture="kb:NVDA+shift+n"
 	)
 	def script_toggleAnnounceNewOutput(self, gesture):
 		"""Toggle announce new output on/off."""
@@ -5031,7 +5033,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for toggling indentation announcement
 		description=_("Toggle indentation announcement on line read in terminal"),
-		gesture="kb:NVDA+alt+f5"
+		gesture="kb:NVDA+f5"
 	)
 	def script_toggleIndentation(self, gesture):
 		"""Toggle indentation announcement on/off."""
@@ -5052,7 +5054,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for copy mode
 		description=_("Enter copy mode in terminal"),
-		gesture="kb:NVDA+alt+v"
+		gesture="kb:NVDA+v"
 	)
 	def script_copyMode(self, gesture):
 		"""Enter copy mode to copy line or screen."""
@@ -5331,7 +5333,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading text attributes
 		description=_("Read text attributes at cursor"),
-		gesture="kb:NVDA+alt+shift+a"
+		gesture="kb:NVDA+shift+a"
 	)
 	def script_readAttributes(self, gesture):
 		"""Read color and formatting attributes at cursor position using enhanced ANSI parser."""
@@ -5381,7 +5383,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for continuous reading (say all)
 		description=_("Read continuously from cursor to end of buffer"),
-		gesture="kb:NVDA+alt+a"
+		gesture="kb:NVDA+a"
 	)
 	def script_sayAll(self, gesture):
 		"""Read continuously from current review cursor position to end of buffer."""
@@ -5419,7 +5421,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for jumping to start of line
 		description=_("Move to first character of current line"),
-		gesture="kb:NVDA+alt+home"
+		gesture="kb:NVDA+shift+home"
 	)
 	def script_reviewHome(self, gesture):
 		"""Move review cursor to first character of current line."""
@@ -5455,7 +5457,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for jumping to end of line
 		description=_("Move to last character of current line"),
-		gesture="kb:NVDA+alt+end"
+		gesture="kb:NVDA+shift+end"
 	)
 	def script_reviewEnd(self, gesture):
 		"""Move review cursor to last character of current line."""
@@ -5492,7 +5494,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for jumping to top
 		description=_("Move to top of terminal buffer"),
-		gesture="kb:NVDA+alt+pageUp"
+		gesture="kb:NVDA+f4"
 	)
 	def script_reviewTop(self, gesture):
 		"""Move review cursor to top of terminal buffer."""
@@ -5523,7 +5525,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for jumping to bottom
 		description=_("Move to bottom of terminal buffer"),
-		gesture="kb:NVDA+alt+pageDown"
+		gesture="kb:NVDA+f6"
 	)
 	def script_reviewBottom(self, gesture):
 		"""Move review cursor to bottom of terminal buffer."""
@@ -5554,7 +5556,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for announcing position
 		description=_("Announce current row and column position"),
-		gesture="kb:NVDA+alt+p"
+		gesture="kb:NVDA+;"
 	)
 	def script_announcePosition(self, gesture):
 		"""Announce current row and column coordinates of review cursor."""
@@ -5584,7 +5586,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for announcing active profile
 		description=_("Announce which profile is currently active and which is set as default"),
-		gesture="kb:NVDA+alt+f10"
+		gesture="kb:NVDA+f10"
 	)
 	def script_announceActiveProfile(self, gesture):
 		"""Announce the currently active profile and default profile."""
@@ -5914,7 +5916,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for decreasing punctuation level
 		description=_("Decrease punctuation level"),
-		gesture="kb:NVDA+alt+["
+		gesture="kb:NVDA+["
 	)
 	def script_decreasePunctuationLevel(self, gesture):
 		"""Decrease the punctuation level (wraps from 0 to 3)."""
@@ -5938,7 +5940,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for increasing punctuation level
 		description=_("Increase punctuation level"),
-		gesture="kb:NVDA+alt+]"
+		gesture="kb:NVDA+]"
 	)
 	def script_increasePunctuationLevel(self, gesture):
 		"""Increase the punctuation level (wraps from 3 to 0)."""
@@ -5962,7 +5964,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading to left edge
 		description=_("Read from cursor to beginning of line"),
-		gesture="kb:NVDA+alt+shift+leftArrow"
+		gesture="kb:NVDA+shift+leftArrow"
 	)
 	def script_readToLeft(self, gesture):
 		"""Read from current cursor position to beginning of line."""
@@ -5996,7 +5998,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading to right edge
 		description=_("Read from cursor to end of line"),
-		gesture="kb:NVDA+alt+shift+rightArrow"
+		gesture="kb:NVDA+shift+rightArrow"
 	)
 	def script_readToRight(self, gesture):
 		"""Read from current cursor position to end of line."""
@@ -6029,7 +6031,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading to top
 		description=_("Read from cursor to top of buffer"),
-		gesture="kb:NVDA+alt+shift+upArrow"
+		gesture="kb:NVDA+shift+upArrow"
 	)
 	def script_readToTop(self, gesture):
 		"""Read from current cursor position to top of buffer."""
@@ -6064,7 +6066,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading to bottom
 		description=_("Read from cursor to bottom of buffer"),
-		gesture="kb:NVDA+alt+shift+downArrow"
+		gesture="kb:NVDA+shift+downArrow"
 	)
 	def script_readToBottom(self, gesture):
 		"""Read from current cursor position to bottom of buffer."""
@@ -6099,7 +6101,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for toggling mark position
 		description=_("Toggle mark for selection (enhanced)"),
-		gesture="kb:NVDA+alt+r"
+		gesture="kb:NVDA+r"
 	)
 	def script_toggleMark(self, gesture):
 		"""Toggle marking positions for enhanced selection."""
@@ -6135,7 +6137,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for copying linear selection
 		description=_("Copy linear selection between marks"),
-		gesture="kb:NVDA+alt+c"
+		gesture="kb:NVDA+c"
 	)
 	def script_copyLinearSelection(self, gesture):
 		"""Copy text from start mark to end mark (continuous selection)."""
@@ -6177,7 +6179,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for copying rectangular selection
 		description=_("Copy rectangular selection between marks"),
-		gesture="kb:NVDA+alt+shift+c"
+		gesture="kb:NVDA+shift+c"
 	)
 	def script_copyRectangularSelection(self, gesture):
 		"""Copy rectangular region (column-based) between marks."""
@@ -6384,7 +6386,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for clearing marks
 		description=_("Clear selection marks"),
-		gesture="kb:NVDA+alt+x"
+		gesture="kb:NVDA+x"
 	)
 	def script_clearMarks(self, gesture):
 		"""Clear the selection marks."""
@@ -6403,10 +6405,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for setting bookmark
 		description=_("Set a bookmark at the current review position (use with 0-9)"),
 		category=SCRCAT_TERMINALACCESS,
-		gestures=["kb:NVDA+alt+shift+0", "kb:NVDA+alt+shift+1", "kb:NVDA+alt+shift+2",
-		          "kb:NVDA+alt+shift+3", "kb:NVDA+alt+shift+4", "kb:NVDA+alt+shift+5",
-		          "kb:NVDA+alt+shift+6", "kb:NVDA+alt+shift+7", "kb:NVDA+alt+shift+8",
-		          "kb:NVDA+alt+shift+9"]
+		gestures=["kb:NVDA+shift+0", "kb:NVDA+shift+1", "kb:NVDA+shift+2",
+		          "kb:NVDA+shift+3", "kb:NVDA+shift+4", "kb:NVDA+shift+5",
+		          "kb:NVDA+shift+6", "kb:NVDA+shift+7", "kb:NVDA+shift+8",
+		          "kb:NVDA+shift+9"]
 	)
 	def script_setBookmark(self, gesture):
 		"""Set a bookmark at current position."""
@@ -6478,7 +6480,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for listing bookmarks
 		description=_("List all bookmarks"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+alt+shift+b"
+		gesture="kb:NVDA+shift+b"
 	)
 	def script_listBookmarks(self, gesture):
 		"""List all bookmarks."""
@@ -6510,7 +6512,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for creating a new terminal tab
 		description=_("Create a new tab in the terminal"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+shift+alt+t"
+		gesture="kb:NVDA+shift+t"
 	)
 	def script_createNewTab(self, gesture):
 		"""Create a new tab in the terminal."""
@@ -6535,7 +6537,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for listing/navigating tabs
 		description=_("List tabs or switch to tab bar"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+alt+t"
+		gesture="kb:NVDA+w"
 	)
 	def script_listTabs(self, gesture):
 		"""List all tabs or focus tab bar."""
@@ -6581,7 +6583,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for scanning command history
 		description=_("Scan terminal output to detect and store command history"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+alt+shift+h"
+		gesture="kb:NVDA+shift+h"
 	)
 	def script_scanCommandHistory(self, gesture):
 		"""Scan terminal output for commands."""
@@ -6609,7 +6611,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for previous command navigation
 		description=_("Navigate to previous command in history"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+alt+upArrow"
+		gesture="kb:NVDA+h"
 	)
 	def script_previousCommand(self, gesture):
 		"""Navigate to previous command."""
@@ -6634,7 +6636,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for next command navigation
 		description=_("Navigate to next command in history"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+alt+downArrow"
+		gesture="kb:NVDA+g"
 	)
 	def script_nextCommand(self, gesture):
 		"""Navigate to next command."""
@@ -6659,7 +6661,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for listing command history
 		description=_("List all commands in history"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+alt+shift+l"
+		gesture="kb:NVDA+shift+l"
 	)
 	def script_listCommandHistory(self, gesture):
 		"""List all commands in history."""
@@ -6699,7 +6701,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for searching output
 		description=_("Search terminal output for text pattern"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+alt+f"
+		gesture="kb:NVDA+f"
 	)
 	def script_searchOutput(self, gesture):
 		"""Search terminal output."""
@@ -6775,7 +6777,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		if self._searchManager.get_match_count() == 0:
 			# Translators: No search results
-			ui.message(_("No search results. Use NVDA+Alt+F to search."))
+			ui.message(_("No search results. Use NVDA+F to search."))
 			return
 
 		if self._searchManager.next_match():
@@ -6805,7 +6807,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		if self._searchManager.get_match_count() == 0:
 			# Translators: No search results
-			ui.message(_("No search results. Use NVDA+Alt+F to search."))
+			ui.message(_("No search results. Use NVDA+F to search."))
 			return
 
 		if self._searchManager.previous_match():
@@ -6979,7 +6981,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		self.punctuationLevelChoice.SetToolTip(_(
 			"Controls which punctuation symbols are announced. "
 			"Higher levels announce more symbols. "
-			"Use NVDA+Alt+[ and ] to adjust quickly."
+			"Use NVDA+[ and ] to adjust quickly."
 		))
 
 		# Quiet mode checkbox
@@ -6990,7 +6992,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		self.quietModeCheckBox.SetValue(config.conf["terminalAccess"]["quietMode"])
 		# Translators: Tooltip for quiet mode
 		self.quietModeCheckBox.SetToolTip(_(
-			"Suppress most Terminal Access announcements. Use NVDA+Alt+Q to toggle quickly."
+			"Suppress most Terminal Access announcements. Use NVDA+Shift+Q to toggle quickly."
 		))
 
 		# Verbose mode checkbox (Phase 6: Verbose Mode with Context)
@@ -7014,7 +7016,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		# Translators: Tooltip for indentation announcement
 		self.indentationOnLineReadCheckBox.SetToolTip(_(
 			"Automatically announce indentation level when reading lines. "
-			"Use NVDA+Alt+F5 to toggle quickly. NVDA+Alt+I pressed twice still reads indentation."
+			"Use NVDA+F5 to toggle quickly. NVDA+I pressed twice still reads indentation."
 		))
 
 		# === Announce New Output Section ===
@@ -7034,7 +7036,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		# Translators: Tooltip for announce new output
 		self.announceNewOutputCheckBox.SetToolTip(_(
 			"Automatically speak newly appended terminal output as it arrives. "
-			"Use NVDA+Alt+N to toggle quickly."
+			"Use NVDA+Shift+N to toggle quickly."
 		))
 
 		# Coalesce delay spinner
@@ -7154,7 +7156,7 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		# Translators: Tooltip for default profile
 		self.defaultProfileChoice.SetToolTip(_(
 			"Profile to use when no application-specific profile is detected. "
-			"Use NVDA+Alt+0 to check which profile is active."
+			"Use NVDA+F10 to check which profile is active."
 		))
 
 		# Profile action buttons

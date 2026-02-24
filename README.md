@@ -33,7 +33,7 @@ Terminal Access enables screen reader users to efficiently navigate and interact
   - 256-color palette support
   - RGB/TrueColor (24-bit color) support
 - **Format detection** - Bold, dim, italic, underline, blink, inverse, strikethrough
-- **Attribute reading** - Announce colors and formatting at cursor (NVDA+Alt+Shift+A)
+- **Attribute reading** - Announce colors and formatting at cursor (NVDA+Shift+A)
 
 ### Cursor Tracking & Windowing
 - **Multiple cursor tracking modes** - Standard, Highlight, Window, or Off
@@ -124,11 +124,11 @@ Terminal Access provides keyboard shortcuts for efficient terminal navigation. F
 - Refer to `addon/doc/en/readme.html` file
 
 **Most Common Gestures:**
-- **NVDA+Alt+U/I/O** - Read previous/current/next line
-- **NVDA+Alt+J/K/L** - Read previous/current/next word
-- **NVDA+Alt+F** - Search terminal output
-- **NVDA+Alt+[/]** - Adjust punctuation level
-- **NVDA+Alt+Q** - Toggle quiet mode
+- **NVDA+U/I/O** - Read previous/current/next line
+- **NVDA+J/K/L** - Read previous/current/next word
+- **NVDA+F** - Search terminal output
+- **NVDA+[/]** - Adjust punctuation level
+- **NVDA+Shift+Q** - Toggle quiet mode
 
 For complete gesture documentation and advanced features, see the [User Guide](addon/doc/en/readme.html).
 
@@ -151,7 +151,7 @@ Access Terminal Access settings through:
 
 **Line Pause** - Reserved for future continuous reading functionality. Currently preserved but not actively used.
 
-**Announce Indentation When Reading Lines** - When enabled, automatically announces the indentation level (spaces and/or tabs) after reading each line with NVDA+Alt+U, I, or O. Essential for Python, YAML, and other indentation-sensitive code. Use NVDA+Alt+F5 to toggle quickly, or NVDA+Alt+I twice to query indentation of current line. Can be customized per application profile.
+**Announce Indentation When Reading Lines** - When enabled, automatically announces the indentation level (spaces and/or tabs) after reading each line with NVDA+U, I, or O. Essential for Python, YAML, and other indentation-sensitive code. Use NVDA+F5 to toggle quickly, or NVDA+I twice to query indentation of current line. Can be customized per application profile.
 
 **Punctuation Level** - Controls how many symbols are announced (0-3):
 - **Level 0 (None)**: No punctuation announced
@@ -166,12 +166,12 @@ Access Terminal Access settings through:
 
 **Cursor Delay** - Delay in milliseconds (0-1000) before announcing cursor position changes. Lower values provide instant feedback but may overwhelm during rapid movement. Default: 20ms.
 
-**Default Profile** - Select a profile to use when no application-specific profile is detected. Allows you to have custom settings apply by default rather than global settings. Use NVDA+Alt+F10 to check which profile is currently active and which is set as default.
+**Default Profile** - Select a profile to use when no application-specific profile is detected. Allows you to have custom settings apply by default rather than global settings. Use NVDA+F10 to check which profile is currently active and which is set as default.
 
 ### Settings Interactions
 
-- **Quiet Mode** (NVDA+Alt+Q) temporarily disables cursor tracking and key echo
-- **Indentation Announcement** (NVDA+Alt+F5) toggles indentation reading on line navigation
+- **Quiet Mode** (NVDA+Shift+Q) temporarily disables cursor tracking and key echo
+- **Indentation Announcement** (NVDA+F5) toggles indentation reading on line navigation
 - **Process Symbols** affects cursor tracking, key echo, and character navigation
 - **Condense Repeated Symbols** requires Key Echo to be enabled
 - **Cursor Delay** only affects cursor tracking, not key echo or manual navigation

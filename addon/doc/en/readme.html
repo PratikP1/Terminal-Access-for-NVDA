@@ -103,8 +103,8 @@
 	<h4>Line Navigation</h4>
 	<p>Move through terminal output line by line to review command results at your own pace.</p>
 	<div class="info">
-		<strong>Example Usage:</strong> After running <code>dir</code> or <code>ls</code>, use <code>NVDA+Alt+I</code>
-		to hear the current line, <code>NVDA+Alt+O</code> to move to the next line, and <code>NVDA+Alt+U</code>
+		<strong>Example Usage:</strong> After running <code>dir</code> or <code>ls</code>, use <code>NVDA+I</code>
+		to hear the current line, <code>NVDA+O</code> to move to the next line, and <code>NVDA+U</code>
 		to go back to the previous line. This is perfect for reviewing file listings, log output, or any
 		multi-line command results.
 	</div>
@@ -114,8 +114,8 @@
 	<div class="info">
 		<strong>Example Usage:</strong> When reviewing a long path like
 		<code>C:\Users\Username\Documents\Projects\MyApp\src\components\Button.jsx</code>, use
-		<code>NVDA+Alt+K</code> to hear the current word (e.g., "components"), <code>NVDA+Alt+L</code>
-		to move to the next word (e.g., "Button"), and <code>NVDA+Alt+J</code> to go back. This is much
+		<code>NVDA+K</code> to hear the current word (e.g., "components"), <code>NVDA+L</code>
+		to move to the next word (e.g., "Button"), and <code>NVDA+J</code> to go back. This is much
 		faster than character-by-character review for long lines.
 	</div>
 
@@ -123,7 +123,7 @@
 	<p>Move character by character with phonetic spelling support for precise review.</p>
 	<div class="info">
 		<strong>Example Usage:</strong> When verifying a complex filename like <code>data_2024-01-15_v2.json</code>,
-		use <code>NVDA+Alt+Comma</code> to hear each character. Press <code>NVDA+Alt+Comma</code> twice to hear
+		use <code>NVDA+Comma</code> to hear each character. Press <code>NVDA+Comma</code> twice to hear
 		phonetic spelling (e.g., "alpha" for "a", "bravo" for "b"), which is helpful for distinguishing
 		similar-sounding letters. Press three times to hear the character code (e.g., "Character 97, hex 61, a").
 	</div>
@@ -135,7 +135,7 @@
 	<div class="info">
 		<strong>Example Usage:</strong> After running a command that generates lots of output like
 		<code>git log</code> or <code>npm install</code>, position your review cursor at the beginning
-		with <code>NVDA+Alt+PageUp</code>, then press <code>NVDA+Alt+A</code> to hear all the output
+		with <code>NVDA+F4</code>, then press <code>NVDA+A</code> to hear all the output
 		read continuously. Press any key to stop reading at any time.
 	</div>
 
@@ -143,7 +143,7 @@
 	<p>Announce the indentation level of the current line, essential for Python, YAML, and other indentation-sensitive formats.</p>
 	<div class="info">
 		<strong>Example Usage:</strong> When reviewing Python code or YAML configuration files in the terminal,
-		press <code>NVDA+Alt+I</code> twice on any line to hear its indentation. For example, "4 spaces" or
+		press <code>NVDA+I</code> twice on any line to hear its indentation. For example, "4 spaces" or
 		"2 tabs" helps you understand the code structure without seeing it visually.
 	</div>
 
@@ -151,7 +151,7 @@
 	<p>Reports your current row and column position in the terminal buffer.</p>
 	<div class="info">
 		<strong>Example Usage:</strong> When navigating through a large file or log output, press
-		<code>NVDA+Alt+P</code> to hear something like "Row 142, column 25". This helps you keep track
+		<code>NVDA+;</code> to hear something like "Row 142, column 25". This helps you keep track
 		of where you are in long outputs or when sharing position information with others.
 	</div>
 
@@ -189,8 +189,8 @@
 	<p>Temporarily disable automatic announcements when dealing with verbose output.</p>
 	<div class="info">
 		<strong>Example Usage:</strong> Before running a command that produces lots of output like compiling
-		code or installing packages, press <code>NVDA+Alt+Q</code> to enable quiet mode. The command runs
-		without NVDA announcing every cursor movement or output change. When done, press <code>NVDA+Alt+Q</code>
+		code or installing packages, press <code>NVDA+Shift+Q</code> to enable quiet mode. The command runs
+		without NVDA announcing every cursor movement or output change. When done, press <code>NVDA+Shift+Q</code>
 		again to re-enable announcements and review the output manually.
 	</div>
 
@@ -198,9 +198,9 @@
 	<p>Automatically hear newly appended terminal output as it arrives, without any manual navigation.</p>
 	<div class="info">
 		<strong>Example Usage:</strong> While running <code>ping google.com</code>, press
-		<code>NVDA+Alt+N</code> to enable "Announce New Output". Each new line from the ping command
+		<code>NVDA+Shift+N</code> to enable "Announce New Output". Each new line from the ping command
 		is automatically spoken as it appears—"Reply from 142.250.185.46: bytes=32 time=12ms TTL=117"—so
-		you can monitor the output hands-free. Press <code>NVDA+Alt+N</code> again to turn it off when done.
+		you can monitor the output hands-free. Press <code>NVDA+Shift+N</code> again to turn it off when done.
 		<br><br>
 		<strong>Flood protection:</strong> If a command produces rapid output (like <code>cat largefile.txt</code>),
 		the add-on coalesces lines within a configurable window (default 200 ms) and, if more than
@@ -214,13 +214,13 @@
 		<strong>Example Usage:</strong> To copy a specific section of output:
 		<ol>
 			<li>Navigate to the start of the text you want to copy</li>
-			<li>Press <code>NVDA+Alt+R</code> to set the start mark (you'll hear "Mark start set")</li>
+			<li>Press <code>NVDA+R</code> to set the start mark (you'll hear "Mark start set")</li>
 			<li>Navigate to the end of the text</li>
-			<li>Press <code>NVDA+Alt+R</code> again to set the end mark (you'll hear "Mark end set")</li>
-			<li>Press <code>NVDA+Alt+C</code> to copy the selection as continuous text, or
-			<code>NVDA+Alt+Shift+C</code> for rectangular (column-based) selection</li>
+			<li>Press <code>NVDA+R</code> again to set the end mark (you'll hear "Mark end set")</li>
+			<li>Press <code>NVDA+C</code> to copy the selection as continuous text, or
+			<code>NVDA+Shift+C</code> for rectangular (column-based) selection</li>
 		</ol>
-		For quick copying, press <code>NVDA+Alt+V</code> to enter copy mode, then press <code>L</code>
+		For quick copying, press <code>NVDA+V</code> to enter copy mode, then press <code>L</code>
 		to copy the current line or <code>S</code> to copy the entire screen.
 	</div>
 
@@ -230,23 +230,23 @@
 		<strong>Example Usage:</strong> When working with a long log file, you might bookmark important sections:
 		<ol>
 			<li>Navigate to an error message at row 150</li>
-			<li>Press <code>NVDA+Alt+Shift+1</code> to set bookmark 1</li>
+			<li>Press <code>NVDA+Shift+1</code> to set bookmark 1</li>
 			<li>Navigate to another error at row 450</li>
-			<li>Press <code>NVDA+Alt+Shift+2</code> to set bookmark 2</li>
+			<li>Press <code>NVDA+Shift+2</code> to set bookmark 2</li>
 			<li>Later, press <code>NVDA+Alt+1</code> to jump back to the first error instantly</li>
 			<li>Press <code>NVDA+Alt+2</code> to jump to the second error</li>
 		</ol>
-		Press <code>NVDA+Alt+Shift+B</code> to hear a list of all set bookmarks.
+		Press <code>NVDA+Shift+B</code> to hear a list of all set bookmarks.
 	</div>
 
 	<h4>Command History Navigation</h4>
 	<p>Scan and navigate through commands in your terminal session.</p>
 	<div class="info">
-		<strong>Example Usage:</strong> After running several commands, press <code>NVDA+Alt+Shift+H</code>
+		<strong>Example Usage:</strong> After running several commands, press <code>NVDA+Shift+H</code>
 		to scan the terminal output and detect all commands (it looks for command prompts). Then use
-		<code>NVDA+Alt+Up</code> and <code>NVDA+Alt+Down</code> to jump between commands. For example,
+		<code>NVDA+H</code> and <code>NVDA+G</code> to jump between commands. For example,
 		if you ran <code>ls</code>, <code>cd Documents</code>, and <code>dir</code>, you can jump directly
-		to each command and review its output. Press <code>NVDA+Alt+Shift+L</code> to hear a summary of
+		to each command and review its output. Press <code>NVDA+Shift+L</code> to hear a summary of
 		all detected commands.
 	</div>
 
@@ -254,7 +254,7 @@
 	<p>Search terminal output for specific text patterns.</p>
 	<div class="info">
 		<strong>Example Usage:</strong> After running a test suite that produces lots of output, press
-		<code>NVDA+Alt+F</code> to open the search dialog. Type "FAILED" to find all failed tests.
+		<code>NVDA+F</code> to open the search dialog. Type "FAILED" to find all failed tests.
 		Terminal Access will announce "Found 3 matches. Match 1 of 3: Test authentication FAILED".
 		Press <code>NVDA+F3</code> to jump to the next match and <code>NVDA+Shift+F3</code> to go to
 		the previous match. This is much faster than manually scanning through hundreds of lines.
@@ -279,8 +279,8 @@
 	<p>Control how much punctuation and symbols are announced (None/Some/Most/All).</p>
 	<div class="info">
 		<strong>Example Usage:</strong> When reading prose or documentation in the terminal, press
-		<code>NVDA+Alt+[</code> to decrease to "Some" punctuation (only essential punctuation like periods
-		and commas are announced). When working with code or configuration files, press <code>NVDA+Alt+]</code>
+		<code>NVDA+[</code> to decrease to "Some" punctuation (only essential punctuation like periods
+		and commas are announced). When working with code or configuration files, press <code>NVDA+]</code>
 		repeatedly to increase to "Most" or "All" to hear every bracket, semicolon, and operator. For example,
 		with "All" level, <code>if (x > 5) { return; }</code> announces every parenthesis, bracket, and semicolon.
 	</div>
@@ -289,10 +289,10 @@
 	<p>Read from cursor to any edge of the screen or buffer.</p>
 	<div class="info">
 		<strong>Example Usage:</strong> When you're in the middle of a long line and want to hear what comes next,
-		press <code>NVDA+Alt+Shift+Right</code> to read from the cursor to the end of the line. If you're
+		press <code>NVDA+Shift+Right</code> to read from the cursor to the end of the line. If you're
 		reviewing a long log file and want to hear everything from your current position to the end, press
-		<code>NVDA+Alt+Shift+Down</code> to read to the bottom. Use <code>NVDA+Alt+Shift+Left</code> to read
-		back to the beginning of the line and <code>NVDA+Alt+Shift+Up</code> to read to the top of the buffer.
+		<code>NVDA+Shift+Down</code> to read to the bottom. Use <code>NVDA+Shift+Left</code> to read
+		back to the beginning of the line and <code>NVDA+Shift+Up</code> to read to the top of the buffer.
 	</div>
 
 	<h4>Configurable Settings</h4>
@@ -366,15 +366,15 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+U</code></td>
+				<td><code>NVDA+U</code></td>
 				<td>Read previous line</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+I</code></td>
+				<td><code>NVDA+I</code></td>
 				<td>Read current line</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+O</code></td>
+				<td><code>NVDA+O</code></td>
 				<td>Read next line</td>
 			</tr>
 		</tbody>
@@ -390,19 +390,19 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+J</code></td>
+				<td><code>NVDA+J</code></td>
 				<td>Read previous word</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+K</code></td>
+				<td><code>NVDA+K</code></td>
 				<td>Read current word</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+K</code> (twice)</td>
+				<td><code>NVDA+K</code> (twice)</td>
 				<td>Spell current word letter by letter</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+L</code></td>
+				<td><code>NVDA+L</code></td>
 				<td>Read next word</td>
 			</tr>
 		</tbody>
@@ -418,23 +418,23 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+M</code></td>
+				<td><code>NVDA+M</code></td>
 				<td>Read previous character</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Comma</code></td>
+				<td><code>NVDA+Comma</code></td>
 				<td>Read current character</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Comma</code> (twice)</td>
+				<td><code>NVDA+Comma</code> (twice)</td>
 				<td>Read current character phonetically (e.g., "alpha" for "a")</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Comma</code> (three times)</td>
+				<td><code>NVDA+Comma</code> (three times)</td>
 				<td>Announce character code (decimal, hex, and name)</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Period</code></td>
+				<td><code>NVDA+Period</code></td>
 				<td>Read next character</td>
 			</tr>
 		</tbody>
@@ -450,19 +450,19 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+A</code></td>
+				<td><code>NVDA+A</code></td>
 				<td>Continuous reading (say all) from cursor to end of buffer</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+I</code> (twice)</td>
+				<td><code>NVDA+I</code> (twice)</td>
 				<td>Announce line indentation level</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+F5</code></td>
+				<td><code>NVDA+F5</code></td>
 				<td>Toggle automatic indentation announcement on line read</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+P</code></td>
+				<td><code>NVDA+;</code></td>
 				<td>Announce current row and column position</td>
 			</tr>
 		</tbody>
@@ -478,19 +478,19 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+Home</code></td>
+				<td><code>NVDA+Shift+Home</code></td>
 				<td>Jump to first character of current line</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+End</code></td>
+				<td><code>NVDA+Shift+End</code></td>
 				<td>Jump to last character of current line</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+PageUp</code></td>
+				<td><code>NVDA+F4</code></td>
 				<td>Jump to top of terminal buffer</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+PageDown</code></td>
+				<td><code>NVDA+F6</code></td>
 				<td>Jump to bottom of terminal buffer</td>
 			</tr>
 		</tbody>
@@ -506,19 +506,19 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+Shift+Left Arrow</code></td>
+				<td><code>NVDA+Shift+Left Arrow</code></td>
 				<td>Read from cursor to beginning of line</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Shift+Right Arrow</code></td>
+				<td><code>NVDA+Shift+Right Arrow</code></td>
 				<td>Read from cursor to end of line</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Shift+Up Arrow</code></td>
+				<td><code>NVDA+Shift+Up Arrow</code></td>
 				<td>Read from cursor to top of buffer</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Shift+Down Arrow</code></td>
+				<td><code>NVDA+Shift+Down Arrow</code></td>
 				<td>Read from cursor to bottom of buffer</td>
 			</tr>
 		</tbody>
@@ -534,11 +534,11 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+[</code></td>
+				<td><code>NVDA+[</code></td>
 				<td>Decrease punctuation level (None/Some/Most/All)</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+]</code></td>
+				<td><code>NVDA+]</code></td>
 				<td>Increase punctuation level (None/Some/Most/All)</td>
 			</tr>
 			<tr>
@@ -558,32 +558,32 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+R</code></td>
+				<td><code>NVDA+R</code></td>
 				<td>Toggle mark for selection (press 3 times: start, end, clear)</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+C</code></td>
+				<td><code>NVDA+C</code></td>
 				<td>Copy linear selection (requires marks to be set)</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Shift+C</code></td>
+				<td><code>NVDA+Shift+C</code></td>
 				<td>Copy rectangular selection (requires marks to be set)</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+X</code></td>
+				<td><code>NVDA+X</code></td>
 				<td>Clear selection marks</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+V</code></td>
+				<td><code>NVDA+V</code></td>
 				<td>Enter legacy copy mode (then press L for line, S for screen)</td>
 			</tr>
 		</tbody>
 	</table>
 	<p>
-		<strong>Note:</strong> When using marker-based selection with <code>NVDA+Alt+R</code>,
+		<strong>Note:</strong> When using marker-based selection with <code>NVDA+R</code>,
 		press it once to set the start marker, navigate to the desired end position using review
-		cursor commands, then press <code>NVDA+Alt+R</code> again to set the end marker.
-		Press <code>NVDA+Alt+C</code> to copy linear selection or <code>NVDA+Alt+Shift+C</code>
+		cursor commands, then press <code>NVDA+R</code> again to set the end marker.
+		Press <code>NVDA+C</code> to copy linear selection or <code>NVDA+Shift+C</code>
 		to copy rectangular (column-based) selection.
 	</p>
 
@@ -609,7 +609,7 @@
 				<td>Read window content</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Shift+A</code></td>
+				<td><code>NVDA+Shift+A</code></td>
 				<td>Read text attributes and colors at cursor</td>
 			</tr>
 		</tbody>
@@ -625,7 +625,7 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+Shift+0-9</code></td>
+				<td><code>NVDA+Shift+0-9</code></td>
 				<td>Set bookmark at current position</td>
 			</tr>
 			<tr>
@@ -633,7 +633,7 @@
 				<td>Jump to bookmark</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Shift+B</code></td>
+				<td><code>NVDA+Shift+B</code></td>
 				<td>List all bookmarks</td>
 			</tr>
 		</tbody>
@@ -649,19 +649,19 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+Shift+H</code></td>
+				<td><code>NVDA+Shift+H</code></td>
 				<td>Scan terminal output to detect and store command history</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Up Arrow</code></td>
+				<td><code>NVDA+H</code></td>
 				<td>Navigate to previous command in history</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Down Arrow</code></td>
+				<td><code>NVDA+G</code></td>
 				<td>Navigate to next command in history</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+Shift+L</code></td>
+				<td><code>NVDA+Shift+L</code></td>
 				<td>List all commands in history</td>
 			</tr>
 		</tbody>
@@ -677,7 +677,7 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+F</code></td>
+				<td><code>NVDA+F</code></td>
 				<td>Search terminal output for text pattern</td>
 			</tr>
 			<tr>
@@ -701,15 +701,15 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td><code>NVDA+Alt+Q</code></td>
+				<td><code>NVDA+Shift+Q</code></td>
 				<td>Toggle quiet mode (disables automatic announcements)</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+N</code></td>
+				<td><code>NVDA+Shift+N</code></td>
 				<td>Toggle announce new output (automatically speaks new terminal lines as they arrive)</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+F5</code></td>
+				<td><code>NVDA+F5</code></td>
 				<td>Toggle automatic indentation announcement on line read</td>
 			</tr>
 		</tbody>
@@ -724,11 +724,11 @@
 		<br><br>
 		<strong>Workflow:</strong>
 		<ol>
-			<li>Press <code>NVDA+Alt+PageUp</code> to jump to the top of the output</li>
-			<li>Use <code>NVDA+Alt+A</code> to have NVDA read all packages continuously</li>
+			<li>Press <code>NVDA+F4</code> to jump to the top of the output</li>
+			<li>Use <code>NVDA+A</code> to have NVDA read all packages continuously</li>
 			<li>If you hear a package name you want to examine, press any key to stop</li>
-			<li>Use <code>NVDA+Alt+I</code> to re-read the current line</li>
-			<li>Use <code>NVDA+Alt+O</code> and <code>NVDA+Alt+U</code> to review surrounding lines</li>
+			<li>Use <code>NVDA+I</code> to re-read the current line</li>
+			<li>Use <code>NVDA+O</code> and <code>NVDA+U</code> to review surrounding lines</li>
 		</ol>
 	</div>
 
@@ -738,13 +738,13 @@
 		<br><br>
 		<strong>Workflow:</strong>
 		<ol>
-			<li>Press <code>NVDA+Alt+F</code> to open search</li>
+			<li>Press <code>NVDA+F</code> to open search</li>
 			<li>Type "error" or "failed" and press Enter</li>
 			<li>Terminal Access announces: "Found 2 matches. Match 1 of 2: Build error in module auth"</li>
 			<li>Press <code>NVDA+F3</code> to jump to the next error</li>
-			<li>Use <code>NVDA+Alt+U</code> and <code>NVDA+Alt+O</code> to read context around each error</li>
-			<li>Press <code>NVDA+Alt+Shift+1</code> to bookmark the first error location</li>
-			<li>Navigate to the second error and bookmark it with <code>NVDA+Alt+Shift+2</code></li>
+			<li>Use <code>NVDA+U</code> and <code>NVDA+O</code> to read context around each error</li>
+			<li>Press <code>NVDA+Shift+1</code> to bookmark the first error location</li>
+			<li>Navigate to the second error and bookmark it with <code>NVDA+Shift+2</code></li>
 			<li>Jump between bookmarked errors with <code>NVDA+Alt+1</code> and <code>NVDA+Alt+2</code></li>
 		</ol>
 	</div>
@@ -756,13 +756,13 @@
 		<strong>Workflow:</strong>
 		<ol>
 			<li>Navigate to the beginning of the error message</li>
-			<li>Press <code>NVDA+Alt+R</code> to set the start mark</li>
-			<li>Navigate line by line with <code>NVDA+Alt+O</code> until you reach the end of the error</li>
-			<li>Press <code>NVDA+Alt+R</code> again to set the end mark</li>
-			<li>Press <code>NVDA+Alt+C</code> to copy the selection</li>
+			<li>Press <code>NVDA+R</code> to set the start mark</li>
+			<li>Navigate line by line with <code>NVDA+O</code> until you reach the end of the error</li>
+			<li>Press <code>NVDA+R</code> again to set the end mark</li>
+			<li>Press <code>NVDA+C</code> to copy the selection</li>
 			<li>Paste into your email or chat with <code>Ctrl+V</code></li>
 		</ol>
-		<strong>Alternative:</strong> For copying a single line, press <code>NVDA+Alt+V</code> for copy mode,
+		<strong>Alternative:</strong> For copying a single line, press <code>NVDA+V</code> for copy mode,
 		then press <code>L</code> to quickly copy the current line.
 	</div>
 
@@ -774,10 +774,10 @@
 		<ol>
 			<li>Type or recall your command: <code>docker run -d -p 8080:80 -v /data:/app/data --name myapp nginx</code></li>
 			<li>Press Home to go to the beginning of the line</li>
-			<li>Use <code>NVDA+Alt+L</code> repeatedly to move word by word: "docker", "run", "-d", "-p", etc.</li>
-			<li>When you reach the word you want to change (e.g., "8080"), press <code>NVDA+Alt+K</code> to confirm</li>
+			<li>Use <code>NVDA+L</code> repeatedly to move word by word: "docker", "run", "-d", "-p", etc.</li>
+			<li>When you reach the word you want to change (e.g., "8080"), press <code>NVDA+K</code> to confirm</li>
 			<li>Select the word with <code>Ctrl+Shift+Right Arrow</code> and type the new value</li>
-			<li>Use <code>NVDA+Alt+I</code> to review the entire modified command before pressing Enter</li>
+			<li>Use <code>NVDA+I</code> to review the entire modified command before pressing Enter</li>
 		</ol>
 	</div>
 
@@ -787,12 +787,12 @@
 		<br><br>
 		<strong>Workflow:</strong>
 		<ol>
-			<li>After running <code>git status</code>, press <code>NVDA+Alt+Shift+H</code> to scan command history</li>
+			<li>After running <code>git status</code>, press <code>NVDA+Shift+H</code> to scan command history</li>
 			<li>The output shows "modified: src/app.py", "modified: tests/test_app.py", "untracked: README.md"</li>
-			<li>Use <code>NVDA+Alt+O</code> to navigate line by line through the modified files</li>
-			<li>For files of interest, use <code>NVDA+Alt+R</code> twice to select the filename</li>
-			<li>Press <code>NVDA+Alt+C</code> to copy the filename to use in other commands</li>
-			<li>Enable quiet mode with <code>NVDA+Alt+Q</code> before running <code>git diff</code> (produces lots of output)</li>
+			<li>Use <code>NVDA+O</code> to navigate line by line through the modified files</li>
+			<li>For files of interest, use <code>NVDA+R</code> twice to select the filename</li>
+			<li>Press <code>NVDA+C</code> to copy the filename to use in other commands</li>
+			<li>Enable quiet mode with <code>NVDA+Shift+Q</code> before running <code>git diff</code> (produces lots of output)</li>
 			<li>After the diff completes, disable quiet mode and use search to find specific changes</li>
 		</ol>
 	</div>
@@ -803,13 +803,13 @@
 		<br><br>
 		<strong>Workflow:</strong>
 		<ol>
-			<li>Before running the command, press <code>NVDA+Alt+Q</code> to enable quiet mode</li>
+			<li>Before running the command, press <code>NVDA+Shift+Q</code> to enable quiet mode</li>
 			<li>Run <code>npm install</code> - the command executes without constant announcements</li>
 			<li>Wait for the command to complete (you'll hear the new command prompt)</li>
-			<li>Press <code>NVDA+Alt+Q</code> to disable quiet mode</li>
-			<li>Press <code>NVDA+Alt+PageDown</code> to jump to the bottom (most recent output)</li>
-			<li>Use <code>NVDA+Alt+U</code> repeatedly to review the last few lines and check for errors</li>
-			<li>Or press <code>NVDA+Alt+F</code> and search for "error" or "warn" to find any issues</li>
+			<li>Press <code>NVDA+Shift+Q</code> to disable quiet mode</li>
+			<li>Press <code>NVDA+F6</code> to jump to the bottom (most recent output)</li>
+			<li>Use <code>NVDA+U</code> repeatedly to review the last few lines and check for errors</li>
+			<li>Or press <code>NVDA+F</code> and search for "error" or "warn" to find any issues</li>
 		</ol>
 	</div>
 
@@ -820,7 +820,7 @@
 		<br><br>
 		<strong>Workflow:</strong>
 		<ol>
-			<li>Press <code>NVDA+Alt+N</code> to enable "Announce New Output" (you'll hear "Announce new output on")</li>
+			<li>Press <code>NVDA+Shift+N</code> to enable "Announce New Output" (you'll hear "Announce new output on")</li>
 			<li>Run your command, for example: <code>pytest -v</code></li>
 			<li>Each new result line is automatically spoken as it appears:
 				<ul>
@@ -833,7 +833,7 @@
 				hear important lines without switching focus</li>
 			<li>If a fast command floods the terminal (e.g., <code>cat /var/log/syslog</code>), the add-on
 				automatically summarises: "342 new lines" so speech is never overwhelming</li>
-			<li>When done, press <code>NVDA+Alt+N</code> again to turn the feature off</li>
+			<li>When done, press <code>NVDA+Shift+N</code> again to turn the feature off</li>
 		</ol>
 		<strong>Tip:</strong> You can adjust the coalesce delay and maximum line count in NVDA Preferences &gt;
 		Settings &gt; Terminal Settings &gt; "Announce New Output" to tune responsiveness vs. verbosity.
@@ -845,15 +845,15 @@
 		<br><br>
 		<strong>Workflow:</strong>
 		<ol>
-			<li>Press <code>NVDA+Alt+F5</code> to enable automatic indentation announcement</li>
-			<li>Navigate to a function definition with <code>NVDA+Alt+I</code></li>
+			<li>Press <code>NVDA+F5</code> to enable automatic indentation announcement</li>
+			<li>Navigate to a function definition with <code>NVDA+I</code></li>
 			<li>Hear the line content followed by "No indentation" (top level function)</li>
-			<li>Move to the next line with <code>NVDA+Alt+O</code></li>
+			<li>Move to the next line with <code>NVDA+O</code></li>
 			<li>Hear the line content followed by "4 spaces" (function body)</li>
 			<li>Continue navigating with indentation announced automatically after each line</li>
-			<li>Or press <code>NVDA+Alt+I</code> twice to query indentation of current line only</li>
-			<li>Use <code>NVDA+Alt+Shift+0</code> through <code>NVDA+Alt+Shift+9</code> to bookmark important functions</li>
-			<li>Toggle off automatic announcement with <code>NVDA+Alt+F5</code> when not needed</li>
+			<li>Or press <code>NVDA+I</code> twice to query indentation of current line only</li>
+			<li>Use <code>NVDA+Shift+0</code> through <code>NVDA+Shift+9</code> to bookmark important functions</li>
+			<li>Toggle off automatic announcement with <code>NVDA+F5</code> when not needed</li>
 		</ol>
 	</div>
 
@@ -869,7 +869,7 @@
 			<li>Navigate to the bottom-right of the process list</li>
 			<li>Press <code>NVDA+Alt+F2</code> again to complete the window definition</li>
 			<li>Now press <code>NVDA+Alt+Plus</code> anytime to hear just the process list</li>
-			<li>Use <code>NVDA+Alt+]</code> to increase punctuation level if you need to hear percentage signs and brackets</li>
+			<li>Use <code>NVDA+]</code> to increase punctuation level if you need to hear percentage signs and brackets</li>
 			<li>When done, press <code>NVDA+Alt+F3</code> to clear the window</li>
 		</ol>
 	</div>
@@ -881,12 +881,12 @@
 		<strong>Workflow:</strong>
 		<ol>
 			<li>Navigate to the first filename column in the first row</li>
-			<li>Press <code>NVDA+Alt+P</code> to note the column number (e.g., "Row 1, column 50")</li>
-			<li>Press <code>NVDA+Alt+R</code> to set the start mark</li>
-			<li>Navigate down to the last file with <code>NVDA+Alt+O</code> repeatedly</li>
+			<li>Press <code>NVDA+;</code> to note the column number (e.g., "Row 1, column 50")</li>
+			<li>Press <code>NVDA+R</code> to set the start mark</li>
+			<li>Navigate down to the last file with <code>NVDA+O</code> repeatedly</li>
 			<li>Press Right Arrow to ensure you're at the same column position</li>
-			<li>Press <code>NVDA+Alt+R</code> again to set the end mark</li>
-			<li>Press <code>NVDA+Alt+Shift+C</code> for rectangular (column-based) copy</li>
+			<li>Press <code>NVDA+R</code> again to set the end mark</li>
+			<li>Press <code>NVDA+Shift+C</code> for rectangular (column-based) copy</li>
 			<li>You'll hear "Rectangular selection copied: 15 rows, columns 50 to 80"</li>
 			<li>Now paste - you'll have just the filenames without other columns!</li>
 		</ol>
@@ -903,8 +903,8 @@
 			<li>Set punctuation level to "All" for maximum detail</li>
 			<li>Start typing your regex: <code>grep -E '^[0-9]{3}-[0-9]{2}-[0-9]{4}$' file.txt</code></li>
 			<li>As you type, hear: "g r e p space dash cap e space quote caret left-bracket 0 dash 9 right-bracket left-brace 3 right-brace..."</li>
-			<li>After typing, press Home then use <code>NVDA+Alt+Period</code> repeatedly to review character by character</li>
-			<li>For any character you're unsure about, press <code>NVDA+Alt+Comma</code> three times to hear its character code</li>
+			<li>After typing, press Home then use <code>NVDA+Period</code> repeatedly to review character by character</li>
+			<li>For any character you're unsure about, press <code>NVDA+Comma</code> three times to hear its character code</li>
 		</ol>
 	</div>
 
@@ -998,7 +998,7 @@
 	</ul>
 	<p>
 		<strong>Affects:</strong> Both typing (with Key Echo) and navigation (when reading characters with
-		NVDA+Alt+Comma/Period). Also affects cursor tracking announcements.
+		NVDA+Comma/Period). Also affects cursor tracking announcements.
 	</p>
 	<p>
 		<strong>When to enable:</strong>
@@ -1125,11 +1125,11 @@
 		"342 new lines"—so speech is never overwhelming.
 	</p>
 	<p>
-		<strong>Quiet mode interaction:</strong> When quiet mode is active (<code>NVDA+Alt+Q</code>), new
+		<strong>Quiet mode interaction:</strong> When quiet mode is active (<code>NVDA+Shift+Q</code>), new
 		output announcements are suppressed regardless of this setting.
 	</p>
 	<p>
-		<strong>Toggle quickly:</strong> Use <code>NVDA+Alt+N</code> to turn the feature on and off without
+		<strong>Toggle quickly:</strong> Use <code>NVDA+Shift+N</code> to turn the feature on and off without
 		opening the settings dialog.  Enabling the toggle also resets the internal snapshot so stale
 		buffered content is not replayed.
 	</p>
@@ -1219,12 +1219,12 @@
 	<div class="info">
 		<strong>Settings Interaction Summary:</strong>
 		<ul>
-			<li><strong>Quiet Mode</strong> (toggled with NVDA+Alt+Q) temporarily disables cursor tracking,
+			<li><strong>Quiet Mode</strong> (toggled with NVDA+Shift+Q) temporarily disables cursor tracking,
 			key echo, <em>and</em> new output announcements, regardless of their individual settings</li>
 			<li><strong>Process Symbols</strong> affects cursor tracking, key echo, and manual character navigation</li>
 			<li><strong>Condense Repeated Symbols</strong> only works with Key Echo enabled</li>
 			<li><strong>Cursor Delay</strong> only affects cursor tracking announcements</li>
-			<li><strong>Announce New Output</strong> (toggled with NVDA+Alt+N) works independently of cursor
+			<li><strong>Announce New Output</strong> (toggled with NVDA+Shift+N) works independently of cursor
 			tracking; it monitors the terminal buffer for newly appended lines</li>
 			<li><strong>Coalesce Delay</strong> and <strong>Max Lines</strong> and <strong>Strip ANSI Codes</strong>
 			only apply when "Announce New Output" is enabled</li>
@@ -1550,16 +1550,16 @@
 	<h3>Efficient Terminal Usage</h3>
 	<ul>
 		<li><strong>Use Quiet Mode:</strong> When running commands that produce verbose output, 
-		enable quiet mode (<code>NVDA+Alt+Q</code>) to prevent overwhelming speech output.</li>
+		enable quiet mode (<code>NVDA+Shift+Q</code>) to prevent overwhelming speech output.</li>
 		
 		<li><strong>Review Output:</strong> After a command completes, use line navigation 
-		(<code>NVDA+Alt+U/I/O</code>) to review the output at your own pace.</li>
+		(<code>NVDA+U/I/O</code>) to review the output at your own pace.</li>
 		
 		<li><strong>Word Navigation:</strong> When examining long command lines or paths, 
-		word navigation (<code>NVDA+Alt+J/K/L</code>) is faster than character-by-character review.</li>
+		word navigation (<code>NVDA+J/K/L</code>) is faster than character-by-character review.</li>
 		
 		<li><strong>Phonetic Spelling:</strong> When dealing with complex filenames or unclear output, 
-		use phonetic character reading (<code>NVDA+Alt+Comma</code> twice) to ensure accuracy.</li>
+		use phonetic character reading (<code>NVDA+Comma</code> twice) to ensure accuracy.</li>
 	</ul>
 	
 	<h3>Customization</h3>
