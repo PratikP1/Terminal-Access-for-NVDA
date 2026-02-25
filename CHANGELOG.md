@@ -4,6 +4,22 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.48] - 2026-02-25
+
+### Fixed
+
+- **Fixed Announce New Output feature with background polling**: The NewOutputAnnouncer previously
+  relied solely on `event_caret` to detect new terminal output. However, `event_caret` is primarily
+  fired when the user moves the cursor, not when program output appears. This meant the feature
+  didn't work for background processes (npm install, compilation, etc.). The fix adds a background
+  polling thread that checks the terminal buffer every 300ms when the feature is enabled, ensuring
+  reliable detection of new output even when caret events don't fire. The implementation:
+  - Added background polling thread with 300ms interval
+  - Polling starts when announceNewOutput feature is enabled
+  - Preserves existing event-driven updates via event_caret
+  - Thread-safe implementation with proper start/stop lifecycle
+  - Added 6 comprehensive tests for polling behavior
+
 ### Added
 
 - **Enforce CHANGELOG.md updates via CI** ([skip changelog] to bypass): New GitHub Actions

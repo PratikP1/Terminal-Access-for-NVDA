@@ -388,5 +388,101 @@ class TestQuietModeInteractionWithAnnouncer(unittest.TestCase):
         self.assertIn("audible line", mock_msg.call_args[0][0])
 
 
+# ---------------------------------------------------------------------------
+# Polling mechanism tests
+# ---------------------------------------------------------------------------
+
+class TestPollingMechanism(unittest.TestCase):
+    """Test the background polling functionality of NewOutputAnnouncer."""
+
+    def setUp(self):
+        _setup_config(self)
+        from globalPlugins.terminalAccess import NewOutputAnnouncer
+        self.announcer = NewOutputAnnouncer()
+
+        # Create a mock terminal object that returns text via makeTextInfo
+        self.mock_terminal = Mock()
+        self.terminal_text = "initial\n"
+
+        def make_text_info(position):
+            mock_info = Mock()
+            mock_info.text = self.terminal_text
+            return mock_info
+
+        self.mock_terminal.makeTextInfo = make_text_info
+
+    def tearDown(self):
+        """Ensure polling thread is stopped after each test."""
+        self.announcer.stop_polling()
+
+    def test_start_polling_creates_thread(self):
+        """Starting polling creates a background thread."""
+        self.announcer.set_terminal(self.mock_terminal)
+        self.announcer.start_polling()
+        self.assertIsNotNone(self.announcer._poll_thread)
+        self.assertTrue(self.announcer._poll_thread.is_alive())
+
+    def test_stop_polling_terminates_thread(self):
+        """Stopping polling terminates the background thread."""
+        self.announcer.set_terminal(self.mock_terminal)
+        self.announcer.start_polling()
+        self.announcer.stop_polling()
+        time.sleep(0.5)  # Give thread time to stop
+        self.assertIsNone(self.announcer._poll_thread)
+
+    @patch('globalPlugins.terminalAccess.ui.message')
+    def test_polling_detects_new_output(self, mock_msg):
+        """Polling thread detects new output without explicit feed() calls."""
+        # Set terminal and start polling
+        self.announcer.set_terminal(self.mock_terminal)
+        self.announcer.start_polling()
+
+        # Wait for initial poll to establish baseline
+        time.sleep(0.4)
+
+        # Add new output to terminal
+        self.terminal_text = "initial\nnew line from polling\n"
+
+        # Wait for polling + coalesce delay
+        time.sleep(0.6)
+
+        # Should have announced the new output
+        mock_msg.assert_called()
+        announced_text = mock_msg.call_args[0][0]
+        self.assertIn("new line from polling", announced_text)
+
+    def test_multiple_start_calls_safe(self):
+        """Calling start_polling multiple times doesn't create multiple threads."""
+        self.announcer.set_terminal(self.mock_terminal)
+        self.announcer.start_polling()
+        first_thread = self.announcer._poll_thread
+        self.announcer.start_polling()
+        self.assertIs(self.announcer._poll_thread, first_thread)
+
+    @patch('globalPlugins.terminalAccess.ui.message')
+    def test_polling_respects_feature_disabled(self, mock_msg):
+        """Polling doesn't announce when feature is disabled."""
+        self._conf["announceNewOutput"] = False
+        self.announcer.set_terminal(self.mock_terminal)
+        self.announcer.start_polling()
+
+        time.sleep(0.4)
+        self.terminal_text = "initial\nshould not be announced\n"
+        time.sleep(0.6)
+
+        mock_msg.assert_not_called()
+
+    def test_set_terminal_updates_reference(self):
+        """set_terminal updates the stored terminal object reference."""
+        mock_terminal1 = Mock()
+        mock_terminal2 = Mock()
+
+        self.announcer.set_terminal(mock_terminal1)
+        self.assertIs(self.announcer._terminal_obj, mock_terminal1)
+
+        self.announcer.set_terminal(mock_terminal2)
+        self.assertIs(self.announcer._terminal_obj, mock_terminal2)
+
+
 if __name__ == '__main__':
     unittest.main()

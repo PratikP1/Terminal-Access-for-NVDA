@@ -2605,12 +2605,20 @@ class NewOutputAnnouncer:
 	Announces newly appended terminal output using TextDiffer.
 
 	When the "announce new output" feature is enabled, this class monitors
-	terminal content fed via :meth:`feed` and speaks newly appended lines
-	as they arrive.  Rapid bursts are coalesced by a short timer so that
-	fast-scrolling output (``cat`` of a large file, ``apt`` progress bars,
-	etc.) does not overwhelm the speech synthesiser.
+	terminal content and speaks newly appended lines as they arrive.
+
+	The announcer uses two mechanisms to detect new output:
+	1. Event-driven: Content fed via :meth:`feed` (called from event_caret)
+	2. Polling: Background thread that polls terminal buffer at regular intervals
+
+	The polling mechanism ensures reliable detection even when terminals don't
+	fire caret events for program output. Rapid bursts are coalesced by a short
+	timer so that fast-scrolling output (``cat`` of a large file, ``apt``
+	progress bars, etc.) does not overwhelm the speech synthesiser.
 
 	Features:
+	- Background polling: actively checks for new output every 300ms
+	- Event-driven updates: also processes event_caret notifications
 	- Coalescing: accumulates text within a configurable window (newOutputCoalesceMs)
 	- Max-lines guard: if more than newOutputMaxLines arrive at once, a summary
 	  "{N} new lines" is spoken instead of the full text
@@ -2618,9 +2626,12 @@ class NewOutputAnnouncer:
 	- Quiet-mode awareness: no output when quietMode is active
 
 	Thread Safety:
-		:meth:`feed` may be called from any thread.  Internal state is
-		protected by a ``threading.Lock``.
+		:meth:`feed` and polling may be called from multiple threads.
+		Internal state is protected by a ``threading.Lock``.
 	"""
+
+	# Polling interval in seconds (300ms)
+	POLL_INTERVAL = 0.3
 
 	def __init__(self) -> None:
 		"""Initialise with no previous snapshot."""
@@ -2628,6 +2639,9 @@ class NewOutputAnnouncer:
 		self._lock = threading.Lock()
 		self._timer: threading.Timer | None = None
 		self._pending_text: str = ""
+		self._poll_thread: threading.Thread | None = None
+		self._stop_polling = threading.Event()
+		self._terminal_obj = None
 
 	def feed(self, text: str) -> None:
 		"""
@@ -2711,6 +2725,68 @@ class NewOutputAnnouncer:
 				self._timer = None
 			self._pending_text = ""
 		self._differ.reset()
+
+	def set_terminal(self, terminal_obj) -> None:
+		"""
+		Set the terminal object for polling.
+
+		Args:
+			terminal_obj: The focused terminal object to poll for content.
+		"""
+		self._terminal_obj = terminal_obj
+
+	def start_polling(self) -> None:
+		"""
+		Start background polling thread to detect new output.
+
+		Called when the announce new output feature is enabled.
+		"""
+		if self._poll_thread is not None:
+			return  # Already polling
+
+		self._stop_polling.clear()
+		self._poll_thread = threading.Thread(target=self._poll_loop, daemon=True)
+		self._poll_thread.start()
+
+	def stop_polling(self) -> None:
+		"""
+		Stop background polling thread.
+
+		Called when the announce new output feature is disabled.
+		"""
+		if self._poll_thread is None:
+			return
+
+		self._stop_polling.set()
+		if self._poll_thread.is_alive():
+			self._poll_thread.join(timeout=1.0)
+		self._poll_thread = None
+
+	def _poll_loop(self) -> None:
+		"""
+		Background polling loop that checks for new terminal output.
+
+		Runs in a separate thread and polls the terminal buffer at regular
+		intervals (POLL_INTERVAL). Uses the same feed() method as event-driven
+		updates, so all detection and coalescing logic is shared.
+		"""
+		while not self._stop_polling.wait(self.POLL_INTERVAL):
+			try:
+				# Check if feature is still enabled
+				if not config.conf["terminalAccess"]["announceNewOutput"]:
+					continue
+
+				# Get terminal content and feed to announcer
+				if self._terminal_obj is not None:
+					try:
+						info = self._terminal_obj.makeTextInfo(textInfos.POSITION_ALL)
+						self.feed(info.text)
+					except Exception:
+						# Terminal object may be invalid, ignore
+						pass
+			except Exception:
+				# Config access or other errors - continue polling
+				pass
 
 
 class WindowMonitor:
@@ -4167,6 +4243,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# New output announcer for automatically speaking appended terminal output
 		self._newOutputAnnouncer = NewOutputAnnouncer()
 
+		# Start polling if feature is enabled from previous session
+		try:
+			if config.conf["terminalAccess"]["announceNewOutput"]:
+				self._newOutputAnnouncer.start_polling()
+		except Exception:
+			pass
+
 		# Tab manager for managing terminal tabs (Section 9 - v1.0.39+)
 		self._tabManager = None  # Initialized when terminal is bound
 
@@ -4257,6 +4340,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	def terminate(self):
 		"""Clean up when the plugin is terminated."""
+		# Stop new output announcer polling if active
+		if self._newOutputAnnouncer:
+			self._newOutputAnnouncer.stop_polling()
+
 		# Stop window monitoring if active
 		if self._windowMonitor and self._windowMonitor.is_monitoring():
 			self._windowMonitor.stop_monitoring()
@@ -4592,6 +4679,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		"""
 		Read the current terminal buffer and feed it to the new output announcer.
 
+		Also updates the terminal object reference for polling.
+
 		This is a best-effort helper: any exception is silently ignored so it
 		never disrupts normal caret handling.
 
@@ -4599,6 +4688,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			obj: The focused terminal object.
 		"""
 		try:
+			# Update terminal object for polling (in case it changed)
+			self._newOutputAnnouncer.set_terminal(obj)
 			info = obj.makeTextInfo(textInfos.POSITION_ALL)
 			self._newOutputAnnouncer.feed(info.text)
 		except Exception:
@@ -5024,9 +5115,18 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if config.conf["terminalAccess"]["announceNewOutput"]:
 			# Reset the announcer so it doesn't speak stale buffered content
 			self._newOutputAnnouncer.reset()
+			# Set the current terminal object and start polling
+			try:
+				obj = api.getForegroundObject()
+				self._newOutputAnnouncer.set_terminal(obj)
+				self._newOutputAnnouncer.start_polling()
+			except Exception:
+				pass
 			# Translators: Message when announce new output is enabled
 			ui.message(_("Announce new output on"))
 		else:
+			# Stop polling when feature is disabled
+			self._newOutputAnnouncer.stop_polling()
 			# Translators: Message when announce new output is disabled
 			ui.message(_("Announce new output off"))
 
