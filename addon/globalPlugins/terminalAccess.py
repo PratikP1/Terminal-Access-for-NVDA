@@ -2698,9 +2698,11 @@ class NewOutputAnnouncer:
 		if not text.strip():
 			return
 
-		# Re-check quiet mode (might have changed while timer was running)
+		# Re-check quiet mode and feature toggle (might have changed while timer was running)
 		try:
 			if config.conf["terminalAccess"]["quietMode"]:
+				return
+			if not config.conf["terminalAccess"]["announceNewOutput"]:
 				return
 		except Exception:
 			return
@@ -3611,18 +3613,33 @@ class OutputSearchManager:
 		if not self._terminal or not pattern:
 			return 0
 
-		def _store_match(line_info, line_text, line_num):
+		def _store_match(line_info, line_text, line_num, char_offset):
 			"""
 			Store a search match with a bookmark and fallback position.
 
 			Fallback is needed when bookmarks aren't supported by the TextInfo implementation.
+			char_offset is the character position within the line where the match starts.
 			"""
 			bookmark = getattr(line_info, "bookmark", None)
 			try:
 				fallback_pos = line_info.copy()
 			except Exception:
 				fallback_pos = line_info
-			self._matches.append((bookmark, line_text, line_num, fallback_pos))
+			self._matches.append((bookmark, line_text, line_num, fallback_pos, char_offset))
+
+		def _find_match_offset(line_text, pattern, case_sensitive, use_regex):
+			"""Find the character offset of the first match in the line."""
+			if use_regex:
+				import re
+				flags = 0 if case_sensitive else re.IGNORECASE
+				regex = re.compile(pattern, flags)
+				match = regex.search(line_text)
+				return match.start() if match else 0
+			else:
+				search_pattern = pattern if case_sensitive else pattern.lower()
+				search_text = line_text if case_sensitive else line_text.lower()
+				offset = search_text.find(search_pattern)
+				return offset if offset >= 0 else 0
 
 		self._pattern = pattern
 		self._case_sensitive = case_sensitive
@@ -3666,7 +3683,8 @@ class OutputSearchManager:
 				match_set = set(matching_indices)
 				for line_index in range(len(lines) - 1 if lines[-1] == '' else len(lines)):
 					if line_index in match_set:
-						_store_match(cursor, lines[line_index], line_index + 1)
+						char_offset = _find_match_offset(lines[line_index], pattern, case_sensitive, use_regex)
+						_store_match(cursor, lines[line_index], line_index + 1, char_offset)
 					if line_index < len(lines) - 1:
 						moved = cursor.move(textInfos.UNIT_LINE, 1)
 						if not moved:
@@ -3678,7 +3696,8 @@ class OutputSearchManager:
 					try:
 						line_info = self._terminal.makeTextInfo(textInfos.POSITION_FIRST)
 						line_info.move(textInfos.UNIT_LINE, i)
-						_store_match(line_info, lines[i], i + 1)
+						char_offset = _find_match_offset(lines[i], pattern, case_sensitive, use_regex)
+						_store_match(line_info, lines[i], i + 1, char_offset)
 					except Exception:
 						pass
 
@@ -3742,15 +3761,17 @@ class OutputSearchManager:
 		return self._jump_to_current_match()
 
 	def _unpack_match(self, match):
-		"""Handle legacy (bookmark, text, line) and new (bookmark, text, line, pos) tuples."""
-		if len(match) == 4:
-			return match[0], match[1], match[2], match[3]
+		"""Handle legacy (bookmark, text, line), (bookmark, text, line, pos), and new (bookmark, text, line, pos, offset) tuples."""
+		if len(match) == 5:
+			return match[0], match[1], match[2], match[3], match[4]
+		elif len(match) == 4:
+			return match[0], match[1], match[2], match[3], 0
 		bookmark, line_text, line_num = match
-		return bookmark, line_text, line_num, None
+		return bookmark, line_text, line_num, None, 0
 
 	def _jump_to_current_match(self) -> bool:
 		"""
-		Jump to current match index.
+		Jump to current match index and position cursor at the search term.
 
 		Returns:
 			bool: True if jump successful
@@ -3759,7 +3780,7 @@ class OutputSearchManager:
 			return False
 
 		try:
-			bookmark, line_text, line_num, pos_info = self._unpack_match(
+			bookmark, line_text, line_num, pos_info, char_offset = self._unpack_match(
 				self._matches[self._current_match_index]
 			)
 
@@ -3777,6 +3798,14 @@ class OutputSearchManager:
 					pos = pos_info
 
 			if pos:
+				# Move cursor to the character position of the search term within the line
+				if char_offset > 0:
+					try:
+						pos.move(textInfos.UNIT_CHARACTER, char_offset)
+					except Exception:
+						# If we can't move by character, just use line position
+						pass
+
 				api.setReviewPosition(pos)
 				return True
 		except Exception:
@@ -3803,7 +3832,7 @@ class OutputSearchManager:
 		if not self._matches or self._current_match_index < 0:
 			return None
 
-		_, line_text, line_num, _ = self._unpack_match(self._matches[self._current_match_index])
+		_, line_text, line_num, _, _ = self._unpack_match(self._matches[self._current_match_index])
 		return (self._current_match_index + 1, len(self._matches), line_text, line_num)
 
 	def clear_search(self) -> None:
