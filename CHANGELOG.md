@@ -38,6 +38,20 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
   terminal output is the meaningful feedback, not the transient empty line. Navigation-triggered
   blanks (arrow keys, page up/down) are still announced immediately — no delay.
 
+- **Command history gestures**: Changed previous/next command navigation from `NVDA+H`/`NVDA+G`
+  to `NVDA+Shift+Up`/`NVDA+Shift+Down` for more intuitive navigation. Read-to-top and
+  read-to-bottom commands are now unassigned (available via NVDA Input Gestures dialog).
+
+### Fixed
+
+- **Command history navigation silent failure**: Fixed `from . import ui` in `_jump_to_command`
+  that caused an ImportError silently caught by exception handling, making NVDA+H/G appear to
+  do nothing. Now uses the correct module-level `ui` import.
+
+- **Search not finding visible text**: Added ANSI escape stripping to the search and command
+  history detection. Terminal buffer text may contain ANSI formatting codes that break substring
+  matching even though the text appears correctly on screen.
+
 ### Improved
 
 - **Comprehensive ANSI escape stripping**: The ANSI strip regex now handles OSC sequences (window

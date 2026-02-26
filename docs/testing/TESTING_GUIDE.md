@@ -293,8 +293,8 @@ def test_with_terminal(mock_terminal):
 1. Position mid-screen
 2. Press `NVDA+Alt+Shift+Left` (read to start of line)
 3. Press `NVDA+Alt+Shift+Right` (read to end of line)
-4. Press `NVDA+Alt+Shift+Up` (read to top)
-5. Press `NVDA+Alt+Shift+Down` (read to bottom)
+4. Read to top (assign gesture via NVDA Input Gestures if needed)
+5. Read to bottom (assign gesture via NVDA Input Gestures if needed)
 
 **Expected Result:**
 - Each direction reads correctly from cursor to boundary
@@ -436,9 +436,9 @@ def test_with_terminal(mock_terminal):
 
 #### Test 10.2: Command Navigation
 **Steps:**
-1. Press `NVDA+Alt+UpArrow` (previous command)
-2. Press `NVDA+Alt+DownArrow` (next command)
-3. Press `NVDA+Alt+Shift+L` (list commands)
+1. Press `NVDA+Shift+UpArrow` (previous command)
+2. Press `NVDA+Shift+DownArrow` (next command)
+3. Press `NVDA+Shift+L` (list commands)
 
 **Expected Result:**
 - Navigation jumps to previous/next command

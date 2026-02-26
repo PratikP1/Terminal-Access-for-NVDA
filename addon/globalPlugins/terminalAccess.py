@@ -3824,6 +3824,11 @@ class OutputSearchManager:
 			if not all_text:
 				return 0
 
+			# Strip ANSI escape sequences that some terminals leave in the
+			# text buffer.  Without this, embedded formatting codes can
+			# break substring matching for terms the user can clearly see.
+			all_text = ANSIParser._STRIP_PATTERN.sub('', all_text)
+
 			# Split into lines and build a set of matching line numbers first
 			# (0-indexed internally, converted to 1-indexed for storage).
 			lines = all_text.split('\n')
@@ -4104,6 +4109,10 @@ class CommandHistoryManager:
 			if not content:
 				return 0
 
+			# Strip ANSI escape sequences that some terminals leave in the
+			# text buffer so prompt patterns match cleanly.
+			content = ANSIParser._STRIP_PATTERN.sub('', content)
+
 			lines = content.split('\n')
 			new_commands = 0
 
@@ -4212,7 +4221,6 @@ class CommandHistoryManager:
 			api.setReviewPosition(info)
 
 			# Announce the command
-			from . import ui
 			ui.message(f"Command {index + 1} of {len(self._history)}: {command_text}")
 
 			return True
@@ -6332,7 +6340,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading to top
 		description=_("Read from cursor to top of buffer"),
-		gesture="kb:NVDA+shift+upArrow"
 	)
 	def script_readToTop(self, gesture):
 		"""Read from current cursor position to top of buffer."""
@@ -6367,7 +6374,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for reading to bottom
 		description=_("Read from cursor to bottom of buffer"),
-		gesture="kb:NVDA+shift+downArrow"
 	)
 	def script_readToBottom(self, gesture):
 		"""Read from current cursor position to bottom of buffer."""
@@ -6912,7 +6918,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for previous command navigation
 		description=_("Navigate to previous command in history"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+h"
+		gesture="kb:NVDA+shift+upArrow"
 	)
 	def script_previousCommand(self, gesture):
 		"""Navigate to previous command."""
@@ -6937,7 +6943,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for next command navigation
 		description=_("Navigate to next command in history"),
 		category=SCRCAT_TERMINALACCESS,
-		gesture="kb:NVDA+g"
+		gesture="kb:NVDA+shift+downArrow"
 	)
 	def script_nextCommand(self, gesture):
 		"""Navigate to next command."""

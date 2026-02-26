@@ -244,7 +244,7 @@
 	<div class="info">
 		<strong>Example Usage:</strong> After running several commands, press <code>NVDA+Shift+H</code>
 		to scan the terminal output and detect all commands (it looks for command prompts). Then use
-		<code>NVDA+H</code> and <code>NVDA+G</code> to jump between commands. For example,
+		<code>NVDA+Shift+Up</code> and <code>NVDA+Shift+Down</code> to jump between commands. For example,
 		if you ran <code>ls</code>, <code>cd Documents</code>, and <code>dir</code>, you can jump directly
 		to each command and review its output. Press <code>NVDA+Shift+L</code> to hear a summary of
 		all detected commands.
@@ -289,10 +289,9 @@
 	<p>Read from cursor to any edge of the screen or buffer.</p>
 	<div class="info">
 		<strong>Example Usage:</strong> When you're in the middle of a long line and want to hear what comes next,
-		press <code>NVDA+Shift+Right</code> to read from the cursor to the end of the line. If you're
-		reviewing a long log file and want to hear everything from your current position to the end, press
-		<code>NVDA+Shift+Down</code> to read to the bottom. Use <code>NVDA+Shift+Left</code> to read
-		back to the beginning of the line and <code>NVDA+Shift+Up</code> to read to the top of the buffer.
+		press <code>NVDA+Shift+Right</code> to read from the cursor to the end of the line, or
+		<code>NVDA+Shift+Left</code> to read back to the beginning of the line. Read-to-top and
+		read-to-bottom commands are also available and can be assigned via the NVDA Input Gestures dialog.
 	</div>
 
 	<h4>Configurable Settings</h4>
@@ -560,11 +559,11 @@
 				<td>Read from cursor to end of line</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Shift+Up Arrow</code></td>
+				<td>(Unassigned)</td>
 				<td>Read from cursor to top of buffer</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Shift+Down Arrow</code></td>
+				<td>(Unassigned)</td>
 				<td>Read from cursor to bottom of buffer</td>
 			</tr>
 		</tbody>
@@ -699,11 +698,11 @@
 				<td>Scan terminal output to detect and store command history</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+H</code></td>
+				<td><code>NVDA+Shift+Up Arrow</code></td>
 				<td>Navigate to previous command in history</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+G</code></td>
+				<td><code>NVDA+Shift+Down Arrow</code></td>
 				<td>Navigate to next command in history</td>
 			</tr>
 			<tr>

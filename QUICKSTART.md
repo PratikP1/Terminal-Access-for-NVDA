@@ -109,9 +109,9 @@ Try these settings:
 
 ### Reading Portions of Screen
 1. Position cursor where you want to start
-2. Press **NVDA+Alt+Shift+Right** to read to end of line
-3. Or **NVDA+Alt+Shift+Down** to read to bottom of buffer
-4. Use other directions (Left/Up) as needed
+2. Press **NVDA+Shift+Right** to read to end of line
+3. Press **NVDA+Shift+Left** to read to start of line
+4. Read-to-top and read-to-bottom commands can be assigned via NVDA Input Gestures dialog
 
 ### Reading Long Files or Logs
 1. Navigate to start position
@@ -164,8 +164,8 @@ Try these settings:
 - **NVDA+Alt+P** - Announce position (row, column)
 
 ### Directional Reading
-- **NVDA+Alt+Shift+Left/Right** - Read to beginning/end of line
-- **NVDA+Alt+Shift+Up/Down** - Read to top/bottom of buffer
+- **NVDA+Shift+Left/Right** - Read to beginning/end of line
+- Read to top/bottom of buffer (assignable via NVDA Input Gestures)
 
 ### Punctuation & Tracking
 - **NVDA+Alt+[/]** - Decrease/increase punctuation level
@@ -191,9 +191,9 @@ Try these settings:
 - **NVDA+Shift+B** - List bookmarks
 
 ### Command History (v1.0.31+)
-- **NVDA+Alt+Shift+H** - Scan command history
-- **NVDA+Alt+Up/Down** - Navigate previous/next command
-- **NVDA+Alt+Shift+L** - List command history
+- **NVDA+Shift+H** - Scan command history
+- **NVDA+Shift+Up/Down** - Navigate previous/next command
+- **NVDA+Shift+L** - List command history
 
 ### Search (v1.0.30+)
 - **NVDA+Alt+F** - Search terminal output
