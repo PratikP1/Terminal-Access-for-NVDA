@@ -4,6 +4,50 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.49] - 2026-02-26
+
+### Added
+
+- **10 new terminal emulators supported**: Added Ghostty, Rio, Wave Terminal, Contour Terminal,
+  Cool Retro Term, MobaXterm, SecureCRT, Tera Term, mRemoteNG, and Royal TS to the supported
+  terminals list (total now 30). Each new terminal has a default application profile with
+  sensible settings (SOME punctuation, standard cursor tracking).
+
+- **5 TUI application profiles**: Added optimized profiles for popular TUI applications that
+  are automatically detected by window title:
+  - **Claude CLI**: Code-friendly punctuation, streaming output optimizations, status bar silenced
+  - **lazygit**: Git diff-friendly punctuation, window-based cursor tracking, single-key shortcuts
+  - **btop/btm**: Progress bar noise reduction, fast refresh support, CPU/memory header regions
+  - **yazi**: Terminal file manager with single-key navigation
+  - **k9s**: Kubernetes TUI with namespace-friendly punctuation and fast status updates
+
+- **Last-line overwrite detection (TextDiffer)**: Added `KIND_LAST_LINE_UPDATED` to detect when
+  only the last line of the terminal buffer changes (progress bars, spinners, carriage-return
+  overwrites). The NewOutputAnnouncer now announces these updates by replacing (not accumulating)
+  pending text, preventing stale progress info from being spoken.
+
+### Changed
+
+- **Simplified bookmark jump gestures**: Jump-to-bookmark shortcuts changed from `NVDA+Alt+0-9`
+  to `Alt+0-9` for faster access. Set-bookmark shortcuts changed from `NVDA+Alt+Shift+0-9` to
+  `NVDA+Shift+0-9`. List-bookmarks changed from `NVDA+Alt+Shift+B` to `NVDA+Shift+B`.
+
+- **Deferred blank announcement**: Replaced the fragile Enter-key-based 300ms blank suppression
+  window with a content-aware deferred re-verification approach. Instead of tracking Enter key
+  presses, ALL blank announcements are now deferred via `wx.CallLater` and re-verified before
+  speaking. If content has appeared (e.g., terminal rendered command output), the blank is
+  silently discarded. This handles all transient blank lines, not just those after Enter.
+
+### Improved
+
+- **Comprehensive ANSI escape stripping**: The ANSI strip regex now handles OSC sequences (window
+  titles, hyperlinks), DCS sequences (Sixel graphics), private mode CSI (`?25h` cursor show/hide),
+  charset designation (`ESC(B`), and two-character ESC sequences (`ESC M`, `ESC 7`). Previously only
+  basic CSI color codes were stripped, causing leftover escape fragments in announced text.
+
+- **Window title detection ordering**: Fixed detection priority so `lazygit` is matched before
+  `git`, and `btop`/`btm` are matched before `htop`, preventing false positive profile assignments.
+
 ## [1.0.48] - 2026-02-25
 
 ### Fixed
@@ -64,7 +108,7 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
     - Set bookmark: `NVDA+Alt+Shift+0-9` → `NVDA+Shift+0-9`
   - **Unchanged** (advanced features retain Alt modifier for safety):
     - Help: `NVDA+Shift+F1`
-    - Jump to bookmark: `NVDA+Alt+0-9`
+    - Jump to bookmark: `Alt+0-9`
     - Window management: `NVDA+Alt+F2/F3/Plus/Asterisk`
     - Find next/previous: `NVDA+F3` / `NVDA+Shift+F3`
 - Updated all documentation (README.md, addon/doc/en/readme.html, terminalAccess.py) to reflect new keyboard shortcuts (#54)
@@ -298,8 +342,8 @@ This is the **first public release** of Terminal Access for NVDA. The add-on is 
   - Updated all documentation to remove shortcut references
   - Updated help text in plugin to remove shortcut reference
 - **Bookmark Shortcuts Restored**: Bookmarks now support full 0-9 range
-  - NVDA+Alt+0-9 jumps to bookmarks 0-9 (all 10 bookmarks)
-  - NVDA+Alt+Shift+0-9 sets bookmarks 0-9 (all 10 bookmarks)
+  - Alt+0-9 jumps to bookmarks 0-9 (all 10 bookmarks)
+  - NVDA+Shift+0-9 sets bookmarks 0-9 (all 10 bookmarks)
   - Profile announcement moved to NVDA+Alt+F10 to free up NVDA+Alt+0
   - Indentation toggle moved to NVDA+Alt+F5 to free up NVDA+Alt+5
 - **Author Information**: Updated author to Pratik Patel (#31)
@@ -731,9 +775,9 @@ info = manager.get_current_match_info()
   - Location: `addon/globalPlugins/tdsr.py` lines 2694-2837
 
 - **Bookmark Gestures**:
-  - `NVDA+Alt+Shift+0-9` - Set bookmark 0-9 at current position
-  - `NVDA+Alt+0-9` - Jump to bookmark 0-9
-  - `NVDA+Alt+Shift+B` - List all bookmarks
+  - `NVDA+Shift+0-9` - Set bookmark 0-9 at current position
+  - `Alt+0-9` - Jump to bookmark 0-9
+  - `NVDA+Shift+B` - List all bookmarks
 
 #### Technical Details
 

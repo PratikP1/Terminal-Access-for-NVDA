@@ -233,8 +233,8 @@
 			<li>Press <code>NVDA+Shift+1</code> to set bookmark 1</li>
 			<li>Navigate to another error at row 450</li>
 			<li>Press <code>NVDA+Shift+2</code> to set bookmark 2</li>
-			<li>Later, press <code>NVDA+Alt+1</code> to jump back to the first error instantly</li>
-			<li>Press <code>NVDA+Alt+2</code> to jump to the second error</li>
+			<li>Later, press <code>Alt+1</code> to jump back to the first error instantly</li>
+			<li>Press <code>Alt+2</code> to jump to the second error</li>
 		</ol>
 		Press <code>NVDA+Shift+B</code> to hear a list of all set bookmarks.
 	</div>
@@ -306,12 +306,58 @@
 	
 	<h2 id="supported-terminals">Supported Terminals</h2>
 	<p>Terminal Access for NVDA supports the following terminal applications on Windows 10 and Windows 11:</p>
+
+	<h3>Built-in Windows Terminals</h3>
 	<ul>
 		<li>Windows Terminal</li>
 		<li>Windows PowerShell</li>
 		<li>PowerShell Core (pwsh)</li>
 		<li>Command Prompt (cmd.exe)</li>
 		<li>Console Host (conhost.exe)</li>
+	</ul>
+
+	<h3>Third-Party Terminal Emulators</h3>
+	<ul>
+		<li>Cmder</li>
+		<li>ConEmu / ConEmu64</li>
+		<li>Git Bash (mintty)</li>
+		<li>PuTTY / KiTTY</li>
+		<li>Terminus</li>
+		<li>Hyper</li>
+		<li>Alacritty</li>
+		<li>WezTerm</li>
+		<li>Tabby</li>
+		<li>FluentTerminal</li>
+		<li>Ghostty</li>
+		<li>Rio</li>
+		<li>Wave Terminal</li>
+		<li>Contour Terminal</li>
+		<li>Cool Retro Term</li>
+	</ul>
+
+	<h3>Remote Access / Professional Terminals</h3>
+	<ul>
+		<li>MobaXterm</li>
+		<li>SecureCRT</li>
+		<li>Tera Term</li>
+		<li>mRemoteNG</li>
+		<li>Royal TS</li>
+	</ul>
+
+	<h3>WSL (Windows Subsystem for Linux)</h3>
+	<ul>
+		<li>WSL executable</li>
+		<li>WSL Bash</li>
+	</ul>
+
+	<h3>TUI Application Profiles</h3>
+	<p>Terminal Access includes optimized profiles for popular TUI (Text User Interface) applications. These profiles are automatically detected by window title and configure cursor tracking, punctuation, key echo, and screen regions for the best experience:</p>
+	<ul>
+		<li><strong>Claude CLI</strong> - Anthropic's AI assistant CLI with streaming output optimizations, status bar silencing, and code-friendly punctuation</li>
+		<li><strong>lazygit</strong> - Git TUI with diff-friendly punctuation and single-key shortcut support</li>
+		<li><strong>btop / btm</strong> - System monitors with progress bar handling and fast refresh rate support</li>
+		<li><strong>yazi</strong> - Terminal file manager with single-key navigation support</li>
+		<li><strong>k9s</strong> - Kubernetes TUI with namespace-friendly punctuation and fast status updates</li>
 	</ul>
 	
 	<div class="info">
@@ -629,7 +675,7 @@
 				<td>Set bookmark at current position</td>
 			</tr>
 			<tr>
-				<td><code>NVDA+Alt+0-9</code></td>
+				<td><code>Alt+0-9</code></td>
 				<td>Jump to bookmark</td>
 			</tr>
 			<tr>
@@ -745,7 +791,7 @@
 			<li>Use <code>NVDA+U</code> and <code>NVDA+O</code> to read context around each error</li>
 			<li>Press <code>NVDA+Shift+1</code> to bookmark the first error location</li>
 			<li>Navigate to the second error and bookmark it with <code>NVDA+Shift+2</code></li>
-			<li>Jump between bookmarked errors with <code>NVDA+Alt+1</code> and <code>NVDA+Alt+2</code></li>
+			<li>Jump between bookmarked errors with <code>Alt+1</code> and <code>Alt+2</code></li>
 		</ol>
 	</div>
 
@@ -1339,7 +1385,7 @@
 
 	<h3>Third-Party Terminal Support</h3>
 	<p>
-		Terminal Access supports 13 popular third-party terminal emulators in addition to the 5 built-in Windows terminals.
+		Terminal Access supports 25 popular third-party terminal emulators and remote access tools in addition to the 5 built-in Windows terminals, for a total of 30 supported terminals.
 	</p>
 
 	<h4>Supported Third-Party Terminals</h4>
@@ -1413,12 +1459,114 @@
 				<li>Touch-friendly</li>
 			</ul>
 		</li>
+		<li><strong>Ghostty</strong>: Fast, feature-rich GPU-accelerated terminal
+			<ul>
+				<li>Written in Zig</li>
+				<li>Native platform integration</li>
+			</ul>
+		</li>
+		<li><strong>Rio</strong>: GPU-accelerated terminal built in Rust
+			<ul>
+				<li>WebGPU-based rendering</li>
+				<li>Cross-platform</li>
+			</ul>
+		</li>
+		<li><strong>Wave Terminal</strong>: Modern terminal with AI integration
+			<ul>
+				<li>Inline rendering capabilities</li>
+				<li>Block-based workflows</li>
+			</ul>
+		</li>
+		<li><strong>Contour Terminal</strong>: Modern C++ terminal emulator
+			<ul>
+				<li>GPU-accelerated</li>
+				<li>VT sequence support</li>
+			</ul>
+		</li>
+		<li><strong>Cool Retro Term</strong>: Retro-styled terminal emulator
+			<ul>
+				<li>CRT monitor visual effects</li>
+				<li>Based on QTermWidget</li>
+			</ul>
+		</li>
+		<li><strong>MobaXterm</strong>: Enhanced terminal for Windows with X11 server
+			<ul>
+				<li>Built-in SSH, RDP, VNC clients</li>
+				<li>Embedded Unix commands</li>
+			</ul>
+		</li>
+		<li><strong>SecureCRT</strong>: Professional SSH and Telnet client
+			<ul>
+				<li>Enterprise-grade security</li>
+				<li>Session management</li>
+			</ul>
+		</li>
+		<li><strong>Tera Term</strong>: Open-source terminal emulator
+			<ul>
+				<li>SSH2, serial port support</li>
+				<li>Macro scripting</li>
+			</ul>
+		</li>
+		<li><strong>mRemoteNG</strong>: Multi-remote connection manager
+			<ul>
+				<li>Multiple protocol support</li>
+				<li>Tabbed interface</li>
+			</ul>
+		</li>
+		<li><strong>Royal TS</strong>: Remote management solution
+			<ul>
+				<li>Enterprise-focused</li>
+				<li>Credential management</li>
+			</ul>
+		</li>
+	</ul>
+
+	<h4>TUI Application Profiles</h4>
+	<p>
+		Terminal Access automatically detects popular TUI (Text User Interface) applications running inside any supported terminal and applies optimized profiles:
+	</p>
+	<ul>
+		<li><strong>Claude CLI</strong>: Anthropic's AI assistant command-line interface
+			<ul>
+				<li>Code-friendly punctuation (MOST level)</li>
+				<li>Streaming response optimization (no line pause)</li>
+				<li>Status bar silenced to reduce noise</li>
+				<li>Key echo disabled during input</li>
+			</ul>
+		</li>
+		<li><strong>lazygit</strong>: Simple terminal UI for Git commands
+			<ul>
+				<li>Diff-friendly punctuation (MOST level)</li>
+				<li>Single-key shortcut support (key echo disabled)</li>
+				<li>Window-based cursor tracking for panel navigation</li>
+			</ul>
+		</li>
+		<li><strong>btop / btm</strong>: Terminal-based system monitors
+			<ul>
+				<li>Progress bar noise reduction (repeated symbols disabled)</li>
+				<li>Fast refresh rate support (no line pause)</li>
+				<li>CPU/memory header and process list regions</li>
+			</ul>
+		</li>
+		<li><strong>yazi</strong>: Blazing fast terminal file manager
+			<ul>
+				<li>Single-key navigation support</li>
+				<li>File listing separator handling</li>
+			</ul>
+		</li>
+		<li><strong>k9s</strong>: Kubernetes cluster management TUI
+			<ul>
+				<li>Namespace/pod-friendly punctuation (MOST level)</li>
+				<li>Fast status update support (no line pause)</li>
+				<li>Table border noise reduction</li>
+			</ul>
+		</li>
 	</ul>
 
 	<div class="info">
 		All Terminal Access features work with third-party terminals including navigation, selection,
 		cursor tracking, and profiles. Terminal Access automatically detects third-party terminals
-		when you switch to them.
+		and TUI applications when you switch to them.
 	</div>
 
 	<h3>Window Definitions</h3>

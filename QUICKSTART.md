@@ -18,7 +18,7 @@ That's it! The add-on is now installed.
 ## First Steps (5 minutes)
 
 ### Step 1: Open a Terminal
-Open Windows Terminal, PowerShell, Command Prompt, or WSL.
+Open any supported terminal: Windows Terminal, PowerShell, Command Prompt, WSL, or any of the 30 supported terminal emulators (including Alacritty, WezTerm, Ghostty, MobaXterm, and more).
 
 You'll hear: *"Terminal Access support active. Press NVDA+shift+f1 for help."*
 
@@ -186,9 +186,9 @@ Try these settings:
 - **NVDA+Alt+Shift+A** - Read text attributes/colors
 
 ### Bookmarks (v1.0.29+)
-- **NVDA+Alt+Shift+0-9** - Set bookmark (0-9)
-- **NVDA+Alt+0-9** - Jump to bookmark (0-9)
-- **NVDA+Alt+Shift+B** - List bookmarks
+- **NVDA+Shift+0-9** - Set bookmark (0-9)
+- **Alt+0-9** - Jump to bookmark (0-9)
+- **NVDA+Shift+B** - List bookmarks
 
 ### Command History (v1.0.31+)
 - **NVDA+Alt+Shift+H** - Scan command history
@@ -226,7 +226,7 @@ Try these settings:
 ## Troubleshooting
 
 ### Not Working?
-- Ensure you're in a supported terminal (Windows Terminal, PowerShell, cmd, WSL)
+- Ensure you're in a supported terminal (Windows Terminal, PowerShell, cmd, WSL, or any of the 30 supported terminals)
 - Check add-on is enabled in NVDA > Tools > Manage Add-ons
 - Restart NVDA
 

@@ -998,7 +998,7 @@ class OutputSearchManager:
 - List all bookmarks
 - Remove bookmarks
 - Maximum 50 bookmarks per terminal
-- Keyboard shortcuts: NVDA+Alt+Shift+0-9 (set), NVDA+Alt+0-9 (jump), NVDA+Alt+Shift+B (list)
+- Keyboard shortcuts: NVDA+Shift+0-9 (set), Alt+0-9 (jump), NVDA+Shift+B (list)
 - Location: `addon/globalPlugins/tdsr.py` lines 2694-2837 (BookmarkManager)
 - Location: `addon/globalPlugins/tdsr.py` lines 4967-5087 (bookmark gestures)
 

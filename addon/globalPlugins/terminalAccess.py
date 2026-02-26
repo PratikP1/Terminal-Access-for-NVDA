@@ -188,11 +188,24 @@ _SUPPORTED_TERMINALS: frozenset[str] = frozenset([
 	# WSL (Windows Subsystem for Linux)
 	"wsl",              # WSL executable
 	"bash",             # WSL bash
+	# Modern GPU-accelerated terminals
+	"ghostty",          # Ghostty
+	"rio",              # Rio
+	"waveterm",         # Wave Terminal
+	"contour",          # Contour Terminal
+	"cool-retro-term",  # Cool Retro Term
+	# Remote access / professional terminals
+	"mobaxterm",        # MobaXterm
+	"securecrt",        # SecureCRT
+	"ttermpro",         # Tera Term
+	"mremoteng",        # mRemoteNG
+	"royalts",          # Royal TS
 ])
 
 # Frozenset of built-in profile names that cannot be removed
 _BUILTIN_PROFILE_NAMES: frozenset[str] = frozenset([
 	'vim', 'tmux', 'htop', 'less', 'git', 'nano', 'irssi',
+	'claude', 'lazygit', 'btop', 'btm', 'yazi', 'k9s',
 ])
 
 # Compiled regex for stripping ANSI highlight codes (used in _extractHighlightedText)
@@ -362,6 +375,7 @@ class TextDiffer:
 	KIND_UNCHANGED = "unchanged"  # Text identical to last snapshot
 	KIND_APPENDED = "appended"  # New text was appended after old text
 	KIND_CHANGED = "changed"    # Non-trivial change (edit, clear, etc.)
+	KIND_LAST_LINE_UPDATED = "last_line_updated"  # Only the last line changed (progress bars, spinners)
 
 	__slots__ = ('_last_text',)
 
@@ -379,7 +393,7 @@ class TextDiffer:
 		Returns:
 			tuple: ``(kind, new_content)`` where *kind* is one of the
 			``KIND_*`` constants and *new_content* is the appended portion
-			(only non-empty for :attr:`KIND_APPENDED`).
+			(non-empty for :attr:`KIND_APPENDED` and :attr:`KIND_LAST_LINE_UPDATED`).
 		"""
 		if self._last_text is None:
 			self._last_text = current_text
@@ -394,6 +408,14 @@ class TextDiffer:
 			appended = current_text[len(old):]
 			self._last_text = current_text
 			return (self.KIND_APPENDED, appended)
+
+		# Last-line overwrite detection: everything before the last newline is
+		# identical, only the trailing content differs (progress bars, spinners).
+		old_prefix, old_sep, _old_tail = old.rpartition('\n')
+		new_prefix, new_sep, new_tail = current_text.rpartition('\n')
+		if old_sep and new_sep and old_prefix == new_prefix:
+			self._last_text = current_text
+			return (self.KIND_LAST_LINE_UPDATED, new_tail)
 
 		# Non-trivial change.
 		self._last_text = current_text
@@ -485,7 +507,16 @@ class ANSIParser:
 
 	# Compiled regex patterns (class-level to avoid recompilation per call)
 	_SGR_PATTERN: re.Pattern[str] = re.compile(r'\x1b\[([0-9;]+)m')
-	_STRIP_PATTERN: re.Pattern[str] = re.compile(r'\x1b\[[0-9;]*[a-zA-Z]')
+	_STRIP_PATTERN: re.Pattern[str] = re.compile(
+		r'\x1b'           # ESC
+		r'(?:'
+		r'\[[0-9;?]*[a-zA-Z~]'            # CSI sequences (including private modes like ?25h)
+		r'|\][^\x07\x1b]*(?:\x07|\x1b\\)' # OSC sequences (BEL or ST terminated)
+		r'|P[^\x1b]*\x1b\\'               # DCS sequences (ST terminated)
+		r'|[()][A-Z0-9]'                   # Charset designation (e.g., (B, )0)
+		r'|[a-zA-Z0-9=><~]'               # Two-char ESC sequences (e.g., M, 7, 8)
+		r')'
+	)
 
 	def __init__(self) -> None:
 		"""Initialize the ANSI parser."""
@@ -1635,6 +1666,108 @@ class ProfileManager:
 		self.profiles['wsl'] = wsl
 		self.profiles['bash'] = wsl  # Use same profile for bash
 
+		# Section 5.3: Modern GPU-accelerated terminal profiles (v1.0.49+)
+		ghostty = ApplicationProfile('ghostty', 'Ghostty')
+		ghostty.punctuationLevel = PUNCT_SOME
+		ghostty.cursorTrackingMode = CT_STANDARD
+		self.profiles['ghostty'] = ghostty
+
+		rio = ApplicationProfile('rio', 'Rio')
+		rio.punctuationLevel = PUNCT_SOME
+		rio.cursorTrackingMode = CT_STANDARD
+		self.profiles['rio'] = rio
+
+		wave = ApplicationProfile('waveterm', 'Wave Terminal')
+		wave.punctuationLevel = PUNCT_SOME
+		wave.cursorTrackingMode = CT_STANDARD
+		self.profiles['waveterm'] = wave
+
+		contour = ApplicationProfile('contour', 'Contour Terminal')
+		contour.punctuationLevel = PUNCT_SOME
+		contour.cursorTrackingMode = CT_STANDARD
+		self.profiles['contour'] = contour
+
+		coolretro = ApplicationProfile('cool-retro-term', 'Cool Retro Term')
+		coolretro.punctuationLevel = PUNCT_SOME
+		coolretro.cursorTrackingMode = CT_STANDARD
+		self.profiles['cool-retro-term'] = coolretro
+
+		# Section 5.4: Remote access / professional terminal profiles (v1.0.49+)
+		mobaxterm = ApplicationProfile('mobaxterm', 'MobaXterm')
+		mobaxterm.punctuationLevel = PUNCT_SOME
+		mobaxterm.cursorTrackingMode = CT_STANDARD
+		self.profiles['mobaxterm'] = mobaxterm
+
+		securecrt = ApplicationProfile('securecrt', 'SecureCRT')
+		securecrt.punctuationLevel = PUNCT_SOME
+		securecrt.cursorTrackingMode = CT_STANDARD
+		self.profiles['securecrt'] = securecrt
+
+		ttermpro = ApplicationProfile('ttermpro', 'Tera Term')
+		ttermpro.punctuationLevel = PUNCT_SOME
+		ttermpro.cursorTrackingMode = CT_STANDARD
+		self.profiles['ttermpro'] = ttermpro
+
+		mremoteng = ApplicationProfile('mremoteng', 'mRemoteNG')
+		mremoteng.punctuationLevel = PUNCT_SOME
+		mremoteng.cursorTrackingMode = CT_STANDARD
+		self.profiles['mremoteng'] = mremoteng
+
+		royalts = ApplicationProfile('royalts', 'Royal TS')
+		royalts.punctuationLevel = PUNCT_SOME
+		royalts.cursorTrackingMode = CT_STANDARD
+		self.profiles['royalts'] = royalts
+
+		# Section 5.5: TUI Application profiles (v1.0.49+)
+
+		# Claude CLI profile
+		claude = ApplicationProfile('claude', 'Claude CLI')
+		claude.punctuationLevel = PUNCT_MOST  # Code-heavy output needs punctuation
+		claude.repeatedSymbols = False  # Markdown-style separators in output
+		claude.linePause = False  # Fast reading for streaming responses
+		claude.keyEcho = False  # Don't echo typing during input
+		# Silence bottom status bar region
+		claude.addWindow('conversation', 1, 9997, 1, 9999, mode='announce')
+		claude.addWindow('statusbar', 9998, 9999, 1, 9999, mode='silent')
+		self.profiles['claude'] = claude
+
+		# lazygit profile
+		lazygit = ApplicationProfile('lazygit', 'lazygit')
+		lazygit.punctuationLevel = PUNCT_MOST  # Git diff symbols
+		lazygit.repeatedSymbols = False  # Many repeated chars in borders/diffs
+		lazygit.keyEcho = False  # Single-key shortcuts
+		lazygit.cursorTrackingMode = CT_WINDOW
+		# Panel layout: announce all content
+		lazygit.addWindow('main', 1, 9999, 1, 9999, mode='announce')
+		self.profiles['lazygit'] = lazygit
+
+		# btop/btm profile (system monitor)
+		btop = ApplicationProfile('btop', 'btop/btm (System Monitor)')
+		btop.repeatedSymbols = False  # Progress bars, box-drawing
+		btop.keyEcho = False  # Single-key navigation
+		btop.linePause = False  # Fast refresh rates
+		# Header with CPU/memory meters
+		btop.addWindow('header', 1, 6, 1, 9999, mode='announce')
+		btop.addWindow('processes', 7, 9999, 1, 9999, mode='announce')
+		self.profiles['btop'] = btop
+		self.profiles['btm'] = btop  # bottom uses same profile
+
+		# yazi profile (file manager)
+		yazi = ApplicationProfile('yazi', 'yazi (File Manager)')
+		yazi.punctuationLevel = PUNCT_SOME
+		yazi.keyEcho = False  # Single-key shortcuts
+		yazi.repeatedSymbols = False  # File listing separators
+		yazi.cursorTrackingMode = CT_STANDARD
+		self.profiles['yazi'] = yazi
+
+		# k9s profile (Kubernetes TUI)
+		k9s = ApplicationProfile('k9s', 'k9s (Kubernetes)')
+		k9s.punctuationLevel = PUNCT_MOST  # Namespace/pod names with symbols
+		k9s.repeatedSymbols = False  # Table borders
+		k9s.keyEcho = False  # Single-key navigation
+		k9s.linePause = False  # Fast status updates
+		self.profiles['k9s'] = k9s
+
 	def detectApplication(self, focusObject: Any) -> str:
 		"""
 		Detect the current terminal application.
@@ -1659,20 +1792,33 @@ class ProfileManager:
 				title = focusObject.name.lower()
 
 				# Check for common patterns
+				# Note: more specific matches (lazygit) must come before
+				# less specific ones (git) to avoid false positives.
 				if 'vim' in title or 'nvim' in title:
 					return 'vim'
 				elif 'tmux' in title:
 					return 'tmux'
+				elif 'btop' in title or 'btm' in title:
+					return 'btop'
 				elif 'htop' in title:
 					return 'htop'
 				elif 'less' in title or 'more' in title:
 					return 'less'
+				elif 'lazygit' in title:
+					return 'lazygit'
 				elif 'git' in title:
 					return 'git'
 				elif 'nano' in title:
 					return 'nano'
 				elif 'irssi' in title:
 					return 'irssi'
+				# TUI applications (detected by window title)
+				elif 'claude' in title:
+					return 'claude'
+				elif 'yazi' in title:
+					return 'yazi'
+				elif 'k9s' in title:
+					return 'k9s'
 
 		except Exception:
 			pass
@@ -2661,6 +2807,29 @@ class NewOutputAnnouncer:
 			return
 
 		kind, new_content = self._differ.update(text)
+
+		if kind == TextDiffer.KIND_LAST_LINE_UPDATED and new_content.strip():
+			# Last-line overwrite (progress bars, spinners): REPLACE pending
+			# text because the old partial content is now stale.
+			try:
+				if config.conf["terminalAccess"]["stripAnsiInOutput"]:
+					new_content = ANSIParser.stripANSI(new_content)
+			except Exception:
+				pass
+			if not new_content.strip():
+				return
+			with self._lock:
+				self._pending_text = new_content
+				if self._timer is not None:
+					self._timer.cancel()
+				try:
+					coalesce_ms = int(config.conf["terminalAccess"]["newOutputCoalesceMs"])
+				except Exception:
+					coalesce_ms = 200
+				self._timer = threading.Timer(coalesce_ms / 1000.0, self._announce_pending)
+				self._timer.daemon = True
+				self._timer.start()
+			return
 
 		if kind != TextDiffer.KIND_APPENDED or not new_content.strip():
 			return
@@ -4206,10 +4375,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	3 - Window: Track within defined screen region
 	"""
 
-	# Duration (in seconds) after an Enter/Return key press during which a
-	# caret-driven "Blank" announcement is suppressed.  This gives the terminal
-	# time to render command output before we speak the empty line.
-	_ENTER_SUPPRESSION_WINDOW: float = 0.3
+	# Delay (in milliseconds) before announcing "Blank" when the caret lands
+	# on an empty/newline position.  The announcement is deferred and the
+	# character at the caret is re-verified when the timer fires, so transient
+	# blank lines (e.g. the empty line seen immediately after pressing Enter,
+	# before terminal output arrives) are silently discarded if content has
+	# appeared in the meantime.
+	_BLANK_ANNOUNCE_DELAY: int = 300
 	
 	def __init__(self):
 		"""Initialize the Terminal Access global plugin."""
@@ -4243,10 +4415,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self._lastLineEndOffset: int | None = None
 		self._lastLineGeneration: int = -1
 
-		# Timestamp of the last Enter/Return key press.
-		# Used to suppress premature blank announcements in _announceStandardCursor
-		# when the caret lands on an empty line before terminal output has arrived.
-		self._lastEnterTime: float | None = None
+		# Timer for deferred blank announcements.  When the caret lands on an
+		# empty position, we schedule a delayed re-check instead of announcing
+		# "Blank" immediately.  This lets transient blank lines (e.g. the empty
+		# line after pressing Enter) be silently discarded once terminal output
+		# fills the position.
+		self._deferredBlankTimer = None
 
 		# Highlight tracking state
 		self._lastHighlightedText = None
@@ -4588,12 +4762,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp(obj):
 			return
 
-		# Track Enter/Return presses to suppress premature blank announcements in
-		# _announceStandardCursor.  This must run even when keyEcho is disabled
-		# so that cursor-tracking suppression is active regardless of echo state.
-		if ch == '\r':
-			self._lastEnterTime = time.time()
-
 		# Don't echo if key echo is disabled or in quiet mode
 		if not config.conf["terminalAccess"]["keyEcho"]:
 			return
@@ -4695,6 +4863,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		ta_conf = config.conf["terminalAccess"]
 		if not ta_conf["cursorTracking"] or ta_conf["quietMode"]:
 			return
+
+		# Cancel any pending deferred blank announcement since the caret has
+		# moved; a fresh check will be done by the new cursor tracking event.
+		self._cancelDeferredBlank()
 
 		# Cancel any pending cursor tracking announcement
 		if self._cursorTrackingTimer:
@@ -4815,6 +4987,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				self._lastLineEndOffset = None
 
 		if char and char.strip():
+			self._cancelDeferredBlank()
 			# Use punctuation level system if enabled
 			if self._shouldProcessSymbol(char):
 				charToSpeak = self._processSymbol(char)
@@ -4822,15 +4995,68 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				charToSpeak = char
 			ui.message(charToSpeak)
 		elif char == ' ':
+			self._cancelDeferredBlank()
 			ui.message(_("space"))
 		elif not char or char in ('\r', '\n'):
-			# The caret has landed on an empty or newline position. If Enter was
-			# recently pressed, suppress the announcement to avoid saying "blank"
-			# before the terminal has rendered command output.
-			if (self._lastEnterTime is not None
-					and (time.time() - self._lastEnterTime) < self._ENTER_SUPPRESSION_WINDOW):
+			# The caret has landed on an empty or newline position.  Instead
+			# of announcing "Blank" immediately, defer the announcement and
+			# re-verify the character when the timer fires.  This lets
+			# transient blank lines (e.g. right after pressing Enter) be
+			# silently discarded once the terminal renders output.
+			self._scheduleDeferredBlank(obj, currentPos)
+			return
+
+	def _cancelDeferredBlank(self):
+		"""Cancel any pending deferred blank announcement."""
+		if self._deferredBlankTimer:
+			self._deferredBlankTimer.Stop()
+			self._deferredBlankTimer = None
+
+	def _scheduleDeferredBlank(self, obj, expectedPos):
+		"""Schedule a deferred blank announcement that re-verifies before speaking.
+
+		Instead of announcing "Blank" immediately, a timer is started.  When
+		the timer fires, the character at *expectedPos* is re-read from *obj*.
+		If the position still contains a blank/newline (i.e. the terminal has
+		NOT rendered output), "Blank" is announced.  Otherwise the
+		announcement is silently discarded.
+
+		Args:
+			obj: The terminal object whose text will be re-checked.
+			expectedPos: The caret offset at the time the blank was detected.
+		"""
+		self._cancelDeferredBlank()
+		self._deferredBlankTimer = wx.CallLater(
+			self._BLANK_ANNOUNCE_DELAY,
+			self._checkDeferredBlank,
+			obj, expectedPos
+		)
+
+	def _checkDeferredBlank(self, obj, expectedPos):
+		"""Re-verify the character at *expectedPos* and announce Blank only if still empty.
+
+		This callback is invoked by the deferred blank timer.  It re-reads
+		the character at the caret and only announces "Blank" when:
+		  * the caret is still at *expectedPos*, AND
+		  * the character at that position is still empty / a newline.
+
+		Args:
+			obj: The terminal object to re-check.
+			expectedPos: The caret offset recorded when the blank was first seen.
+		"""
+		self._deferredBlankTimer = None
+		try:
+			info = obj.makeTextInfo(textInfos.POSITION_CARET)
+			currentPos = (info.bookmark.startOffset if hasattr(info, 'bookmark') else None)
+			# Only announce if caret hasn't moved
+			if currentPos != expectedPos:
 				return
-			ui.message(_("Blank"))
+			info.expand(textInfos.UNIT_CHARACTER)
+			char = info.text
+			if not char or char in ('\r', '\n') or not char.strip():
+				ui.message(_("Blank"))
+		except Exception:
+			pass
 
 	def _announceHighlightCursor(self, obj):
 		"""
@@ -6569,9 +6795,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for jumping to bookmark
 		description=_("Jump to a previously set bookmark (use with 0-9)"),
 		category=SCRCAT_TERMINALACCESS,
-		gestures=["kb:NVDA+alt+0", "kb:NVDA+alt+1", "kb:NVDA+alt+2",
-		          "kb:NVDA+alt+3", "kb:NVDA+alt+4", "kb:NVDA+alt+5",
-		          "kb:NVDA+alt+6", "kb:NVDA+alt+7", "kb:NVDA+alt+8", "kb:NVDA+alt+9"]
+		gestures=["kb:alt+0", "kb:alt+1", "kb:alt+2",
+		          "kb:alt+3", "kb:alt+4", "kb:alt+5",
+		          "kb:alt+6", "kb:alt+7", "kb:alt+8", "kb:alt+9"]
 	)
 	def script_jumpToBookmark(self, gesture):
 		"""Jump to a bookmark."""
