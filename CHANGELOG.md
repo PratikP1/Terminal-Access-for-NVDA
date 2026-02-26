@@ -28,9 +28,9 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ### Changed
 
-- **Simplified bookmark jump gestures**: Jump-to-bookmark shortcuts changed from `NVDA+Alt+0-9`
-  to `Alt+0-9` for faster access. Set-bookmark shortcuts changed from `NVDA+Alt+Shift+0-9` to
-  `NVDA+Shift+0-9`. List-bookmarks changed from `NVDA+Alt+Shift+B` to `NVDA+Shift+B`.
+- **Simplified bookmark gestures**: Bookmark shortcuts rationalised to avoid conflicts with other
+  add-ons. Set-bookmark changed from `NVDA+Shift+0-9` to `NVDA+Alt+0-9`. Jump-to-bookmark
+  remains `Alt+0-9`. List-bookmarks remains `NVDA+Shift+B`.
 
 - **Deferred blank announcement**: Replaced the fragile Enter-key-based 300ms blank suppression
   window with a content-aware deferred re-verification approach. Instead of tracking Enter key

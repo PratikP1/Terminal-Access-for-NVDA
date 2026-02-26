@@ -6760,10 +6760,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Description for setting bookmark
 		description=_("Set a bookmark at the current review position (use with 0-9)"),
 		category=SCRCAT_TERMINALACCESS,
-		gestures=["kb:NVDA+shift+0", "kb:NVDA+shift+1", "kb:NVDA+shift+2",
-		          "kb:NVDA+shift+3", "kb:NVDA+shift+4", "kb:NVDA+shift+5",
-		          "kb:NVDA+shift+6", "kb:NVDA+shift+7", "kb:NVDA+shift+8",
-		          "kb:NVDA+shift+9"]
+		gestures=["kb:NVDA+alt+0", "kb:NVDA+alt+1", "kb:NVDA+alt+2",
+		          "kb:NVDA+alt+3", "kb:NVDA+alt+4", "kb:NVDA+alt+5",
+		          "kb:NVDA+alt+6", "kb:NVDA+alt+7", "kb:NVDA+alt+8",
+		          "kb:NVDA+alt+9"]
 	)
 	def script_setBookmark(self, gesture):
 		"""Set a bookmark at current position."""

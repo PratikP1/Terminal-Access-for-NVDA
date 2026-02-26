@@ -409,7 +409,7 @@ def test_with_terminal(mock_terminal):
 
 #### Test 9.2: Bookmarks (v1.0.29+)
 **Steps:**
-1. Press `NVDA+Shift+1` (set bookmark 1)
+1. Press `NVDA+Alt+1` (set bookmark 1)
 2. Navigate away
 3. Press `Alt+1` (jump to bookmark 1)
 

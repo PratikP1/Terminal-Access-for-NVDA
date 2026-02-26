@@ -186,7 +186,7 @@ Try these settings:
 - **NVDA+Alt+Shift+A** - Read text attributes/colors
 
 ### Bookmarks (v1.0.29+)
-- **NVDA+Shift+0-9** - Set bookmark (0-9)
+- **NVDA+Alt+0-9** - Set bookmark (0-9)
 - **Alt+0-9** - Jump to bookmark (0-9)
 - **NVDA+Shift+B** - List bookmarks
 
