@@ -1,22 +1,24 @@
 """
-Tests for the deferred blank announcement mechanism in _announceStandardCursor.
+Tests for the typing-based blank suppression in _announceStandardCursor.
 
-When the caret lands on an empty / newline position, _announceStandardCursor
-does NOT announce "Blank" immediately.  Instead it schedules a deferred timer
-(wx.CallLater) that re-verifies the character at the caret when it fires.  If
-content has appeared (e.g. terminal rendered command output), the announcement
-is silently discarded.
+When the caret lands on an empty / newline position:
+  - If the user recently typed a character (within _BLANK_AFTER_TYPING_GRACE
+    seconds), the "Blank" announcement is suppressed entirely.  The real
+    output will be announced by the NewOutputAnnouncer.
+  - If the blank results from navigation (arrow keys, page up/down), "Blank"
+    is announced immediately — this is meaningful feedback for the user.
 
-Normal (non-blank) characters and spaces are always announced immediately.
-Navigation scripts (script_moveTo*) are NOT affected by this deferral.
+Normal (non-blank) characters and spaces are always announced immediately
+regardless of typing history.
 """
 
+import time
 import unittest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 
 
-class TestDeferredBlank(unittest.TestCase):
-	"""Tests for the deferred blank announcement mechanism."""
+class TestBlankSuppression(unittest.TestCase):
+	"""Tests for the typing-based blank suppression mechanism."""
 
 	# ------------------------------------------------------------------
 	# Helpers
@@ -60,186 +62,123 @@ class TestDeferredBlank(unittest.TestCase):
 
 		return plugin, mock_obj
 
-	def _make_plugin_with_changing_cursor(self, first_char, second_char, caret_offset=100):
-		"""
-		Build a GlobalPlugin whose first call to makeTextInfo returns
-		*first_char* and subsequent calls return *second_char*.
+	# ------------------------------------------------------------------
+	# _lastTypedTime initialization
+	# ------------------------------------------------------------------
 
-		Used to simulate content appearing between the initial blank
-		detection and the deferred re-check.
-		"""
+	def test_last_typed_time_initialized_zero(self):
+		"""_lastTypedTime must start as 0.0 (no recent typing)."""
 		from globalPlugins.terminalAccess import GlobalPlugin
 
 		plugin = GlobalPlugin()
-		plugin._lastLineText = None
-		plugin._lastCaretPosition = None
-
-		call_count = [0]
-
-		def make_text_info(pos):
-			call_count[0] += 1
-			char = first_char if call_count[0] <= 2 else second_char
-			# call_count <= 2: the first makeTextInfo call within
-			# _announceStandardCursor (caret pos + expand), and the line-cache
-			# refresh call.  Subsequent calls come from _checkDeferredBlank.
-
-			info = MagicMock()
-			info.bookmark.startOffset = caret_offset
-			info.bookmark.endOffset = caret_offset + 1
-
-			def expand_side_effect(unit):
-				info.text = char
-
-			info.expand.side_effect = expand_side_effect
-			info.text = char
-			return info
-
-		mock_obj = MagicMock()
-		mock_obj.makeTextInfo.side_effect = make_text_info
-
-		return plugin, mock_obj
+		self.assertEqual(plugin._lastTypedTime, 0.0)
 
 	# ------------------------------------------------------------------
-	# _deferredBlankTimer initialization
-	# ------------------------------------------------------------------
-
-	def test_deferred_blank_timer_initialized_none(self):
-		"""_deferredBlankTimer must start as None."""
-		from globalPlugins.terminalAccess import GlobalPlugin
-
-		plugin = GlobalPlugin()
-		self.assertIsNone(plugin._deferredBlankTimer)
-
-	# ------------------------------------------------------------------
-	# Blank is deferred, NOT announced immediately
+	# Blank suppressed after recent typing (e.g. pressing Enter)
 	# ------------------------------------------------------------------
 
 	@patch('globalPlugins.terminalAccess.ui')
-	def test_blank_deferred_not_immediate(self, mock_ui):
-		"""When caret lands on a blank, ui.message must NOT be called immediately."""
+	def test_blank_suppressed_after_recent_typing(self, mock_ui):
+		"""Blank must be suppressed when the user typed recently."""
 		plugin, mock_obj = self._make_plugin_with_cursor('')
+
+		# Simulate that the user just typed (e.g. pressed Enter).
+		plugin._lastTypedTime = time.time()
 
 		plugin._announceStandardCursor(mock_obj)
 
-		# "Blank" must NOT have been spoken synchronously.
+		# "Blank" must NOT be spoken.
 		mock_ui.message.assert_not_called()
 
 	@patch('globalPlugins.terminalAccess.ui')
-	def test_newline_deferred_not_immediate(self, mock_ui):
-		"""When caret lands on \\n, ui.message must NOT be called immediately."""
+	def test_newline_suppressed_after_recent_typing(self, mock_ui):
+		"""Newline at caret must be suppressed when the user typed recently."""
+		plugin, mock_obj = self._make_plugin_with_cursor('\n')
+
+		plugin._lastTypedTime = time.time()
+		plugin._announceStandardCursor(mock_obj)
+
+		mock_ui.message.assert_not_called()
+
+	@patch('globalPlugins.terminalAccess.ui')
+	def test_cr_suppressed_after_recent_typing(self, mock_ui):
+		"""Carriage return at caret must be suppressed when the user typed recently."""
+		plugin, mock_obj = self._make_plugin_with_cursor('\r')
+
+		plugin._lastTypedTime = time.time()
+		plugin._announceStandardCursor(mock_obj)
+
+		mock_ui.message.assert_not_called()
+
+	# ------------------------------------------------------------------
+	# Blank announced for navigation (no recent typing)
+	# ------------------------------------------------------------------
+
+	@patch('globalPlugins.terminalAccess.ui')
+	def test_blank_announced_for_navigation(self, mock_ui):
+		"""Blank must be announced when there was no recent typing (navigation)."""
+		plugin, mock_obj = self._make_plugin_with_cursor('')
+
+		# _lastTypedTime is 0.0 (default) — long in the past.
+		plugin._announceStandardCursor(mock_obj)
+
+		mock_ui.message.assert_called_once()
+		args = mock_ui.message.call_args[0]
+		self.assertIn("blank", args[0].lower())
+
+	@patch('globalPlugins.terminalAccess.ui')
+	def test_newline_announced_for_navigation(self, mock_ui):
+		"""Newline at caret must announce Blank when no recent typing."""
 		plugin, mock_obj = self._make_plugin_with_cursor('\n')
 
 		plugin._announceStandardCursor(mock_obj)
 
-		mock_ui.message.assert_not_called()
+		mock_ui.message.assert_called_once()
+		args = mock_ui.message.call_args[0]
+		self.assertIn("blank", args[0].lower())
 
 	@patch('globalPlugins.terminalAccess.ui')
-	def test_cr_deferred_not_immediate(self, mock_ui):
-		"""When caret lands on \\r, ui.message must NOT be called immediately."""
+	def test_cr_announced_for_navigation(self, mock_ui):
+		"""Carriage return at caret must announce Blank when no recent typing."""
 		plugin, mock_obj = self._make_plugin_with_cursor('\r')
 
 		plugin._announceStandardCursor(mock_obj)
-
-		mock_ui.message.assert_not_called()
-
-	# ------------------------------------------------------------------
-	# Deferred blank announces after timer fires (char still blank)
-	# ------------------------------------------------------------------
-
-	@patch('globalPlugins.terminalAccess.ui')
-	def test_deferred_blank_announced_after_delay(self, mock_ui):
-		"""_checkDeferredBlank must announce 'Blank' when the position is still empty."""
-		plugin, mock_obj = self._make_plugin_with_cursor('')
-
-		# Invoke the deferred check directly (simulates timer firing).
-		plugin._checkDeferredBlank(mock_obj, 100)
 
 		mock_ui.message.assert_called_once()
 		args = mock_ui.message.call_args[0]
 		self.assertIn("blank", args[0].lower())
 
 	# ------------------------------------------------------------------
-	# Deferred blank suppressed when content appears
+	# Grace period expiry — blank announced after grace period
 	# ------------------------------------------------------------------
 
 	@patch('globalPlugins.terminalAccess.ui')
-	def test_deferred_blank_suppressed_when_content_appears(self, mock_ui):
-		"""If content has appeared at the position, _checkDeferredBlank must NOT announce."""
-		plugin, mock_obj = self._make_plugin_with_changing_cursor(
-			first_char='', second_char='$'
-		)
+	def test_blank_announced_after_grace_period(self, mock_ui):
+		"""Blank must be announced once the typing grace period has expired."""
+		from globalPlugins.terminalAccess import GlobalPlugin
 
-		# First, trigger the blank detection (which schedules the timer).
-		plugin._announceStandardCursor(mock_obj)
-		mock_ui.message.assert_not_called()
-
-		# Now simulate the timer firing – _checkDeferredBlank will re-read
-		# the character and find '$' instead of blank.
-		plugin._checkDeferredBlank(mock_obj, 100)
-
-		mock_ui.message.assert_not_called()
-
-	# ------------------------------------------------------------------
-	# Deferred blank suppressed when caret has moved
-	# ------------------------------------------------------------------
-
-	@patch('globalPlugins.terminalAccess.ui')
-	def test_deferred_blank_suppressed_when_caret_moved(self, mock_ui):
-		"""If caret moved to a different position, _checkDeferredBlank must NOT announce."""
 		plugin, mock_obj = self._make_plugin_with_cursor('')
 
-		# Simulate the timer firing, but with a different expectedPos than
-		# the current caret position (100).
-		plugin._checkDeferredBlank(mock_obj, 200)  # expectedPos=200 != currentPos=100
-
-		mock_ui.message.assert_not_called()
-
-	# ------------------------------------------------------------------
-	# Cancellation: non-blank char cancels deferred blank
-	# ------------------------------------------------------------------
-
-	@patch('globalPlugins.terminalAccess.ui')
-	def test_deferred_blank_cancelled_on_nonblank_char(self, mock_ui):
-		"""Announcing a normal character must cancel any pending deferred blank."""
-		plugin, mock_obj = self._make_plugin_with_cursor('a')
-
-		# Simulate a pending deferred blank timer.
-		mock_timer = MagicMock()
-		plugin._deferredBlankTimer = mock_timer
+		# Simulate typing that happened well beyond the grace period.
+		plugin._lastTypedTime = time.time() - (GlobalPlugin._BLANK_AFTER_TYPING_GRACE + 0.1)
 
 		plugin._announceStandardCursor(mock_obj)
 
-		# The timer should have been cancelled.
-		mock_timer.Stop.assert_called_once()
-		self.assertIsNone(plugin._deferredBlankTimer)
-
-		# 'a' should still be announced.
 		mock_ui.message.assert_called_once()
-		self.assertEqual(mock_ui.message.call_args[0][0], 'a')
-
-	@patch('globalPlugins.terminalAccess.ui')
-	def test_deferred_blank_cancelled_on_space(self, mock_ui):
-		"""Announcing space must cancel any pending deferred blank."""
-		plugin, mock_obj = self._make_plugin_with_cursor(' ')
-
-		mock_timer = MagicMock()
-		plugin._deferredBlankTimer = mock_timer
-
-		plugin._announceStandardCursor(mock_obj)
-
-		mock_timer.Stop.assert_called_once()
-		self.assertIsNone(plugin._deferredBlankTimer)
-		mock_ui.message.assert_called_once()
+		args = mock_ui.message.call_args[0]
+		self.assertIn("blank", args[0].lower())
 
 	# ------------------------------------------------------------------
-	# Normal characters always announced immediately
+	# Normal characters always announced regardless of typing history
 	# ------------------------------------------------------------------
 
 	@patch('globalPlugins.terminalAccess.ui')
 	def test_normal_char_always_announced(self, mock_ui):
-		"""A printable character at the caret must always be announced immediately."""
+		"""A printable character at the caret must always be announced."""
 		plugin, mock_obj = self._make_plugin_with_cursor('a')
 
+		# Even with recent typing, normal characters are announced.
+		plugin._lastTypedTime = time.time()
 		plugin._announceStandardCursor(mock_obj)
 
 		mock_ui.message.assert_called_once()
@@ -247,61 +186,36 @@ class TestDeferredBlank(unittest.TestCase):
 
 	@patch('globalPlugins.terminalAccess.ui')
 	def test_space_always_announced(self, mock_ui):
-		"""Space at the caret must always be announced immediately."""
+		"""Space at the caret must always be announced."""
 		plugin, mock_obj = self._make_plugin_with_cursor(' ')
 
+		plugin._lastTypedTime = time.time()
 		plugin._announceStandardCursor(mock_obj)
 
 		mock_ui.message.assert_called_once()
 
+	@patch('globalPlugins.terminalAccess.ui')
+	def test_normal_char_announced_without_recent_typing(self, mock_ui):
+		"""A printable character at the caret is announced even without recent typing."""
+		plugin, mock_obj = self._make_plugin_with_cursor('x')
+
+		# _lastTypedTime = 0.0 (default, no recent typing).
+		plugin._announceStandardCursor(mock_obj)
+
+		mock_ui.message.assert_called_once()
+		self.assertEqual(mock_ui.message.call_args[0][0], 'x')
+
 	# ------------------------------------------------------------------
-	# _scheduleDeferredBlank creates a timer
+	# Grace period constant
 	# ------------------------------------------------------------------
 
-	@patch('globalPlugins.terminalAccess.wx')
-	def test_schedule_creates_call_later_timer(self, mock_wx):
-		"""_scheduleDeferredBlank must create a wx.CallLater timer."""
+	def test_grace_period_is_reasonable(self):
+		"""The grace period should be between 0.1 and 2.0 seconds."""
 		from globalPlugins.terminalAccess import GlobalPlugin
 
-		plugin = GlobalPlugin()
-		mock_obj = MagicMock()
-
-		plugin._scheduleDeferredBlank(mock_obj, 100)
-
-		mock_wx.CallLater.assert_called_once()
-		args = mock_wx.CallLater.call_args
-		# First argument is the delay in milliseconds.
-		self.assertEqual(args[0][0], plugin._BLANK_ANNOUNCE_DELAY)
-		# Second argument is the callback.
-		self.assertEqual(args[0][1], plugin._checkDeferredBlank)
-
-	# ------------------------------------------------------------------
-	# _cancelDeferredBlank stops existing timer
-	# ------------------------------------------------------------------
-
-	def test_cancel_stops_timer(self):
-		"""_cancelDeferredBlank must Stop() the timer and set it to None."""
-		from globalPlugins.terminalAccess import GlobalPlugin
-
-		plugin = GlobalPlugin()
-		mock_timer = MagicMock()
-		plugin._deferredBlankTimer = mock_timer
-
-		plugin._cancelDeferredBlank()
-
-		mock_timer.Stop.assert_called_once()
-		self.assertIsNone(plugin._deferredBlankTimer)
-
-	def test_cancel_noop_when_no_timer(self):
-		"""_cancelDeferredBlank must be safe to call when no timer is pending."""
-		from globalPlugins.terminalAccess import GlobalPlugin
-
-		plugin = GlobalPlugin()
-		plugin._deferredBlankTimer = None
-
-		# Should not raise.
-		plugin._cancelDeferredBlank()
-		self.assertIsNone(plugin._deferredBlankTimer)
+		grace = GlobalPlugin._BLANK_AFTER_TYPING_GRACE
+		self.assertGreaterEqual(grace, 0.1)
+		self.assertLessEqual(grace, 2.0)
 
 
 if __name__ == '__main__':

@@ -4375,13 +4375,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	3 - Window: Track within defined screen region
 	"""
 
-	# Delay (in milliseconds) before announcing "Blank" when the caret lands
-	# on an empty/newline position.  The announcement is deferred and the
-	# character at the caret is re-verified when the timer fires, so transient
-	# blank lines (e.g. the empty line seen immediately after pressing Enter,
-	# before terminal output arrives) are silently discarded if content has
-	# appeared in the meantime.
-	_BLANK_ANNOUNCE_DELAY: int = 300
+	# Grace period (seconds) after the last typed character during which
+	# "Blank" announcements from cursor tracking are suppressed.  This
+	# prevents the spurious "Blank" that occurs when the caret lands on an
+	# empty line right after pressing Enter (or any other key) in a
+	# terminal.  Navigation-triggered blanks (arrow keys, page up/down)
+	# are unaffected and announced immediately.
+	_BLANK_AFTER_TYPING_GRACE: float = 0.5
 	
 	def __init__(self):
 		"""Initialize the Terminal Access global plugin."""
@@ -4415,12 +4415,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self._lastLineEndOffset: int | None = None
 		self._lastLineGeneration: int = -1
 
-		# Timer for deferred blank announcements.  When the caret lands on an
-		# empty position, we schedule a delayed re-check instead of announcing
-		# "Blank" immediately.  This lets transient blank lines (e.g. the empty
-		# line after pressing Enter) be silently discarded once terminal output
-		# fills the position.
-		self._deferredBlankTimer = None
+		# Timestamp of the last typed character (from event_typedCharacter).
+		# Used to suppress "Blank" announcements that follow keystrokes like
+		# Enter, where the caret temporarily lands on an empty line.
+		self._lastTypedTime: float = 0.0
 
 		# Highlight tracking state
 		self._lastHighlightedText = None
@@ -4776,6 +4774,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Increment content generation so cached line TextInfo is invalidated.
 		self._contentGeneration += 1
 
+		# Record typing timestamp so _announceStandardCursor can suppress
+		# spurious "Blank" announcements that follow keystrokes like Enter.
+		self._lastTypedTime = time.time()
+
 		# Process the character for speech
 		if ch:
 			# Check if we should condense repeated symbols
@@ -4863,10 +4865,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		ta_conf = config.conf["terminalAccess"]
 		if not ta_conf["cursorTracking"] or ta_conf["quietMode"]:
 			return
-
-		# Cancel any pending deferred blank announcement since the caret has
-		# moved; a fresh check will be done by the new cursor tracking event.
-		self._cancelDeferredBlank()
 
 		# Cancel any pending cursor tracking announcement
 		if self._cursorTrackingTimer:
@@ -4987,7 +4985,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				self._lastLineEndOffset = None
 
 		if char and char.strip():
-			self._cancelDeferredBlank()
 			# Use punctuation level system if enabled
 			if self._shouldProcessSymbol(char):
 				charToSpeak = self._processSymbol(char)
@@ -4995,68 +4992,17 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				charToSpeak = char
 			ui.message(charToSpeak)
 		elif char == ' ':
-			self._cancelDeferredBlank()
 			ui.message(_("space"))
 		elif not char or char in ('\r', '\n'):
-			# The caret has landed on an empty or newline position.  Instead
-			# of announcing "Blank" immediately, defer the announcement and
-			# re-verify the character when the timer fires.  This lets
-			# transient blank lines (e.g. right after pressing Enter) be
-			# silently discarded once the terminal renders output.
-			self._scheduleDeferredBlank(obj, currentPos)
-			return
-
-	def _cancelDeferredBlank(self):
-		"""Cancel any pending deferred blank announcement."""
-		if self._deferredBlankTimer:
-			self._deferredBlankTimer.Stop()
-			self._deferredBlankTimer = None
-
-	def _scheduleDeferredBlank(self, obj, expectedPos):
-		"""Schedule a deferred blank announcement that re-verifies before speaking.
-
-		Instead of announcing "Blank" immediately, a timer is started.  When
-		the timer fires, the character at *expectedPos* is re-read from *obj*.
-		If the position still contains a blank/newline (i.e. the terminal has
-		NOT rendered output), "Blank" is announced.  Otherwise the
-		announcement is silently discarded.
-
-		Args:
-			obj: The terminal object whose text will be re-checked.
-			expectedPos: The caret offset at the time the blank was detected.
-		"""
-		self._cancelDeferredBlank()
-		self._deferredBlankTimer = wx.CallLater(
-			self._BLANK_ANNOUNCE_DELAY,
-			self._checkDeferredBlank,
-			obj, expectedPos
-		)
-
-	def _checkDeferredBlank(self, obj, expectedPos):
-		"""Re-verify the character at *expectedPos* and announce Blank only if still empty.
-
-		This callback is invoked by the deferred blank timer.  It re-reads
-		the character at the caret and only announces "Blank" when:
-		  * the caret is still at *expectedPos*, AND
-		  * the character at that position is still empty / a newline.
-
-		Args:
-			obj: The terminal object to re-check.
-			expectedPos: The caret offset recorded when the blank was first seen.
-		"""
-		self._deferredBlankTimer = None
-		try:
-			info = obj.makeTextInfo(textInfos.POSITION_CARET)
-			currentPos = (info.bookmark.startOffset if hasattr(info, 'bookmark') else None)
-			# Only announce if caret hasn't moved
-			if currentPos != expectedPos:
+			# The caret is on an empty / newline position.  If the user just
+			# typed something (e.g. pressed Enter), the blank line is
+			# transient and the real output will be announced by the new-
+			# output announcer — suppress the "Blank" to avoid noise.
+			# For pure navigation (arrow keys, page up/down) the blank IS
+			# meaningful feedback and is announced immediately.
+			if (time.time() - self._lastTypedTime) < self._BLANK_AFTER_TYPING_GRACE:
 				return
-			info.expand(textInfos.UNIT_CHARACTER)
-			char = info.text
-			if not char or char in ('\r', '\n') or not char.strip():
-				ui.message(_("Blank"))
-		except Exception:
-			pass
+			ui.message(_("Blank"))
 
 	def _announceHighlightCursor(self, obj):
 		"""

@@ -32,11 +32,11 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
   add-ons. Set-bookmark changed from `NVDA+Shift+0-9` to `NVDA+Alt+0-9`. Jump-to-bookmark
   remains `Alt+0-9`. List-bookmarks remains `NVDA+Shift+B`.
 
-- **Deferred blank announcement**: Replaced the fragile Enter-key-based 300ms blank suppression
-  window with a content-aware deferred re-verification approach. Instead of tracking Enter key
-  presses, ALL blank announcements are now deferred via `wx.CallLater` and re-verified before
-  speaking. If content has appeared (e.g., terminal rendered command output), the blank is
-  silently discarded. This handles all transient blank lines, not just those after Enter.
+- **Typing-based blank suppression**: Replaced the deferred blank timer approach (which still
+  announced "Blank" after 300ms and delayed output) with a simpler, more effective typing-based
+  suppression. After any keystroke (especially Enter), "Blank" is suppressed for 500ms since the
+  terminal output is the meaningful feedback, not the transient empty line. Navigation-triggered
+  blanks (arrow keys, page up/down) are still announced immediately — no delay.
 
 ### Improved
 
