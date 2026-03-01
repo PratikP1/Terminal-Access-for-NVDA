@@ -13,8 +13,6 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
   Braille displays via `braille.handler.message()`. Previously these used `speech.speakText()`
   which produced zero Braille output. Cursor tracking also notifies the Braille display of
   caret movement so it shows the full line context instead of a brief single-character flash.
-- **Automated NVDA Add-on Store submission**: CI workflow that automatically submits the addon
-  to the NVDA Add-on Store when a stable GitHub release is published.
 
 ### Fixed
 
