@@ -94,6 +94,12 @@ import speech
 from typing import Any
 
 try:
+	import braille
+	_braille_available = True
+except (ImportError, AttributeError):
+	_braille_available = False
+
+try:
 	addonHandler.initTranslation()
 except (ImportError, AttributeError, OSError):
 	# If translation initialization fails, provide a fallback function
@@ -4812,6 +4818,23 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				# Translators: Message announced when entering a terminal application
 				ui.message(_("Terminal Access support active. Press NVDA+shift+f1 for help."))
 
+	def _isKeyEchoActive(self) -> bool:
+		"""Check if the addon should perform its own key echo.
+
+		Returns False when the addon's key echo is disabled, quiet mode is on,
+		or NVDA's native speak-typed-characters setting is already enabled
+		(to avoid duplicate announcements).
+		"""
+		if not config.conf["terminalAccess"]["keyEcho"]:
+			return False
+		if config.conf["terminalAccess"]["quietMode"]:
+			return False
+		# When NVDA's own character echo is on, let NVDA handle it
+		# to avoid speaking every character twice.
+		if config.conf["keyboard"]["speakTypedCharacters"]:
+			return False
+		return True
+
 	def event_typedCharacter(self, obj, nextHandler, ch):
 		"""
 		Handle typed character events.
@@ -4819,6 +4842,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		Announces characters as they are typed if keyEcho is enabled.
 		Uses punctuation level system to determine whether to speak symbol names.
 		Uses repeatedSymbols to condense sequences of repeated symbols.
+
+		When NVDA's own speak-typed-characters setting is enabled, the addon
+		defers to NVDA to avoid duplicate announcements.
 		"""
 		nextHandler()
 
@@ -4826,12 +4852,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp(obj):
 			return
 
-		# Don't echo if key echo is disabled or in quiet mode
-		if not config.conf["terminalAccess"]["keyEcho"]:
-			return
-
-		# Don't echo if in quiet mode
-		if config.conf["terminalAccess"]["quietMode"]:
+		# Don't echo if disabled, quiet, or NVDA is already echoing
+		if not self._isKeyEchoActive():
 			return
 
 		# Clear position cache on content change
@@ -4880,6 +4902,26 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				ui.message(_("space"))
 			else:
 				ui.message(charToSpeak)
+
+	def _brailleMessage(self, text):
+		"""Show text on the Braille display.
+
+		Safe to call when no display is connected or the braille module is
+		unavailable.  Use this alongside ``speech.speakText()`` calls which
+		do not produce Braille output on their own.
+
+		Args:
+			text: The text to show on the Braille display.
+		"""
+		if not _braille_available:
+			return
+		try:
+			if config.conf["terminalAccess"]["quietMode"]:
+				return
+			if braille.handler.displaySize > 0:
+				braille.handler.message(text)
+		except Exception:
+			pass
 
 	def _announceRepeatedSymbol(self, char, count):
 		"""
@@ -5058,6 +5100,15 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		elif not char or char in ('\r', '\n'):
 			ui.message(_("Blank"))
 
+		# Notify the Braille display of the caret movement so it shows the
+		# full line context around the cursor instead of a brief character flash.
+		if _braille_available:
+			try:
+				if braille.handler.displaySize > 0:
+					braille.handler.handleCaretMove(obj)
+			except Exception:
+				pass
+
 	def _announceHighlightCursor(self, obj):
 		"""
 		Highlight tracking - announce highlighted/inverse text at cursor.
@@ -5088,6 +5139,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				if highlightedText and highlightedText != self._lastHighlightedText:
 					self._lastHighlightedText = highlightedText
 					ui.message(_("Highlighted: {text}").format(text=highlightedText))
+				# Update Braille display with full line context
+				if _braille_available:
+					try:
+						if braille.handler.displaySize > 0:
+							braille.handler.handleCaretMove(obj)
+					except Exception:
+						pass
 			else:
 				# Fall back to standard cursor announcement
 				self._announceStandardCursor(obj)
@@ -5678,6 +5736,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			windowText = ' '.join(lines)
 			if windowText:
 				speech.speakText(windowText)
+				self._brailleMessage(windowText)
 			else:
 				# Translators: Message when window contains no text
 				ui.message(_("Window is empty"))
@@ -5769,6 +5828,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# Use NVDA's speech system to read the text
 			# This allows for proper interruption
 			speech.speakText(text)
+			self._brailleMessage(text)
 		except Exception:
 			# Translators: Message when continuous reading fails
 			ui.message(_("Unable to read"))
@@ -5803,6 +5863,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			char = info.text
 			if char and char != '\n' and char != '\r':
 				speech.speakText(char)
+				self._brailleMessage(char)
 			else:
 				# Translators: Message for blank line
 				ui.message(_("Blank"))
@@ -5840,6 +5901,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			char = info.text
 			if char and char != '\n' and char != '\r':
 				speech.speakText(char)
+				self._brailleMessage(char)
 			else:
 				# Translators: Message for blank line
 				ui.message(_("Blank"))
@@ -5872,6 +5934,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			char = info.text
 			if char and char != '\n' and char != '\r':
 				speech.speakText(char)
+				self._brailleMessage(char)
 			else:
 				ui.message(_("Blank"))
 		except Exception:
@@ -5903,6 +5966,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			char = info.text
 			if char and char != '\n' and char != '\r':
 				speech.speakText(char)
+				self._brailleMessage(char)
 			else:
 				ui.message(_("Blank"))
 		except Exception:
@@ -6188,6 +6252,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			speech.speakTextInfo(reviewInfo, **speak_kwargs)
 		except Exception:
 			ui.message(charText)
+		self._brailleMessage(charText)
 
 	def _announceCharacterCode(self):
 		"""Announce the ASCII/Unicode code of the current character."""
@@ -6351,6 +6416,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				return
 
 			speech.speakText(text)
+			self._brailleMessage(text)
 		except Exception:
 			ui.message(_("Unable to read"))
 
@@ -6384,6 +6450,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				return
 
 			speech.speakText(text)
+			self._brailleMessage(text)
 		except Exception:
 			ui.message(_("Unable to read"))
 
@@ -6419,6 +6486,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				return
 
 			speech.speakText(text)
+			self._brailleMessage(text)
 		except Exception:
 			ui.message(_("Unable to read"))
 
@@ -6454,6 +6522,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				return
 
 			speech.speakText(text)
+			self._brailleMessage(text)
 		except Exception:
 			ui.message(_("Unable to read"))
 

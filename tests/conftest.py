@@ -33,6 +33,14 @@ sys.modules['api'] = MagicMock()
 sys.modules['ui'] = MagicMock()
 sys.modules['config'] = MagicMock()
 
+# Mock braille module
+braille_mock = MagicMock()
+braille_mock.handler = MagicMock()
+braille_mock.handler.displaySize = 40  # Simulated 40-cell display
+braille_mock.handler.message = MagicMock()
+braille_mock.handler.handleCaretMove = MagicMock()
+sys.modules['braille'] = braille_mock
+
 # Mock gui module and its submodules properly
 gui_mock = MagicMock()
 gui_helper_mock = MagicMock()
@@ -122,7 +130,10 @@ conf_dict = {
         "newOutputCoalesceMs": 200,
         "newOutputMaxLines": 20,
         "stripAnsiInOutput": True,
-    }
+    },
+    "keyboard": {
+        "speakTypedCharacters": False,
+    },
 }
 # Create a mock conf object that acts like a dict but also has a spec attribute
 config_mock.conf = Mock()
@@ -182,6 +193,9 @@ def reset_config():
         "newOutputMaxLines": 20,
         "stripAnsiInOutput": True,
     }
+    config_mock.conf["keyboard"] = {
+        "speakTypedCharacters": False,
+    }
     yield
 
 
@@ -219,7 +233,10 @@ def ensure_mocks():
                         "newOutputCoalesceMs": 200,
                         "newOutputMaxLines": 20,
                         "stripAnsiInOutput": True,
-                    }
+                    },
+                    "keyboard": {
+                        "speakTypedCharacters": False,
+                    },
                 }
                 config_mock.conf = Mock()
                 config_mock.conf.__getitem__ = lambda self, key: conf_dict[key]

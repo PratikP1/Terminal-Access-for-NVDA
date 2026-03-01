@@ -165,7 +165,10 @@ class TestContentGenerationTracking(unittest.TestCase):
                 "windowLeft": 0,
                 "windowRight": 0,
                 "windowEnabled": False,
-            }
+            },
+            "keyboard": {
+                "speakTypedCharacters": False,
+            },
         }
 
         config_mock = sys.modules['config']
@@ -195,7 +198,10 @@ class TestContentGenerationTracking(unittest.TestCase):
                 "quietMode": False,
                 "repeatedSymbols": False,
                 "repeatedSymbolsValues": "-_=!",
-            }
+            },
+            "keyboard": {
+                "speakTypedCharacters": False,
+            },
         }
 
         config_mock = sys.modules['config']

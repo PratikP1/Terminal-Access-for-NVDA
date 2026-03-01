@@ -4,6 +4,30 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+## [1.0.53] - 2026-03-01
+
+### Added
+
+- **Enhanced Braille display support**: Navigation scripts (read line, read to left/right/top/
+  bottom, review home/end/top/bottom, window content, continuous read) now send output to
+  Braille displays via `braille.handler.message()`. Previously these used `speech.speakText()`
+  which produced zero Braille output. Cursor tracking also notifies the Braille display of
+  caret movement so it shows the full line context instead of a brief single-character flash.
+
+### Fixed
+
+- **Duplicate key echo when NVDA's speak-typed-characters is enabled**: When NVDA's global
+  "Speak typed characters" setting was on, every keystroke was announced twice — once by NVDA
+  and once by the addon. The addon now detects NVDA's `speakTypedCharacters` setting and defers
+  to NVDA when it is already echoing characters, eliminating the duplication.
+
+### Changed
+
+- **CI workflows preserve previous releases**: Removed the `delete-old-releases` workflow,
+  the release cleanup step that deleted all prior versions on every new release, and the nightly
+  cleanup step that deleted old nightly tags. All previous versions, tags, and release assets
+  are now retained.
+
 ## [1.0.52] - 2026-02-26
 
 ### Reverted
