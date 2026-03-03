@@ -24,9 +24,9 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
   "Speak typed characters" setting was on, every keystroke was announced twice — once by NVDA
   and once by the addon. The addon now detects NVDA's `speakTypedCharacters` setting and defers
   to NVDA when it is already echoing characters, eliminating the duplication.
-- **Spacebar announcing "space" when key echo is off**: On Windows 11, Windows Terminal fires
-  UIA caret events for every keystroke. The cursor tracking path announced the character at the
-  new caret position independently of the key echo setting, creating a "shadow key echo".
+- **Spacebar announcing "space" when key echo is off**: On Windows 10, the legacy console host
+  fires UIA caret events on every keystroke. The cursor tracking path announced the character
+  at the new caret position independently of the key echo setting, creating a "shadow key echo".
   Typing-induced caret events are now suppressed when key echo is off.
 
 ### Changed
