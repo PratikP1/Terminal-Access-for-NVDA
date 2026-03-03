@@ -4458,6 +4458,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self._lastCaretPosition = None
 		self._lastTypedChar = None
 		self._repeatedCharCount = 0
+		self._lastTypedCharTime: float = 0.0
 
 		# Content generation counter — incremented whenever terminal content changes.
 		# Used to invalidate per-line TextInfo caches in _announceStandardCursor.
@@ -4852,6 +4853,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if not self.isTerminalApp(obj):
 			return
 
+		# Record typing timestamp so cursor tracking can distinguish
+		# typing-induced caret events from navigation.
+		self._lastTypedCharTime = time.time()
+
 		# Don't echo if disabled, quiet, or NVDA is already echoing
 		if not self._isKeyEchoActive():
 			return
@@ -5087,6 +5092,15 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				self._lastLineText = None
 				self._lastLineStartOffset = None
 				self._lastLineEndOffset = None
+
+		# When a recent keystroke caused this caret movement and the addon's
+		# key echo is off, suppress the character announcement to avoid a
+		# "shadow key echo" through cursor tracking.  Navigation-induced
+		# caret events (arrow keys, Home/End, etc.) are not affected because
+		# they don't set _lastTypedCharTime.
+		typing_induced = (time.time() - self._lastTypedCharTime) < 0.3
+		if typing_induced and not self._isKeyEchoActive():
+			return
 
 		if char and char.strip():
 			# Use punctuation level system if enabled

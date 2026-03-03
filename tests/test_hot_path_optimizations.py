@@ -113,6 +113,7 @@ class TestContentGenerationTracking(unittest.TestCase):
         plugin._lastCaretPosition = None
         plugin._lastTypedChar = None
         plugin._repeatedCharCount = 0
+        plugin._lastTypedCharTime = 0.0
         plugin._contentGeneration = 0
         plugin._lastLineText = None
         plugin._lastLineStartOffset = None
@@ -236,6 +237,7 @@ class TestLineLevelCache(unittest.TestCase):
         plugin._lastCaretPosition = None
         plugin._lastTypedChar = None
         plugin._repeatedCharCount = 0
+        plugin._lastTypedCharTime = 0.0
         plugin._contentGeneration = 0
         plugin._lastLineText = None
         plugin._lastLineStartOffset = None
@@ -256,6 +258,7 @@ class TestLineLevelCache(unittest.TestCase):
         plugin._commandHistoryManager = None
         plugin._shouldProcessSymbol = Mock(return_value=False)
         plugin._processSymbol = Mock(side_effect=lambda c: c)
+        plugin._isKeyEchoActive = Mock(return_value=True)
         return plugin
 
     def _make_obj(self, offset, line_text="hello world", line_start=0):
