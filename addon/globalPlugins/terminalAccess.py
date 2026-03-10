@@ -206,6 +206,61 @@ _COMMAND_LAYER_MAP = {
 	"kb:escape": "exitCommandLayer",
 }
 
+# Default gesture bindings: gesture string → script name (without "script_" prefix).
+# Stored as a module-level constant so NVDA's Input Gestures dialog can display
+# all Terminal Access commands (via the class-level __gestures dict) and the
+# dynamic binding system can reference them without name-mangling issues.
+_DEFAULT_GESTURES = {
+	"kb:NVDA+shift+f1": "showHelp",
+	"kb:NVDA+u": "readPreviousLine",
+	"kb:NVDA+i": "readCurrentLine",
+	"kb:NVDA+o": "readNextLine",
+	"kb:NVDA+j": "readPreviousWord",
+	"kb:NVDA+k": "readCurrentWord",
+	"kb:NVDA+k,kb:NVDA+k": "spellCurrentWord",
+	"kb:NVDA+l": "readNextWord",
+	"kb:NVDA+m": "readPreviousChar",
+	"kb:NVDA+,": "readCurrentChar",
+	"kb:NVDA+.": "readNextChar",
+	"kb:NVDA+shift+q": "toggleQuietMode",
+	"kb:NVDA+shift+n": "toggleAnnounceNewOutput",
+	"kb:NVDA+f5": "toggleIndentation",
+	"kb:NVDA+v": "copyMode",
+	"kb:NVDA+'": "toggleCommandLayer",
+	"kb:NVDA+alt+asterisk": "cycleCursorTrackingMode",
+	"kb:NVDA+alt+f2": "setWindow",
+	"kb:NVDA+alt+f3": "clearWindow",
+	"kb:NVDA+alt+plus": "readWindow",
+	"kb:NVDA+shift+a": "readAttributes",
+	"kb:NVDA+a": "sayAll",
+	"kb:NVDA+shift+home": "reviewHome",
+	"kb:NVDA+shift+end": "reviewEnd",
+	"kb:NVDA+f4": "reviewTop",
+	"kb:NVDA+f6": "reviewBottom",
+	"kb:NVDA+;": "announcePosition",
+	"kb:NVDA+f10": "announceActiveProfile",
+	"kb:NVDA+[": "decreasePunctuationLevel",
+	"kb:NVDA+]": "increasePunctuationLevel",
+	"kb:NVDA+shift+leftArrow": "readToLeft",
+	"kb:NVDA+shift+rightArrow": "readToRight",
+	"kb:NVDA+shift+upArrow": "readToTop",
+	"kb:NVDA+shift+downArrow": "readToBottom",
+	"kb:NVDA+r": "toggleMark",
+	"kb:NVDA+c": "copyLinearSelection",
+	"kb:NVDA+shift+c": "copyRectangularSelection",
+	"kb:NVDA+x": "clearMarks",
+	"kb:NVDA+shift+b": "listBookmarks",
+	"kb:NVDA+shift+t": "createNewTab",
+	"kb:NVDA+w": "listTabs",
+	"kb:NVDA+shift+h": "scanCommandHistory",
+	"kb:NVDA+h": "previousCommand",
+	"kb:NVDA+g": "nextCommand",
+	"kb:NVDA+shift+l": "listCommandHistory",
+	"kb:NVDA+f": "searchOutput",
+	"kb:NVDA+f3": "findNext",
+	"kb:NVDA+shift+f3": "findPrevious",
+}
+
 # Cursor tracking mode constants
 CT_OFF = 0
 CT_STANDARD = 1
@@ -4721,6 +4776,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	3 - Window: Track within defined screen region
 	"""
 
+	# Class-level gesture map consumed by NVDA's Input Gestures dialog.
+	# Without this dict, gestures defined via @script(gesture=...) are bound
+	# at the instance level but do not appear in the Input Gestures list.
+	__gestures = _DEFAULT_GESTURES
+
 	def __init__(self):
 		"""Initialize the Terminal Access global plugin."""
 		super().__init__()
@@ -4826,26 +4886,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			pass
 
 	def _collectTerminalGestures(self) -> dict[str, str]:
-		"""Collect gestures defined on script methods for conditional binding."""
-		existing = getattr(self.__class__, "__gestures__", {}) or {}
-		if isinstance(existing, dict) and existing:
-			return dict(existing)
-
-		gesture_map: dict[str, str] = {}
-		for attr_name in dir(self.__class__):
-			if not attr_name.startswith("script_"):
-				continue
-			method = getattr(self.__class__, attr_name)
-			gestures = getattr(method, "__gestures__", None) or getattr(method, "gestures", None)
-			if not gestures:
-				continue
-			if isinstance(gestures, str):
-				gestures = [gestures]
-			# Strip "script_" prefix for NVDA's bindGestures
-			script_name = attr_name[7:]  # Remove "script_" prefix
-			for gesture in gestures:
-				gesture_map.setdefault(gesture, script_name)
-		return gesture_map
+		"""Return the default gesture map for conditional binding."""
+		return dict(_DEFAULT_GESTURES)
 
 	def _enableTerminalGestures(self):
 		"""Bind Terminal Access gestures when a terminal is focused."""
