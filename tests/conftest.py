@@ -144,6 +144,7 @@ conf_dict = {
         "newOutputCoalesceMs": 200,
         "newOutputMaxLines": 20,
         "stripAnsiInOutput": True,
+        "unboundGestures": "",
     },
     "keyboard": {
         "speakTypedCharacters": False,
@@ -206,6 +207,7 @@ def reset_config():
         "newOutputCoalesceMs": 200,
         "newOutputMaxLines": 20,
         "stripAnsiInOutput": True,
+        "unboundGestures": "",
     }
     config_mock.conf["keyboard"] = {
         "speakTypedCharacters": False,
@@ -248,6 +250,7 @@ def ensure_mocks():
                         "newOutputCoalesceMs": 200,
                         "newOutputMaxLines": 20,
                         "stripAnsiInOutput": True,
+                        "unboundGestures": "",
                     },
                     "keyboard": {
                         "speakTypedCharacters": False,

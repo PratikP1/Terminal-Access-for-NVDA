@@ -287,6 +287,34 @@ _DEFAULT_GESTURES = {
 	"kb:alt+9": "jumpToBookmark",
 }
 
+# Gestures that are always bound regardless of user exclusions
+_ALWAYS_BOUND = frozenset({"kb:NVDA+'", "kb:NVDA+shift+f1"})
+
+
+def _gestureLabel(gesture: str, script_name: str) -> str:
+	"""Format a gesture and script name into a human-readable label.
+
+	Example: 'kb:NVDA+shift+c' + 'copyRectangularSelection'
+	→ 'NVDA+Shift+C — Copy Rectangular Selection'
+	"""
+	import re
+	key = gesture.replace("kb:", "")
+	# Title-case each part of the key combo; keep NVDA uppercase
+	parts = key.split("+")
+	formatted = []
+	for p in parts:
+		if p.upper() == "NVDA":
+			formatted.append("NVDA")
+		elif len(p) > 1:
+			formatted.append(p.capitalize())
+		else:
+			formatted.append(p.upper())
+	key_display = "+".join(formatted)
+	# Convert camelCase script name to spaced title
+	label = re.sub(r'(?<=[a-z])(?=[A-Z])', ' ', script_name)
+	return f"{key_display} \u2014 {label.title()}"
+
+
 # Cursor tracking mode constants
 CT_OFF = 0
 CT_STANDARD = 1
@@ -338,6 +366,7 @@ confspec = {
 	"newOutputCoalesceMs": "integer(default=200, min=50, max=2000)",  # ms to wait before announcing accumulated output
 	"newOutputMaxLines": "integer(default=20, min=1, max=200)",  # max lines before summarising
 	"stripAnsiInOutput": "boolean(default=True)",  # strip ANSI codes from announced output
+	"unboundGestures": "string(default='')",  # Comma-separated gestures excluded from direct binding
 }
 
 # Register configuration
@@ -5232,8 +5261,16 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			pass
 
 	def _collectTerminalGestures(self) -> dict[str, str]:
-		"""Return the default gesture map for conditional binding."""
-		return dict(_DEFAULT_GESTURES)
+		"""Return the gesture map for conditional binding, excluding user-disabled gestures."""
+		try:
+			raw = config.conf["terminalAccess"]["unboundGestures"]
+		except (KeyError, TypeError):
+			raw = ""
+		excluded = set(g.strip() for g in raw.split(",") if g.strip())
+		return {
+			g: s for g, s in _DEFAULT_GESTURES.items()
+			if g not in excluded or g in _ALWAYS_BOUND
+		}
 
 	def _enableTerminalGestures(self):
 		"""Bind Terminal Access gestures when a terminal is focused."""
@@ -5256,7 +5293,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Exit command layer silently before unbinding (focus loss auto-exit)
 		if getattr(self, "_inCommandLayer", False):
 			self._exitCommandLayer()
-		for gesture in self._terminalGestures:
+		# Iterate _DEFAULT_GESTURES (not _terminalGestures) to also clean up
+		# decorator-created bindings for gestures excluded from _terminalGestures
+		for gesture in _DEFAULT_GESTURES:
 			try:
 				self.removeGestureBinding(gesture)
 			except Exception:
@@ -5265,6 +5304,16 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self._exitCopyModeBindings()
 			self.copyMode = False
 		self._gesturesBound = False
+
+	def _reloadGestures(self):
+		"""Rebuild gesture bindings from current config (called after settings change)."""
+		wasBound = self._gesturesBound
+		if wasBound:
+			self._disableTerminalGestures()
+		self._terminalGestures = self._collectTerminalGestures()
+		if wasBound:
+			self._gesturesBound = False
+			self._enableTerminalGestures()
 
 	def _updateGestureBindingsForFocus(self, obj) -> bool:
 		"""Enable gestures when a terminal is focused, otherwise disable them."""
@@ -8544,6 +8593,43 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 		self.profileList.Bind(wx.EVT_CHOICE, self.onProfileSelection)
 		self.onProfileSelection(None)  # Initialize button states
 
+		# === Direct Gesture Bindings Section ===
+		# Translators: Label for direct gesture bindings settings group
+		gestureGroup = guiHelper.BoxSizerHelper(self, sizer=wx.StaticBoxSizer(
+			wx.StaticBox(self, label=_("Direct Gesture Bindings")),
+			wx.VERTICAL
+		))
+		sHelper.addItem(gestureGroup)
+
+		# Build ordered list of bindable gestures (excluding always-bound)
+		self._gestureItems = [
+			(g, s) for g, s in sorted(_DEFAULT_GESTURES.items(), key=lambda x: x[1])
+			if g not in _ALWAYS_BOUND
+		]
+		labels = [_gestureLabel(g, s) for g, s in self._gestureItems]
+
+		# Translators: Label for gesture bindings checklist
+		self.gestureCheckList = gestureGroup.addItem(
+			wx.CheckListBox(self, choices=labels, size=(-1, 200))
+		)
+
+		# Read current exclusion list from config and check appropriate items
+		try:
+			raw = config.conf["terminalAccess"]["unboundGestures"]
+		except (KeyError, TypeError):
+			raw = ""
+		excluded = set(g.strip() for g in raw.split(",") if g.strip())
+		for i, (gesture, _) in enumerate(self._gestureItems):
+			self.gestureCheckList.Check(i, gesture not in excluded)
+
+		# Translators: Help text for gesture bindings
+		gestureGroup.addItem(
+			wx.StaticText(self, label=_(
+				"Unchecked gestures are disabled. Use the command layer (NVDA+') to access them.\n"
+				"NVDA+' (Command Layer) and NVDA+Shift+F1 (Help) are always available."
+			))
+		)
+
 		# === Reset Button ===
 		# Translators: Label for reset to defaults button
 		self.resetButton = sHelper.addItem(
@@ -8598,6 +8684,10 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 			self.newOutputCoalesceSpinner.SetValue(200)
 			self.newOutputMaxLinesSpinner.SetValue(20)
 			self.stripAnsiInOutputCheckBox.SetValue(True)
+			config.conf["terminalAccess"]["unboundGestures"] = ""
+			# Check all items in the gesture checklist (re-enable all gestures)
+			for i in range(self.gestureCheckList.GetCount()):
+				self.gestureCheckList.Check(i, True)
 
 			# Translators: Message after resetting to defaults
 			gui.messageBox(
@@ -8663,6 +8753,22 @@ class TerminalAccessSettingsPanel(SettingsPanel):
 				config.conf["terminalAccess"]["defaultProfile"] = profileNames[defaultProfileIndex - 1]
 			else:
 				config.conf["terminalAccess"]["defaultProfile"] = ""
+
+		# Save gesture exclusions
+		unchecked = []
+		for i, (gesture, _) in enumerate(self._gestureItems):
+			if not self.gestureCheckList.IsChecked(i):
+				unchecked.append(gesture)
+		config.conf["terminalAccess"]["unboundGestures"] = ",".join(unchecked)
+
+		# Live-reload gesture bindings
+		try:
+			for plugin in globalPluginHandler.runningPlugins:
+				if isinstance(plugin, GlobalPlugin):
+					plugin._reloadGestures()
+					break
+		except (StopIteration, Exception):
+			pass
 
 	def _getProfileManager(self):
 		"""Return the shared ProfileManager from the running global plugin, if available."""

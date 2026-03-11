@@ -22,6 +22,9 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ### Fixed
 
+- Added per-gesture unbinding setting. Users can disable individual direct keyboard shortcuts in
+  the settings panel to avoid conflicts with NVDA's built-in commands. All commands remain
+  accessible through the command layer (NVDA+').
 - Punctuation pronunciation now respects NVDA's configured language instead of using raw Unicode
   character names (e.g., "dot" instead of "full stop" for period). Symbol names are resolved
   through NVDA's `characterProcessing` module, matching the user's NVDA language setting.

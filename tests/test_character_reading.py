@@ -419,5 +419,96 @@ class TestCharacterReading(unittest.TestCase):
 			mock_globalCommands.commands.script_review_nextCharacter.assert_not_called()
 
 
+	# -- Per-gesture unbinding tests --
+
+	def test_collectTerminalGestures_excludes_unbound(self):
+		"""Excluded gestures are filtered from _terminalGestures."""
+		import sys
+		from globalPlugins.terminalAccess import GlobalPlugin, _DEFAULT_GESTURES
+
+		config_mock = sys.modules['config']
+		config_mock.conf["terminalAccess"]["unboundGestures"] = "kb:NVDA+c,kb:NVDA+r"
+
+		try:
+			plugin = GlobalPlugin()
+			gestures = plugin._collectTerminalGestures()
+			self.assertNotIn("kb:NVDA+c", gestures)
+			self.assertNotIn("kb:NVDA+r", gestures)
+			# A gesture not in the exclusion list should still be present
+			self.assertIn("kb:NVDA+u", gestures)
+		finally:
+			config_mock.conf["terminalAccess"]["unboundGestures"] = ""
+
+	def test_collectTerminalGestures_always_bound_cannot_exclude(self):
+		"""_ALWAYS_BOUND gestures survive even if in unboundGestures."""
+		import sys
+		from globalPlugins.terminalAccess import GlobalPlugin, _ALWAYS_BOUND
+
+		config_mock = sys.modules['config']
+		config_mock.conf["terminalAccess"]["unboundGestures"] = "kb:NVDA+'"
+
+		try:
+			plugin = GlobalPlugin()
+			gestures = plugin._collectTerminalGestures()
+			self.assertIn("kb:NVDA+'", gestures)
+		finally:
+			config_mock.conf["terminalAccess"]["unboundGestures"] = ""
+
+	def test_collectTerminalGestures_empty_config(self):
+		"""Empty unboundGestures returns the full set."""
+		import sys
+		from globalPlugins.terminalAccess import GlobalPlugin, _DEFAULT_GESTURES
+
+		config_mock = sys.modules['config']
+		config_mock.conf["terminalAccess"]["unboundGestures"] = ""
+
+		plugin = GlobalPlugin()
+		gestures = plugin._collectTerminalGestures()
+		self.assertEqual(len(gestures), len(_DEFAULT_GESTURES))
+
+	def test_reloadGestures_rebuilds_bindings(self):
+		"""_reloadGestures rebuilds _terminalGestures from config."""
+		import sys
+		from globalPlugins.terminalAccess import GlobalPlugin, _DEFAULT_GESTURES
+
+		config_mock = sys.modules['config']
+		config_mock.conf["terminalAccess"]["unboundGestures"] = ""
+
+		plugin = GlobalPlugin()
+		original_count = len(plugin._terminalGestures)
+		self.assertEqual(original_count, len(_DEFAULT_GESTURES))
+
+		# Exclude two gestures and reload
+		config_mock.conf["terminalAccess"]["unboundGestures"] = "kb:NVDA+c,kb:NVDA+r"
+		plugin._reloadGestures()
+
+		self.assertEqual(len(plugin._terminalGestures), original_count - 2)
+		self.assertNotIn("kb:NVDA+c", plugin._terminalGestures)
+		self.assertNotIn("kb:NVDA+r", plugin._terminalGestures)
+
+		# Restore and verify
+		config_mock.conf["terminalAccess"]["unboundGestures"] = ""
+		plugin._reloadGestures()
+		self.assertEqual(len(plugin._terminalGestures), original_count)
+
+	def test_gestureLabel_formatting(self):
+		"""_gestureLabel formats gesture and script name correctly."""
+		from globalPlugins.terminalAccess import _gestureLabel
+
+		label = _gestureLabel("kb:NVDA+shift+c", "copyRectangularSelection")
+		self.assertIn("NVDA", label)
+		self.assertIn("Shift", label)
+		self.assertIn("C", label)
+		self.assertIn("\u2014", label)  # em dash
+		self.assertIn("Copy", label)
+
+	def test_gestureLabel_single_key(self):
+		"""_gestureLabel handles single modifier+key correctly."""
+		from globalPlugins.terminalAccess import _gestureLabel
+
+		label = _gestureLabel("kb:NVDA+u", "readCurrentLine")
+		self.assertEqual(label, "NVDA+U \u2014 Read Current Line")
+
+
 if __name__ == '__main__':
 	unittest.main()
