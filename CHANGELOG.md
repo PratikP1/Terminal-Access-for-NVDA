@@ -13,6 +13,13 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 - Bookmark gestures (NVDA+Alt+0-9 for set, Alt+0-9 for jump) now appear in NVDA's Input Gestures
   dialog, allowing users to discover and remap them.
 
+### Changed
+
+- Cursor tracking mode gesture changed from `NVDA+Alt+Asterisk` (layer: `*`) to `NVDA+Alt+Y`
+  (layer: `Y`) for better keyboard accessibility.
+- All keyboard command tables in the HTML user guide now include a Layer Key column showing the
+  corresponding command layer shortcut alongside each direct gesture.
+
 ### Fixed
 
 - Punctuation pronunciation now respects NVDA's configured language instead of using raw Unicode

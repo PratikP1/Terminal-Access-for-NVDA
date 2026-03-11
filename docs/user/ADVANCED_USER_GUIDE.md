@@ -62,7 +62,7 @@ While in the command layer, the following keys are active:
 | **W** | Read window content |
 | **Shift+W** | Set window boundaries |
 | **Ctrl+W** | Clear window |
-| **\*** | Cycle cursor tracking mode |
+| **Y** | Cycle cursor tracking mode |
 
 #### Configuration
 | Key | Action |

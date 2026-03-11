@@ -17,7 +17,7 @@ TDSR now supports four distinct cursor tracking modes, allowing users to choose 
 - `CT_WINDOW = 3` - Window-based tracking
 
 #### Mode Cycling
-- **Gesture**: `NVDA+Alt+Asterisk`
+- **Gesture**: `NVDA+Alt+Y` (layer: `Y`)
 - **Behavior**: Cycles through modes: Off → Standard → Highlight → Window → Off
 - **Announcement**: Announces the new mode when changed
 
@@ -261,7 +261,7 @@ The implementation adapts Speakup's concepts to the Windows/NVDA environment:
 ### Manual Testing Scenarios
 
 1. **Mode Cycling**:
-   - Press NVDA+Alt+Asterisk repeatedly
+   - Press NVDA+Alt+Y repeatedly (or layer: Y)
    - Verify mode announcements
    - Test cursor tracking behavior in each mode
 

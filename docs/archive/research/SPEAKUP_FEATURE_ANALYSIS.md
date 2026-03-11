@@ -127,7 +127,7 @@ These features would have the most significant impact on terminal usability and 
 - Add tracking mode state variable
 - Implement highlight detection (inverse video/color changes)
 - Integrate with window system
-- Add gesture to cycle modes (NVDA+Alt+Asterisk)
+- Add gesture to cycle modes (NVDA+Alt+Y)
 
 **Tracking Mode Cycle**:
 Standard → Highlight → Window → Off → Standard
@@ -483,7 +483,7 @@ Final enhancements and refinements:
 | NVDA+Alt+F3 | Clear screen window |
 | NVDA+Alt+F4 | Toggle window silence |
 | NVDA+Alt+Plus | Read window content |
-| NVDA+Alt+Asterisk | Cycle cursor tracking mode |
+| NVDA+Alt+Y | Cycle cursor tracking mode |
 | NVDA+Alt+A | Continuous reading (say all) |
 | NVDA+Alt+I, I | Line indentation (double-press) |
 | NVDA+Alt+Home | First character of line |

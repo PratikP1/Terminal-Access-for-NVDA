@@ -207,7 +207,7 @@ Once in the command layer, all commands are single-key presses:
 | **[/]** | Punctuation level -/+ | **p** | Active profile |
 | **r** | Toggle mark | **c/Shift+C** | Copy linear/rectangular |
 | **x** | Clear marks | **v** | Copy mode |
-| **w/Shift+W/Ctrl+W** | Read/set/clear window | **\*** | Cycle tracking mode |
+| **w/Shift+W/Ctrl+W** | Read/set/clear window | **y** | Cycle tracking mode |
 | **0-9** | Jump to bookmark | **Shift+0-9** | Set bookmark |
 | **b** | List bookmarks | **t/Shift+T** | New tab / list tabs |
 | **h/g** | Prev/next command | **Shift+H/Shift+L** | Scan/list history |
@@ -238,7 +238,7 @@ Once in the command layer, all commands are single-key presses:
 
 #### Punctuation & Tracking
 - **NVDA+[/]** - Decrease/increase punctuation level
-- **NVDA+Alt+Asterisk** - Cycle cursor tracking mode
+- **NVDA+Alt+Y** - Cycle cursor tracking mode (layer: **y**)
 - **NVDA+Shift+Q** - Toggle quiet mode
 
 #### Selection & Copy

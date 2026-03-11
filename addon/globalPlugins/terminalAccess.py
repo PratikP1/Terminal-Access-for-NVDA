@@ -160,7 +160,7 @@ _COMMAND_LAYER_MAP = {
 	"kb:w": "readWindow",
 	"kb:shift+w": "setWindow",
 	"kb:control+w": "clearWindow",
-	"kb:*": "cycleCursorTrackingMode",
+	"kb:y": "cycleCursorTrackingMode",
 	# Configuration
 	"kb:q": "toggleQuietMode",
 	"kb:n": "toggleAnnounceNewOutput",
@@ -232,7 +232,7 @@ _DEFAULT_GESTURES = {
 	"kb:NVDA+f5": "toggleIndentation",
 	"kb:NVDA+v": "copyMode",
 	"kb:NVDA+'": "toggleCommandLayer",
-	"kb:NVDA+alt+asterisk": "cycleCursorTrackingMode",
+	"kb:NVDA+alt+y": "cycleCursorTrackingMode",
 	"kb:NVDA+alt+f2": "setWindow",
 	"kb:NVDA+alt+f3": "clearWindow",
 	"kb:NVDA+alt+plus": "readWindow",
@@ -5083,7 +5083,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		NVDA+Alt+F2      - Define screen window (two-step)
 		NVDA+Alt+F3      - Clear screen window
 		NVDA+Alt+Plus    - Read window content
-		NVDA+Alt+Asterisk - Cycle cursor tracking mode
+		NVDA+Alt+Y - Cycle cursor tracking mode
 		(Note: Window management retains the Alt modifier as these are advanced,
 		 infrequently-used features where the extra modifier prevents accidental activation.)
 
@@ -6409,7 +6409,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	@script(
 		# Translators: Description for cycling cursor tracking modes
 		description=_("Cycle cursor tracking mode"),
-		gesture="kb:NVDA+alt+asterisk",
+		gesture="kb:NVDA+alt+y",
 		category=SCRCAT_TERMINALACCESS,
 	)
 	def script_cycleCursorTrackingMode(self, gesture):

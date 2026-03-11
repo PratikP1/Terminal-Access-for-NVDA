@@ -313,7 +313,7 @@ Without these libraries, Terminal Access provides basic Unicode support but not 
 **Solutions**:
 1. **Enable Cursor Tracking**: NVDA menu > Preferences > Settings > Terminal Settings > Enable "Cursor Tracking"
 2. **Check Quiet Mode**: Press NVDA+Alt+Q to toggle quiet mode off
-3. **Verify tracking mode**: Press NVDA+Alt+Asterisk to cycle through tracking modes (ensure not "Off")
+3. **Verify tracking mode**: Press NVDA+Alt+Y (or layer: Y) to cycle through tracking modes (ensure not "Off")
 4. **Adjust Cursor Delay**: Try setting delay to 0ms if responses are too slow
 
 ### Punctuation not announced
@@ -354,7 +354,7 @@ Without these libraries, Terminal Access provides basic Unicode support but not 
 1. **Check window mode**: You may be in Window tracking mode with defined boundaries
 2. **Verify window bounds**: Check Terminal Settings for window coordinates
 3. **Clear window**: Press NVDA+Alt+F3 to clear window definition
-4. **Switch mode**: Press NVDA+Alt+Asterisk to use Standard tracking instead
+4. **Switch mode**: Press NVDA+Alt+Y (or layer: Y) to use Standard tracking instead
 
 ### Settings not saving
 
