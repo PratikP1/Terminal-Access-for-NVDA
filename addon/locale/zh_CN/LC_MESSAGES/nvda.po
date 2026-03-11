@@ -3,9 +3,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Terminal Access for NVDA\n"
 "Report-Msgid-Bugs-To: https://github.com/PratikP1/Terminal-Access-for-NVDA/issues\n"
-"POT-Creation-Date: 2026-03-11 13:34-0400\n"
-"PO-Revision-Date: 2026-03-11 13:34-0400\n"
-"Last-Translator: Auto-translated\n"
+"POT-Creation-Date: 2026-03-11 16:33-0400\n"
+"PO-Revision-Date: 2026-03-11 16:33-0400\n"
+"Last-Translator: DeepL auto-translation\n"
 "Language-Team: zh_CN\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -13,1617 +13,1376 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: addon/globalPlugins/terminalAccess.py:121
-#, fuzzy
 msgid "Terminal Access"
-msgstr "终端接入"
+msgstr "终端访问"
 
 #: addon/globalPlugins/terminalAccess.py:2326
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Selection too large: {rows} rows exceeds maximum of {max}"
-msgstr "选择太大：{rows} 行超出了 {max} 的最大值"
+msgstr "选择过大：{rows}行超过最大值{max}"
 
 #: addon/globalPlugins/terminalAccess.py:2331
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Selection too wide: {cols} columns exceeds maximum of {max}"
-msgstr "选择太宽：{cols} 列超出了 {max} 的最大值"
+msgstr "选择范围过大：{cols}列数超过{max}的最大限制"
 
 #: addon/globalPlugins/terminalAccess.py:3050
-#, fuzzy
 msgid "Initializing..."
-msgstr "正在初始化..."
+msgstr "初始化中..."
 
 # Summary when many new lines arrive at once
 #: addon/globalPlugins/terminalAccess.py:3377
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{n} new lines"
-msgstr "{n} 新行"
+msgstr "{n} 换行符"
 
 # Title for URL list dialog
 #: addon/globalPlugins/terminalAccess.py:4931
-#, fuzzy
 msgid "URL List - Terminal Access"
-msgstr "URL列表-终端访问"
+msgstr "URL列表 - 终端访问"
 
 # Label for URL filter text box
 #: addon/globalPlugins/terminalAccess.py:4943
-#, fuzzy
 msgid "&Filter:"
-msgstr "＆筛选："
+msgstr "&过滤器："
 
 # Column header for URL list index
 #: addon/globalPlugins/terminalAccess.py:4953
 msgid "#"
-msgstr ""
+msgstr "#"
 
 # Column header for URL
 #: addon/globalPlugins/terminalAccess.py:4955
-#, fuzzy
 msgid "URL"
-msgstr "网址"
+msgstr "URL"
 
 # Column header for line number
 #: addon/globalPlugins/terminalAccess.py:4957
-#, fuzzy
 msgid "Line"
 msgstr "线"
 
 # Column header for line context
 #: addon/globalPlugins/terminalAccess.py:4959
-#, fuzzy
 msgid "Context"
-msgstr "语境"
+msgstr "上下文"
 
 # Button to open URL in browser
 #: addon/globalPlugins/terminalAccess.py:4966
-#, fuzzy
 msgid "&Open"
-msgstr "＆打开"
+msgstr "&打开"
 
 # Button to copy URL to clipboard
 #: addon/globalPlugins/terminalAccess.py:4968
-#, fuzzy
 msgid "&Copy URL"
-msgstr "复制网址(&C)"
+msgstr "&复制网址"
 
 # Button to move cursor to URL line
 #: addon/globalPlugins/terminalAccess.py:4970
-#, fuzzy
 msgid "&Move to line"
-msgstr "移至行(&M)"
+msgstr "&移至行"
 
 #: addon/globalPlugins/terminalAccess.py:4971
-#, fuzzy
 msgid "Close"
 msgstr "关闭"
 
 # Announced after URL is copied
 #: addon/globalPlugins/terminalAccess.py:5049
-#, fuzzy
 msgid "URL copied"
-msgstr "已复制网址"
+msgstr "URL已复制"
 
 # Announced when moving to a URL line
 #: addon/globalPlugins/terminalAccess.py:5060
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Line {num}: {text}"
-msgstr "行{num}：{text}"
+msgstr "{num}行：{text}"
 
 # Position context for verbose mode
 #: addon/globalPlugins/terminalAccess.py:5433
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Row {row}, column {col}"
-msgstr "行 {row}，列 {col}"
+msgstr "行{row}，列{col}"
 
 # Format for verbose announcements with context
 #: addon/globalPlugins/terminalAccess.py:5471
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{message}. {context}"
-msgstr "{message}。 {context}"
+msgstr "{message}. {context}"
 
 # Message announced when entering a terminal application
 #: addon/globalPlugins/terminalAccess.py:5577
-#, fuzzy
 msgid "Terminal Access support active. Press NVDA+shift+f1 for help."
-msgstr "终端访问支持已激活。按 NVDA+shift+f1 寻求帮助。"
+msgstr "终端访问功能已启用。按 NVDA+Shift+F1 获取帮助。"
 
 # Message format for repeated symbols, e.g. "3 dash"
 #: addon/globalPlugins/terminalAccess.py:5707
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{count} {symbol}"
 msgstr "{count} {symbol}"
 
 #: addon/globalPlugins/terminalAccess.py:5920
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Highlighted: {text}"
-msgstr "突出显示：{text}"
+msgstr "高亮显示：{text}"
 
 # Description for the show help gesture
 #: addon/globalPlugins/terminalAccess.py:6008
-#, fuzzy
 msgid "Opens the Terminal Access user guide"
 msgstr "打开终端访问用户指南"
 
 # Error message when help file is not found
 #: addon/globalPlugins/terminalAccess.py:6023
-#, fuzzy
 msgid "Help file not found. Please reinstall the add-on."
 msgstr "未找到帮助文件。请重新安装该附加组件。"
 
 # Error message when add-on is not properly installed
 #: addon/globalPlugins/terminalAccess.py:6026
-#, fuzzy
 msgid "Terminal Access add-on not properly installed."
 msgstr "终端访问附加组件未正确安装。"
 
 # Description for reading the previous line
 #: addon/globalPlugins/terminalAccess.py:6030
-#, fuzzy
 msgid "Read previous line in terminal"
-msgstr "读取终端中的上一行"
+msgstr "在终端中读取上一行内容"
 
 # Description for reading the current line
 #: addon/globalPlugins/terminalAccess.py:6044
-#, fuzzy
 msgid "Read current line in terminal. Press twice for indentation level."
-msgstr "读取终端中的当前行。按两次可设置缩进级别。"
+msgstr "在终端中读取当前行。双击以设置缩进层级。"
 
 # Description for reading the next line
 #: addon/globalPlugins/terminalAccess.py:6063
-#, fuzzy
 msgid "Read next line in terminal"
-msgstr "读取终端中的下一行"
+msgstr "在终端中读取下一行"
 
 # Description for reading the previous word
 #: addon/globalPlugins/terminalAccess.py:6077
-#, fuzzy
 msgid "Read previous word in terminal"
-msgstr "读取终端中的前一个单词"
+msgstr "在终端中读取上一个单词"
 
 # Description for reading the current word
 #: addon/globalPlugins/terminalAccess.py:6091
-#, fuzzy
 msgid "Read current word in terminal"
-msgstr "读取终端中的当前单词"
+msgstr "在终端中读取当前单词"
 
 # Description for spelling the current word
 #: addon/globalPlugins/terminalAccess.py:6105
-#, fuzzy
 msgid "Spell current word in terminal"
 msgstr "在终端中拼写当前单词"
 
 # Description for reading the next word
 #: addon/globalPlugins/terminalAccess.py:6119
-#, fuzzy
 msgid "Read next word in terminal"
-msgstr "读取终端中的下一个单词"
+msgstr "在终端中读取下一个单词"
 
 # Description for reading the previous character
 #: addon/globalPlugins/terminalAccess.py:6133
-#, fuzzy
 msgid "Read previous character in terminal"
-msgstr "读取终端中的前一个字符"
+msgstr "在终端中读取前一个字符"
 
 # Description for reading the current character
 #: addon/globalPlugins/terminalAccess.py:6147
-#, fuzzy
 msgid ""
 "Read current character in terminal. Press twice for phonetic. Press three "
 "times for character code."
-msgstr "读取终端中的当前字符。按两次可获取拼音。按三下以获取字符代码。"
+msgstr "在终端中读取当前字符。双击显示音标。三击显示字符代码。"
 
 # Description for reading the next character
 #: addon/globalPlugins/terminalAccess.py:6171
-#, fuzzy
 msgid "Read next character in terminal"
 msgstr "读取终端中的下一个字符"
 
 # Description for toggling quiet mode
 #: addon/globalPlugins/terminalAccess.py:6185
-#, fuzzy
 msgid "Toggle quiet mode in terminal"
-msgstr "在终端中切换安静模式"
+msgstr "在终端中切换静音模式"
 
 # Message when quiet mode is enabled
 #: addon/globalPlugins/terminalAccess.py:6205
-#, fuzzy
 msgid "Quiet mode on"
 msgstr "静音模式开启"
 
 # Message when quiet mode is disabled
 #: addon/globalPlugins/terminalAccess.py:6208
-#, fuzzy
 msgid "Quiet mode off"
 msgstr "静音模式关闭"
 
 # Description for toggling announce new output
 #: addon/globalPlugins/terminalAccess.py:6212
-#, fuzzy
 msgid "Toggle announce new output in terminal"
-msgstr "Toggle 在终端中宣布新输出"
+msgstr "在终端中切换显示新输出的提示"
 
 # Message when announce new output is enabled
 #: addon/globalPlugins/terminalAccess.py:6236
-#, fuzzy
 msgid "Announce new output on"
-msgstr "宣布新输出"
+msgstr "发布新内容"
 
 # Message when announce new output is disabled
 #: addon/globalPlugins/terminalAccess.py:6241
-#, fuzzy
 msgid "Announce new output off"
 msgstr "宣布新输出关闭"
 
 # Description for toggling indentation announcement
 #: addon/globalPlugins/terminalAccess.py:6245
-#, fuzzy
 msgid "Toggle indentation announcement on line read in terminal"
-msgstr "切换终端中在线读取的缩进公告"
+msgstr "在终端中切换行内缩进提示"
 
 # Message when indentation announcement is enabled
 #: addon/globalPlugins/terminalAccess.py:6263
-#, fuzzy
 msgid "Indentation announcement on"
 msgstr "缩进公告于"
 
 # Message when indentation announcement is disabled
 #: addon/globalPlugins/terminalAccess.py:6266
-#, fuzzy
 msgid "Indentation announcement off"
 msgstr "缩进公告关闭"
 
 # Description for copy mode
 #: addon/globalPlugins/terminalAccess.py:6270
-#, fuzzy
 msgid "Enter copy mode in terminal"
 msgstr "在终端中进入复制模式"
 
 # Message entering copy mode
 #: addon/globalPlugins/terminalAccess.py:6287
-#, fuzzy
 msgid ""
 "Copy mode. Press L to copy line, S to copy screen, or Escape to cancel."
-msgstr "复制模式。按 L 复制行，按 S 复制屏幕，或按 Esc 取消。"
+msgstr "复制模式。按L键复制行，按S键复制屏幕，或按Esc键取消。"
 
 # Description for copying line
 #: addon/globalPlugins/terminalAccess.py:6291
-#, fuzzy
 msgid "Copy line in copy mode"
 msgstr "在复制模式下复制行"
 
 #: addon/globalPlugins/terminalAccess.py:6303
-#, fuzzy
 msgid "Unable to copy"
 msgstr "无法复制"
 
 # Message when line is copied
 #: addon/globalPlugins/terminalAccess.py:6311
-#, fuzzy
 msgid "Line copied"
-msgstr "已复制行"
+msgstr "行复制"
 
 # Description for copying screen
 #: addon/globalPlugins/terminalAccess.py:6322
-#, fuzzy
 msgid "Copy screen in copy mode"
-msgstr "复制模式下复制屏幕"
+msgstr "在复制模式下复制屏幕"
 
 # Message when screen is copied
 #: addon/globalPlugins/terminalAccess.py:6342
-#, fuzzy
 msgid "Screen copied"
-msgstr "屏幕复制"
+msgstr "屏幕已复制"
 
 # Description for exiting copy mode
 #: addon/globalPlugins/terminalAccess.py:6353
-#, fuzzy
 msgid "Exit copy mode"
-msgstr "退出复印模式"
+msgstr "退出复制模式"
 
 # Message when copy mode is canceled
 #: addon/globalPlugins/terminalAccess.py:6363
-#, fuzzy
 msgid "Copy mode canceled"
-msgstr "复印模式已取消"
+msgstr "复制模式已取消"
 
 # Description for toggling the command layer
 #: addon/globalPlugins/terminalAccess.py:6391
-#, fuzzy
 msgid "Toggle terminal command layer (single-key command mode)"
 msgstr "切换终端命令层（单键命令模式）"
 
 # Announced when the terminal command layer is activated
 #: addon/globalPlugins/terminalAccess.py:6420
-#, fuzzy
 msgid "Terminal commands"
 msgstr "终端命令"
 
 # Announced when the terminal command layer is deactivated
 #: addon/globalPlugins/terminalAccess.py:6434
-#, fuzzy
 msgid "Exit terminal commands"
 msgstr "退出终端命令"
 
 # Description for exiting the command layer
 #: addon/globalPlugins/terminalAccess.py:6438
-#, fuzzy
 msgid "Exit the terminal command layer"
 msgstr "退出终端命令层"
 
 # Description for opening terminal settings
 #: addon/globalPlugins/terminalAccess.py:6450
-#, fuzzy
 msgid "Open Terminal Access settings"
 msgstr "打开终端访问设置"
 
 # Error message when settings dialog cannot be opened
 #: addon/globalPlugins/terminalAccess.py:6464
-#, fuzzy
 msgid "Unable to open settings dialog. Please try again."
-msgstr "无法打开设置对话框。请再试一次。"
+msgstr "无法打开设置对话框。请重试。"
 
 # Description for cycling cursor tracking modes
 #: addon/globalPlugins/terminalAccess.py:6468
-#, fuzzy
 msgid "Cycle cursor tracking mode"
 msgstr "循环光标跟踪模式"
 
 #: addon/globalPlugins/terminalAccess.py:6491
-#, fuzzy
 msgid "Cursor tracking off"
-msgstr "光标跟踪关闭"
+msgstr "关闭光标跟踪"
 
 #: addon/globalPlugins/terminalAccess.py:6492
-#, fuzzy
 msgid "Standard cursor tracking"
-msgstr "标准光标跟踪"
+msgstr "标准光标追踪"
 
 #: addon/globalPlugins/terminalAccess.py:6493
-#, fuzzy
 msgid "Highlight tracking"
-msgstr "突出显示跟踪"
+msgstr "高亮跟踪"
 
 #: addon/globalPlugins/terminalAccess.py:6494
-#, fuzzy
 msgid "Window tracking"
-msgstr "窗口跟踪"
+msgstr "窗口追踪"
 
 #: addon/globalPlugins/terminalAccess.py:6496
-#, fuzzy
 msgid "Unknown mode"
 msgstr "未知模式"
 
 # Description for setting screen window
 #: addon/globalPlugins/terminalAccess.py:6500
-#, fuzzy
 msgid "Set screen window boundaries"
 msgstr "设置屏幕窗口边界"
 
 #: addon/globalPlugins/terminalAccess.py:6513
-#, fuzzy
 msgid "Unable to set window"
 msgstr "无法设置窗口"
 
 # Message when window start is set
 #: addon/globalPlugins/terminalAccess.py:6521
-#, fuzzy
 msgid "Window start set. Move to end position and press again."
-msgstr "窗口启动设置。移至结束位置并再次按下。"
+msgstr "启动窗口设置。移动至终点位置并再次按下。"
 
 # Message when window is defined
 #: addon/globalPlugins/terminalAccess.py:6533
-#, fuzzy
 msgid "Window defined"
 msgstr "窗口定义"
 
 # Description for clearing screen window
 #: addon/globalPlugins/terminalAccess.py:6540
-#, fuzzy
 msgid "Clear screen window"
 msgstr "清除屏幕窗口"
 
 # Message when window is cleared
 #: addon/globalPlugins/terminalAccess.py:6553
-#, fuzzy
 msgid "Window cleared"
-msgstr "窗户已清除"
+msgstr "窗口已清除"
 
 # Description for reading window content
 #: addon/globalPlugins/terminalAccess.py:6557
-#, fuzzy
 msgid "Read window content"
 msgstr "读取窗口内容"
 
 # Message when no window is defined
 #: addon/globalPlugins/terminalAccess.py:6569
-#, fuzzy
 msgid "No window defined"
-msgstr "没有定义窗口"
+msgstr "未定义窗口"
 
 #: addon/globalPlugins/terminalAccess.py:6575
-#, fuzzy
 msgid "Unable to read window"
 msgstr "无法读取窗口"
 
 #: addon/globalPlugins/terminalAccess.py:6586
-#, fuzzy
 msgid "Window not properly defined"
 msgstr "窗口未正确定义"
 
 # Message when window contains no text
 #: addon/globalPlugins/terminalAccess.py:6626
-#, fuzzy
 msgid "Window is empty"
-msgstr "窗口是空的"
+msgstr "窗口为空"
 
 # Description for reading text attributes
 #: addon/globalPlugins/terminalAccess.py:6633
-#, fuzzy
 msgid "Read text attributes at cursor"
-msgstr "读取光标处的文本属性"
+msgstr "读取光标位置处的文本属性"
 
 #: addon/globalPlugins/terminalAccess.py:6646
-#, fuzzy
 msgid "Unable to read attributes"
 msgstr "无法读取属性"
 
 # Message when no text at cursor
 #: addon/globalPlugins/terminalAccess.py:6673
-#, fuzzy
 msgid "No text at cursor"
-msgstr "光标处没有文字"
+msgstr "光标处无文本"
 
 # Description for continuous reading (say all)
 #: addon/globalPlugins/terminalAccess.py:6684
-#, fuzzy
 msgid "Read continuously from cursor to end of buffer"
-msgstr "从光标处连续读取到缓冲区末尾"
+msgstr "从光标位置开始连续读取至缓冲区末尾"
 
 # Message when unable to start continuous reading
 #: addon/globalPlugins/terminalAccess.py:6698
-#, fuzzy
 msgid "Unable to read"
-msgstr "无法阅读"
+msgstr "无法读取"
 
 # Message when buffer is empty
 #: addon/globalPlugins/terminalAccess.py:6711
-#, fuzzy
 msgid "Nothing to read"
-msgstr "没什么可读的"
+msgstr "无书可读"
 
 # Description for jumping to start of line
 #: addon/globalPlugins/terminalAccess.py:6724
-#, fuzzy
 msgid "Move to first character of current line"
-msgstr "移至当前行的第一个字符"
+msgstr "移至当前行首字符"
 
 # Message when unable to move
 #: addon/globalPlugins/terminalAccess.py:6738
-#, fuzzy
 msgid "Unable to move"
 msgstr "无法移动"
 
 # Message for blank line
 #: addon/globalPlugins/terminalAccess.py:6756
-#, fuzzy
 msgid "Blank"
-msgstr "空白的"
+msgstr "空白"
 
 # Description for jumping to end of line
 #: addon/globalPlugins/terminalAccess.py:6762
-#, fuzzy
 msgid "Move to last character of current line"
-msgstr "移至当前行的最后一个字符"
+msgstr "移至当前行末尾字符"
 
 # Description for jumping to top
 #: addon/globalPlugins/terminalAccess.py:6801
-#, fuzzy
 msgid "Move to top of terminal buffer"
-msgstr "移动到终端缓冲区的顶部"
+msgstr "移至终端缓冲区顶部"
 
 # Description for jumping to bottom
 #: addon/globalPlugins/terminalAccess.py:6834
-#, fuzzy
 msgid "Move to bottom of terminal buffer"
-msgstr "移动到终端缓冲区的底部"
+msgstr "移至终端缓冲区底部"
 
 # Description for announcing position
 #: addon/globalPlugins/terminalAccess.py:6867
-#, fuzzy
 msgid "Announce current row and column position"
-msgstr "宣布当前行和列的位置"
+msgstr "宣布当前行和列位置"
 
 # Message when position unavailable
 #: addon/globalPlugins/terminalAccess.py:6881
-#, fuzzy
 msgid "Position unavailable"
-msgstr "位置不可用"
+msgstr "职位已满"
 
 # Description for announcing active profile
 #: addon/globalPlugins/terminalAccess.py:6898
-#, fuzzy
 msgid "Announce which profile is currently active and which is set as default"
-msgstr "宣布哪个配置文件当前处于活动状态以及哪个配置文件被设置为默认值"
+msgstr "宣布当前激活的配置文件以及设为默认的配置文件"
 
 # Message when no profile is active
 #: addon/globalPlugins/terminalAccess.py:6913
-#, fuzzy
 msgid "None (using global settings)"
 msgstr "无（使用全局设置）"
 
 # Message when no default profile is set
 #: addon/globalPlugins/terminalAccess.py:6922
-#, fuzzy
 msgid "None"
-msgstr "没有任何"
+msgstr "无"
 
 # Message announcing active and default profiles
 #: addon/globalPlugins/terminalAccess.py:6926
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Active profile: {active}. Default profile: {default}"
-msgstr "活动配置文件：{active}。默认配置文件：{default}"
+msgstr "活动配置文件：{active}默认配置文件：{default}"
 
 # Message when unable to read indentation
 #: addon/globalPlugins/terminalAccess.py:6937
-#, fuzzy
 msgid "Unable to read indentation"
 msgstr "无法读取缩进"
 
 # Message for empty line
 #: addon/globalPlugins/terminalAccess.py:6947
-#, fuzzy
 msgid "Empty line"
 msgstr "空行"
 
 # Message when line has no indentation
 #: addon/globalPlugins/terminalAccess.py:6972
-#, fuzzy
 msgid "No indentation"
-msgstr "无缩进"
+msgstr "不缩进"
 
 # Message for mixed indentation
 #: addon/globalPlugins/terminalAccess.py:6975
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{tabs} tab, {spaces} spaces"
-msgstr "{tabs} 制表符，{spaces} 空格"
+msgstr "{tabs} tab, {spaces} spaces"
 
 # Message for mixed indentation
 #: addon/globalPlugins/terminalAccess.py:6975
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{tabs} tabs, {spaces} spaces"
-msgstr "{tabs} 制表符，{spaces} 空格"
+msgstr "{tabs} tabs, {spaces} spaces"
 
 # Message for tab indentation
 #: addon/globalPlugins/terminalAccess.py:6978
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{count} tab"
-msgstr "{count} 选项卡"
+msgstr "{count} 标签"
 
 # Message for tab indentation
 #: addon/globalPlugins/terminalAccess.py:6978
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{count} tabs"
-msgstr "{count} 选项卡"
+msgstr "{count} 标签页"
 
 # Message for space indentation
 #: addon/globalPlugins/terminalAccess.py:6981
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{count} space"
 msgstr "{count} 空间"
 
 # Message for space indentation
 #: addon/globalPlugins/terminalAccess.py:6981
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{count} spaces"
 msgstr "{count} 空格"
 
 # Message when no review position
 #: addon/globalPlugins/terminalAccess.py:7087
-#, fuzzy
 msgid "No review position"
-msgstr "没有评论位置"
+msgstr "无评审职位"
 
 #: addon/globalPlugins/terminalAccess.py:7093
-#, fuzzy
 msgid "Unable to read character"
 msgstr "无法读取字符"
 
 # Message when at edge of text
 #: addon/globalPlugins/terminalAccess.py:7113
-#, fuzzy
 msgid "Edge"
 msgstr "边缘"
 
 # Message when at edge of text
 #: addon/globalPlugins/terminalAccess.py:7113
-#, fuzzy
 msgid "Top"
 msgstr "顶部"
 
 # Message when no character at position
 #: addon/globalPlugins/terminalAccess.py:7165
-#, fuzzy
 msgid "No character"
-msgstr "没有字符"
+msgstr "无字符"
 
 # Message announcing character code
 #: addon/globalPlugins/terminalAccess.py:7186
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Character {decimal}, hex {hex}, {name}"
-msgstr "字符 {decimal}，十六进制 {hex}，{name}"
+msgstr "字符{decimal}，十六进制{hex}，{name}"
 
 #: addon/globalPlugins/terminalAccess.py:7248
-#, fuzzy
 msgid "space"
 msgstr "空间"
 
 # Description for decreasing punctuation level
 #: addon/globalPlugins/terminalAccess.py:7256
-#, fuzzy
 msgid "Decrease punctuation level"
-msgstr "减少标点符号级别"
+msgstr "降低标点符号级别"
 
 #: addon/globalPlugins/terminalAccess.py:7274
-#, fuzzy
 msgid "Punctuation level none"
-msgstr "标点符号级别 无"
+msgstr "标点级别：无"
 
 #: addon/globalPlugins/terminalAccess.py:7275
-#, fuzzy
 msgid "Punctuation level some"
-msgstr "标点符号级别有些"
+msgstr "标点符号级别：某些"
 
 #: addon/globalPlugins/terminalAccess.py:7276
-#, fuzzy
 msgid "Punctuation level most"
 msgstr "标点符号级别最高"
 
 #: addon/globalPlugins/terminalAccess.py:7277
-#, fuzzy
 msgid "Punctuation level all"
 msgstr "标点符号级别全部"
 
 #: addon/globalPlugins/terminalAccess.py:7279
-#, fuzzy
 msgid "Punctuation level unknown"
 msgstr "标点符号级别未知"
 
 # Description for increasing punctuation level
 #: addon/globalPlugins/terminalAccess.py:7283
-#, fuzzy
 msgid "Increase punctuation level"
-msgstr "增加标点符号级别"
+msgstr "提高标点符号级别"
 
 # Description for reading to left edge
 #: addon/globalPlugins/terminalAccess.py:7310
-#, fuzzy
 msgid "Read from cursor to beginning of line"
-msgstr "从光标处读取到行首"
+msgstr "从光标位置读取至行首"
 
 # Message when region is empty
 #: addon/globalPlugins/terminalAccess.py:7336
-#, fuzzy
 msgid "Nothing"
-msgstr "没有什么"
+msgstr "无"
 
 # Description for reading to right edge
 #: addon/globalPlugins/terminalAccess.py:7346
-#, fuzzy
 msgid "Read from cursor to end of line"
-msgstr "从光标处读取到行尾"
+msgstr "从光标位置读取至行尾"
 
 # Description for reading to top
 #: addon/globalPlugins/terminalAccess.py:7381
-#, fuzzy
 msgid "Read from cursor to top of buffer"
-msgstr "从光标处读取到缓冲区顶部"
+msgstr "从光标位置读取至缓冲区顶部"
 
 # Description for reading to bottom
 #: addon/globalPlugins/terminalAccess.py:7418
-#, fuzzy
 msgid "Read from cursor to bottom of buffer"
-msgstr "从光标处读取到缓冲区底部"
+msgstr "从光标位置读取至缓冲区末尾"
 
 # Description for toggling mark position
 #: addon/globalPlugins/terminalAccess.py:7455
-#, fuzzy
 msgid "Toggle mark for selection (enhanced)"
-msgstr "切换选择标记（增强）"
+msgstr "切换标记以进行选择（增强版）"
 
 #: addon/globalPlugins/terminalAccess.py:7468
-#, fuzzy
 msgid "Unable to set mark"
 msgstr "无法设置标记"
 
 # Message when start mark is set (Phase 6: Enhanced with context)
 #: addon/globalPlugins/terminalAccess.py:7475
-#, fuzzy
 msgid "Mark start set"
 msgstr "标记开始设置"
 
 # Message when end mark is set (Phase 6: Enhanced with context)
 #: addon/globalPlugins/terminalAccess.py:7480
-#, fuzzy
 msgid "Mark end set"
 msgstr "标记结束集"
 
 # Message when marks are cleared
 #: addon/globalPlugins/terminalAccess.py:7486
-#, fuzzy
 msgid "Marks cleared"
 msgstr "标记已清除"
 
 # Description for copying linear selection
 #: addon/globalPlugins/terminalAccess.py:7492
-#, fuzzy
 msgid "Copy linear selection between marks"
 msgstr "复制标记之间的线性选择"
 
 # Message when marks are not set
 #: addon/globalPlugins/terminalAccess.py:7504
-#, fuzzy
 msgid "Set start and end marks first"
-msgstr "首先设置开始和结束标记"
+msgstr "先设置起始标记和结束标记"
 
 # Message when selection copied
 #: addon/globalPlugins/terminalAccess.py:7521
-#, fuzzy
 msgid "Selection copied"
-msgstr "已复制选择"
+msgstr "选定内容已复制"
 
 #: addon/globalPlugins/terminalAccess.py:7527
-#, fuzzy
 msgid "Unable to copy: terminal not accessible"
-msgstr "无法复制：终端无法访问"
+msgstr "无法复制：终端不可访问"
 
 # Description for copying rectangular selection
 #: addon/globalPlugins/terminalAccess.py:7535
-#, fuzzy
 msgid "Copy rectangular selection between marks"
-msgstr "复制标记之间的矩形选区"
+msgstr "在标记之间复制矩形选区"
 
 #: addon/globalPlugins/terminalAccess.py:7565
-#, fuzzy
 msgid "Unable to determine position"
 msgstr "无法确定位置"
 
 #: addon/globalPlugins/terminalAccess.py:7587
-#, fuzzy
 msgid "Background operation in progress, please wait"
 msgstr "后台操作正在进行中，请稍候"
 
 #: addon/globalPlugins/terminalAccess.py:7590
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Processing large selection ({rows} rows), please wait..."
-msgstr "正在处理大量选择（{rows} 行），请稍候..."
+msgstr "正在处理大量选择（{rows}行），请稍候..."
 
 #: addon/globalPlugins/terminalAccess.py:7597
-#, fuzzy
 msgid "Terminal Access - Copying Selection"
-msgstr "终端访问 - 复制选择"
+msgstr "终端访问 - 复制选定内容"
 
 #: addon/globalPlugins/terminalAccess.py:7610
-#, fuzzy
 msgid "Failed to start background operation"
 msgstr "无法启动后台操作"
 
 #: addon/globalPlugins/terminalAccess.py:7648
-#, fuzzy
 msgid "Background copy failed: terminal not accessible"
-msgstr "后台复制失败：终端无法访问"
+msgstr "背景复制失败：终端不可访问"
 
 #: addon/globalPlugins/terminalAccess.py:7654
-#, fuzzy
 msgid "Background copy failed"
-msgstr "后台复制失败"
+msgstr "背景复制失败"
 
 #: addon/globalPlugins/terminalAccess.py:7691
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Copying row {current} of {total}..."
-msgstr "正在复制 {total} 的 {current} 行..."
+msgstr "复制行 {current} 来自 {total}..."
 
 #: addon/globalPlugins/terminalAccess.py:7696
-#, fuzzy
 msgid "Copy operation cancelled by user"
-msgstr "用户取消复制操作"
+msgstr "复制操作被用户取消"
 
 #: addon/globalPlugins/terminalAccess.py:7717
-#, fuzzy
 msgid "Copy complete!"
 msgstr "复制完成！"
 
 # Message for successful rectangular selection copy
 #: addon/globalPlugins/terminalAccess.py:7722
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Rectangular selection copied: {rows} rows, columns {start} to {end}"
-msgstr "已复制矩形选区：{rows} 行，{start} 列至 {end}"
+msgstr "矩形选区已复制：{rows} 行，列 {start} 至 {end}"
 
 # Description for clearing marks
 #: addon/globalPlugins/terminalAccess.py:7741
-#, fuzzy
 msgid "Clear selection marks"
-msgstr "清晰的选择标记"
+msgstr "清除选择标记"
 
 # Description for setting bookmark
 #: addon/globalPlugins/terminalAccess.py:7760
-#, fuzzy
 msgid "Set a bookmark at the current review position (use with 0-9)"
-msgstr "在当前审阅位置设置书签（与0-9一起使用）"
+msgstr "在当前审阅位置设置书签（配合0-9使用）"
 
 # Error message when bookmark manager not initialized
 #: addon/globalPlugins/terminalAccess.py:7775
-#, fuzzy
 msgid "Bookmark manager not available"
 msgstr "书签管理器不可用"
 
 # Message when bookmark set
 #: addon/globalPlugins/terminalAccess.py:7788
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Bookmark {name} set"
-msgstr "书签 {name} 套装"
+msgstr "收藏 {name} 套装"
 
 # Error message when bookmark setting fails
 #: addon/globalPlugins/terminalAccess.py:7791
-#, fuzzy
 msgid "Failed to set bookmark"
 msgstr "设置书签失败"
 
 # Description for jumping to bookmark
 #: addon/globalPlugins/terminalAccess.py:7795
-#, fuzzy
 msgid "Jump to a previously set bookmark (use with 0-9)"
-msgstr "跳转到之前设置的书签（与 0-9 一起使用）"
+msgstr "跳转至先前设置的书签（配合0-9键使用）"
 
 # Message when jumping to bookmark
 #: addon/globalPlugins/terminalAccess.py:7828
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Jumped to bookmark {name}"
 msgstr "跳转至书签 {name}"
 
 # Error message when bookmark not found
 #: addon/globalPlugins/terminalAccess.py:7831
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Bookmark {name} not found"
-msgstr "未找到书签 {name}"
+msgstr "书签 {name} 未找到"
 
 # Description for listing bookmarks
 #: addon/globalPlugins/terminalAccess.py:7835
-#, fuzzy
 msgid "List all bookmarks"
 msgstr "列出所有书签"
 
 # Message listing bookmarks
 #: addon/globalPlugins/terminalAccess.py:7854
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{count} bookmarks: {names}"
 msgstr "{count} 书签：{names}"
 
 # Message when no bookmarks exist
 #: addon/globalPlugins/terminalAccess.py:7861
-#, fuzzy
 msgid "No bookmarks set"
-msgstr "没有设置书签"
+msgstr "未设置书签"
 
 # Description for creating a new terminal tab
 #: addon/globalPlugins/terminalAccess.py:7867
-#, fuzzy
 msgid "Create a new tab in the terminal"
-msgstr "在终端中创建一个新选项卡"
+msgstr "在终端中创建一个新标签页"
 
 # Message when creating a new tab
 #: addon/globalPlugins/terminalAccess.py:7885
-#, fuzzy
 msgid "Creating new tab"
-msgstr "创建新选项卡"
+msgstr "新建标签页"
 
 # Error message when tab creation fails
 #: addon/globalPlugins/terminalAccess.py:7888
-#, fuzzy
 msgid "Unable to create new tab"
-msgstr "无法创建新选项卡"
+msgstr "无法创建新标签页"
 
 # Description for listing/navigating tabs
 #: addon/globalPlugins/terminalAccess.py:7892
-#, fuzzy
 msgid "List tabs or switch to tab bar"
-msgstr "列出选项卡或切换到选项卡栏"
+msgstr "列出标签页或切换到标签栏"
 
 # Error message when tab manager not initialized
 #: addon/globalPlugins/terminalAccess.py:7904
-#, fuzzy
 msgid "Tab manager not available"
-msgstr "选项卡管理器不可用"
+msgstr "标签管理器不可用"
 
 # Message when no tabs are detected
 #: addon/globalPlugins/terminalAccess.py:7914
-#, fuzzy
 msgid "No tabs detected"
-msgstr "未检测到标签"
+msgstr "未检测到标签页"
 
 # Message for single tab
 #: addon/globalPlugins/terminalAccess.py:7918
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Single tab: {title}"
-msgstr "单个选项卡：{title}"
+msgstr "单标签页：{title}"
 
 # Message listing tab count
 #: addon/globalPlugins/terminalAccess.py:7923
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{count} tabs detected"
-msgstr "检测到 {count} 标签"
+msgstr "{count} 检测到标签页"
 
 # Message when switching tabs
 #: addon/globalPlugins/terminalAccess.py:7930
-#, fuzzy
 msgid "Switching to next tab"
-msgstr "切换到下一个选项卡"
+msgstr "切换到下一个标签页"
 
 # Description for scanning command history
 #: addon/globalPlugins/terminalAccess.py:7938
-#, fuzzy
 msgid "Scan terminal output to detect and store command history"
 msgstr "扫描终端输出以检测并存储命令历史记录"
 
 # Error message when command history manager not initialized
 #: addon/globalPlugins/terminalAccess.py:7950
-#, fuzzy
 msgid "Command history not available"
 msgstr "命令历史记录不可用"
 
 # Message when commands detected
 #: addon/globalPlugins/terminalAccess.py:7959
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Found {count} new commands, {total} total"
-msgstr "找到 {count} 个新命令，总共 {total} 个"
+msgstr "发现 {count} 个新命令，{total} 个总计"
 
 # Message when no new commands found
 #: addon/globalPlugins/terminalAccess.py:7962
-#, fuzzy
 msgid "No new commands found"
-msgstr "没有发现新命令"
+msgstr "未找到新命令"
 
 # Description for previous command navigation
 #: addon/globalPlugins/terminalAccess.py:7966
-#, fuzzy
 msgid "Navigate to previous command in history"
-msgstr "导航到历史记录中的上一个命令"
+msgstr "在历史记录中导航至上一个命令"
 
 # Message when at beginning of history
 #: addon/globalPlugins/terminalAccess.py:7987
-#, fuzzy
 msgid "No previous command"
-msgstr "没有先前的命令"
+msgstr "没有之前的命令"
 
 # Description for next command navigation
 #: addon/globalPlugins/terminalAccess.py:7991
-#, fuzzy
 msgid "Navigate to next command in history"
-msgstr "导航到历史记录中的下一个命令"
+msgstr "导航至历史记录中的下一个命令"
 
 # Message when at end of history
 #: addon/globalPlugins/terminalAccess.py:8012
-#, fuzzy
 msgid "No next command"
 msgstr "没有下一个命令"
 
 # Description for listing command history
 #: addon/globalPlugins/terminalAccess.py:8016
-#, fuzzy
 msgid "List all commands in history"
-msgstr "列出历史中所有命令"
+msgstr "列出历史记录中的所有命令"
 
 # Message listing command history
 #: addon/globalPlugins/terminalAccess.py:8044
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{count} commands in history. Recent: {commands}"
-msgstr "{count} 历史命令。最近：{commands}"
+msgstr "{count} 历史记录中的命令。最近：{commands}"
 
 # Message when no commands in history
 #: addon/globalPlugins/terminalAccess.py:8050
-#, fuzzy
 msgid "No commands in history"
-msgstr "历史上没有命令"
+msgstr "历史记录中没有命令"
 
 # Description for listing URLs in terminal output
 #: addon/globalPlugins/terminalAccess.py:8056
-#, fuzzy
 msgid "List URLs found in terminal output"
-msgstr "列出终端输出中找到的 URL"
+msgstr "列出终端输出中发现的URL"
 
 # Error when URL extractor not ready
 #: addon/globalPlugins/terminalAccess.py:8068
-#, fuzzy
 msgid "URL list not available"
-msgstr "网址列表不可用"
+msgstr "URL列表不可用"
 
 # Announced when no URLs found
 #: addon/globalPlugins/terminalAccess.py:8075
-#, fuzzy
 msgid "No URLs found"
-msgstr "没有找到网址"
+msgstr "未找到任何URL"
 
 # Description for searching output
 #: addon/globalPlugins/terminalAccess.py:8089
-#, fuzzy
 msgid "Search terminal output for text pattern"
-msgstr "搜索终端输出的文本模式"
+msgstr "在终端输出中搜索文本模式"
 
 # Error message when search manager not initialized
 #: addon/globalPlugins/terminalAccess.py:8101
-#, fuzzy
 msgid "Search not available"
 msgstr "搜索不可用"
 
 # Search dialog prompt
 #: addon/globalPlugins/terminalAccess.py:8113
-#, fuzzy
 msgid "Enter search text:"
-msgstr "输入搜索文字："
+msgstr "输入搜索文本："
 
 # Search dialog title
 #: addon/globalPlugins/terminalAccess.py:8115
-#, fuzzy
 msgid "Search Terminal Output"
 msgstr "搜索终端输出"
 
 # Search results message
 #: addon/globalPlugins/terminalAccess.py:8135
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Found {total} matches. Match {num} of {total}: {text}"
-msgstr "找到 {total} 匹配项。匹配 {num} 或 {total}：{text}"
+msgstr "找到 <x id=\"0\">{total}</x> 个匹配项。匹配项 {num} 占 {total} 个匹配项中的：{text}"
 
 # No matches found
 #: addon/globalPlugins/terminalAccess.py:8143
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "No matches found for '{pattern}'"
-msgstr "未找到“{pattern}”的匹配项"
+msgstr "未找到与 '{pattern}' 匹配的记录"
 
 # Description for next search match
 #: addon/globalPlugins/terminalAccess.py:8152
-#, fuzzy
 msgid "Jump to next search match"
 msgstr "跳转到下一个搜索匹配项"
 
 # No search results
 #: addon/globalPlugins/terminalAccess.py:8167
-#, fuzzy
 msgid "No search results. Use NVDA+F to search."
-msgstr "没有搜索结果。使用NVDA+F进行搜索。"
+msgstr "没有搜索结果。请使用NVDA+F进行搜索。"
 
 # Error jumping to next match
 #: addon/globalPlugins/terminalAccess.py:8178
-#, fuzzy
 msgid "Cannot jump to next match"
-msgstr "无法跳转到下一场比赛"
+msgstr "无法跳转至下一场比赛"
 
 # Description for previous search match
 #: addon/globalPlugins/terminalAccess.py:8182
-#, fuzzy
 msgid "Jump to previous search match"
-msgstr "跳转到上一个搜索匹配项"
+msgstr "跳转至上一个搜索匹配项"
 
 # Error jumping to previous match
 #: addon/globalPlugins/terminalAccess.py:8208
-#, fuzzy
 msgid "Cannot jump to previous match"
-msgstr "无法跳转到上一场比赛"
+msgstr "无法跳转至上一场比赛"
 
 # Title for the Terminal Access settings category
 #: addon/globalPlugins/terminalAccess.py:8255
-#, fuzzy
 msgid "Terminal Settings"
 msgstr "终端设置"
 
 #: addon/globalPlugins/terminalAccess.py:8265
-#, fuzzy
 msgid "Cursor Tracking"
-msgstr "光标跟踪"
+msgstr "光标追踪"
 
 #: addon/globalPlugins/terminalAccess.py:8273
-#, fuzzy
 msgid "Enable cursor &tracking"
-msgstr "启用光标&跟踪"
+msgstr "启用光标追踪"
 
 # Tooltip for cursor tracking checkbox
 #: addon/globalPlugins/terminalAccess.py:8277
-#, fuzzy
 msgid "Automatically announce cursor position changes in the terminal"
-msgstr "自动宣布终端中光标位置的变化"
+msgstr "在终端中自动宣布光标位置变化"
 
 #: addon/globalPlugins/terminalAccess.py:8284
-#, fuzzy
 msgid "Cursor tracking &mode:"
-msgstr "光标跟踪模式："
+msgstr "光标跟踪与模式："
 
 # Cursor tracking mode option
 #: addon/globalPlugins/terminalAccess.py:8288
-#, fuzzy
 msgid "Off"
-msgstr "离开"
+msgstr "关闭"
 
 # Cursor tracking mode option
 #: addon/globalPlugins/terminalAccess.py:8290
-#, fuzzy
 msgid "Standard"
 msgstr "标准"
 
 # Cursor tracking mode option
 #: addon/globalPlugins/terminalAccess.py:8292
-#, fuzzy
 msgid "Highlight"
-msgstr "强调"
+msgstr "突出显示"
 
 # Cursor tracking mode option
 #: addon/globalPlugins/terminalAccess.py:8294
-#, fuzzy
 msgid "Window"
 msgstr "窗户"
 
 # Tooltip for cursor tracking mode
 #: addon/globalPlugins/terminalAccess.py:8299
-#, fuzzy
 msgid ""
 "Standard: announce line/column changes, Highlight: announce highlighted "
 "text, Window: only announce within defined window"
-msgstr "标准：宣布行/列更改，突出显示：宣布突出显示的文本，窗口：仅在定义的窗口内宣布"
+msgstr "标准：宣布行/列变更，突出显示：宣布高亮文本，窗口：仅在定义的窗口内宣布"
 
 #: addon/globalPlugins/terminalAccess.py:8308
-#, fuzzy
 msgid "Cursor delay (milliseconds):"
 msgstr "光标延迟（毫秒）："
 
 # Tooltip for cursor delay
 #: addon/globalPlugins/terminalAccess.py:8315
-#, fuzzy
 msgid ""
 "Delay before announcing cursor position (0-1000ms). Higher values reduce "
 "announcement frequency."
-msgstr "宣布光标位置之前的延迟（0-1000 毫秒）。较高的值会降低公告频率。"
+msgstr "延迟后宣布光标位置（0-1000毫秒）。数值越高，宣布频率越低。"
 
 #: addon/globalPlugins/terminalAccess.py:8323
-#, fuzzy
 msgid "Feedback"
 msgstr "反馈"
 
 #: addon/globalPlugins/terminalAccess.py:8331
-#, fuzzy
 msgid "Enable &key echo"
-msgstr "启用按键回显(&C)"
+msgstr "启用 &key echo"
 
 # Tooltip for key echo
 #: addon/globalPlugins/terminalAccess.py:8335
-#, fuzzy
 msgid "Announce characters as you type in the terminal"
-msgstr "当您在终端中键入时读出字符"
+msgstr "在终端输入时实时显示字符"
 
 #: addon/globalPlugins/terminalAccess.py:8342
-#, fuzzy
 msgid "Pause at &newlines"
-msgstr "在换行符处暂停(&N)"
+msgstr "在换行符处暂停"
 
 # Tooltip for line pause
 #: addon/globalPlugins/terminalAccess.py:8346
-#, fuzzy
 msgid "Brief pause when speaking line content to improve clarity"
-msgstr "说出台词内容时短暂停顿以提高清晰度"
+msgstr "说话时短暂停顿以提高清晰度"
 
 #: addon/globalPlugins/terminalAccess.py:8353
-#, fuzzy
 msgid "&Punctuation level:"
-msgstr "标点符号级别(&S)："
+msgstr "&标点符号级别："
 
 # Punctuation level option
 #: addon/globalPlugins/terminalAccess.py:8359
-#, fuzzy
 msgid "Some (.,?!;:)"
-msgstr "一些 （。，？！;：）"
+msgstr "某些（.,?!;:）"
 
 # Punctuation level option
 #: addon/globalPlugins/terminalAccess.py:8361
 #, python-brace-format, fuzzy
 msgid "Most (adds @#$%^&*()_+=[]{}\\\\|<>/)"
-msgstr "大多数（添加@#$%^&*()_+=[]{}\\\\|<>/）"
+msgstr "大多数（添加 @#$%^&*()_+=[]{}\\\\|<>/）"
 
 # Punctuation level option
 #: addon/globalPlugins/terminalAccess.py:8363
-#, fuzzy
 msgid "All"
-msgstr "全部"
+msgstr "所有"
 
 # Tooltip for punctuation level
 #: addon/globalPlugins/terminalAccess.py:8368
-#, fuzzy
 msgid ""
 "Controls which punctuation symbols are announced. Higher levels announce "
 "more symbols. Use NVDA+[ and ] to adjust quickly."
-msgstr "控制宣布哪些标点符号。更高的级别宣布更多的符号。使用NVDA+[和]快速调整。"
+msgstr "控制哪些标点符号会被朗读。级别越高，朗读的符号越多。使用 NVDA + [ 和 ] 键快速调整。"
 
 #: addon/globalPlugins/terminalAccess.py:8377
-#, fuzzy
 msgid "&Quiet mode"
-msgstr "安静模式(&C)"
+msgstr "静音模式"
 
 # Tooltip for quiet mode
 #: addon/globalPlugins/terminalAccess.py:8381
-#, fuzzy
 msgid ""
 "Suppress most Terminal Access announcements. Use NVDA+Shift+Q to toggle "
 "quickly."
-msgstr "禁止大多数终端访问公告。使用 NVDA+Shift+Q 快速切换。"
+msgstr "抑制大部分终端访问提示。使用 NVDA+Shift+Q 快速切换。"
 
 #: addon/globalPlugins/terminalAccess.py:8388
-#, fuzzy
 msgid "&Verbose mode (detailed feedback)"
-msgstr "&Verbose 模式（详细反馈）"
+msgstr "&详细模式（详细反馈）"
 
 # Tooltip for verbose mode
 #: addon/globalPlugins/terminalAccess.py:8392
-#, fuzzy
 msgid ""
 "Include position and context information with announcements. Useful for "
 "debugging and understanding terminal layout."
-msgstr "在公告中包含位置和上下文信息。对于调试和理解终端布局很有用。"
+msgstr "在公告中包含位置和上下文信息。这有助于调试和理解终端布局。"
 
 #: addon/globalPlugins/terminalAccess.py:8400
-#, fuzzy
 msgid "Announce &indentation when reading lines"
-msgstr "阅读行时宣布缩进(&H)"
+msgstr "在读取行时显示缩进"
 
 # Tooltip for indentation announcement
 #: addon/globalPlugins/terminalAccess.py:8404
-#, fuzzy
 msgid ""
 "Automatically announce indentation level when reading lines. Use NVDA+F5 to "
 "toggle quickly. NVDA+I pressed twice still reads indentation."
-msgstr "读取行时自动宣布缩进级别。使用NVDA+F5快速切换。 NVDA+我按了两次仍然读取缩进。"
+msgstr "在朗读行内容时自动宣布缩进级别。使用 NVDA+F5 快速切换。双击 NVDA+I 仍会朗读缩进级别。"
 
 #: addon/globalPlugins/terminalAccess.py:8412
-#, fuzzy
 msgid "Announce New Output"
-msgstr "宣布新输出"
+msgstr "发布新成果"
 
 #: addon/globalPlugins/terminalAccess.py:8420
-#, fuzzy
 msgid "&Announce new terminal output automatically"
-msgstr "自动宣布新终端输出(&A)"
+msgstr "&自动宣布新终端输出"
 
 # Tooltip for announce new output
 #: addon/globalPlugins/terminalAccess.py:8424
-#, fuzzy
 msgid ""
 "Automatically speak newly appended terminal output as it arrives. Use "
 "NVDA+Shift+N to toggle quickly."
-msgstr "当新附加的终端输出到达时，自动说出它。使用 NVDA+Shift+N 快速切换。"
+msgstr "自动朗读新输出的终端内容。使用 NVDA+Shift+N 快速切换。"
 
 #: addon/globalPlugins/terminalAccess.py:8432
-#, fuzzy
 msgid "&Coalesce delay (ms):"
-msgstr "合并延迟（毫秒）："
+msgstr "&聚合延迟 (毫秒)："
 
 # Tooltip for coalesce delay
 #: addon/globalPlugins/terminalAccess.py:8438
-#, fuzzy
 msgid ""
 "Milliseconds to wait before announcing accumulated new output. Larger values"
 " reduce interruptions during fast output."
-msgstr "宣布累积的新输出之前等待的毫秒数。较大的值可减少快速输出期间的中断。"
+msgstr "在宣布累积的新输出前等待的毫秒数。较大值可减少快速输出过程中的中断。"
 
 #: addon/globalPlugins/terminalAccess.py:8446
-#, fuzzy
 msgid "&Max lines before summarising:"
-msgstr "总结前的最大行数(&M):"
+msgstr "&摘要前的最大行数："
 
 # Tooltip for max lines
 #: addon/globalPlugins/terminalAccess.py:8452
-#, fuzzy
 msgid ""
 "When more than this many lines arrive at once, speak a summary ('N new "
 "lines') instead of the full text."
-msgstr "当超过这么多行同时到达时，请说出摘要（“N 新行”）而不是全文。"
+msgstr "当同时到达的行数超过此数量时，请说出摘要（\"N行新内容\"）而非完整文本。"
 
 #: addon/globalPlugins/terminalAccess.py:8460
-#, fuzzy
 msgid "&Strip ANSI escape codes from output"
-msgstr "从输出中去除 ANSI 转义码(&S)"
+msgstr "&从输出中移除 ANSI 转义码"
 
 # Tooltip for strip ANSI
 #: addon/globalPlugins/terminalAccess.py:8464
-#, fuzzy
 msgid "Remove ANSI colour and formatting codes before speaking new output."
-msgstr "在说出新输出之前删除 ANSI 颜色和格式代码。"
+msgstr "在输出新内容前，请移除ANSI颜色和格式化代码。"
 
 #: addon/globalPlugins/terminalAccess.py:8471
-#, fuzzy
 msgid "Advanced"
-msgstr "先进的"
+msgstr "高级"
 
 #: addon/globalPlugins/terminalAccess.py:8479
-#, fuzzy
 msgid "Condense &repeated symbols"
-msgstr "压缩重复符号"
+msgstr "缩写 &重复符号"
 
 # Tooltip for repeated symbols
 #: addon/globalPlugins/terminalAccess.py:8483
-#, fuzzy
 msgid "Condense runs of repeated symbols (e.g., '====' becomes '4 equals')"
-msgstr "压缩重复符号（例如，“====”变为“4 equals”）"
+msgstr "将重复符号的连续段落进行压缩（例如，'====' 变为 '4 个等号'）"
 
 #: addon/globalPlugins/terminalAccess.py:8490
-#, fuzzy
 msgid "Repeated symbols to condense:"
-msgstr "重复的符号来压缩："
+msgstr "重复符号以实现压缩："
 
 # Tooltip for repeated symbols values
 #: addon/globalPlugins/terminalAccess.py:8495
-#, fuzzy
 msgid ""
 "Characters that will be condensed when repeated. Example: -_=! (max 50 "
 "characters)"
-msgstr "重复时会被压缩的字符。示例：-_=！ （最多 50 个字符）"
+msgstr "重复时将被压缩的字符。示例：-_=!（最多50个字符）"
 
 #: addon/globalPlugins/terminalAccess.py:8503
-#, fuzzy
 msgid "Application Profiles"
-msgstr "应用简介"
+msgstr "应用配置文件"
 
 #: addon/globalPlugins/terminalAccess.py:8511
-#, fuzzy
 msgid "Installed &profiles:"
-msgstr "安装和配置文件："
+msgstr "已安装的配置文件："
 
 # Tooltip for profile list
 #: addon/globalPlugins/terminalAccess.py:8518
-#, fuzzy
 msgid ""
 "Select an application profile to view or edit. Profiles customize Terminal "
 "Access behavior for specific applications. Active and default profiles are "
 "marked."
-msgstr "选择要查看或编辑的应用程序配置文件。配置文件为特定应用程序定制终端访问行为。活动和默认配置文件已标记。"
+msgstr "选择应用程序配置文件进行查看或编辑。配置文件可针对特定应用程序自定义终端访问行为。当前活动和默认配置文件已标记。"
 
 # Label for default profile choice
 #: addon/globalPlugins/terminalAccess.py:8526
-#, fuzzy
 msgid "None (use global settings)"
 msgstr "无（使用全局设置）"
 
 #: addon/globalPlugins/terminalAccess.py:8528
-#, fuzzy
 msgid "&Default profile:"
-msgstr "默认配置文件(&D)："
+msgstr "默认配置文件："
 
 # Tooltip for default profile
 #: addon/globalPlugins/terminalAccess.py:8544
-#, fuzzy
 msgid ""
 "Profile to use when no application-specific profile is detected. Use "
 "NVDA+F10 to check which profile is active."
-msgstr "未检测到特定于应用程序的配置文件时要使用的配置文件。使用 NVDA+F10 检查哪个配置文件处于活动状态。"
+msgstr "当未检测到应用程序专用配置文件时使用的配置文件。使用 NVDA+F10 检查当前激活的配置文件。"
 
 # Label for new profile button
 #: addon/globalPlugins/terminalAccess.py:8553
-#, fuzzy
 msgid "&New Profile..."
-msgstr "新配置文件(&N)..."
+msgstr "&新个人资料..."
 
 # Tooltip for new profile button
 #: addon/globalPlugins/terminalAccess.py:8556
-#, fuzzy
 msgid "Create a new application profile with custom settings"
-msgstr "使用自定义设置创建新的应用程序配置文件"
+msgstr "创建具有自定义设置的新应用程序配置文件"
 
 # Label for edit profile button
 #: addon/globalPlugins/terminalAccess.py:8562
-#, fuzzy
 msgid "&Edit Profile..."
-msgstr "编辑个人资料(&E)..."
+msgstr "编辑个人资料..."
 
 # Tooltip for edit profile button
 #: addon/globalPlugins/terminalAccess.py:8565
-#, fuzzy
 msgid "Edit the selected application profile"
-msgstr "编辑选定的应用程序配置文件"
+msgstr "编辑所选应用程序配置文件"
 
 # Label for delete profile button
 #: addon/globalPlugins/terminalAccess.py:8571
-#, fuzzy
 msgid "&Delete Profile"
-msgstr "删除个人资料(&D)"
+msgstr "&删除个人资料"
 
 # Tooltip for delete profile button
 #: addon/globalPlugins/terminalAccess.py:8574
-#, fuzzy
 msgid ""
 "Delete the selected custom profile (default profiles cannot be deleted)"
-msgstr "删除选定的自定义配置文件（默认配置文件无法删除）"
+msgstr "删除所选自定义配置文件（默认配置文件不可删除）"
 
 # Label for import profile button
 #: addon/globalPlugins/terminalAccess.py:8585
-#, fuzzy
 msgid "&Import..."
-msgstr "＆进口..."
+msgstr "&导入..."
 
 # Tooltip for import profile button
 #: addon/globalPlugins/terminalAccess.py:8588
-#, fuzzy
 msgid "Import a profile from a JSON file"
-msgstr "从 JSON 文件导入配置文件"
+msgstr "从JSON文件导入配置文件"
 
 # Label for export profile button
 #: addon/globalPlugins/terminalAccess.py:8594
-#, fuzzy
 msgid "E&xport..."
-msgstr "出口..."
+msgstr "进出口..."
 
 # Tooltip for export profile button
 #: addon/globalPlugins/terminalAccess.py:8597
-#, fuzzy
 msgid "Export the selected profile to a JSON file"
-msgstr "将选定的配置文件导出到 JSON 文件"
+msgstr "将所选配置文件导出为JSON文件"
 
 #: addon/globalPlugins/terminalAccess.py:8611
-#, fuzzy
 msgid "Direct Gesture Bindings"
 msgstr "直接手势绑定"
 
 #: addon/globalPlugins/terminalAccess.py:8639
-#, fuzzy
 msgid ""
 "Unchecked gestures are disabled. Use the command layer (NVDA+') to access "
 "them.\\nNVDA+' (Command Layer) and NVDA+Shift+F1 (Help) are always "
 "available."
-msgstr "未选中的手势将被禁用。使用命令层 (NVDA+') 访问它们。\\nNVDA+'（命令层）和 NVDA+Shift+F1（帮助）始终可用。"
+msgstr "未检查的手势功能已禁用。请使用命令层（NVDA+'）访问这些功能。NVDA+'（命令层）和 NVDA+Shift+F1（帮助）始终可用。"
 
 #: addon/globalPlugins/terminalAccess.py:8648
-#, fuzzy
 msgid "&Reset to Defaults"
-msgstr "重置为默认值(&R)"
+msgstr "&重置为默认设置"
 
 # Tooltip for reset button
 #: addon/globalPlugins/terminalAccess.py:8651
-#, fuzzy
 msgid "Reset all Terminal Access settings to their default values"
 msgstr "将所有终端访问设置重置为默认值"
 
 #: addon/globalPlugins/terminalAccess.py:8660
-#, fuzzy
 msgid ""
 "Are you sure you want to reset all Terminal Access settings to their default"
 " values?"
 msgstr "您确定要将所有终端访问设置重置为默认值吗？"
 
 #: addon/globalPlugins/terminalAccess.py:8661
-#, fuzzy
 msgid "Confirm Reset"
 msgstr "确认重置"
 
 #: addon/globalPlugins/terminalAccess.py:8706
-#, fuzzy
 msgid "All settings have been reset to their default values."
 msgstr "所有设置均已重置为默认值。"
 
 #: addon/globalPlugins/terminalAccess.py:8707
-#, fuzzy
 msgid "Settings Reset"
 msgstr "设置重置"
 
 # Indicator for currently active profile
 #: addon/globalPlugins/terminalAccess.py:8826
-#, fuzzy
 msgid "Active"
-msgstr "积极的"
+msgstr "活动"
 
 # Indicator for default profile
 #: addon/globalPlugins/terminalAccess.py:8830
-#, fuzzy
 msgid "Default"
 msgstr "默认"
 
 #: addon/globalPlugins/terminalAccess.py:8875
-#, fuzzy
 msgid ""
 "Profile creation dialog will be implemented soon. For now, profiles can be "
 "created programmatically via the ProfileManager API."
-msgstr "配置文件创建对话框将很快实现。目前，可以通过 ProfileManager API 以编程方式创建配置文件。"
+msgstr "配置文件创建对话框即将实现。目前，可通过ProfileManager API以编程方式创建配置文件。"
 
 #: addon/globalPlugins/terminalAccess.py:8877
-#, fuzzy
 msgid "Feature In Development"
-msgstr "正在开发中的功能"
+msgstr "功能开发中"
 
 #: addon/globalPlugins/terminalAccess.py:8889
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid ""
 "Profile editing dialog will be implemented soon. Selected profile: {name}"
-msgstr "配置文件编辑对话框将很快实现。选定的配置文件：{name}"
+msgstr "配置文件编辑对话框即将实现。当前选定配置文件：{name}"
 
 #: addon/globalPlugins/terminalAccess.py:8903
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Are you sure you want to delete the profile '{name}'?"
-msgstr "您确定要删除配置文件“{name}”吗？"
+msgstr "您确定要删除用户资料“{name}”吗？"
 
 #: addon/globalPlugins/terminalAccess.py:8904
-#, fuzzy
 msgid "Confirm Delete"
 msgstr "确认删除"
 
 #: addon/globalPlugins/terminalAccess.py:8923
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Profile '{name}' has been deleted."
-msgstr "配置文件“{name}”已被删除。"
+msgstr "用户资料 '{name}' 已被删除。"
 
 #: addon/globalPlugins/terminalAccess.py:8924
-#, fuzzy
 msgid "Profile Deleted"
 msgstr "个人资料已删除"
 
 #: addon/globalPlugins/terminalAccess.py:8933
-#, fuzzy
 msgid "Failed to delete profile. See NVDA log for details."
-msgstr "删除个人资料失败。有关详细信息，请参阅 NVDA 日志。"
+msgstr "删除配置文件失败。请查看 NVDA 日志以获取详细信息。"
 
 #: addon/globalPlugins/terminalAccess.py:8934
-#, fuzzy
 msgid "Error"
 msgstr "错误"
 
 #: addon/globalPlugins/terminalAccess.py:8943
-#, fuzzy
 msgid "Import Profile"
 msgstr "导入配置文件"
 
 #: addon/globalPlugins/terminalAccess.py:8945
-#, fuzzy
 msgid "JSON files (*.json)|*.json"
-msgstr "JSON 文件 (*.json)|*.json"
+msgstr "JSON文件（*.json）|*.json"
 
 #: addon/globalPlugins/terminalAccess.py:8972
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Profile '{name}' has been imported successfully."
-msgstr "配置文件“{name}”已成功导入。"
+msgstr "个人资料 '{name}' 已成功导入。"
 
 #: addon/globalPlugins/terminalAccess.py:8975
-#, fuzzy
 msgid "Profile Imported"
-msgstr "配置文件导入"
+msgstr "个人资料已导入"
 
 #: addon/globalPlugins/terminalAccess.py:8984
-#, fuzzy
 msgid "Failed to import profile. The file may be invalid or corrupted."
-msgstr "导入配置文件失败。该文件可能无效或已损坏。"
+msgstr "导入配置文件失败。文件可能无效或已损坏。"
 
 #: addon/globalPlugins/terminalAccess.py:8985
-#, fuzzy
 msgid "Import Error"
 msgstr "导入错误"
 
 #: addon/globalPlugins/terminalAccess.py:9008
-#, fuzzy
 msgid "Export Profile"
-msgstr "出口概况"
+msgstr "导出配置文件"
 
 #: addon/globalPlugins/terminalAccess.py:9024
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Profile '{name}' has been exported successfully."
-msgstr "配置文件“{name}”已成功导出。"
+msgstr "用户资料 '{name}' 已成功导出。"
 
 #: addon/globalPlugins/terminalAccess.py:9025
-#, fuzzy
 msgid "Profile Exported"
-msgstr "配置文件已导出"
+msgstr "个人资料已导出"
 
 #: addon/globalPlugins/terminalAccess.py:9034
-#, fuzzy
 msgid "Failed to export profile. See NVDA log for details."
-msgstr "导出配置文件失败。有关详细信息，请参阅 NVDA 日志。"
+msgstr "导出配置文件失败。请查看 NVDA 日志以获取详细信息。"
 
 #: addon/globalPlugins/terminalAccess.py:9035
-#, fuzzy
 msgid "Export Error"
 msgstr "导出错误"
 
 # Long description to be shown for this add-on on add-on information from add-
 # ons manager
 #: buildVars.py:17
-#, fuzzy
 msgid ""
 "Provides enhanced terminal accessibility for Windows Terminal and "
 "PowerShell, enabling screen reader users to efficiently navigate and "
@@ -1631,10 +1390,9 @@ msgid ""
 "Structure Reader) and incorporates functionality from both TDSR and Speakup."
 " Advanced features inspired by community suggestions and discussions."
 msgstr ""
-"为 Windows 终端和 PowerShell 提供增强的终端可访问性，使屏幕阅读器用户能够有效地导航并与命令行界面交互。受到 "
-"TDSR（终端数据结构阅读器）的启发，并结合了 TDSR 和 Speakup 的功能。受社区建议和讨论启发的高级功能。"
+"为 Windows 终端和 PowerShell 提供增强的终端可访问性，使屏幕阅读器用户能够高效地导航和交互命令行界面。该方案受 "
+"TDSR（终端数据结构阅读器）启发，融合了 TDSR 与 Speakup 的功能特性。其高级功能源于社区建议与讨论的成果。"
 
 #: buildVars.py:14
-#, fuzzy
 msgid "Terminal Access for NVDA"
-msgstr "NVDA 终端访问"
+msgstr "终端访问（适用于NVDA）"

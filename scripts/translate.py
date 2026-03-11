@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """
-Extract translatable strings, update .po files, and auto-translate via Google Translate.
+Extract translatable strings, update .po files, and auto-translate via DeepL.
 
 Usage:
     python scripts/translate.py                # Extract + merge + translate all
     python scripts/translate.py --extract      # Only regenerate .pot and merge .po files
     python scripts/translate.py --lang es fr   # Translate only specific languages
+
+Environment:
+    DEEPL_API_KEY   DeepL API key (required for translation)
 """
 import argparse
 import os
@@ -13,8 +16,8 @@ import re
 import sys
 import time
 
+import deepl
 import polib
-from deep_translator import GoogleTranslator
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -28,16 +31,16 @@ SOURCE_FILES = [
     os.path.join(PROJECT_ROOT, "buildVars.py"),
 ]
 
-# Language codes → Google Translate codes
+# Locale code -> DeepL target language code
 LANGUAGES = {
-    "de": "de",
-    "es": "es",
-    "fr": "fr",
-    "ja": "ja",
-    "pt": "pt",
-    "ru": "ru",
-    "zh_CN": "zh-CN",
-    "zh_TW": "zh-TW",
+    "de": "DE",
+    "es": "ES",
+    "fr": "FR",
+    "ja": "JA",
+    "pt": "PT-BR",
+    "ru": "RU",
+    "zh_CN": "ZH-HANS",
+    "zh_TW": "ZH-HANT",
 }
 
 # ---------------------------------------------------------------------------
@@ -57,7 +60,6 @@ def extract_strings(filepath: str) -> list[tuple[str, int, str]]:
     single_pat = re.compile(r'''_\(\s*"((?:[^"\\]|\\.)*)"\s*\)''')
     # Regex for single-line _("..." \n "...") continuation
     concat_start = re.compile(r'''_\(\s*"((?:[^"\\]|\\.)*)"\s*$''')
-    concat_cont = re.compile(r'''^\s*"((?:[^"\\]|\\.)*)"\s*\)''')
     # Regex for triple-quoted _() in buildVars
     triple_pat = re.compile(r'_\(\s*"""(.*?)"""\s*\)', re.DOTALL)
     # Regex for multi-line _(\n"..."\n) calls
@@ -91,7 +93,6 @@ def extract_strings(filepath: str) -> list[tuple[str, int, str]]:
             j = i + 1
             while j < len(lines):
                 cont_line = lines[j]
-                # Continuation "..."
                 cont_m = re.match(r'''^\s*"((?:[^"\\]|\\.)*)"\s*$''', cont_line)
                 end_m = re.match(r'''^\s*"((?:[^"\\]|\\.)*)"\s*\)''', cont_line)
                 if end_m:
@@ -105,7 +106,6 @@ def extract_strings(filepath: str) -> list[tuple[str, int, str]]:
             s = "".join(parts)
             if s:
                 comment = _find_translator_comment(lines, i + 1)
-                # Avoid duplicates from single_pat
                 if not any(r[0] == s for r in results):
                     results.append((s, i + 1, comment))
 
@@ -212,7 +212,7 @@ def merge_po(lang_code: str, pot: polib.POFile) -> polib.POFile:
         "Report-Msgid-Bugs-To": "https://github.com/PratikP1/Terminal-Access-for-NVDA/issues",
         "POT-Creation-Date": pot.metadata.get("POT-Creation-Date", ""),
         "PO-Revision-Date": time.strftime("%Y-%m-%d %H:%M%z"),
-        "Last-Translator": "Auto-translated",
+        "Last-Translator": "DeepL auto-translation",
         "Language-Team": lang_code,
         "Language": lang_code,
         "MIME-Version": "1.0",
@@ -224,8 +224,6 @@ def merge_po(lang_code: str, pot: polib.POFile) -> polib.POFile:
     existing = {e.msgid: e.msgstr for e in po if e.msgstr}
 
     # Rebuild from pot
-    po.clear()  # polib: remove all entries
-    # Actually polib doesn't have clear(), let's rebuild
     new_po = polib.POFile()
     new_po.metadata = po.metadata
 
@@ -247,46 +245,64 @@ def merge_po(lang_code: str, pot: polib.POFile) -> polib.POFile:
 # Translation
 # ---------------------------------------------------------------------------
 
-def translate_po(lang_code: str, google_lang: str) -> tuple[int, int]:
-    """Translate empty msgstr entries using Google Translate.
+def translate_po(lang_code: str, deepl_lang: str, translator: deepl.Translator) -> tuple[int, int]:
+    """Translate empty msgstr entries using DeepL.
 
     Returns (translated_count, total_count).
     """
     po_path = os.path.join(LOCALE_DIR, lang_code, "LC_MESSAGES", "nvda.po")
     po = polib.pofile(po_path)
 
-    translator = GoogleTranslator(source="en", target=google_lang)
-
-    untranslated = [e for e in po if not e.msgstr]
+    untranslated = [e for e in po if not e.msgstr and not e.fuzzy]
     total = len(po)
     count = 0
 
     for entry in untranslated:
         text = entry.msgid
 
-        # Protect python-brace-format placeholders
+        # Escape XML-unsafe characters for DeepL's tag_handling="xml"
+        # & (wxWidgets accelerator keys), < > (literal angle brackets)
+        has_escapes = "&" in text or "<" in text or ">" in text
+        if has_escapes:
+            text = text.replace("&", "&amp;")
+            text = text.replace("<", "&lt;")
+            text = text.replace(">", "&gt;")
+
+        # Protect python-brace-format placeholders with XML tags
+        # DeepL's tag_handling="xml" + ignore_tags preserves tagged content
         placeholders = {}
+        placeholder_text = text
         for i, m in enumerate(re.finditer(r"\{[^}]*\}", text)):
-            token = f"__PH{i}__"
-            placeholders[token] = m.group(0)
-            text = text.replace(m.group(0), token, 1)
+            token = f'<x id="{i}">{m.group(0)}</x>'
+            placeholders[i] = m.group(0)
+            placeholder_text = placeholder_text.replace(m.group(0), token, 1)
 
         try:
-            translated = translator.translate(text)
-            if not translated:
-                continue
+            result = translator.translate_text(
+                placeholder_text,
+                source_lang="EN",
+                target_lang=deepl_lang,
+                tag_handling="xml",
+                ignore_tags=["x"],
+            )
+            translated = result.text
 
-            # Restore placeholders
-            for token, original in placeholders.items():
-                translated = translated.replace(token, original)
+            # Restore placeholders — strip the XML wrapper
+            for i, original in placeholders.items():
+                # DeepL preserves <x id="N">...</x>, extract and replace
+                pattern = f'<x id="{i}">[^<]*</x>'
+                translated = re.sub(pattern, original, translated)
+
+            # Unescape XML entities back to literal characters
+            if has_escapes:
+                translated = translated.replace("&lt;", "<")
+                translated = translated.replace("&gt;", ">")
+                translated = translated.replace("&amp;", "&")
 
             entry.msgstr = translated
             if "fuzzy" not in entry.flags:
                 entry.flags.append("fuzzy")
             count += 1
-
-            # Rate limiting — Google Translate free tier
-            time.sleep(0.3)
 
         except Exception as e:
             print(f"    Error translating '{entry.msgid[:40]}...': {e}")
@@ -318,22 +334,46 @@ def main():
             print(f"  Unknown language: {lang}, skipping")
             continue
         po = merge_po(lang, pot)
-        untranslated = len([e for e in po if not e.msgstr])
+        untranslated = len([e for e in po if not e.msgstr and not e.fuzzy])
         print(f"  {lang}: {len(po)} strings, {untranslated} untranslated")
 
     if args.extract:
         print("Done (extract only).")
         return
 
-    # Step 3: Translate
-    print("\nTranslating...")
+    # Step 3: Translate with DeepL
+    api_key = os.environ.get("DEEPL_API_KEY", "")
+    if not api_key:
+        print("\nError: DEEPL_API_KEY environment variable not set.")
+        print("Set it with: set DEEPL_API_KEY=your-key-here")
+        sys.exit(1)
+
+    translator = deepl.Translator(api_key)
+
+    # Show usage before starting
+    try:
+        usage = translator.get_usage()
+        if usage.character.valid:
+            print(f"\nDeepL usage: {usage.character.count:,}/{usage.character.limit:,} characters used")
+    except Exception:
+        pass
+
+    print("\nTranslating with DeepL...")
     for lang in langs:
         if lang not in LANGUAGES:
             continue
-        google_lang = LANGUAGES[lang]
-        print(f"  {lang} ({google_lang})...", end=" ", flush=True)
-        translated, total = translate_po(lang, google_lang)
+        deepl_lang = LANGUAGES[lang]
+        print(f"  {lang} ({deepl_lang})...", end=" ", flush=True)
+        translated, total = translate_po(lang, deepl_lang, translator)
         print(f"{translated}/{total} translated")
+
+    # Show usage after
+    try:
+        usage = translator.get_usage()
+        if usage.character.valid:
+            print(f"\nDeepL usage after: {usage.character.count:,}/{usage.character.limit:,} characters used")
+    except Exception:
+        pass
 
     print("\nDone. All translations marked as 'fuzzy' for human review.")
 
