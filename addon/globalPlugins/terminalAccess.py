@@ -4829,9 +4829,14 @@ class UrlExtractorManager:
 			return []
 
 		try:
-			info = self._terminal.makeTextInfo(textInfos.POSITION_ALL)
-			raw_text = info.text
+			text_info = self._terminal.makeTextInfo(textInfos.POSITION_ALL)
+			raw_text = text_info.text
 		except Exception:
+			try:
+				import logHandler
+				logHandler.log.debugWarning("UrlExtractorManager: failed to read terminal text", exc_info=True)
+			except Exception:
+				pass
 			return []
 
 		if not raw_text:
@@ -4875,9 +4880,9 @@ class UrlExtractorManager:
 					}
 
 		self._urls = [
-			UrlEntry(url=url, line_num=info['line_num'], line_text=info['line_text'],
-			         source=info['source'], count=info['count'])
-			for url, info in seen.items()
+			UrlEntry(url=url, line_num=meta['line_num'], line_text=meta['line_text'],
+			         source=meta['source'], count=meta['count'])
+			for url, meta in seen.items()
 		]
 		return list(self._urls)
 
@@ -4968,13 +4973,17 @@ class UrlListDialog(wx.Dialog):
 		self._copy_btn = wx.Button(self, label=_("&Copy URL"))
 		# Translators: Button to move cursor to URL line
 		self._move_btn = wx.Button(self, label=_("&Move to line"))
-		close_btn = wx.Button(self, wx.ID_CLOSE, label=_("Close"))
+		# Use wx.ID_CANCEL so pressing Escape automatically closes the dialog
+		close_btn = wx.Button(self, wx.ID_CANCEL, label=_("Close"))
 
 		self._open_btn.Bind(wx.EVT_BUTTON, self._on_open)
 		self._copy_btn.Bind(wx.EVT_BUTTON, self._on_copy)
 		self._move_btn.Bind(wx.EVT_BUTTON, self._on_move)
 		close_btn.Bind(wx.EVT_BUTTON, self._on_close)
 		self.Bind(wx.EVT_CLOSE, self._on_close)
+
+		# Allow Escape key to close the dialog from any focused control
+		self.SetEscapeId(wx.ID_CANCEL)
 
 		btn_sizer.Add(self._open_btn, 0, wx.RIGHT, 5)
 		btn_sizer.Add(self._copy_btn, 0, wx.RIGHT, 5)
@@ -5062,7 +5071,7 @@ class UrlListDialog(wx.Dialog):
 	def _on_close(self, event):
 		"""Close the dialog."""
 		if self.IsModal():
-			self.EndModal(wx.ID_CLOSE)
+			self.EndModal(wx.ID_CANCEL)
 		else:
 			self.Destroy()
 
@@ -8068,17 +8077,39 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			ui.message(_("URL list not available"))
 			return
 
-		urls = self._urlExtractorManager.extract_urls()
+		try:
+			urls = self._urlExtractorManager.extract_urls()
+		except Exception:
+			try:
+				import logHandler
+				logHandler.log.error("URL extraction failed", exc_info=True)
+			except Exception:
+				pass
+			# Translators: Error when URL extraction fails
+			ui.message(_("Error extracting URLs"))
+			return
 
 		if not urls:
 			# Translators: Announced when no URLs found
 			ui.message(_("No URLs found"))
 			return
 
+		# Translators: Announced when URL list is loading with count of URLs found
+		ui.message(_("{count} URLs found").format(count=len(urls)))
+
 		def show_url_dialog():
-			dlg = UrlListDialog(gui.mainFrame, urls, self._urlExtractorManager)
-			dlg.ShowModal()
-			dlg.Destroy()
+			try:
+				dlg = UrlListDialog(gui.mainFrame, urls, self._urlExtractorManager)
+				dlg.ShowModal()
+				dlg.Destroy()
+			except Exception:
+				try:
+					import logHandler
+					logHandler.log.error("URL list dialog failed", exc_info=True)
+				except Exception:
+					pass
+				# Translators: Error when URL dialog fails to open
+				ui.message(_("Error opening URL list"))
 
 		wx.CallAfter(show_url_dialog)
 

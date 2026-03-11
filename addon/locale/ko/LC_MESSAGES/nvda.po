@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Terminal Access for NVDA\n"
 "Report-Msgid-Bugs-To: https://github.com/PratikP1/Terminal-Access-for-NVDA/issues\n"
-"POT-Creation-Date: 2026-03-11 17:50-0400\n"
-"PO-Revision-Date: 2026-03-11 17:50-0400\n"
+"POT-Creation-Date: 2026-03-11 19:32-0400\n"
+"PO-Revision-Date: 2026-03-11 19:32-0400\n"
 "Last-Translator: DeepL auto-translation\n"
 "Language-Team: ko\n"
 "Language: ko\n"
@@ -13,1226 +13,1064 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 
 #: addon/globalPlugins/terminalAccess.py:121
-#, fuzzy
 msgid "Terminal Access"
 msgstr "터미널 접속"
 
 #: addon/globalPlugins/terminalAccess.py:2326
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Selection too large: {rows} rows exceeds maximum of {max}"
 msgstr "선택된 행 수가 너무 많습니다: {rows} 행이 최대 허용 행 수 {max}를 초과합니다."
 
 #: addon/globalPlugins/terminalAccess.py:2331
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "Selection too wide: {cols} columns exceeds maximum of {max}"
 msgstr "선택 범위가 너무 넓습니다: {cols} 열이 최대 허용값 {max}을 초과합니다."
 
 #: addon/globalPlugins/terminalAccess.py:3050
-#, fuzzy
 msgid "Initializing..."
 msgstr "초기화 중..."
 
 # Summary when many new lines arrive at once
 #: addon/globalPlugins/terminalAccess.py:3377
-#, python-brace-format, fuzzy
+#, python-brace-format
 msgid "{n} new lines"
 msgstr "{n} 새 줄"
 
 # Title for URL list dialog
-#: addon/globalPlugins/terminalAccess.py:4931
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:4936
 msgid "URL List - Terminal Access"
 msgstr "URL 목록 - 터미널 접속"
 
 # Label for URL filter text box
-#: addon/globalPlugins/terminalAccess.py:4943
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:4948
 msgid "&Filter:"
 msgstr "&필터:"
 
 # Column header for URL list index
-#: addon/globalPlugins/terminalAccess.py:4953
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:4958
 msgid "#"
 msgstr "#"
 
 # Column header for URL
-#: addon/globalPlugins/terminalAccess.py:4955
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:4960
 msgid "URL"
 msgstr "URL"
 
 # Column header for line number
-#: addon/globalPlugins/terminalAccess.py:4957
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:4962
 msgid "Line"
 msgstr "라인"
 
 # Column header for line context
-#: addon/globalPlugins/terminalAccess.py:4959
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:4964
 msgid "Context"
 msgstr "문맥"
 
 # Button to open URL in browser
-#: addon/globalPlugins/terminalAccess.py:4966
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:4971
 msgid "&Open"
 msgstr "&열기"
 
 # Button to copy URL to clipboard
-#: addon/globalPlugins/terminalAccess.py:4968
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:4973
 msgid "&Copy URL"
 msgstr "&Copy URL"
 
 # Button to move cursor to URL line
-#: addon/globalPlugins/terminalAccess.py:4970
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:4975
 msgid "&Move to line"
 msgstr "&줄로 이동"
 
-#: addon/globalPlugins/terminalAccess.py:4971
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:4977
 msgid "Close"
 msgstr "닫기"
 
 # Announced after URL is copied
-#: addon/globalPlugins/terminalAccess.py:5049
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:5058
 msgid "URL copied"
 msgstr "URL 복사됨"
 
 # Announced when moving to a URL line
-#: addon/globalPlugins/terminalAccess.py:5060
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:5069
+#, python-brace-format
 msgid "Line {num}: {text}"
 msgstr "{num} 라인: {text}"
 
 # Position context for verbose mode
-#: addon/globalPlugins/terminalAccess.py:5433
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:5442
+#, python-brace-format
 msgid "Row {row}, column {col}"
 msgstr "{row}행, {col}열"
 
 # Format for verbose announcements with context
-#: addon/globalPlugins/terminalAccess.py:5471
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:5480
+#, python-brace-format
 msgid "{message}. {context}"
 msgstr "{message}. {context}"
 
 # Message announced when entering a terminal application
-#: addon/globalPlugins/terminalAccess.py:5577
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:5586
 msgid "Terminal Access support active. Press NVDA+shift+f1 for help."
 msgstr "터미널 액세스 지원 활성화됨. 도움말은 NVDA+Shift+F1을 누르세요."
 
 # Message format for repeated symbols, e.g. "3 dash"
-#: addon/globalPlugins/terminalAccess.py:5707
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:5716
+#, python-brace-format
 msgid "{count} {symbol}"
 msgstr "{count} {symbol}"
 
-#: addon/globalPlugins/terminalAccess.py:5920
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:5929
+#, python-brace-format
 msgid "Highlighted: {text}"
 msgstr "하이라이트: {text}"
 
 # Description for the show help gesture
-#: addon/globalPlugins/terminalAccess.py:6008
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6017
 msgid "Opens the Terminal Access user guide"
 msgstr "터미널 액세스 사용자 가이드 열기"
 
 # Error message when help file is not found
-#: addon/globalPlugins/terminalAccess.py:6023
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6032
 msgid "Help file not found. Please reinstall the add-on."
 msgstr "도움말 파일을 찾을 수 없습니다. 애드온을 다시 설치하십시오."
 
 # Error message when add-on is not properly installed
-#: addon/globalPlugins/terminalAccess.py:6026
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6035
 msgid "Terminal Access add-on not properly installed."
 msgstr "터미널 액세스 애드온이 제대로 설치되지 않았습니다."
 
 # Description for reading the previous line
-#: addon/globalPlugins/terminalAccess.py:6030
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6039
 msgid "Read previous line in terminal"
 msgstr "터미널에서 이전 줄 읽기"
 
 # Description for reading the current line
-#: addon/globalPlugins/terminalAccess.py:6044
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6053
 msgid "Read current line in terminal. Press twice for indentation level."
 msgstr "터미널에서 현재 줄 읽기. 들여쓰기 수준을 위해 두 번 누르세요."
 
 # Description for reading the next line
-#: addon/globalPlugins/terminalAccess.py:6063
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6072
 msgid "Read next line in terminal"
 msgstr "터미널에서 다음 줄 읽기"
 
 # Description for reading the previous word
-#: addon/globalPlugins/terminalAccess.py:6077
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6086
 msgid "Read previous word in terminal"
 msgstr "터미널에서 이전 단어 읽기"
 
 # Description for reading the current word
-#: addon/globalPlugins/terminalAccess.py:6091
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6100
 msgid "Read current word in terminal"
 msgstr "터미널에서 현재 단어 읽기"
 
 # Description for spelling the current word
-#: addon/globalPlugins/terminalAccess.py:6105
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6114
 msgid "Spell current word in terminal"
 msgstr "터미널에서 현재 단어 철자 맞추기"
 
 # Description for reading the next word
-#: addon/globalPlugins/terminalAccess.py:6119
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6128
 msgid "Read next word in terminal"
 msgstr "터미널에서 다음 단어 읽기"
 
 # Description for reading the previous character
-#: addon/globalPlugins/terminalAccess.py:6133
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6142
 msgid "Read previous character in terminal"
 msgstr "터미널에서 이전 문자 읽기"
 
 # Description for reading the current character
-#: addon/globalPlugins/terminalAccess.py:6147
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6156
 msgid ""
 "Read current character in terminal. Press twice for phonetic. Press three "
 "times for character code."
 msgstr "터미널에서 현재 문자를 읽습니다. 발음을 위해 두 번 누르세요. 문자 코드를 위해 세 번 누르세요."
 
 # Description for reading the next character
-#: addon/globalPlugins/terminalAccess.py:6171
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6180
 msgid "Read next character in terminal"
 msgstr "터미널에서 다음 문자를 읽으십시오"
 
 # Description for toggling quiet mode
-#: addon/globalPlugins/terminalAccess.py:6185
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6194
 msgid "Toggle quiet mode in terminal"
 msgstr "터미널에서 조용한 모드 전환"
 
 # Message when quiet mode is enabled
-#: addon/globalPlugins/terminalAccess.py:6205
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6214
 msgid "Quiet mode on"
 msgstr "조용한 모드 켜기"
 
 # Message when quiet mode is disabled
-#: addon/globalPlugins/terminalAccess.py:6208
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6217
 msgid "Quiet mode off"
 msgstr "무음 모드 해제"
 
 # Description for toggling announce new output
-#: addon/globalPlugins/terminalAccess.py:6212
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6221
 msgid "Toggle announce new output in terminal"
 msgstr "터미널에서 새 출력 알림 토글"
 
 # Message when announce new output is enabled
-#: addon/globalPlugins/terminalAccess.py:6236
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6245
 msgid "Announce new output on"
 msgstr "새로운 출력 발표"
 
 # Message when announce new output is disabled
-#: addon/globalPlugins/terminalAccess.py:6241
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6250
 msgid "Announce new output off"
 msgstr "새로운 출력 발표"
 
 # Description for toggling indentation announcement
-#: addon/globalPlugins/terminalAccess.py:6245
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6254
 msgid "Toggle indentation announcement on line read in terminal"
 msgstr "터미널에서 읽은 줄의 들여쓰기 표시 전환"
 
 # Message when indentation announcement is enabled
-#: addon/globalPlugins/terminalAccess.py:6263
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6272
 msgid "Indentation announcement on"
 msgstr "인덴테이션 공지사항"
 
 # Message when indentation announcement is disabled
-#: addon/globalPlugins/terminalAccess.py:6266
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6275
 msgid "Indentation announcement off"
 msgstr "들여쓰기 공지 해제"
 
 # Description for copy mode
-#: addon/globalPlugins/terminalAccess.py:6270
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6279
 msgid "Enter copy mode in terminal"
 msgstr "터미널에서 복사 모드로 진입"
 
 # Message entering copy mode
-#: addon/globalPlugins/terminalAccess.py:6287
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6296
 msgid ""
 "Copy mode. Press L to copy line, S to copy screen, or Escape to cancel."
 msgstr "복사 모드. L 키를 눌러 줄 복사, S 키를 눌러 화면 복사, Esc 키를 눌러 취소합니다."
 
 # Description for copying line
-#: addon/globalPlugins/terminalAccess.py:6291
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6300
 msgid "Copy line in copy mode"
 msgstr "복사 모드에서 줄 복사"
 
-#: addon/globalPlugins/terminalAccess.py:6303
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6312
 msgid "Unable to copy"
 msgstr "복사할 수 없습니다"
 
 # Message when line is copied
-#: addon/globalPlugins/terminalAccess.py:6311
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6320
 msgid "Line copied"
 msgstr "라인 복사됨"
 
 # Description for copying screen
-#: addon/globalPlugins/terminalAccess.py:6322
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6331
 msgid "Copy screen in copy mode"
 msgstr "복사 모드에서 화면 복사"
 
 # Message when screen is copied
-#: addon/globalPlugins/terminalAccess.py:6342
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6351
 msgid "Screen copied"
 msgstr "화면 복사됨"
 
 # Description for exiting copy mode
-#: addon/globalPlugins/terminalAccess.py:6353
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6362
 msgid "Exit copy mode"
 msgstr "복사 모드 종료"
 
 # Message when copy mode is canceled
-#: addon/globalPlugins/terminalAccess.py:6363
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6372
 msgid "Copy mode canceled"
 msgstr "복사 모드 취소됨"
 
 # Description for toggling the command layer
-#: addon/globalPlugins/terminalAccess.py:6391
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6400
 msgid "Toggle terminal command layer (single-key command mode)"
 msgstr "터미널 명령어 레이어 전환 (단일 키 명령어 모드)"
 
 # Announced when the terminal command layer is activated
-#: addon/globalPlugins/terminalAccess.py:6420
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6429
 msgid "Terminal commands"
 msgstr "터미널 명령어"
 
 # Announced when the terminal command layer is deactivated
-#: addon/globalPlugins/terminalAccess.py:6434
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6443
 msgid "Exit terminal commands"
 msgstr "터미널 명령어 종료"
 
 # Description for exiting the command layer
-#: addon/globalPlugins/terminalAccess.py:6438
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6447
 msgid "Exit the terminal command layer"
 msgstr "터미널 명령어 레이어에서 나가기"
 
 # Description for opening terminal settings
-#: addon/globalPlugins/terminalAccess.py:6450
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6459
 msgid "Open Terminal Access settings"
 msgstr "터미널 액세스 설정 열기"
 
 # Error message when settings dialog cannot be opened
-#: addon/globalPlugins/terminalAccess.py:6464
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6473
 msgid "Unable to open settings dialog. Please try again."
 msgstr "설정 대화 상자를 열 수 없습니다. 다시 시도해 주세요."
 
 # Description for cycling cursor tracking modes
-#: addon/globalPlugins/terminalAccess.py:6468
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6477
 msgid "Cycle cursor tracking mode"
 msgstr "사이클 커서 추적 모드"
 
-#: addon/globalPlugins/terminalAccess.py:6491
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6500
 msgid "Cursor tracking off"
 msgstr "커서 추적 해제"
 
-#: addon/globalPlugins/terminalAccess.py:6492
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6501
 msgid "Standard cursor tracking"
 msgstr "표준 커서 추적"
 
-#: addon/globalPlugins/terminalAccess.py:6493
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6502
 msgid "Highlight tracking"
 msgstr "하이라이트 추적"
 
-#: addon/globalPlugins/terminalAccess.py:6494
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6503
 msgid "Window tracking"
 msgstr "창 추적"
 
-#: addon/globalPlugins/terminalAccess.py:6496
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6505
 msgid "Unknown mode"
 msgstr "알 수 없는 모드"
 
 # Description for setting screen window
-#: addon/globalPlugins/terminalAccess.py:6500
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6509
 msgid "Set screen window boundaries"
 msgstr "화면 창 경계 설정"
 
-#: addon/globalPlugins/terminalAccess.py:6513
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6522
 msgid "Unable to set window"
 msgstr "창을 설정할 수 없습니다"
 
 # Message when window start is set
-#: addon/globalPlugins/terminalAccess.py:6521
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6530
 msgid "Window start set. Move to end position and press again."
 msgstr "창 시작 위치 설정. 끝 위치로 이동한 후 다시 누르세요."
 
 # Message when window is defined
-#: addon/globalPlugins/terminalAccess.py:6533
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6542
 msgid "Window defined"
 msgstr "창 정의"
 
 # Description for clearing screen window
-#: addon/globalPlugins/terminalAccess.py:6540
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6549
 msgid "Clear screen window"
 msgstr "창문 유리"
 
 # Message when window is cleared
-#: addon/globalPlugins/terminalAccess.py:6553
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6562
 msgid "Window cleared"
 msgstr "창이 비워졌습니다"
 
 # Description for reading window content
-#: addon/globalPlugins/terminalAccess.py:6557
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6566
 msgid "Read window content"
 msgstr "창 내용 읽기"
 
 # Message when no window is defined
-#: addon/globalPlugins/terminalAccess.py:6569
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6578
 msgid "No window defined"
 msgstr "정의된 창이 없습니다."
 
-#: addon/globalPlugins/terminalAccess.py:6575
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6584
 msgid "Unable to read window"
 msgstr "창을 읽을 수 없습니다"
 
-#: addon/globalPlugins/terminalAccess.py:6586
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6595
 msgid "Window not properly defined"
 msgstr "창이 올바르게 정의되지 않았습니다."
 
 # Message when window contains no text
-#: addon/globalPlugins/terminalAccess.py:6626
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6635
 msgid "Window is empty"
 msgstr "창이 비어 있습니다"
 
 # Description for reading text attributes
-#: addon/globalPlugins/terminalAccess.py:6633
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6642
 msgid "Read text attributes at cursor"
 msgstr "커서 위치의 텍스트 속성 읽기"
 
-#: addon/globalPlugins/terminalAccess.py:6646
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6655
 msgid "Unable to read attributes"
 msgstr "속성을 읽을 수 없습니다"
 
 # Message when no text at cursor
-#: addon/globalPlugins/terminalAccess.py:6673
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6682
 msgid "No text at cursor"
 msgstr "커서 위치에 텍스트 없음"
 
 # Description for continuous reading (say all)
-#: addon/globalPlugins/terminalAccess.py:6684
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6693
 msgid "Read continuously from cursor to end of buffer"
 msgstr "커서 위치부터 버퍼 끝까지 연속적으로 읽기"
 
 # Message when unable to start continuous reading
-#: addon/globalPlugins/terminalAccess.py:6698
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6707
 msgid "Unable to read"
 msgstr "읽을 수 없음"
 
 # Message when buffer is empty
-#: addon/globalPlugins/terminalAccess.py:6711
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6720
 msgid "Nothing to read"
 msgstr "읽을 게 없다"
 
 # Description for jumping to start of line
-#: addon/globalPlugins/terminalAccess.py:6724
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6733
 msgid "Move to first character of current line"
 msgstr "현재 줄의 첫 번째 문자로 이동"
 
 # Message when unable to move
-#: addon/globalPlugins/terminalAccess.py:6738
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6747
 msgid "Unable to move"
 msgstr "움직일 수 없음"
 
 # Message for blank line
-#: addon/globalPlugins/terminalAccess.py:6756
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6765
 msgid "Blank"
 msgstr "빈칸"
 
 # Description for jumping to end of line
-#: addon/globalPlugins/terminalAccess.py:6762
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6771
 msgid "Move to last character of current line"
 msgstr "현재 줄의 마지막 문자로 이동"
 
 # Description for jumping to top
-#: addon/globalPlugins/terminalAccess.py:6801
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6810
 msgid "Move to top of terminal buffer"
 msgstr "터미널 버퍼 맨 위로 이동"
 
 # Description for jumping to bottom
-#: addon/globalPlugins/terminalAccess.py:6834
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6843
 msgid "Move to bottom of terminal buffer"
 msgstr "터미널 버퍼의 맨 아래로 이동"
 
 # Description for announcing position
-#: addon/globalPlugins/terminalAccess.py:6867
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6876
 msgid "Announce current row and column position"
 msgstr "현재 행과 열 위치를 알립니다"
 
 # Message when position unavailable
-#: addon/globalPlugins/terminalAccess.py:6881
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6890
 msgid "Position unavailable"
 msgstr "해당 직책은 현재 공석이 아닙니다."
 
 # Description for announcing active profile
-#: addon/globalPlugins/terminalAccess.py:6898
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6907
 msgid "Announce which profile is currently active and which is set as default"
 msgstr "현재 활성화된 프로필과 기본값으로 설정된 프로필을 알려줍니다."
 
 # Message when no profile is active
-#: addon/globalPlugins/terminalAccess.py:6913
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6922
 msgid "None (using global settings)"
 msgstr "없음 (글로벌 설정 사용)"
 
 # Message when no default profile is set
-#: addon/globalPlugins/terminalAccess.py:6922
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6931
 msgid "None"
 msgstr "없음"
 
 # Message announcing active and default profiles
-#: addon/globalPlugins/terminalAccess.py:6926
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6935
+#, python-brace-format
 msgid "Active profile: {active}. Default profile: {default}"
 msgstr "활성 프로필: {active} 기본 프로필: {default}"
 
 # Message when unable to read indentation
-#: addon/globalPlugins/terminalAccess.py:6937
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6946
 msgid "Unable to read indentation"
 msgstr "들여쓰기를 읽을 수 없음"
 
 # Message for empty line
-#: addon/globalPlugins/terminalAccess.py:6947
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6956
 msgid "Empty line"
 msgstr "빈 줄"
 
 # Message when line has no indentation
-#: addon/globalPlugins/terminalAccess.py:6972
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6981
 msgid "No indentation"
 msgstr "들여쓰기 없음"
 
 # Message for mixed indentation
-#: addon/globalPlugins/terminalAccess.py:6975
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6984
+#, python-brace-format
 msgid "{tabs} tab, {spaces} spaces"
 msgstr "{tabs} 탭, {spaces} 공백"
 
 # Message for mixed indentation
-#: addon/globalPlugins/terminalAccess.py:6975
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6984
+#, python-brace-format
 msgid "{tabs} tabs, {spaces} spaces"
 msgstr "{tabs} 탭, {spaces} 공백"
 
 # Message for tab indentation
-#: addon/globalPlugins/terminalAccess.py:6978
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6987
+#, python-brace-format
 msgid "{count} tab"
 msgstr "{count} 탭"
 
 # Message for tab indentation
-#: addon/globalPlugins/terminalAccess.py:6978
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6987
+#, python-brace-format
 msgid "{count} tabs"
 msgstr "{count} 탭"
 
 # Message for space indentation
-#: addon/globalPlugins/terminalAccess.py:6981
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6990
+#, python-brace-format
 msgid "{count} space"
 msgstr "{count} 공간"
 
 # Message for space indentation
-#: addon/globalPlugins/terminalAccess.py:6981
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:6990
+#, python-brace-format
 msgid "{count} spaces"
 msgstr "{count} 공백"
 
 # Message when no review position
-#: addon/globalPlugins/terminalAccess.py:7087
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7096
 msgid "No review position"
 msgstr "검토 위치 없음"
 
-#: addon/globalPlugins/terminalAccess.py:7093
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7102
 msgid "Unable to read character"
 msgstr "문자를 읽을 수 없습니다"
 
 # Message when at edge of text
-#: addon/globalPlugins/terminalAccess.py:7113
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7122
 msgid "Edge"
 msgstr "에지"
 
 # Message when at edge of text
-#: addon/globalPlugins/terminalAccess.py:7113
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7122
 msgid "Top"
 msgstr "최상위"
 
 # Message when no character at position
-#: addon/globalPlugins/terminalAccess.py:7165
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7174
 msgid "No character"
 msgstr "문자 없음"
 
 # Message announcing character code
-#: addon/globalPlugins/terminalAccess.py:7186
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7195
+#, python-brace-format
 msgid "Character {decimal}, hex {hex}, {name}"
 msgstr "문자{decimal}, 16진수{hex}, {name}"
 
-#: addon/globalPlugins/terminalAccess.py:7248
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7257
 msgid "space"
 msgstr "공간"
 
 # Description for decreasing punctuation level
-#: addon/globalPlugins/terminalAccess.py:7256
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7265
 msgid "Decrease punctuation level"
 msgstr "구두점 수준 낮추기"
 
-#: addon/globalPlugins/terminalAccess.py:7274
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7283
 msgid "Punctuation level none"
 msgstr "구두점 수준 없음"
 
-#: addon/globalPlugins/terminalAccess.py:7275
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7284
 msgid "Punctuation level some"
 msgstr "구두점 수준 일부"
 
-#: addon/globalPlugins/terminalAccess.py:7276
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7285
 msgid "Punctuation level most"
 msgstr "구두점 수준 최고"
 
-#: addon/globalPlugins/terminalAccess.py:7277
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7286
 msgid "Punctuation level all"
 msgstr "구두점 수준 모두"
 
-#: addon/globalPlugins/terminalAccess.py:7279
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7288
 msgid "Punctuation level unknown"
 msgstr "구두점 수준 불명"
 
 # Description for increasing punctuation level
-#: addon/globalPlugins/terminalAccess.py:7283
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7292
 msgid "Increase punctuation level"
 msgstr "구두점 수준 높이기"
 
 # Description for reading to left edge
-#: addon/globalPlugins/terminalAccess.py:7310
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7319
 msgid "Read from cursor to beginning of line"
 msgstr "커서 위치부터 줄 시작 부분까지 읽기"
 
 # Message when region is empty
-#: addon/globalPlugins/terminalAccess.py:7336
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7345
 msgid "Nothing"
 msgstr "아무것도"
 
 # Description for reading to right edge
-#: addon/globalPlugins/terminalAccess.py:7346
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7355
 msgid "Read from cursor to end of line"
 msgstr "커서 위치부터 줄 끝까지 읽기"
 
 # Description for reading to top
-#: addon/globalPlugins/terminalAccess.py:7381
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7390
 msgid "Read from cursor to top of buffer"
 msgstr "커서 위치부터 버퍼 상단까지 읽기"
 
 # Description for reading to bottom
-#: addon/globalPlugins/terminalAccess.py:7418
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7427
 msgid "Read from cursor to bottom of buffer"
 msgstr "커서 위치부터 버퍼 끝까지 읽기"
 
 # Description for toggling mark position
-#: addon/globalPlugins/terminalAccess.py:7455
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7464
 msgid "Toggle mark for selection (enhanced)"
 msgstr "선택 표시 토글 (강화됨)"
 
-#: addon/globalPlugins/terminalAccess.py:7468
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7477
 msgid "Unable to set mark"
 msgstr "표시를 설정할 수 없습니다"
 
 # Message when start mark is set (Phase 6: Enhanced with context)
-#: addon/globalPlugins/terminalAccess.py:7475
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7484
 msgid "Mark start set"
 msgstr "시작 표시 설정"
 
 # Message when end mark is set (Phase 6: Enhanced with context)
-#: addon/globalPlugins/terminalAccess.py:7480
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7489
 msgid "Mark end set"
 msgstr "끝 표시 설정"
 
 # Message when marks are cleared
-#: addon/globalPlugins/terminalAccess.py:7486
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7495
 msgid "Marks cleared"
 msgstr "표식이 지워짐"
 
 # Description for copying linear selection
-#: addon/globalPlugins/terminalAccess.py:7492
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7501
 msgid "Copy linear selection between marks"
 msgstr "선형 선택 영역을 마크 사이에서 복사"
 
 # Message when marks are not set
-#: addon/globalPlugins/terminalAccess.py:7504
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7513
 msgid "Set start and end marks first"
 msgstr "시작 및 종료 표시를 먼저 설정하십시오"
 
 # Message when selection copied
-#: addon/globalPlugins/terminalAccess.py:7521
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7530
 msgid "Selection copied"
 msgstr "선택 항목 복사됨"
 
-#: addon/globalPlugins/terminalAccess.py:7527
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7536
 msgid "Unable to copy: terminal not accessible"
 msgstr "복사할 수 없음: 터미널에 접근할 수 없음"
 
 # Description for copying rectangular selection
-#: addon/globalPlugins/terminalAccess.py:7535
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7544
 msgid "Copy rectangular selection between marks"
 msgstr "표시 사이의 직사각형 선택 영역 복사"
 
-#: addon/globalPlugins/terminalAccess.py:7565
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7574
 msgid "Unable to determine position"
 msgstr "위치를 확인할 수 없습니다"
 
-#: addon/globalPlugins/terminalAccess.py:7587
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7596
 msgid "Background operation in progress, please wait"
 msgstr "백그라운드 작업이 진행 중입니다. 잠시만 기다려 주세요."
 
-#: addon/globalPlugins/terminalAccess.py:7590
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7599
+#, python-brace-format
 msgid "Processing large selection ({rows} rows), please wait..."
 msgstr "대규모 선택 항목 처리 중 ({rows} 행), 잠시만 기다려 주세요..."
 
-#: addon/globalPlugins/terminalAccess.py:7597
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7606
 msgid "Terminal Access - Copying Selection"
 msgstr "터미널 접근 - 선택 항목 복사"
 
-#: addon/globalPlugins/terminalAccess.py:7610
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7619
 msgid "Failed to start background operation"
 msgstr "백그라운드 작업 시작에 실패했습니다"
 
-#: addon/globalPlugins/terminalAccess.py:7648
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7657
 msgid "Background copy failed: terminal not accessible"
 msgstr "배경 복사 실패: 터미널에 접근할 수 없음"
 
-#: addon/globalPlugins/terminalAccess.py:7654
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7663
 msgid "Background copy failed"
 msgstr "배경 복사 실패"
 
-#: addon/globalPlugins/terminalAccess.py:7691
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7700
+#, python-brace-format
 msgid "Copying row {current} of {total}..."
 msgstr "{total}의 {current} 행 복사 중..."
 
-#: addon/globalPlugins/terminalAccess.py:7696
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7705
 msgid "Copy operation cancelled by user"
 msgstr "사용자에 의해 복사 작업이 취소되었습니다."
 
-#: addon/globalPlugins/terminalAccess.py:7717
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7726
 msgid "Copy complete!"
 msgstr "복사 완료!"
 
 # Message for successful rectangular selection copy
-#: addon/globalPlugins/terminalAccess.py:7722
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7731
+#, python-brace-format
 msgid "Rectangular selection copied: {rows} rows, columns {start} to {end}"
 msgstr "사각형 선택 영역 복사됨: {rows} 행, 열 {start} ~ {end}"
 
 # Description for clearing marks
-#: addon/globalPlugins/terminalAccess.py:7741
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7750
 msgid "Clear selection marks"
 msgstr "선택 표시를 지우기"
 
 # Description for setting bookmark
-#: addon/globalPlugins/terminalAccess.py:7760
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7769
 msgid "Set a bookmark at the current review position (use with 0-9)"
 msgstr "현재 리뷰 위치에 북마크 설정 (0-9와 함께 사용)"
 
 # Error message when bookmark manager not initialized
-#: addon/globalPlugins/terminalAccess.py:7775
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7784
 msgid "Bookmark manager not available"
 msgstr "북마크 관리자를 사용할 수 없습니다"
 
 # Message when bookmark set
-#: addon/globalPlugins/terminalAccess.py:7788
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7797
+#, python-brace-format
 msgid "Bookmark {name} set"
 msgstr "{name} 세트 북마크"
 
 # Error message when bookmark setting fails
-#: addon/globalPlugins/terminalAccess.py:7791
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7800
 msgid "Failed to set bookmark"
 msgstr "북마크 설정에 실패했습니다"
 
 # Description for jumping to bookmark
-#: addon/globalPlugins/terminalAccess.py:7795
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7804
 msgid "Jump to a previously set bookmark (use with 0-9)"
 msgstr "미리 설정된 북마크로 이동하기 (0-9와 함께 사용)"
 
 # Message when jumping to bookmark
-#: addon/globalPlugins/terminalAccess.py:7828
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7837
+#, python-brace-format
 msgid "Jumped to bookmark {name}"
 msgstr "{name}로 북마크 이동"
 
 # Error message when bookmark not found
-#: addon/globalPlugins/terminalAccess.py:7831
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7840
+#, python-brace-format
 msgid "Bookmark {name} not found"
 msgstr "{name}를 찾지 못했습니다."
 
 # Description for listing bookmarks
-#: addon/globalPlugins/terminalAccess.py:7835
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7844
 msgid "List all bookmarks"
 msgstr "모든 북마크를 나열하세요"
 
 # Message listing bookmarks
-#: addon/globalPlugins/terminalAccess.py:7854
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7863
+#, python-brace-format
 msgid "{count} bookmarks: {names}"
 msgstr "{count} 북마크: {names}"
 
 # Message when no bookmarks exist
-#: addon/globalPlugins/terminalAccess.py:7861
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7870
 msgid "No bookmarks set"
 msgstr "설정된 북마크가 없습니다"
 
 # Description for creating a new terminal tab
-#: addon/globalPlugins/terminalAccess.py:7867
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7876
 msgid "Create a new tab in the terminal"
 msgstr "터미널에 새 탭 생성"
 
 # Message when creating a new tab
-#: addon/globalPlugins/terminalAccess.py:7885
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7894
 msgid "Creating new tab"
 msgstr "새 탭 생성"
 
 # Error message when tab creation fails
-#: addon/globalPlugins/terminalAccess.py:7888
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7897
 msgid "Unable to create new tab"
 msgstr "새 탭을 생성할 수 없습니다"
 
 # Description for listing/navigating tabs
-#: addon/globalPlugins/terminalAccess.py:7892
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7901
 msgid "List tabs or switch to tab bar"
 msgstr "탭 목록 또는 탭 바로 전환"
 
 # Error message when tab manager not initialized
-#: addon/globalPlugins/terminalAccess.py:7904
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7913
 msgid "Tab manager not available"
 msgstr "탭 관리자를 사용할 수 없습니다"
 
 # Message when no tabs are detected
-#: addon/globalPlugins/terminalAccess.py:7914
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7923
 msgid "No tabs detected"
 msgstr "탭이 감지되지 않음"
 
 # Message for single tab
-#: addon/globalPlugins/terminalAccess.py:7918
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7927
+#, python-brace-format
 msgid "Single tab: {title}"
 msgstr "단일 탭: {title}"
 
 # Message listing tab count
-#: addon/globalPlugins/terminalAccess.py:7923
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7932
+#, python-brace-format
 msgid "{count} tabs detected"
 msgstr "{count} 탭 감지됨"
 
 # Message when switching tabs
-#: addon/globalPlugins/terminalAccess.py:7930
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7939
 msgid "Switching to next tab"
 msgstr "다음 탭으로 전환"
 
 # Description for scanning command history
-#: addon/globalPlugins/terminalAccess.py:7938
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7947
 msgid "Scan terminal output to detect and store command history"
 msgstr "터미널 출력을 스캔하여 명령어 이력을 감지하고 저장합니다"
 
 # Error message when command history manager not initialized
-#: addon/globalPlugins/terminalAccess.py:7950
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7959
 msgid "Command history not available"
 msgstr "명령어 기록을 사용할 수 없습니다."
 
 # Message when commands detected
-#: addon/globalPlugins/terminalAccess.py:7959
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7968
+#, python-brace-format
 msgid "Found {count} new commands, {total} total"
 msgstr "{count}개의 새 명령어를 찾았습니다. {total}개 총계"
 
 # Message when no new commands found
-#: addon/globalPlugins/terminalAccess.py:7962
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7971
 msgid "No new commands found"
 msgstr "새로운 명령어가 발견되지 않았습니다."
 
 # Description for previous command navigation
-#: addon/globalPlugins/terminalAccess.py:7966
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7975
 msgid "Navigate to previous command in history"
 msgstr "명령어 기록에서 이전 명령어로 이동"
 
 # Message when at beginning of history
-#: addon/globalPlugins/terminalAccess.py:7987
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:7996
 msgid "No previous command"
 msgstr "이전 명령 없음"
 
 # Description for next command navigation
-#: addon/globalPlugins/terminalAccess.py:7991
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8000
 msgid "Navigate to next command in history"
 msgstr "명령어 기록에서 다음 명령어로 이동"
 
 # Message when at end of history
-#: addon/globalPlugins/terminalAccess.py:8012
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8021
 msgid "No next command"
 msgstr "다음 명령 없음"
 
 # Description for listing command history
-#: addon/globalPlugins/terminalAccess.py:8016
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8025
 msgid "List all commands in history"
 msgstr "명령어 기록에 있는 모든 명령어 목록 표시"
 
 # Message listing command history
-#: addon/globalPlugins/terminalAccess.py:8044
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8053
+#, python-brace-format
 msgid "{count} commands in history. Recent: {commands}"
 msgstr "{count} 명령어 기록. 최근: {commands}"
 
 # Message when no commands in history
-#: addon/globalPlugins/terminalAccess.py:8050
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8059
 msgid "No commands in history"
 msgstr "명령어 기록 없음"
 
 # Description for listing URLs in terminal output
-#: addon/globalPlugins/terminalAccess.py:8056
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8065
 msgid "List URLs found in terminal output"
 msgstr "터미널 출력에서 발견된 URL 목록"
 
 # Error when URL extractor not ready
-#: addon/globalPlugins/terminalAccess.py:8068
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8077
 msgid "URL list not available"
 msgstr "URL 목록을 사용할 수 없습니다."
 
-# Announced when no URLs found
-#: addon/globalPlugins/terminalAccess.py:8075
+# Error when URL extraction fails
+#: addon/globalPlugins/terminalAccess.py:8089
 #, fuzzy
+msgid "Error extracting URLs"
+msgstr "URL 추출 오류"
+
+# Announced when no URLs found
+#: addon/globalPlugins/terminalAccess.py:8094
 msgid "No URLs found"
 msgstr "URL을 찾을 수 없습니다."
 
-# Description for searching output
-#: addon/globalPlugins/terminalAccess.py:8089
+# Announced when URL list is loading with count of URLs found
+#: addon/globalPlugins/terminalAccess.py:8098
+#, python-brace-format, fuzzy
+msgid "{count} URLs found"
+msgstr "{count} 발견된 URL"
+
+# Error when URL dialog fails to open
+#: addon/globalPlugins/terminalAccess.py:8112
 #, fuzzy
+msgid "Error opening URL list"
+msgstr "URL 목록 열기 오류"
+
+# Description for searching output
+#: addon/globalPlugins/terminalAccess.py:8120
 msgid "Search terminal output for text pattern"
 msgstr "터미널 출력에서 텍스트 패턴 검색"
 
 # Error message when search manager not initialized
-#: addon/globalPlugins/terminalAccess.py:8101
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8132
 msgid "Search not available"
 msgstr "검색 불가"
 
 # Search dialog prompt
-#: addon/globalPlugins/terminalAccess.py:8113
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8144
 msgid "Enter search text:"
 msgstr "검색어를 입력하세요:"
 
 # Search dialog title
-#: addon/globalPlugins/terminalAccess.py:8115
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8146
 msgid "Search Terminal Output"
 msgstr "터미널 출력 검색"
 
 # Search results message
-#: addon/globalPlugins/terminalAccess.py:8135
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8166
+#, python-brace-format
 msgid "Found {total} matches. Match {num} of {total}: {text}"
 msgstr "<x id=\"0\">{total}</x>개의 일치 항목을 찾았습니다. {total}개 중 {num}번째 일치 항목: {text}"
 
 # No matches found
-#: addon/globalPlugins/terminalAccess.py:8143
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8174
+#, python-brace-format
 msgid "No matches found for '{pattern}'"
 msgstr "'{pattern}'에 대한 일치 항목이 없습니다."
 
 # Description for next search match
-#: addon/globalPlugins/terminalAccess.py:8152
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8183
 msgid "Jump to next search match"
 msgstr "다음 검색 결과로 이동"
 
 # No search results
-#: addon/globalPlugins/terminalAccess.py:8167
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8198
 msgid "No search results. Use NVDA+F to search."
 msgstr "검색 결과가 없습니다. NVDA+F를 사용하여 검색하십시오."
 
 # Error jumping to next match
-#: addon/globalPlugins/terminalAccess.py:8178
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8209
 msgid "Cannot jump to next match"
 msgstr "다음 경기로 이동할 수 없습니다"
 
 # Description for previous search match
-#: addon/globalPlugins/terminalAccess.py:8182
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8213
 msgid "Jump to previous search match"
 msgstr "이전 검색 결과로 이동"
 
 # Error jumping to previous match
-#: addon/globalPlugins/terminalAccess.py:8208
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8239
 msgid "Cannot jump to previous match"
 msgstr "이전 경기로 이동할 수 없습니다"
 
 # Title for the Terminal Access settings category
-#: addon/globalPlugins/terminalAccess.py:8255
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8286
 msgid "Terminal Settings"
 msgstr "터미널 설정"
 
-#: addon/globalPlugins/terminalAccess.py:8265
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8296
 msgid "Cursor Tracking"
 msgstr "커서 추적"
 
-#: addon/globalPlugins/terminalAccess.py:8273
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8304
 msgid "Enable cursor &tracking"
 msgstr "커서 및 추적 활성화"
 
 # Tooltip for cursor tracking checkbox
-#: addon/globalPlugins/terminalAccess.py:8277
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8308
 msgid "Automatically announce cursor position changes in the terminal"
 msgstr "터미널에서 커서 위치 변경을 자동으로 알림"
 
-#: addon/globalPlugins/terminalAccess.py:8284
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8315
 msgid "Cursor tracking &mode:"
 msgstr "커서 추적 및 모드:"
 
 # Cursor tracking mode option
-#: addon/globalPlugins/terminalAccess.py:8288
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8319
 msgid "Off"
 msgstr "꺼짐"
 
 # Cursor tracking mode option
-#: addon/globalPlugins/terminalAccess.py:8290
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8321
 msgid "Standard"
 msgstr "표준"
 
 # Cursor tracking mode option
-#: addon/globalPlugins/terminalAccess.py:8292
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8323
 msgid "Highlight"
 msgstr "하이라이트"
 
 # Cursor tracking mode option
-#: addon/globalPlugins/terminalAccess.py:8294
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8325
 msgid "Window"
 msgstr "창"
 
 # Tooltip for cursor tracking mode
-#: addon/globalPlugins/terminalAccess.py:8299
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8330
 msgid ""
 "Standard: announce line/column changes, Highlight: announce highlighted "
 "text, Window: only announce within defined window"
 msgstr "표준: 행/열 변경 사항 알림 하이라이트: 하이라이트된 텍스트 알림 창: 정의된 창 내에서만 알림"
 
-#: addon/globalPlugins/terminalAccess.py:8308
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8339
 msgid "Cursor delay (milliseconds):"
 msgstr "커서 지연 시간 (밀리초):"
 
 # Tooltip for cursor delay
-#: addon/globalPlugins/terminalAccess.py:8315
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8346
 msgid ""
 "Delay before announcing cursor position (0-1000ms). Higher values reduce "
 "announcement frequency."
 msgstr "커서 위치 알림 전 지연 시간 (0-1000ms). 값이 높을수록 알림 빈도가 감소합니다."
 
-#: addon/globalPlugins/terminalAccess.py:8323
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8354
 msgid "Feedback"
 msgstr "피드백"
 
-#: addon/globalPlugins/terminalAccess.py:8331
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8362
 msgid "Enable &key echo"
 msgstr "&key echo 활성화"
 
 # Tooltip for key echo
-#: addon/globalPlugins/terminalAccess.py:8335
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8366
 msgid "Announce characters as you type in the terminal"
 msgstr "터미널에서 입력하는 대로 문자를 음성으로 알려줍니다"
 
-#: addon/globalPlugins/terminalAccess.py:8342
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8373
 msgid "Pause at &newlines"
 msgstr "&newlines에서 일시 정지"
 
 # Tooltip for line pause
-#: addon/globalPlugins/terminalAccess.py:8346
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8377
 msgid "Brief pause when speaking line content to improve clarity"
 msgstr "명확성을 높이기 위해 대사 내용을 말할 때 잠시 멈춤"
 
-#: addon/globalPlugins/terminalAccess.py:8353
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8384
 msgid "&Punctuation level:"
 msgstr "&구두점 수준:"
 
 # Punctuation level option
-#: addon/globalPlugins/terminalAccess.py:8359
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8390
 msgid "Some (.,?!;:)"
 msgstr "어떤 (.,?!;:)"
 
 # Punctuation level option
-#: addon/globalPlugins/terminalAccess.py:8361
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8392
+#, python-brace-format
 msgid "Most (adds @#$%^&*()_+=[]{}\\\\|<>/)"
 msgstr "대부분 (추가 @#$%^&*()_+=[]{}\\\\|<>/)"
 
 # Punctuation level option
-#: addon/globalPlugins/terminalAccess.py:8363
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8394
 msgid "All"
 msgstr "모두"
 
 # Tooltip for punctuation level
-#: addon/globalPlugins/terminalAccess.py:8368
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8399
 msgid ""
 "Controls which punctuation symbols are announced. Higher levels announce "
 "more symbols. Use NVDA+[ and ] to adjust quickly."
@@ -1240,40 +1078,34 @@ msgstr ""
 "어떤 구두점 기호가 음성으로 안내되는지 제어합니다. 높은 수준일수록 더 많은 기호가 안내됩니다. NVDA+[ 및 ] 키를 사용하여 빠르게"
 " 조정하세요."
 
-#: addon/globalPlugins/terminalAccess.py:8377
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8408
 msgid "&Quiet mode"
 msgstr "&조용한 모드"
 
 # Tooltip for quiet mode
-#: addon/globalPlugins/terminalAccess.py:8381
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8412
 msgid ""
 "Suppress most Terminal Access announcements. Use NVDA+Shift+Q to toggle "
 "quickly."
 msgstr "대부분의 터미널 액세스 알림을 억제합니다. NVDA+Shift+Q를 사용하여 빠르게 전환하세요."
 
-#: addon/globalPlugins/terminalAccess.py:8388
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8419
 msgid "&Verbose mode (detailed feedback)"
 msgstr "&상세 모드 (상세한 피드백)"
 
 # Tooltip for verbose mode
-#: addon/globalPlugins/terminalAccess.py:8392
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8423
 msgid ""
 "Include position and context information with announcements. Useful for "
 "debugging and understanding terminal layout."
 msgstr "알림에 위치 및 컨텍스트 정보를 포함하십시오. 디버깅 및 터미널 레이아웃 이해에 유용합니다."
 
-#: addon/globalPlugins/terminalAccess.py:8400
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8431
 msgid "Announce &indentation when reading lines"
 msgstr "줄 읽을 때 들여쓰기 표시"
 
 # Tooltip for indentation announcement
-#: addon/globalPlugins/terminalAccess.py:8404
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8435
 msgid ""
 "Automatically announce indentation level when reading lines. Use NVDA+F5 to "
 "toggle quickly. NVDA+I pressed twice still reads indentation."
@@ -1281,104 +1113,87 @@ msgstr ""
 "줄 읽을 때 들여쓰기 수준을 자동으로 알려줍니다. NVDA+F5를 눌러 빠르게 전환하세요. NVDA+I를 두 번 누르면 여전히 들여쓰기를"
 " 읽습니다."
 
-#: addon/globalPlugins/terminalAccess.py:8412
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8443
 msgid "Announce New Output"
 msgstr "새로운 출력 발표"
 
-#: addon/globalPlugins/terminalAccess.py:8420
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8451
 msgid "&Announce new terminal output automatically"
 msgstr "&새로운 터미널 출력을 자동으로 알림"
 
 # Tooltip for announce new output
-#: addon/globalPlugins/terminalAccess.py:8424
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8455
 msgid ""
 "Automatically speak newly appended terminal output as it arrives. Use "
 "NVDA+Shift+N to toggle quickly."
 msgstr ""
 "터미널 출력이 새로 추가될 때마다 자동으로 음성으로 출력합니다. NVDA+Shift+N 키를 눌러 빠르게 켜고 끌 수 있습니다."
 
-#: addon/globalPlugins/terminalAccess.py:8432
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8463
 msgid "&Coalesce delay (ms):"
 msgstr "&Coalesce 지연 시간 (ms):"
 
 # Tooltip for coalesce delay
-#: addon/globalPlugins/terminalAccess.py:8438
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8469
 msgid ""
 "Milliseconds to wait before announcing accumulated new output. Larger values"
 " reduce interruptions during fast output."
 msgstr "누적된 새 출력을 발표하기 전에 대기할 밀리초. 값이 클수록 빠른 출력 중 중단이 줄어듭니다."
 
-#: addon/globalPlugins/terminalAccess.py:8446
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8477
 msgid "&Max lines before summarising:"
 msgstr "요약하기 전 최대 줄 수:"
 
 # Tooltip for max lines
-#: addon/globalPlugins/terminalAccess.py:8452
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8483
 msgid ""
 "When more than this many lines arrive at once, speak a summary ('N new "
 "lines') instead of the full text."
 msgstr "이보다 많은 줄이 한 번에 도착하면, 전체 텍스트 대신 요약('N개의 새 줄')을 말하십시오."
 
-#: addon/globalPlugins/terminalAccess.py:8460
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8491
 msgid "&Strip ANSI escape codes from output"
 msgstr "출력에서 ANSI 이스케이프 코드 제거"
 
 # Tooltip for strip ANSI
-#: addon/globalPlugins/terminalAccess.py:8464
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8495
 msgid "Remove ANSI colour and formatting codes before speaking new output."
 msgstr "새 출력을 생성하기 전에 ANSI 색상 및 서식 코드를 제거하십시오."
 
-#: addon/globalPlugins/terminalAccess.py:8471
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8502
 msgid "Advanced"
 msgstr "고급"
 
-#: addon/globalPlugins/terminalAccess.py:8479
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8510
 msgid "Condense &repeated symbols"
 msgstr "반복 기호 압축"
 
 # Tooltip for repeated symbols
-#: addon/globalPlugins/terminalAccess.py:8483
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8514
 msgid "Condense runs of repeated symbols (e.g., '====' becomes '4 equals')"
 msgstr "반복되는 기호들의 연속을 압축합니다 (예: '===='는 '4개의 등호'로 변환됨)"
 
-#: addon/globalPlugins/terminalAccess.py:8490
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8521
 msgid "Repeated symbols to condense:"
 msgstr "반복되는 기호를 압축하기 위해:"
 
 # Tooltip for repeated symbols values
-#: addon/globalPlugins/terminalAccess.py:8495
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8526
 msgid ""
 "Characters that will be condensed when repeated. Example: -_=! (max 50 "
 "characters)"
 msgstr "반복 시 압축되는 문자. 예시: -_=! (최대 50자)"
 
-#: addon/globalPlugins/terminalAccess.py:8503
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8534
 msgid "Application Profiles"
 msgstr "응용 프로파일"
 
-#: addon/globalPlugins/terminalAccess.py:8511
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8542
 msgid "Installed &profiles:"
 msgstr "설치된 프로필:"
 
 # Tooltip for profile list
-#: addon/globalPlugins/terminalAccess.py:8518
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8549
 msgid ""
 "Select an application profile to view or edit. Profiles customize Terminal "
 "Access behavior for specific applications. Active and default profiles are "
@@ -1388,92 +1203,77 @@ msgstr ""
 " 기본 프로필은 표시됩니다."
 
 # Label for default profile choice
-#: addon/globalPlugins/terminalAccess.py:8526
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8557
 msgid "None (use global settings)"
 msgstr "없음 (글로벌 설정 사용)"
 
-#: addon/globalPlugins/terminalAccess.py:8528
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8559
 msgid "&Default profile:"
 msgstr "&기본 프로필:"
 
 # Tooltip for default profile
-#: addon/globalPlugins/terminalAccess.py:8544
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8575
 msgid ""
 "Profile to use when no application-specific profile is detected. Use "
 "NVDA+F10 to check which profile is active."
 msgstr "응용 프로그램별 프로필이 감지되지 않을 때 사용할 프로필입니다. NVDA+F10을 사용하여 활성화된 프로필을 확인하세요."
 
 # Label for new profile button
-#: addon/globalPlugins/terminalAccess.py:8553
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8584
 msgid "&New Profile..."
 msgstr "&새 프로필..."
 
 # Tooltip for new profile button
-#: addon/globalPlugins/terminalAccess.py:8556
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8587
 msgid "Create a new application profile with custom settings"
 msgstr "사용자 지정 설정으로 새 애플리케이션 프로필 생성"
 
 # Label for edit profile button
-#: addon/globalPlugins/terminalAccess.py:8562
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8593
 msgid "&Edit Profile..."
 msgstr "&프로필 편집..."
 
 # Tooltip for edit profile button
-#: addon/globalPlugins/terminalAccess.py:8565
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8596
 msgid "Edit the selected application profile"
 msgstr "선택한 애플리케이션 프로필 편집"
 
 # Label for delete profile button
-#: addon/globalPlugins/terminalAccess.py:8571
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8602
 msgid "&Delete Profile"
 msgstr "&프로필 삭제"
 
 # Tooltip for delete profile button
-#: addon/globalPlugins/terminalAccess.py:8574
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8605
 msgid ""
 "Delete the selected custom profile (default profiles cannot be deleted)"
 msgstr "선택한 사용자 지정 프로필 삭제 (기본 프로필은 삭제할 수 없습니다)"
 
 # Label for import profile button
-#: addon/globalPlugins/terminalAccess.py:8585
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8616
 msgid "&Import..."
 msgstr "&가져오기..."
 
 # Tooltip for import profile button
-#: addon/globalPlugins/terminalAccess.py:8588
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8619
 msgid "Import a profile from a JSON file"
 msgstr "JSON 파일에서 프로필 가져오기"
 
 # Label for export profile button
-#: addon/globalPlugins/terminalAccess.py:8594
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8625
 msgid "E&xport..."
 msgstr "수출입..."
 
 # Tooltip for export profile button
-#: addon/globalPlugins/terminalAccess.py:8597
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8628
 msgid "Export the selected profile to a JSON file"
 msgstr "선택한 프로필을 JSON 파일로 내보내기"
 
-#: addon/globalPlugins/terminalAccess.py:8611
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8642
 msgid "Direct Gesture Bindings"
 msgstr "직접 제스처 바인딩"
 
-#: addon/globalPlugins/terminalAccess.py:8639
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8670
 msgid ""
 "Unchecked gestures are disabled. Use the command layer (NVDA+') to access "
 "them.\\nNVDA+' (Command Layer) and NVDA+Shift+F1 (Help) are always "
@@ -1482,53 +1282,44 @@ msgstr ""
 "확인되지 않은 제스처는 비활성화됩니다. 명령 레이어(NVDA+')를 사용하여 접근하십시오.\\nNVDA+'(명령 레이어)와 "
 "NVDA+Shift+F1(도움말)은 항상 사용할 수 있습니다."
 
-#: addon/globalPlugins/terminalAccess.py:8648
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8679
 msgid "&Reset to Defaults"
 msgstr "기본값으로 재설정"
 
 # Tooltip for reset button
-#: addon/globalPlugins/terminalAccess.py:8651
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8682
 msgid "Reset all Terminal Access settings to their default values"
 msgstr "모든 터미널 액세스 설정을 기본값으로 재설정합니다."
 
-#: addon/globalPlugins/terminalAccess.py:8660
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8691
 msgid ""
 "Are you sure you want to reset all Terminal Access settings to their default"
 " values?"
 msgstr "터미널 액세스 설정을 모두 기본값으로 재설정하시겠습니까?"
 
-#: addon/globalPlugins/terminalAccess.py:8661
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8692
 msgid "Confirm Reset"
 msgstr "확인 후 재설정"
 
-#: addon/globalPlugins/terminalAccess.py:8706
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8737
 msgid "All settings have been reset to their default values."
 msgstr "모든 설정이 기본값으로 재설정되었습니다."
 
-#: addon/globalPlugins/terminalAccess.py:8707
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8738
 msgid "Settings Reset"
 msgstr "설정 초기화"
 
 # Indicator for currently active profile
-#: addon/globalPlugins/terminalAccess.py:8826
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8857
 msgid "Active"
 msgstr "활성"
 
 # Indicator for default profile
-#: addon/globalPlugins/terminalAccess.py:8830
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8861
 msgid "Default"
 msgstr "기본값"
 
-#: addon/globalPlugins/terminalAccess.py:8875
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8906
 msgid ""
 "Profile creation dialog will be implemented soon. For now, profiles can be "
 "created programmatically via the ProfileManager API."
@@ -1536,106 +1327,91 @@ msgstr ""
 "프로필 생성 대화 상자는 곧 구현될 예정입니다. 현재는 ProfileManager API를 통해 프로그래밍 방식으로 프로필을 생성할 수 "
 "있습니다."
 
-#: addon/globalPlugins/terminalAccess.py:8877
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8908
 msgid "Feature In Development"
 msgstr "개발 중인 기능"
 
-#: addon/globalPlugins/terminalAccess.py:8889
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8920
+#, python-brace-format
 msgid ""
 "Profile editing dialog will be implemented soon. Selected profile: {name}"
 msgstr "프로필 편집 대화 상자가 곧 구현될 예정입니다. 선택된 프로필: {name}"
 
-#: addon/globalPlugins/terminalAccess.py:8903
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8934
+#, python-brace-format
 msgid "Are you sure you want to delete the profile '{name}'?"
 msgstr "'{name}' 프로필을 삭제하시겠습니까?"
 
-#: addon/globalPlugins/terminalAccess.py:8904
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8935
 msgid "Confirm Delete"
 msgstr "삭제 확인"
 
-#: addon/globalPlugins/terminalAccess.py:8923
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8954
+#, python-brace-format
 msgid "Profile '{name}' has been deleted."
 msgstr "프로필 '{name}'이 삭제되었습니다."
 
-#: addon/globalPlugins/terminalAccess.py:8924
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8955
 msgid "Profile Deleted"
 msgstr "프로필 삭제됨"
 
-#: addon/globalPlugins/terminalAccess.py:8933
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8964
 msgid "Failed to delete profile. See NVDA log for details."
 msgstr "프로필 삭제에 실패했습니다. 자세한 내용은 NVDA 로그를 참조하십시오."
 
-#: addon/globalPlugins/terminalAccess.py:8934
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8965
 msgid "Error"
 msgstr "오류"
 
-#: addon/globalPlugins/terminalAccess.py:8943
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8974
 msgid "Import Profile"
 msgstr "프로필 가져오기"
 
-#: addon/globalPlugins/terminalAccess.py:8945
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8976
 msgid "JSON files (*.json)|*.json"
 msgstr "JSON 파일 (*.json)|*.json"
 
-#: addon/globalPlugins/terminalAccess.py:8972
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:9003
+#, python-brace-format
 msgid "Profile '{name}' has been imported successfully."
 msgstr "프로필 '{name}'가 성공적으로 가져왔습니다."
 
-#: addon/globalPlugins/terminalAccess.py:8975
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:9006
 msgid "Profile Imported"
 msgstr "프로필 가져옴"
 
-#: addon/globalPlugins/terminalAccess.py:8984
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:9015
 msgid "Failed to import profile. The file may be invalid or corrupted."
 msgstr "프로필 가져오기에 실패했습니다. 파일이 유효하지 않거나 손상되었을 수 있습니다."
 
-#: addon/globalPlugins/terminalAccess.py:8985
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:9016
 msgid "Import Error"
 msgstr "가져오기 오류"
 
-#: addon/globalPlugins/terminalAccess.py:9008
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:9039
 msgid "Export Profile"
 msgstr "수출 프로필"
 
-#: addon/globalPlugins/terminalAccess.py:9024
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:9055
+#, python-brace-format
 msgid "Profile '{name}' has been exported successfully."
 msgstr "'{name}' 프로필이 성공적으로 내보내졌습니다."
 
-#: addon/globalPlugins/terminalAccess.py:9025
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:9056
 msgid "Profile Exported"
 msgstr "프로필 내보내기"
 
-#: addon/globalPlugins/terminalAccess.py:9034
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:9065
 msgid "Failed to export profile. See NVDA log for details."
 msgstr "프로필 내보내기에 실패했습니다. 자세한 내용은 NVDA 로그를 참조하십시오."
 
-#: addon/globalPlugins/terminalAccess.py:9035
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:9066
 msgid "Export Error"
 msgstr "수출 오류"
 
 # Long description to be shown for this add-on on add-on information from add-
 # ons manager
 #: buildVars.py:17
-#, fuzzy
 msgid ""
 "Provides enhanced terminal accessibility for Windows Terminal and "
 "PowerShell, enabling screen reader users to efficiently navigate and "
@@ -1648,6 +1424,5 @@ msgstr ""
 "통합합니다. 커뮤니티 제안 및 토론에서 영감을 받은 고급 기능을 제공합니다."
 
 #: buildVars.py:14
-#, fuzzy
 msgid "Terminal Access for NVDA"
 msgstr "터미널 접근을 위한 NVDA"

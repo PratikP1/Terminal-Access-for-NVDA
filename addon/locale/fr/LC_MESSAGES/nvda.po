@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Terminal Access for NVDA\n"
 "Report-Msgid-Bugs-To: https://github.com/PratikP1/Terminal-Access-for-NVDA/issues\n"
-"POT-Creation-Date: 2026-03-11 16:33-0400\n"
-"PO-Revision-Date: 2026-03-11 16:33-0400\n"
+"POT-Creation-Date: 2026-03-11 19:32-0400\n"
+"PO-Revision-Date: 2026-03-11 19:32-0400\n"
 "Last-Translator: DeepL auto-translation\n"
 "Language-Team: fr\n"
 "Language: fr\n"
@@ -39,156 +39,156 @@ msgid "{n} new lines"
 msgstr "{n} nouvelles lignes"
 
 # Title for URL list dialog
-#: addon/globalPlugins/terminalAccess.py:4931
+#: addon/globalPlugins/terminalAccess.py:4936
 msgid "URL List - Terminal Access"
 msgstr "Liste d'URL - Accès au terminal"
 
 # Label for URL filter text box
-#: addon/globalPlugins/terminalAccess.py:4943
+#: addon/globalPlugins/terminalAccess.py:4948
 msgid "&Filter:"
 msgstr "&Filtre :"
 
 # Column header for URL list index
-#: addon/globalPlugins/terminalAccess.py:4953
+#: addon/globalPlugins/terminalAccess.py:4958
 msgid "#"
 msgstr "#"
 
 # Column header for URL
-#: addon/globalPlugins/terminalAccess.py:4955
+#: addon/globalPlugins/terminalAccess.py:4960
 msgid "URL"
 msgstr "URL"
 
 # Column header for line number
-#: addon/globalPlugins/terminalAccess.py:4957
+#: addon/globalPlugins/terminalAccess.py:4962
 msgid "Line"
 msgstr "Ligne"
 
 # Column header for line context
-#: addon/globalPlugins/terminalAccess.py:4959
+#: addon/globalPlugins/terminalAccess.py:4964
 msgid "Context"
 msgstr "Contexte"
 
 # Button to open URL in browser
-#: addon/globalPlugins/terminalAccess.py:4966
+#: addon/globalPlugins/terminalAccess.py:4971
 msgid "&Open"
 msgstr "&Ouvrir"
 
 # Button to copy URL to clipboard
-#: addon/globalPlugins/terminalAccess.py:4968
+#: addon/globalPlugins/terminalAccess.py:4973
 msgid "&Copy URL"
 msgstr "&Copier l'URL"
 
 # Button to move cursor to URL line
-#: addon/globalPlugins/terminalAccess.py:4970
+#: addon/globalPlugins/terminalAccess.py:4975
 msgid "&Move to line"
 msgstr "&Déplacer vers la ligne"
 
-#: addon/globalPlugins/terminalAccess.py:4971
+#: addon/globalPlugins/terminalAccess.py:4977
 msgid "Close"
 msgstr "Fermer"
 
 # Announced after URL is copied
-#: addon/globalPlugins/terminalAccess.py:5049
+#: addon/globalPlugins/terminalAccess.py:5058
 msgid "URL copied"
 msgstr "URL copiée"
 
 # Announced when moving to a URL line
-#: addon/globalPlugins/terminalAccess.py:5060
+#: addon/globalPlugins/terminalAccess.py:5069
 #, python-brace-format
 msgid "Line {num}: {text}"
 msgstr "{num} en ligne : {text}"
 
 # Position context for verbose mode
-#: addon/globalPlugins/terminalAccess.py:5433
+#: addon/globalPlugins/terminalAccess.py:5442
 #, python-brace-format
 msgid "Row {row}, column {col}"
 msgstr "Ligne {row} , colonne {col}"
 
 # Format for verbose announcements with context
-#: addon/globalPlugins/terminalAccess.py:5471
+#: addon/globalPlugins/terminalAccess.py:5480
 #, python-brace-format
 msgid "{message}. {context}"
 msgstr "{message}. {context}"
 
 # Message announced when entering a terminal application
-#: addon/globalPlugins/terminalAccess.py:5577
+#: addon/globalPlugins/terminalAccess.py:5586
 msgid "Terminal Access support active. Press NVDA+shift+f1 for help."
 msgstr ""
 "Assistance à l'accès au terminal active. Appuyez sur NVDA+Maj+F1 pour "
 "obtenir de l'aide."
 
 # Message format for repeated symbols, e.g. "3 dash"
-#: addon/globalPlugins/terminalAccess.py:5707
+#: addon/globalPlugins/terminalAccess.py:5716
 #, python-brace-format
 msgid "{count} {symbol}"
 msgstr "{count} {symbol}"
 
-#: addon/globalPlugins/terminalAccess.py:5920
+#: addon/globalPlugins/terminalAccess.py:5929
 #, python-brace-format
 msgid "Highlighted: {text}"
 msgstr "En vedette : {text}"
 
 # Description for the show help gesture
-#: addon/globalPlugins/terminalAccess.py:6008
+#: addon/globalPlugins/terminalAccess.py:6017
 msgid "Opens the Terminal Access user guide"
 msgstr "Ouvre le guide d'utilisation de l'accès au terminal."
 
 # Error message when help file is not found
-#: addon/globalPlugins/terminalAccess.py:6023
+#: addon/globalPlugins/terminalAccess.py:6032
 msgid "Help file not found. Please reinstall the add-on."
 msgstr ""
 "Fichier d'aide introuvable. Veuillez réinstaller le module complémentaire."
 
 # Error message when add-on is not properly installed
-#: addon/globalPlugins/terminalAccess.py:6026
+#: addon/globalPlugins/terminalAccess.py:6035
 msgid "Terminal Access add-on not properly installed."
 msgstr ""
 "Le module complémentaire Terminal Access n'est pas correctement installé."
 
 # Description for reading the previous line
-#: addon/globalPlugins/terminalAccess.py:6030
+#: addon/globalPlugins/terminalAccess.py:6039
 msgid "Read previous line in terminal"
 msgstr "Lire la ligne précédente dans le terminal"
 
 # Description for reading the current line
-#: addon/globalPlugins/terminalAccess.py:6044
+#: addon/globalPlugins/terminalAccess.py:6053
 msgid "Read current line in terminal. Press twice for indentation level."
 msgstr ""
 "Lire la ligne actuelle dans le terminal. Appuyez deux fois pour le niveau "
 "d'indentation."
 
 # Description for reading the next line
-#: addon/globalPlugins/terminalAccess.py:6063
+#: addon/globalPlugins/terminalAccess.py:6072
 msgid "Read next line in terminal"
 msgstr "Lire la ligne suivante dans le terminal"
 
 # Description for reading the previous word
-#: addon/globalPlugins/terminalAccess.py:6077
+#: addon/globalPlugins/terminalAccess.py:6086
 msgid "Read previous word in terminal"
 msgstr "Lire le mot précédent dans le terminal"
 
 # Description for reading the current word
-#: addon/globalPlugins/terminalAccess.py:6091
+#: addon/globalPlugins/terminalAccess.py:6100
 msgid "Read current word in terminal"
 msgstr "Lire le mot actuel dans le terminal"
 
 # Description for spelling the current word
-#: addon/globalPlugins/terminalAccess.py:6105
+#: addon/globalPlugins/terminalAccess.py:6114
 msgid "Spell current word in terminal"
 msgstr "Écrire le mot actuel dans le terminal"
 
 # Description for reading the next word
-#: addon/globalPlugins/terminalAccess.py:6119
+#: addon/globalPlugins/terminalAccess.py:6128
 msgid "Read next word in terminal"
 msgstr "Lire le mot suivant dans le terminal"
 
 # Description for reading the previous character
-#: addon/globalPlugins/terminalAccess.py:6133
+#: addon/globalPlugins/terminalAccess.py:6142
 msgid "Read previous character in terminal"
 msgstr "Lire le caractère précédent dans le terminal"
 
 # Description for reading the current character
-#: addon/globalPlugins/terminalAccess.py:6147
+#: addon/globalPlugins/terminalAccess.py:6156
 msgid ""
 "Read current character in terminal. Press twice for phonetic. Press three "
 "times for character code."
@@ -197,64 +197,64 @@ msgstr ""
 " prononciation. Appuyez trois fois pour obtenir le code du caractère."
 
 # Description for reading the next character
-#: addon/globalPlugins/terminalAccess.py:6171
+#: addon/globalPlugins/terminalAccess.py:6180
 msgid "Read next character in terminal"
 msgstr "Lire le caractère suivant dans le terminal"
 
 # Description for toggling quiet mode
-#: addon/globalPlugins/terminalAccess.py:6185
+#: addon/globalPlugins/terminalAccess.py:6194
 msgid "Toggle quiet mode in terminal"
 msgstr "Activer/désactiver le mode silencieux dans le terminal"
 
 # Message when quiet mode is enabled
-#: addon/globalPlugins/terminalAccess.py:6205
+#: addon/globalPlugins/terminalAccess.py:6214
 msgid "Quiet mode on"
 msgstr "Mode silencieux activé"
 
 # Message when quiet mode is disabled
-#: addon/globalPlugins/terminalAccess.py:6208
+#: addon/globalPlugins/terminalAccess.py:6217
 msgid "Quiet mode off"
 msgstr "Mode silencieux désactivé"
 
 # Description for toggling announce new output
-#: addon/globalPlugins/terminalAccess.py:6212
+#: addon/globalPlugins/terminalAccess.py:6221
 msgid "Toggle announce new output in terminal"
 msgstr "Activer/désactiver l'annonce des nouvelles sorties dans le terminal"
 
 # Message when announce new output is enabled
-#: addon/globalPlugins/terminalAccess.py:6236
+#: addon/globalPlugins/terminalAccess.py:6245
 msgid "Announce new output on"
 msgstr "Annoncer une nouvelle publication sur"
 
 # Message when announce new output is disabled
-#: addon/globalPlugins/terminalAccess.py:6241
+#: addon/globalPlugins/terminalAccess.py:6250
 msgid "Announce new output off"
 msgstr "Annoncer une nouvelle sortie"
 
 # Description for toggling indentation announcement
-#: addon/globalPlugins/terminalAccess.py:6245
+#: addon/globalPlugins/terminalAccess.py:6254
 msgid "Toggle indentation announcement on line read in terminal"
 msgstr ""
 "Activer/désactiver l'annonce de l'indentation sur la ligne lue dans le "
 "terminal"
 
 # Message when indentation announcement is enabled
-#: addon/globalPlugins/terminalAccess.py:6263
+#: addon/globalPlugins/terminalAccess.py:6272
 msgid "Indentation announcement on"
 msgstr "Annonce d'indentation sur"
 
 # Message when indentation announcement is disabled
-#: addon/globalPlugins/terminalAccess.py:6266
+#: addon/globalPlugins/terminalAccess.py:6275
 msgid "Indentation announcement off"
 msgstr "Annonce de retrait désactivée"
 
 # Description for copy mode
-#: addon/globalPlugins/terminalAccess.py:6270
+#: addon/globalPlugins/terminalAccess.py:6279
 msgid "Enter copy mode in terminal"
 msgstr "Entrer en mode copie dans le terminal"
 
 # Message entering copy mode
-#: addon/globalPlugins/terminalAccess.py:6287
+#: addon/globalPlugins/terminalAccess.py:6296
 msgid ""
 "Copy mode. Press L to copy line, S to copy screen, or Escape to cancel."
 msgstr ""
@@ -262,683 +262,701 @@ msgstr ""
 " sur Échap pour annuler."
 
 # Description for copying line
-#: addon/globalPlugins/terminalAccess.py:6291
+#: addon/globalPlugins/terminalAccess.py:6300
 msgid "Copy line in copy mode"
 msgstr "Copier la ligne en mode copie"
 
-#: addon/globalPlugins/terminalAccess.py:6303
+#: addon/globalPlugins/terminalAccess.py:6312
 msgid "Unable to copy"
 msgstr "Impossible de copier"
 
 # Message when line is copied
-#: addon/globalPlugins/terminalAccess.py:6311
+#: addon/globalPlugins/terminalAccess.py:6320
 msgid "Line copied"
 msgstr "Ligne copiée"
 
 # Description for copying screen
-#: addon/globalPlugins/terminalAccess.py:6322
+#: addon/globalPlugins/terminalAccess.py:6331
 msgid "Copy screen in copy mode"
 msgstr "Copier l'écran en mode copie"
 
 # Message when screen is copied
-#: addon/globalPlugins/terminalAccess.py:6342
+#: addon/globalPlugins/terminalAccess.py:6351
 msgid "Screen copied"
 msgstr "Écran copié"
 
 # Description for exiting copy mode
-#: addon/globalPlugins/terminalAccess.py:6353
+#: addon/globalPlugins/terminalAccess.py:6362
 msgid "Exit copy mode"
 msgstr "Quitter le mode copie"
 
 # Message when copy mode is canceled
-#: addon/globalPlugins/terminalAccess.py:6363
+#: addon/globalPlugins/terminalAccess.py:6372
 msgid "Copy mode canceled"
 msgstr "Mode copie annulé"
 
 # Description for toggling the command layer
-#: addon/globalPlugins/terminalAccess.py:6391
+#: addon/globalPlugins/terminalAccess.py:6400
 msgid "Toggle terminal command layer (single-key command mode)"
 msgstr ""
 "Basculer la couche de commande du terminal (mode de commande à touche "
 "unique)"
 
 # Announced when the terminal command layer is activated
-#: addon/globalPlugins/terminalAccess.py:6420
+#: addon/globalPlugins/terminalAccess.py:6429
 msgid "Terminal commands"
 msgstr "Commandes du terminal"
 
 # Announced when the terminal command layer is deactivated
-#: addon/globalPlugins/terminalAccess.py:6434
+#: addon/globalPlugins/terminalAccess.py:6443
 msgid "Exit terminal commands"
 msgstr "Commandes du terminal de sortie"
 
 # Description for exiting the command layer
-#: addon/globalPlugins/terminalAccess.py:6438
+#: addon/globalPlugins/terminalAccess.py:6447
 msgid "Exit the terminal command layer"
 msgstr "Quitter la couche de commande du terminal"
 
 # Description for opening terminal settings
-#: addon/globalPlugins/terminalAccess.py:6450
+#: addon/globalPlugins/terminalAccess.py:6459
 msgid "Open Terminal Access settings"
 msgstr "Ouvrir les paramètres d'accès au terminal"
 
 # Error message when settings dialog cannot be opened
-#: addon/globalPlugins/terminalAccess.py:6464
+#: addon/globalPlugins/terminalAccess.py:6473
 msgid "Unable to open settings dialog. Please try again."
 msgstr ""
 "Impossible d'ouvrir la boîte de dialogue des paramètres. Veuillez réessayer."
 
 # Description for cycling cursor tracking modes
-#: addon/globalPlugins/terminalAccess.py:6468
+#: addon/globalPlugins/terminalAccess.py:6477
 msgid "Cycle cursor tracking mode"
 msgstr "Mode de suivi du curseur cyclique"
 
-#: addon/globalPlugins/terminalAccess.py:6491
+#: addon/globalPlugins/terminalAccess.py:6500
 msgid "Cursor tracking off"
 msgstr "Suivi du curseur désactivé"
 
-#: addon/globalPlugins/terminalAccess.py:6492
+#: addon/globalPlugins/terminalAccess.py:6501
 msgid "Standard cursor tracking"
 msgstr "Suivi standard du curseur"
 
-#: addon/globalPlugins/terminalAccess.py:6493
+#: addon/globalPlugins/terminalAccess.py:6502
 msgid "Highlight tracking"
 msgstr "Suivi des moments forts"
 
-#: addon/globalPlugins/terminalAccess.py:6494
+#: addon/globalPlugins/terminalAccess.py:6503
 msgid "Window tracking"
 msgstr "Suivi des fenêtres"
 
-#: addon/globalPlugins/terminalAccess.py:6496
+#: addon/globalPlugins/terminalAccess.py:6505
 msgid "Unknown mode"
 msgstr "Mode inconnu"
 
 # Description for setting screen window
-#: addon/globalPlugins/terminalAccess.py:6500
+#: addon/globalPlugins/terminalAccess.py:6509
 msgid "Set screen window boundaries"
 msgstr "Définir les limites de la fenêtre d'écran"
 
-#: addon/globalPlugins/terminalAccess.py:6513
+#: addon/globalPlugins/terminalAccess.py:6522
 msgid "Unable to set window"
 msgstr "Impossible de définir la fenêtre"
 
 # Message when window start is set
-#: addon/globalPlugins/terminalAccess.py:6521
+#: addon/globalPlugins/terminalAccess.py:6530
 msgid "Window start set. Move to end position and press again."
 msgstr ""
 "Début de la fenêtre défini. Déplacez-vous vers la position finale et appuyez"
 " à nouveau."
 
 # Message when window is defined
-#: addon/globalPlugins/terminalAccess.py:6533
+#: addon/globalPlugins/terminalAccess.py:6542
 msgid "Window defined"
 msgstr "Fenêtre définie"
 
 # Description for clearing screen window
-#: addon/globalPlugins/terminalAccess.py:6540
+#: addon/globalPlugins/terminalAccess.py:6549
 msgid "Clear screen window"
 msgstr "Fenêtre à écran transparent"
 
 # Message when window is cleared
-#: addon/globalPlugins/terminalAccess.py:6553
+#: addon/globalPlugins/terminalAccess.py:6562
 msgid "Window cleared"
 msgstr "Fenêtre effacée"
 
 # Description for reading window content
-#: addon/globalPlugins/terminalAccess.py:6557
+#: addon/globalPlugins/terminalAccess.py:6566
 msgid "Read window content"
 msgstr "Lire le contenu de la fenêtre"
 
 # Message when no window is defined
-#: addon/globalPlugins/terminalAccess.py:6569
+#: addon/globalPlugins/terminalAccess.py:6578
 msgid "No window defined"
 msgstr "Aucune fenêtre définie"
 
-#: addon/globalPlugins/terminalAccess.py:6575
+#: addon/globalPlugins/terminalAccess.py:6584
 msgid "Unable to read window"
 msgstr "Impossible de lire la fenêtre"
 
-#: addon/globalPlugins/terminalAccess.py:6586
+#: addon/globalPlugins/terminalAccess.py:6595
 msgid "Window not properly defined"
 msgstr "Fenêtre mal définie"
 
 # Message when window contains no text
-#: addon/globalPlugins/terminalAccess.py:6626
+#: addon/globalPlugins/terminalAccess.py:6635
 msgid "Window is empty"
 msgstr "La fenêtre est vide."
 
 # Description for reading text attributes
-#: addon/globalPlugins/terminalAccess.py:6633
+#: addon/globalPlugins/terminalAccess.py:6642
 msgid "Read text attributes at cursor"
 msgstr "Lire les attributs du texte au niveau du curseur"
 
-#: addon/globalPlugins/terminalAccess.py:6646
+#: addon/globalPlugins/terminalAccess.py:6655
 msgid "Unable to read attributes"
 msgstr "Impossible de lire les attributs"
 
 # Message when no text at cursor
-#: addon/globalPlugins/terminalAccess.py:6673
+#: addon/globalPlugins/terminalAccess.py:6682
 msgid "No text at cursor"
 msgstr "Pas de texte sous le curseur"
 
 # Description for continuous reading (say all)
-#: addon/globalPlugins/terminalAccess.py:6684
+#: addon/globalPlugins/terminalAccess.py:6693
 msgid "Read continuously from cursor to end of buffer"
 msgstr "Lire en continu depuis le curseur jusqu'à la fin du tampon"
 
 # Message when unable to start continuous reading
-#: addon/globalPlugins/terminalAccess.py:6698
+#: addon/globalPlugins/terminalAccess.py:6707
 msgid "Unable to read"
 msgstr "Impossible de lire"
 
 # Message when buffer is empty
-#: addon/globalPlugins/terminalAccess.py:6711
+#: addon/globalPlugins/terminalAccess.py:6720
 msgid "Nothing to read"
 msgstr "Rien à lire"
 
 # Description for jumping to start of line
-#: addon/globalPlugins/terminalAccess.py:6724
+#: addon/globalPlugins/terminalAccess.py:6733
 msgid "Move to first character of current line"
 msgstr "Déplacer vers le premier caractère de la ligne actuelle"
 
 # Message when unable to move
-#: addon/globalPlugins/terminalAccess.py:6738
+#: addon/globalPlugins/terminalAccess.py:6747
 msgid "Unable to move"
 msgstr "Incapable de bouger"
 
 # Message for blank line
-#: addon/globalPlugins/terminalAccess.py:6756
+#: addon/globalPlugins/terminalAccess.py:6765
 msgid "Blank"
 msgstr "Blanc"
 
 # Description for jumping to end of line
-#: addon/globalPlugins/terminalAccess.py:6762
+#: addon/globalPlugins/terminalAccess.py:6771
 msgid "Move to last character of current line"
 msgstr "Déplacer vers le dernier caractère de la ligne actuelle"
 
 # Description for jumping to top
-#: addon/globalPlugins/terminalAccess.py:6801
+#: addon/globalPlugins/terminalAccess.py:6810
 msgid "Move to top of terminal buffer"
 msgstr "Déplacer vers le haut du tampon du terminal"
 
 # Description for jumping to bottom
-#: addon/globalPlugins/terminalAccess.py:6834
+#: addon/globalPlugins/terminalAccess.py:6843
 msgid "Move to bottom of terminal buffer"
 msgstr "Déplacer vers le bas du tampon du terminal"
 
 # Description for announcing position
-#: addon/globalPlugins/terminalAccess.py:6867
+#: addon/globalPlugins/terminalAccess.py:6876
 msgid "Announce current row and column position"
 msgstr "Annoncer la position actuelle de la ligne et de la colonne"
 
 # Message when position unavailable
-#: addon/globalPlugins/terminalAccess.py:6881
+#: addon/globalPlugins/terminalAccess.py:6890
 msgid "Position unavailable"
 msgstr "Poste indisponible"
 
 # Description for announcing active profile
-#: addon/globalPlugins/terminalAccess.py:6898
+#: addon/globalPlugins/terminalAccess.py:6907
 msgid "Announce which profile is currently active and which is set as default"
 msgstr ""
 "Indiquez quel profil est actuellement actif et lequel est défini comme "
 "profil par défaut."
 
 # Message when no profile is active
-#: addon/globalPlugins/terminalAccess.py:6913
+#: addon/globalPlugins/terminalAccess.py:6922
 msgid "None (using global settings)"
 msgstr "Aucun (utilisation des paramètres généraux)"
 
 # Message when no default profile is set
-#: addon/globalPlugins/terminalAccess.py:6922
+#: addon/globalPlugins/terminalAccess.py:6931
 msgid "None"
 msgstr "Aucun"
 
 # Message announcing active and default profiles
-#: addon/globalPlugins/terminalAccess.py:6926
+#: addon/globalPlugins/terminalAccess.py:6935
 #, python-brace-format
 msgid "Active profile: {active}. Default profile: {default}"
 msgstr "Profil actif : {active}. Profil par défaut : {default}"
 
 # Message when unable to read indentation
-#: addon/globalPlugins/terminalAccess.py:6937
+#: addon/globalPlugins/terminalAccess.py:6946
 msgid "Unable to read indentation"
 msgstr "Impossible de lire l'indentation"
 
 # Message for empty line
-#: addon/globalPlugins/terminalAccess.py:6947
+#: addon/globalPlugins/terminalAccess.py:6956
 msgid "Empty line"
 msgstr "Ligne vide"
 
 # Message when line has no indentation
-#: addon/globalPlugins/terminalAccess.py:6972
+#: addon/globalPlugins/terminalAccess.py:6981
 msgid "No indentation"
 msgstr "Pas d'indentation"
 
 # Message for mixed indentation
-#: addon/globalPlugins/terminalAccess.py:6975
+#: addon/globalPlugins/terminalAccess.py:6984
 #, python-brace-format
 msgid "{tabs} tab, {spaces} spaces"
 msgstr "{tabs} onglet, espaces d'{spaces}"
 
 # Message for mixed indentation
-#: addon/globalPlugins/terminalAccess.py:6975
+#: addon/globalPlugins/terminalAccess.py:6984
 #, python-brace-format
 msgid "{tabs} tabs, {spaces} spaces"
 msgstr "{tabs} onglets, espaces d'{spaces}"
 
 # Message for tab indentation
-#: addon/globalPlugins/terminalAccess.py:6978
+#: addon/globalPlugins/terminalAccess.py:6987
 #, python-brace-format
 msgid "{count} tab"
 msgstr "{count} onglet"
 
 # Message for tab indentation
-#: addon/globalPlugins/terminalAccess.py:6978
+#: addon/globalPlugins/terminalAccess.py:6987
 #, python-brace-format
 msgid "{count} tabs"
 msgstr "{count} onglets"
 
 # Message for space indentation
-#: addon/globalPlugins/terminalAccess.py:6981
+#: addon/globalPlugins/terminalAccess.py:6990
 #, python-brace-format
 msgid "{count} space"
 msgstr "{count} espace"
 
 # Message for space indentation
-#: addon/globalPlugins/terminalAccess.py:6981
+#: addon/globalPlugins/terminalAccess.py:6990
 #, python-brace-format
 msgid "{count} spaces"
 msgstr "{count} espaces"
 
 # Message when no review position
-#: addon/globalPlugins/terminalAccess.py:7087
+#: addon/globalPlugins/terminalAccess.py:7096
 msgid "No review position"
 msgstr "Pas de position de révision"
 
-#: addon/globalPlugins/terminalAccess.py:7093
+#: addon/globalPlugins/terminalAccess.py:7102
 msgid "Unable to read character"
 msgstr "Impossible de lire le caractère"
 
 # Message when at edge of text
-#: addon/globalPlugins/terminalAccess.py:7113
+#: addon/globalPlugins/terminalAccess.py:7122
 msgid "Edge"
 msgstr "Bord"
 
 # Message when at edge of text
-#: addon/globalPlugins/terminalAccess.py:7113
+#: addon/globalPlugins/terminalAccess.py:7122
 msgid "Top"
 msgstr "Haut"
 
 # Message when no character at position
-#: addon/globalPlugins/terminalAccess.py:7165
+#: addon/globalPlugins/terminalAccess.py:7174
 msgid "No character"
 msgstr "Aucun caractère"
 
 # Message announcing character code
-#: addon/globalPlugins/terminalAccess.py:7186
+#: addon/globalPlugins/terminalAccess.py:7195
 #, python-brace-format
 msgid "Character {decimal}, hex {hex}, {name}"
 msgstr "Caractère {decimal} , hex {hex} , {name}"
 
-#: addon/globalPlugins/terminalAccess.py:7248
+#: addon/globalPlugins/terminalAccess.py:7257
 msgid "space"
 msgstr "espace"
 
 # Description for decreasing punctuation level
-#: addon/globalPlugins/terminalAccess.py:7256
+#: addon/globalPlugins/terminalAccess.py:7265
 msgid "Decrease punctuation level"
 msgstr "Réduire le niveau de ponctuation"
 
-#: addon/globalPlugins/terminalAccess.py:7274
+#: addon/globalPlugins/terminalAccess.py:7283
 msgid "Punctuation level none"
 msgstr "Niveau de ponctuation : aucun"
 
-#: addon/globalPlugins/terminalAccess.py:7275
+#: addon/globalPlugins/terminalAccess.py:7284
 msgid "Punctuation level some"
 msgstr "Niveau de ponctuation : moyen"
 
-#: addon/globalPlugins/terminalAccess.py:7276
+#: addon/globalPlugins/terminalAccess.py:7285
 msgid "Punctuation level most"
 msgstr "Niveau de ponctuation le plus élevé"
 
-#: addon/globalPlugins/terminalAccess.py:7277
+#: addon/globalPlugins/terminalAccess.py:7286
 msgid "Punctuation level all"
 msgstr "Niveau de ponctuation tout"
 
-#: addon/globalPlugins/terminalAccess.py:7279
+#: addon/globalPlugins/terminalAccess.py:7288
 msgid "Punctuation level unknown"
 msgstr "Niveau de ponctuation inconnu"
 
 # Description for increasing punctuation level
-#: addon/globalPlugins/terminalAccess.py:7283
+#: addon/globalPlugins/terminalAccess.py:7292
 msgid "Increase punctuation level"
 msgstr "Augmenter le niveau de ponctuation"
 
 # Description for reading to left edge
-#: addon/globalPlugins/terminalAccess.py:7310
+#: addon/globalPlugins/terminalAccess.py:7319
 msgid "Read from cursor to beginning of line"
 msgstr "Lire depuis le curseur jusqu'au début de la ligne"
 
 # Message when region is empty
-#: addon/globalPlugins/terminalAccess.py:7336
+#: addon/globalPlugins/terminalAccess.py:7345
 msgid "Nothing"
 msgstr "Rien"
 
 # Description for reading to right edge
-#: addon/globalPlugins/terminalAccess.py:7346
+#: addon/globalPlugins/terminalAccess.py:7355
 msgid "Read from cursor to end of line"
 msgstr "Lire depuis le curseur jusqu'à la fin de la ligne"
 
 # Description for reading to top
-#: addon/globalPlugins/terminalAccess.py:7381
+#: addon/globalPlugins/terminalAccess.py:7390
 msgid "Read from cursor to top of buffer"
 msgstr "Lire depuis le curseur jusqu'au début du tampon"
 
 # Description for reading to bottom
-#: addon/globalPlugins/terminalAccess.py:7418
+#: addon/globalPlugins/terminalAccess.py:7427
 msgid "Read from cursor to bottom of buffer"
 msgstr "Lire depuis le curseur jusqu'à la fin du tampon"
 
 # Description for toggling mark position
-#: addon/globalPlugins/terminalAccess.py:7455
+#: addon/globalPlugins/terminalAccess.py:7464
 msgid "Toggle mark for selection (enhanced)"
 msgstr "Bouton de sélection (amélioré)"
 
-#: addon/globalPlugins/terminalAccess.py:7468
+#: addon/globalPlugins/terminalAccess.py:7477
 msgid "Unable to set mark"
 msgstr "Impossible de définir la marque"
 
 # Message when start mark is set (Phase 6: Enhanced with context)
-#: addon/globalPlugins/terminalAccess.py:7475
+#: addon/globalPlugins/terminalAccess.py:7484
 msgid "Mark start set"
 msgstr "Marquer le début"
 
 # Message when end mark is set (Phase 6: Enhanced with context)
-#: addon/globalPlugins/terminalAccess.py:7480
+#: addon/globalPlugins/terminalAccess.py:7489
 msgid "Mark end set"
 msgstr "Marquer la fin de la série"
 
 # Message when marks are cleared
-#: addon/globalPlugins/terminalAccess.py:7486
+#: addon/globalPlugins/terminalAccess.py:7495
 msgid "Marks cleared"
 msgstr "Marques effacées"
 
 # Description for copying linear selection
-#: addon/globalPlugins/terminalAccess.py:7492
+#: addon/globalPlugins/terminalAccess.py:7501
 msgid "Copy linear selection between marks"
 msgstr "Copier la sélection linéaire entre les marques"
 
 # Message when marks are not set
-#: addon/globalPlugins/terminalAccess.py:7504
+#: addon/globalPlugins/terminalAccess.py:7513
 msgid "Set start and end marks first"
 msgstr "Définissez d'abord les repères de début et de fin."
 
 # Message when selection copied
-#: addon/globalPlugins/terminalAccess.py:7521
+#: addon/globalPlugins/terminalAccess.py:7530
 msgid "Selection copied"
 msgstr "Sélection copiée"
 
-#: addon/globalPlugins/terminalAccess.py:7527
+#: addon/globalPlugins/terminalAccess.py:7536
 msgid "Unable to copy: terminal not accessible"
 msgstr "Impossible de copier : terminal inaccessible"
 
 # Description for copying rectangular selection
-#: addon/globalPlugins/terminalAccess.py:7535
+#: addon/globalPlugins/terminalAccess.py:7544
 msgid "Copy rectangular selection between marks"
 msgstr "Copier la sélection rectangulaire entre les marques"
 
-#: addon/globalPlugins/terminalAccess.py:7565
+#: addon/globalPlugins/terminalAccess.py:7574
 msgid "Unable to determine position"
 msgstr "Impossible de déterminer la position"
 
-#: addon/globalPlugins/terminalAccess.py:7587
+#: addon/globalPlugins/terminalAccess.py:7596
 msgid "Background operation in progress, please wait"
 msgstr "Opération en arrière-plan en cours, veuillez patienter"
 
-#: addon/globalPlugins/terminalAccess.py:7590
+#: addon/globalPlugins/terminalAccess.py:7599
 #, python-brace-format
 msgid "Processing large selection ({rows} rows), please wait..."
 msgstr ""
 "Traitement d'une sélection importante (lignes {rows}), veuillez patienter..."
 
-#: addon/globalPlugins/terminalAccess.py:7597
+#: addon/globalPlugins/terminalAccess.py:7606
 msgid "Terminal Access - Copying Selection"
 msgstr "Accès au terminal - Copier la sélection"
 
-#: addon/globalPlugins/terminalAccess.py:7610
+#: addon/globalPlugins/terminalAccess.py:7619
 msgid "Failed to start background operation"
 msgstr "Échec du démarrage de l'opération en arrière-plan"
 
-#: addon/globalPlugins/terminalAccess.py:7648
+#: addon/globalPlugins/terminalAccess.py:7657
 msgid "Background copy failed: terminal not accessible"
 msgstr "Échec de la copie en arrière-plan : terminal inaccessible"
 
-#: addon/globalPlugins/terminalAccess.py:7654
+#: addon/globalPlugins/terminalAccess.py:7663
 msgid "Background copy failed"
 msgstr "Échec de la copie de l'arrière-plan"
 
-#: addon/globalPlugins/terminalAccess.py:7691
+#: addon/globalPlugins/terminalAccess.py:7700
 #, python-brace-format
 msgid "Copying row {current} of {total}..."
 msgstr "Copie de l'{current} de ligne de {total}..."
 
-#: addon/globalPlugins/terminalAccess.py:7696
+#: addon/globalPlugins/terminalAccess.py:7705
 msgid "Copy operation cancelled by user"
 msgstr "Opération de copie annulée par l'utilisateur"
 
-#: addon/globalPlugins/terminalAccess.py:7717
+#: addon/globalPlugins/terminalAccess.py:7726
 msgid "Copy complete!"
 msgstr "Copie terminée !"
 
 # Message for successful rectangular selection copy
-#: addon/globalPlugins/terminalAccess.py:7722
+#: addon/globalPlugins/terminalAccess.py:7731
 #, python-brace-format
 msgid "Rectangular selection copied: {rows} rows, columns {start} to {end}"
 msgstr ""
 "Sélection rectangulaire copiée : {rows} lignes, colonnes {start} à {end}"
 
 # Description for clearing marks
-#: addon/globalPlugins/terminalAccess.py:7741
+#: addon/globalPlugins/terminalAccess.py:7750
 msgid "Clear selection marks"
 msgstr "Marques de sélection claires"
 
 # Description for setting bookmark
-#: addon/globalPlugins/terminalAccess.py:7760
+#: addon/globalPlugins/terminalAccess.py:7769
 msgid "Set a bookmark at the current review position (use with 0-9)"
 msgstr "Ajouter un signet à la position actuelle (utiliser avec 0-9)"
 
 # Error message when bookmark manager not initialized
-#: addon/globalPlugins/terminalAccess.py:7775
+#: addon/globalPlugins/terminalAccess.py:7784
 msgid "Bookmark manager not available"
 msgstr "Gestionnaire de signets indisponible"
 
 # Message when bookmark set
-#: addon/globalPlugins/terminalAccess.py:7788
+#: addon/globalPlugins/terminalAccess.py:7797
 #, python-brace-format
 msgid "Bookmark {name} set"
 msgstr "Marque-page « Ensemble{name}»"
 
 # Error message when bookmark setting fails
-#: addon/globalPlugins/terminalAccess.py:7791
+#: addon/globalPlugins/terminalAccess.py:7800
 msgid "Failed to set bookmark"
 msgstr "Échec de la création du signet"
 
 # Description for jumping to bookmark
-#: addon/globalPlugins/terminalAccess.py:7795
+#: addon/globalPlugins/terminalAccess.py:7804
 msgid "Jump to a previously set bookmark (use with 0-9)"
 msgstr "Aller à un signet précédemment défini (utiliser avec 0-9)"
 
 # Message when jumping to bookmark
-#: addon/globalPlugins/terminalAccess.py:7828
+#: addon/globalPlugins/terminalAccess.py:7837
 #, python-brace-format
 msgid "Jumped to bookmark {name}"
 msgstr "Aller au signet {name}"
 
 # Error message when bookmark not found
-#: addon/globalPlugins/terminalAccess.py:7831
+#: addon/globalPlugins/terminalAccess.py:7840
 #, python-brace-format
 msgid "Bookmark {name} not found"
 msgstr "Signet {name} introuvable"
 
 # Description for listing bookmarks
-#: addon/globalPlugins/terminalAccess.py:7835
+#: addon/globalPlugins/terminalAccess.py:7844
 msgid "List all bookmarks"
 msgstr "Afficher tous les signets"
 
 # Message listing bookmarks
-#: addon/globalPlugins/terminalAccess.py:7854
+#: addon/globalPlugins/terminalAccess.py:7863
 #, python-brace-format
 msgid "{count} bookmarks: {names}"
 msgstr "{count} signets : {names}"
 
 # Message when no bookmarks exist
-#: addon/globalPlugins/terminalAccess.py:7861
+#: addon/globalPlugins/terminalAccess.py:7870
 msgid "No bookmarks set"
 msgstr "Aucun signet défini"
 
 # Description for creating a new terminal tab
-#: addon/globalPlugins/terminalAccess.py:7867
+#: addon/globalPlugins/terminalAccess.py:7876
 msgid "Create a new tab in the terminal"
 msgstr "Créer un nouvel onglet dans le terminal"
 
 # Message when creating a new tab
-#: addon/globalPlugins/terminalAccess.py:7885
+#: addon/globalPlugins/terminalAccess.py:7894
 msgid "Creating new tab"
 msgstr "Création d'un nouvel onglet"
 
 # Error message when tab creation fails
-#: addon/globalPlugins/terminalAccess.py:7888
+#: addon/globalPlugins/terminalAccess.py:7897
 msgid "Unable to create new tab"
 msgstr "Impossible de créer un nouvel onglet"
 
 # Description for listing/navigating tabs
-#: addon/globalPlugins/terminalAccess.py:7892
+#: addon/globalPlugins/terminalAccess.py:7901
 msgid "List tabs or switch to tab bar"
 msgstr "Afficher les onglets ou passer à la barre d'onglets"
 
 # Error message when tab manager not initialized
-#: addon/globalPlugins/terminalAccess.py:7904
+#: addon/globalPlugins/terminalAccess.py:7913
 msgid "Tab manager not available"
 msgstr "Gestionnaire d'onglets indisponible"
 
 # Message when no tabs are detected
-#: addon/globalPlugins/terminalAccess.py:7914
+#: addon/globalPlugins/terminalAccess.py:7923
 msgid "No tabs detected"
 msgstr "Aucun onglet détecté"
 
 # Message for single tab
-#: addon/globalPlugins/terminalAccess.py:7918
+#: addon/globalPlugins/terminalAccess.py:7927
 #, python-brace-format
 msgid "Single tab: {title}"
 msgstr "Onglet unique : {title}"
 
 # Message listing tab count
-#: addon/globalPlugins/terminalAccess.py:7923
+#: addon/globalPlugins/terminalAccess.py:7932
 #, python-brace-format
 msgid "{count} tabs detected"
 msgstr "{count} onglets détectés"
 
 # Message when switching tabs
-#: addon/globalPlugins/terminalAccess.py:7930
+#: addon/globalPlugins/terminalAccess.py:7939
 msgid "Switching to next tab"
 msgstr "Passer à l'onglet suivant"
 
 # Description for scanning command history
-#: addon/globalPlugins/terminalAccess.py:7938
+#: addon/globalPlugins/terminalAccess.py:7947
 msgid "Scan terminal output to detect and store command history"
 msgstr ""
 "Analyser la sortie du terminal pour détecter et enregistrer l'historique des"
 " commandes"
 
 # Error message when command history manager not initialized
-#: addon/globalPlugins/terminalAccess.py:7950
+#: addon/globalPlugins/terminalAccess.py:7959
 msgid "Command history not available"
 msgstr "Historique des commandes non disponible"
 
 # Message when commands detected
-#: addon/globalPlugins/terminalAccess.py:7959
+#: addon/globalPlugins/terminalAccess.py:7968
 #, python-brace-format
 msgid "Found {count} new commands, {total} total"
 msgstr "{count} nouvelles commandes trouvées, {total} au total"
 
 # Message when no new commands found
-#: addon/globalPlugins/terminalAccess.py:7962
+#: addon/globalPlugins/terminalAccess.py:7971
 msgid "No new commands found"
 msgstr "Aucune nouvelle commande trouvée"
 
 # Description for previous command navigation
-#: addon/globalPlugins/terminalAccess.py:7966
+#: addon/globalPlugins/terminalAccess.py:7975
 msgid "Navigate to previous command in history"
 msgstr "Naviguer vers la commande précédente dans l'historique"
 
 # Message when at beginning of history
-#: addon/globalPlugins/terminalAccess.py:7987
+#: addon/globalPlugins/terminalAccess.py:7996
 msgid "No previous command"
 msgstr "Aucune commande précédente"
 
 # Description for next command navigation
-#: addon/globalPlugins/terminalAccess.py:7991
+#: addon/globalPlugins/terminalAccess.py:8000
 msgid "Navigate to next command in history"
 msgstr "Passer à la commande suivante dans l'historique"
 
 # Message when at end of history
-#: addon/globalPlugins/terminalAccess.py:8012
+#: addon/globalPlugins/terminalAccess.py:8021
 msgid "No next command"
 msgstr "Pas de commande suivante"
 
 # Description for listing command history
-#: addon/globalPlugins/terminalAccess.py:8016
+#: addon/globalPlugins/terminalAccess.py:8025
 msgid "List all commands in history"
 msgstr "Afficher toutes les commandes de l'historique"
 
 # Message listing command history
-#: addon/globalPlugins/terminalAccess.py:8044
+#: addon/globalPlugins/terminalAccess.py:8053
 #, python-brace-format
 msgid "{count} commands in history. Recent: {commands}"
 msgstr "{count} commandes dans l'historique. Récentes : {commands}"
 
 # Message when no commands in history
-#: addon/globalPlugins/terminalAccess.py:8050
+#: addon/globalPlugins/terminalAccess.py:8059
 msgid "No commands in history"
 msgstr "Aucune commande dans l'historique"
 
 # Description for listing URLs in terminal output
-#: addon/globalPlugins/terminalAccess.py:8056
+#: addon/globalPlugins/terminalAccess.py:8065
 msgid "List URLs found in terminal output"
 msgstr "Liste des URL trouvées dans la sortie du terminal"
 
 # Error when URL extractor not ready
-#: addon/globalPlugins/terminalAccess.py:8068
+#: addon/globalPlugins/terminalAccess.py:8077
 msgid "URL list not available"
 msgstr "Liste d'URL non disponible"
 
+# Error when URL extraction fails
+#: addon/globalPlugins/terminalAccess.py:8089
+#, fuzzy
+msgid "Error extracting URLs"
+msgstr "Erreur lors de l'extraction des URL"
+
 # Announced when no URLs found
-#: addon/globalPlugins/terminalAccess.py:8075
+#: addon/globalPlugins/terminalAccess.py:8094
 msgid "No URLs found"
 msgstr "Aucune URL trouvée"
 
+# Announced when URL list is loading with count of URLs found
+#: addon/globalPlugins/terminalAccess.py:8098
+#, python-brace-format, fuzzy
+msgid "{count} URLs found"
+msgstr "{count} URL trouvées"
+
+# Error when URL dialog fails to open
+#: addon/globalPlugins/terminalAccess.py:8112
+#, fuzzy
+msgid "Error opening URL list"
+msgstr "Erreur lors de l'ouverture de la liste d'URL"
+
 # Description for searching output
-#: addon/globalPlugins/terminalAccess.py:8089
+#: addon/globalPlugins/terminalAccess.py:8120
 msgid "Search terminal output for text pattern"
 msgstr "Rechercher un motif de texte dans la sortie du terminal"
 
 # Error message when search manager not initialized
-#: addon/globalPlugins/terminalAccess.py:8101
+#: addon/globalPlugins/terminalAccess.py:8132
 msgid "Search not available"
 msgstr "Recherche indisponible"
 
 # Search dialog prompt
-#: addon/globalPlugins/terminalAccess.py:8113
+#: addon/globalPlugins/terminalAccess.py:8144
 msgid "Enter search text:"
 msgstr "Entrez le texte à rechercher :"
 
 # Search dialog title
-#: addon/globalPlugins/terminalAccess.py:8115
+#: addon/globalPlugins/terminalAccess.py:8146
 msgid "Search Terminal Output"
 msgstr "Rechercher la sortie du terminal"
 
 # Search results message
-#: addon/globalPlugins/terminalAccess.py:8135
+#: addon/globalPlugins/terminalAccess.py:8166
 #, python-brace-format
 msgid "Found {total} matches. Match {num} of {total}: {text}"
 msgstr ""
@@ -946,82 +964,82 @@ msgstr ""
 ": {text}"
 
 # No matches found
-#: addon/globalPlugins/terminalAccess.py:8143
+#: addon/globalPlugins/terminalAccess.py:8174
 #, python-brace-format
 msgid "No matches found for '{pattern}'"
 msgstr "Aucun résultat trouvé pour « {pattern} »"
 
 # Description for next search match
-#: addon/globalPlugins/terminalAccess.py:8152
+#: addon/globalPlugins/terminalAccess.py:8183
 msgid "Jump to next search match"
 msgstr "Aller à la correspondance suivante"
 
 # No search results
-#: addon/globalPlugins/terminalAccess.py:8167
+#: addon/globalPlugins/terminalAccess.py:8198
 msgid "No search results. Use NVDA+F to search."
 msgstr "Aucun résultat trouvé. Utilisez NVDA+F pour effectuer une recherche."
 
 # Error jumping to next match
-#: addon/globalPlugins/terminalAccess.py:8178
+#: addon/globalPlugins/terminalAccess.py:8209
 msgid "Cannot jump to next match"
 msgstr "Impossible de passer au match suivant"
 
 # Description for previous search match
-#: addon/globalPlugins/terminalAccess.py:8182
+#: addon/globalPlugins/terminalAccess.py:8213
 msgid "Jump to previous search match"
 msgstr "Aller à la correspondance précédente"
 
 # Error jumping to previous match
-#: addon/globalPlugins/terminalAccess.py:8208
+#: addon/globalPlugins/terminalAccess.py:8239
 msgid "Cannot jump to previous match"
 msgstr "Impossible de revenir au match précédent"
 
 # Title for the Terminal Access settings category
-#: addon/globalPlugins/terminalAccess.py:8255
+#: addon/globalPlugins/terminalAccess.py:8286
 msgid "Terminal Settings"
 msgstr "Paramètres du terminal"
 
-#: addon/globalPlugins/terminalAccess.py:8265
+#: addon/globalPlugins/terminalAccess.py:8296
 msgid "Cursor Tracking"
 msgstr "Suivi du curseur"
 
-#: addon/globalPlugins/terminalAccess.py:8273
+#: addon/globalPlugins/terminalAccess.py:8304
 msgid "Enable cursor &tracking"
 msgstr "Activer le suivi du curseur"
 
 # Tooltip for cursor tracking checkbox
-#: addon/globalPlugins/terminalAccess.py:8277
+#: addon/globalPlugins/terminalAccess.py:8308
 msgid "Automatically announce cursor position changes in the terminal"
 msgstr ""
 "Annoncer automatiquement les changements de position du curseur dans le "
 "terminal"
 
-#: addon/globalPlugins/terminalAccess.py:8284
+#: addon/globalPlugins/terminalAccess.py:8315
 msgid "Cursor tracking &mode:"
 msgstr "Suivi du curseur et mode :"
 
 # Cursor tracking mode option
-#: addon/globalPlugins/terminalAccess.py:8288
+#: addon/globalPlugins/terminalAccess.py:8319
 msgid "Off"
 msgstr "Hors service"
 
 # Cursor tracking mode option
-#: addon/globalPlugins/terminalAccess.py:8290
+#: addon/globalPlugins/terminalAccess.py:8321
 msgid "Standard"
 msgstr "Standard"
 
 # Cursor tracking mode option
-#: addon/globalPlugins/terminalAccess.py:8292
+#: addon/globalPlugins/terminalAccess.py:8323
 msgid "Highlight"
 msgstr "Mettre en évidence"
 
 # Cursor tracking mode option
-#: addon/globalPlugins/terminalAccess.py:8294
+#: addon/globalPlugins/terminalAccess.py:8325
 msgid "Window"
 msgstr "Fenêtre"
 
 # Tooltip for cursor tracking mode
-#: addon/globalPlugins/terminalAccess.py:8299
+#: addon/globalPlugins/terminalAccess.py:8330
 msgid ""
 "Standard: announce line/column changes, Highlight: announce highlighted "
 "text, Window: only announce within defined window"
@@ -1029,12 +1047,12 @@ msgstr ""
 "Standard : annonce les changements de ligne/colonne, Surligner : annonce le "
 "texte surligné, Fenêtre : annonce uniquement dans la fenêtre définie"
 
-#: addon/globalPlugins/terminalAccess.py:8308
+#: addon/globalPlugins/terminalAccess.py:8339
 msgid "Cursor delay (milliseconds):"
 msgstr "Délai du curseur (millisecondes) :"
 
 # Tooltip for cursor delay
-#: addon/globalPlugins/terminalAccess.py:8315
+#: addon/globalPlugins/terminalAccess.py:8346
 msgid ""
 "Delay before announcing cursor position (0-1000ms). Higher values reduce "
 "announcement frequency."
@@ -1042,54 +1060,54 @@ msgstr ""
 "Délai avant l'annonce de la position du curseur (0-1000 ms). Des valeurs "
 "plus élevées réduisent la fréquence des annonces."
 
-#: addon/globalPlugins/terminalAccess.py:8323
+#: addon/globalPlugins/terminalAccess.py:8354
 msgid "Feedback"
 msgstr "Commentaires"
 
-#: addon/globalPlugins/terminalAccess.py:8331
+#: addon/globalPlugins/terminalAccess.py:8362
 msgid "Enable &key echo"
 msgstr "Activer &key echo"
 
 # Tooltip for key echo
-#: addon/globalPlugins/terminalAccess.py:8335
+#: addon/globalPlugins/terminalAccess.py:8366
 msgid "Announce characters as you type in the terminal"
 msgstr ""
 "Annoncer les caractères au fur et à mesure que vous les tapez dans le "
 "terminal"
 
-#: addon/globalPlugins/terminalAccess.py:8342
+#: addon/globalPlugins/terminalAccess.py:8373
 msgid "Pause at &newlines"
 msgstr "Pause à &newlines"
 
 # Tooltip for line pause
-#: addon/globalPlugins/terminalAccess.py:8346
+#: addon/globalPlugins/terminalAccess.py:8377
 msgid "Brief pause when speaking line content to improve clarity"
 msgstr ""
 "Brève pause lors de la prononciation du contenu de la ligne pour améliorer "
 "la clarté"
 
-#: addon/globalPlugins/terminalAccess.py:8353
+#: addon/globalPlugins/terminalAccess.py:8384
 msgid "&Punctuation level:"
 msgstr "&Niveau de ponctuation :"
 
 # Punctuation level option
-#: addon/globalPlugins/terminalAccess.py:8359
+#: addon/globalPlugins/terminalAccess.py:8390
 msgid "Some (.,?!;:)"
 msgstr "Certains (.,?!;:)"
 
 # Punctuation level option
-#: addon/globalPlugins/terminalAccess.py:8361
-#, python-brace-format, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8392
+#, python-brace-format
 msgid "Most (adds @#$%^&*()_+=[]{}\\\\|<>/)"
 msgstr "La plupart (ajoute @#$%^&*()_+=[]{}\\\\|<>/)"
 
 # Punctuation level option
-#: addon/globalPlugins/terminalAccess.py:8363
+#: addon/globalPlugins/terminalAccess.py:8394
 msgid "All"
 msgstr "Tous"
 
 # Tooltip for punctuation level
-#: addon/globalPlugins/terminalAccess.py:8368
+#: addon/globalPlugins/terminalAccess.py:8399
 msgid ""
 "Controls which punctuation symbols are announced. Higher levels announce "
 "more symbols. Use NVDA+[ and ] to adjust quickly."
@@ -1098,12 +1116,12 @@ msgstr ""
 "supérieurs annoncent davantage de symboles. Utilisez NVDA+[ et ] pour régler"
 " rapidement."
 
-#: addon/globalPlugins/terminalAccess.py:8377
+#: addon/globalPlugins/terminalAccess.py:8408
 msgid "&Quiet mode"
 msgstr "Mode silencieux"
 
 # Tooltip for quiet mode
-#: addon/globalPlugins/terminalAccess.py:8381
+#: addon/globalPlugins/terminalAccess.py:8412
 msgid ""
 "Suppress most Terminal Access announcements. Use NVDA+Shift+Q to toggle "
 "quickly."
@@ -1111,12 +1129,12 @@ msgstr ""
 "Supprimez la plupart des annonces d'accès au terminal. Utilisez NVDA+Maj+Q "
 "pour basculer rapidement."
 
-#: addon/globalPlugins/terminalAccess.py:8388
+#: addon/globalPlugins/terminalAccess.py:8419
 msgid "&Verbose mode (detailed feedback)"
 msgstr "&Mode verbeux (commentaires détaillés)"
 
 # Tooltip for verbose mode
-#: addon/globalPlugins/terminalAccess.py:8392
+#: addon/globalPlugins/terminalAccess.py:8423
 msgid ""
 "Include position and context information with announcements. Useful for "
 "debugging and understanding terminal layout."
@@ -1124,12 +1142,12 @@ msgstr ""
 "Inclure les informations de position et de contexte dans les annonces. Utile"
 " pour le débogage et la compréhension de la disposition du terminal."
 
-#: addon/globalPlugins/terminalAccess.py:8400
+#: addon/globalPlugins/terminalAccess.py:8431
 msgid "Announce &indentation when reading lines"
 msgstr "Annoncer et indenter lors de la lecture des lignes"
 
 # Tooltip for indentation announcement
-#: addon/globalPlugins/terminalAccess.py:8404
+#: addon/globalPlugins/terminalAccess.py:8435
 msgid ""
 "Automatically announce indentation level when reading lines. Use NVDA+F5 to "
 "toggle quickly. NVDA+I pressed twice still reads indentation."
@@ -1138,16 +1156,16 @@ msgstr ""
 "lignes. Utilisez NVDA+F5 pour basculer rapidement. NVDA+I enfoncé deux fois "
 "lit toujours l'indentation."
 
-#: addon/globalPlugins/terminalAccess.py:8412
+#: addon/globalPlugins/terminalAccess.py:8443
 msgid "Announce New Output"
 msgstr "Annoncer une nouvelle production"
 
-#: addon/globalPlugins/terminalAccess.py:8420
+#: addon/globalPlugins/terminalAccess.py:8451
 msgid "&Announce new terminal output automatically"
 msgstr "&Annoncer automatiquement la sortie du nouveau terminal"
 
 # Tooltip for announce new output
-#: addon/globalPlugins/terminalAccess.py:8424
+#: addon/globalPlugins/terminalAccess.py:8455
 msgid ""
 "Automatically speak newly appended terminal output as it arrives. Use "
 "NVDA+Shift+N to toggle quickly."
@@ -1156,12 +1174,12 @@ msgstr ""
 "arrivée. Utilisez NVDA+Maj+N pour activer ou désactiver rapidement cette "
 "fonction."
 
-#: addon/globalPlugins/terminalAccess.py:8432
+#: addon/globalPlugins/terminalAccess.py:8463
 msgid "&Coalesce delay (ms):"
 msgstr "&Délai de coalescence (ms) :"
 
 # Tooltip for coalesce delay
-#: addon/globalPlugins/terminalAccess.py:8438
+#: addon/globalPlugins/terminalAccess.py:8469
 msgid ""
 "Milliseconds to wait before announcing accumulated new output. Larger values"
 " reduce interruptions during fast output."
@@ -1169,12 +1187,12 @@ msgstr ""
 "Millisecondes à attendre avant d'annoncer la nouvelle sortie cumulée. Des "
 "valeurs plus élevées réduisent les interruptions pendant la sortie rapide."
 
-#: addon/globalPlugins/terminalAccess.py:8446
+#: addon/globalPlugins/terminalAccess.py:8477
 msgid "&Max lines before summarising:"
 msgstr "&Nombre maximal de lignes avant le résumé :"
 
 # Tooltip for max lines
-#: addon/globalPlugins/terminalAccess.py:8452
+#: addon/globalPlugins/terminalAccess.py:8483
 msgid ""
 "When more than this many lines arrive at once, speak a summary ('N new "
 "lines') instead of the full text."
@@ -1182,38 +1200,38 @@ msgstr ""
 "Lorsque plus de ce nombre de lignes arrivent en même temps, prononcez un "
 "résumé (« N nouvelles lignes ») au lieu du texte complet."
 
-#: addon/globalPlugins/terminalAccess.py:8460
+#: addon/globalPlugins/terminalAccess.py:8491
 msgid "&Strip ANSI escape codes from output"
 msgstr "&Supprimer les codes d'échappement ANSI de la sortie"
 
 # Tooltip for strip ANSI
-#: addon/globalPlugins/terminalAccess.py:8464
+#: addon/globalPlugins/terminalAccess.py:8495
 msgid "Remove ANSI colour and formatting codes before speaking new output."
 msgstr ""
 "Supprimez les codes de couleur et de formatage ANSI avant de prononcer la "
 "nouvelle sortie."
 
-#: addon/globalPlugins/terminalAccess.py:8471
+#: addon/globalPlugins/terminalAccess.py:8502
 msgid "Advanced"
 msgstr "Avancé"
 
-#: addon/globalPlugins/terminalAccess.py:8479
+#: addon/globalPlugins/terminalAccess.py:8510
 msgid "Condense &repeated symbols"
 msgstr "Condenser et répéter les symboles"
 
 # Tooltip for repeated symbols
-#: addon/globalPlugins/terminalAccess.py:8483
+#: addon/globalPlugins/terminalAccess.py:8514
 msgid "Condense runs of repeated symbols (e.g., '====' becomes '4 equals')"
 msgstr ""
 "Condense les séries de symboles répétés (par exemple, « ==== » devient « 4 "
 "égal »)"
 
-#: addon/globalPlugins/terminalAccess.py:8490
+#: addon/globalPlugins/terminalAccess.py:8521
 msgid "Repeated symbols to condense:"
 msgstr "Symboles répétés à condenser :"
 
 # Tooltip for repeated symbols values
-#: addon/globalPlugins/terminalAccess.py:8495
+#: addon/globalPlugins/terminalAccess.py:8526
 msgid ""
 "Characters that will be condensed when repeated. Example: -_=! (max 50 "
 "characters)"
@@ -1221,16 +1239,16 @@ msgstr ""
 "Caractères qui seront condensés lorsqu'ils seront répétés. Exemple : -_=! "
 "(50 caractères maximum)"
 
-#: addon/globalPlugins/terminalAccess.py:8503
+#: addon/globalPlugins/terminalAccess.py:8534
 msgid "Application Profiles"
 msgstr "Profils d'application"
 
-#: addon/globalPlugins/terminalAccess.py:8511
+#: addon/globalPlugins/terminalAccess.py:8542
 msgid "Installed &profiles:"
 msgstr "Profils installés :"
 
 # Tooltip for profile list
-#: addon/globalPlugins/terminalAccess.py:8518
+#: addon/globalPlugins/terminalAccess.py:8549
 msgid ""
 "Select an application profile to view or edit. Profiles customize Terminal "
 "Access behavior for specific applications. Active and default profiles are "
@@ -1241,16 +1259,16 @@ msgstr ""
 "spécifiques. Les profils actifs et par défaut sont marqués."
 
 # Label for default profile choice
-#: addon/globalPlugins/terminalAccess.py:8526
+#: addon/globalPlugins/terminalAccess.py:8557
 msgid "None (use global settings)"
 msgstr "Aucun (utiliser les paramètres globaux)"
 
-#: addon/globalPlugins/terminalAccess.py:8528
+#: addon/globalPlugins/terminalAccess.py:8559
 msgid "&Default profile:"
 msgstr "&Profil par défaut :"
 
 # Tooltip for default profile
-#: addon/globalPlugins/terminalAccess.py:8544
+#: addon/globalPlugins/terminalAccess.py:8575
 msgid ""
 "Profile to use when no application-specific profile is detected. Use "
 "NVDA+F10 to check which profile is active."
@@ -1259,34 +1277,33 @@ msgstr ""
 "détecté. Utilisez NVDA+F10 pour vérifier quel profil est actif."
 
 # Label for new profile button
-#: addon/globalPlugins/terminalAccess.py:8553
-#, fuzzy
+#: addon/globalPlugins/terminalAccess.py:8584
 msgid "&New Profile..."
 msgstr "&Nouveau profil..."
 
 # Tooltip for new profile button
-#: addon/globalPlugins/terminalAccess.py:8556
+#: addon/globalPlugins/terminalAccess.py:8587
 msgid "Create a new application profile with custom settings"
 msgstr ""
 "Créer un nouveau profil d'application avec des paramètres personnalisés"
 
 # Label for edit profile button
-#: addon/globalPlugins/terminalAccess.py:8562
+#: addon/globalPlugins/terminalAccess.py:8593
 msgid "&Edit Profile..."
 msgstr "&Modifier le profil..."
 
 # Tooltip for edit profile button
-#: addon/globalPlugins/terminalAccess.py:8565
+#: addon/globalPlugins/terminalAccess.py:8596
 msgid "Edit the selected application profile"
 msgstr "Modifier le profil d'application sélectionné"
 
 # Label for delete profile button
-#: addon/globalPlugins/terminalAccess.py:8571
+#: addon/globalPlugins/terminalAccess.py:8602
 msgid "&Delete Profile"
 msgstr "&Supprimer le profil"
 
 # Tooltip for delete profile button
-#: addon/globalPlugins/terminalAccess.py:8574
+#: addon/globalPlugins/terminalAccess.py:8605
 msgid ""
 "Delete the selected custom profile (default profiles cannot be deleted)"
 msgstr ""
@@ -1294,30 +1311,30 @@ msgstr ""
 "peuvent pas être supprimés)"
 
 # Label for import profile button
-#: addon/globalPlugins/terminalAccess.py:8585
+#: addon/globalPlugins/terminalAccess.py:8616
 msgid "&Import..."
 msgstr "&Importer..."
 
 # Tooltip for import profile button
-#: addon/globalPlugins/terminalAccess.py:8588
+#: addon/globalPlugins/terminalAccess.py:8619
 msgid "Import a profile from a JSON file"
 msgstr "Importer un profil à partir d'un fichier JSON"
 
 # Label for export profile button
-#: addon/globalPlugins/terminalAccess.py:8594
+#: addon/globalPlugins/terminalAccess.py:8625
 msgid "E&xport..."
 msgstr "E&xport..."
 
 # Tooltip for export profile button
-#: addon/globalPlugins/terminalAccess.py:8597
+#: addon/globalPlugins/terminalAccess.py:8628
 msgid "Export the selected profile to a JSON file"
 msgstr "Exporter le profil sélectionné vers un fichier JSON"
 
-#: addon/globalPlugins/terminalAccess.py:8611
+#: addon/globalPlugins/terminalAccess.py:8642
 msgid "Direct Gesture Bindings"
 msgstr "Liaisons directes par geste"
 
-#: addon/globalPlugins/terminalAccess.py:8639
+#: addon/globalPlugins/terminalAccess.py:8670
 msgid ""
 "Unchecked gestures are disabled. Use the command layer (NVDA+') to access "
 "them.\\nNVDA+' (Command Layer) and NVDA+Shift+F1 (Help) are always "
@@ -1327,18 +1344,18 @@ msgstr ""
 "(NVDA+') pour y accéder. NVDA+' (couche de commande) et NVDA+Maj+F1 (aide) "
 "sont toujours disponibles."
 
-#: addon/globalPlugins/terminalAccess.py:8648
+#: addon/globalPlugins/terminalAccess.py:8679
 msgid "&Reset to Defaults"
 msgstr "&Réinitialiser les paramètres par défaut"
 
 # Tooltip for reset button
-#: addon/globalPlugins/terminalAccess.py:8651
+#: addon/globalPlugins/terminalAccess.py:8682
 msgid "Reset all Terminal Access settings to their default values"
 msgstr ""
 "Réinitialiser tous les paramètres d'accès au terminal à leurs valeurs par "
 "défaut"
 
-#: addon/globalPlugins/terminalAccess.py:8660
+#: addon/globalPlugins/terminalAccess.py:8691
 msgid ""
 "Are you sure you want to reset all Terminal Access settings to their default"
 " values?"
@@ -1346,29 +1363,29 @@ msgstr ""
 "Êtes-vous sûr de vouloir réinitialiser tous les paramètres d'accès au "
 "terminal à leurs valeurs par défaut ?"
 
-#: addon/globalPlugins/terminalAccess.py:8661
+#: addon/globalPlugins/terminalAccess.py:8692
 msgid "Confirm Reset"
 msgstr "Confirmer la réinitialisation"
 
-#: addon/globalPlugins/terminalAccess.py:8706
+#: addon/globalPlugins/terminalAccess.py:8737
 msgid "All settings have been reset to their default values."
 msgstr "Tous les paramètres ont été réinitialisés à leurs valeurs par défaut."
 
-#: addon/globalPlugins/terminalAccess.py:8707
+#: addon/globalPlugins/terminalAccess.py:8738
 msgid "Settings Reset"
 msgstr "Réinitialisation des paramètres"
 
 # Indicator for currently active profile
-#: addon/globalPlugins/terminalAccess.py:8826
+#: addon/globalPlugins/terminalAccess.py:8857
 msgid "Active"
 msgstr "Actif"
 
 # Indicator for default profile
-#: addon/globalPlugins/terminalAccess.py:8830
+#: addon/globalPlugins/terminalAccess.py:8861
 msgid "Default"
 msgstr "Par défaut"
 
-#: addon/globalPlugins/terminalAccess.py:8875
+#: addon/globalPlugins/terminalAccess.py:8906
 msgid ""
 "Profile creation dialog will be implemented soon. For now, profiles can be "
 "created programmatically via the ProfileManager API."
@@ -1377,11 +1394,11 @@ msgstr ""
 "l'instant, les profils peuvent être créés par programmation via l'API "
 "ProfileManager."
 
-#: addon/globalPlugins/terminalAccess.py:8877
+#: addon/globalPlugins/terminalAccess.py:8908
 msgid "Feature In Development"
 msgstr "Fonctionnalité en cours de développement"
 
-#: addon/globalPlugins/terminalAccess.py:8889
+#: addon/globalPlugins/terminalAccess.py:8920
 #, python-brace-format
 msgid ""
 "Profile editing dialog will be implemented soon. Selected profile: {name}"
@@ -1389,81 +1406,81 @@ msgstr ""
 "La boîte de dialogue d'édition du profil sera bientôt mise en place. Profil "
 "sélectionné : {name}"
 
-#: addon/globalPlugins/terminalAccess.py:8903
+#: addon/globalPlugins/terminalAccess.py:8934
 #, python-brace-format
 msgid "Are you sure you want to delete the profile '{name}'?"
 msgstr "Êtes-vous sûr de vouloir supprimer le profil « {name} » ?"
 
-#: addon/globalPlugins/terminalAccess.py:8904
+#: addon/globalPlugins/terminalAccess.py:8935
 msgid "Confirm Delete"
 msgstr "Confirmer la suppression"
 
-#: addon/globalPlugins/terminalAccess.py:8923
+#: addon/globalPlugins/terminalAccess.py:8954
 #, python-brace-format
 msgid "Profile '{name}' has been deleted."
 msgstr "Le profil « {name} » a été supprimé."
 
-#: addon/globalPlugins/terminalAccess.py:8924
+#: addon/globalPlugins/terminalAccess.py:8955
 msgid "Profile Deleted"
 msgstr "Profil supprimé"
 
-#: addon/globalPlugins/terminalAccess.py:8933
+#: addon/globalPlugins/terminalAccess.py:8964
 msgid "Failed to delete profile. See NVDA log for details."
 msgstr ""
 "Échec de la suppression du profil. Consultez le journal NVDA pour plus de "
 "détails."
 
-#: addon/globalPlugins/terminalAccess.py:8934
+#: addon/globalPlugins/terminalAccess.py:8965
 msgid "Error"
 msgstr "Erreur"
 
-#: addon/globalPlugins/terminalAccess.py:8943
+#: addon/globalPlugins/terminalAccess.py:8974
 msgid "Import Profile"
 msgstr "Profil d'importation"
 
-#: addon/globalPlugins/terminalAccess.py:8945
+#: addon/globalPlugins/terminalAccess.py:8976
 msgid "JSON files (*.json)|*.json"
 msgstr "Fichiers JSON (*.json)|*.json"
 
-#: addon/globalPlugins/terminalAccess.py:8972
+#: addon/globalPlugins/terminalAccess.py:9003
 #, python-brace-format
 msgid "Profile '{name}' has been imported successfully."
 msgstr "Le profil « {name} » a été importé avec succès."
 
-#: addon/globalPlugins/terminalAccess.py:8975
+#: addon/globalPlugins/terminalAccess.py:9006
 msgid "Profile Imported"
 msgstr "Profil importé"
 
-#: addon/globalPlugins/terminalAccess.py:8984
+#: addon/globalPlugins/terminalAccess.py:9015
 msgid "Failed to import profile. The file may be invalid or corrupted."
 msgstr ""
 "Échec de l'importation du profil. Le fichier est peut-être invalide ou "
 "corrompu."
 
-#: addon/globalPlugins/terminalAccess.py:8985
+#: addon/globalPlugins/terminalAccess.py:9016
 msgid "Import Error"
 msgstr "Erreur d'importation"
 
-#: addon/globalPlugins/terminalAccess.py:9008
+#: addon/globalPlugins/terminalAccess.py:9039
 msgid "Export Profile"
 msgstr "Profil d'exportation"
 
-#: addon/globalPlugins/terminalAccess.py:9024
+#: addon/globalPlugins/terminalAccess.py:9055
 #, python-brace-format
 msgid "Profile '{name}' has been exported successfully."
 msgstr "Le profil « {name} » a été exporté avec succès."
 
-#: addon/globalPlugins/terminalAccess.py:9025
+#: addon/globalPlugins/terminalAccess.py:9056
 msgid "Profile Exported"
 msgstr "Profil exporté"
 
-#: addon/globalPlugins/terminalAccess.py:9034
+#: addon/globalPlugins/terminalAccess.py:9065
 msgid "Failed to export profile. See NVDA log for details."
 msgstr ""
 "Échec de l'exportation du profil. Consultez le journal NVDA pour plus de "
 "détails."
 
-#: addon/globalPlugins/terminalAccess.py:9035
+#: addon/globalPlugins/terminalAccess.py:9066
 msgid "Export Error"
 msgstr "Erreur d'exportation"
 
