@@ -5592,17 +5592,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 						self._lastTypedChar = None
 						self._repeatedCharCount = 0
 
-			# Use punctuation level system to determine if we should speak symbol names
-			if self._shouldProcessSymbol(ch):
-				charToSpeak = self._processSymbol(ch)
-			else:
-				charToSpeak = ch
-
-			# Speak space as "space" instead of silence
-			if ch == ' ':
-				ui.message(_("space"))
-			else:
-				ui.message(charToSpeak)
+			self._speakCharacter(ch)
 
 	def _brailleMessage(self, text):
 		"""Show text on the Braille display.
@@ -5632,22 +5622,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			char: The repeated character.
 			count: The number of times it was repeated.
 		"""
+		symbolName = self._resolveSymbol(char)
 		if count > 1:
-			# Get symbol name based on punctuation level
-			if self._shouldProcessSymbol(char):
-				symbolName = self._processSymbol(char)
-			else:
-				symbolName = char
-
 			# Translators: Message format for repeated symbols, e.g. "3 dash"
 			ui.message(_("{count} {symbol}").format(count=count, symbol=symbolName))
-		elif count == 1:
-			# Just one - announce normally
-			if self._shouldProcessSymbol(char):
-				charToSpeak = self._processSymbol(char)
-			else:
-				charToSpeak = char
-			ui.message(charToSpeak)
+		else:
+			ui.message(symbolName)
 
 	def event_caret(self, obj, nextHandler):
 		"""
@@ -5817,17 +5797,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if typing_induced and not self._isKeyEchoActive():
 			return
 
-		if char and char.strip():
-			# Use punctuation level system if enabled
-			if self._shouldProcessSymbol(char):
-				charToSpeak = self._processSymbol(char)
-			else:
-				charToSpeak = char
-			ui.message(charToSpeak)
-		elif char == ' ':
-			ui.message(_("space"))
-		elif not char or char in ('\r', '\n'):
-			ui.message(_("Blank"))
+		self._speakCharacter(char)
 
 		# Notify the Braille display of the caret movement so it shows the
 		# full line context around the cursor instead of a brief character flash.
@@ -7171,6 +7141,26 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		"""
 		locale = languageHandler.getLanguage()
 		return _get_symbol_description(locale, char)
+
+	def _resolveSymbol(self, char):
+		"""Return the spoken form of *char* respecting the punctuation level.
+
+		If the current punctuation level includes *char*, returns a
+		locale-aware symbol name via ``_processSymbol``.  Otherwise returns
+		*char* unchanged.
+		"""
+		if self._shouldProcessSymbol(char):
+			return self._processSymbol(char)
+		return char
+
+	def _speakCharacter(self, char):
+		"""Speak a single character, handling space and blank specially."""
+		if char == ' ':
+			ui.message(_("space"))
+		elif not char or char in ('\r', '\n'):
+			ui.message(_("Blank"))
+		elif char.strip():
+			ui.message(self._resolveSymbol(char))
 
 	@script(
 		# Translators: Description for decreasing punctuation level
