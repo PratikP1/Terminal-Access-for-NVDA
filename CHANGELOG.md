@@ -11,6 +11,12 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
   hyperlinks. Interactive dialog with filter box, and actions to open in browser, copy to
   clipboard, or navigate to the line containing the URL.
 
+### Fixed
+
+- Punctuation pronunciation now respects NVDA's configured language instead of using raw Unicode
+  character names (e.g., "dot" instead of "full stop" for period). Symbol names are resolved
+  through NVDA's `characterProcessing` module, matching the user's NVDA language setting.
+
 ## [1.1.0] - 2026-03-03
 
 ### Added

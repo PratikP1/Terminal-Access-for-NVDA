@@ -198,26 +198,73 @@ class TestCharacterReading(unittest.TestCase):
 		plugin._announceCharacterCode.assert_called_once()
 
 	@patch('globalPlugins.terminalAccess.ui')
-	def test_processSymbol_returns_unicode_name(self, mock_ui):
-		"""Ensure _processSymbol returns readable name for symbols."""
-		from globalPlugins.terminalAccess import GlobalPlugin
+	def test_processSymbol_uses_nvda_character_processing(self, mock_ui):
+		"""Ensure _processSymbol delegates to NVDA's characterProcessing for locale-aware names."""
+		import sys
+		from globalPlugins.terminalAccess import GlobalPlugin, _get_symbol_description
 
-		plugin = GlobalPlugin()
-		self.assertEqual(plugin._processSymbol('!'), 'exclamation mark')
-		self.assertEqual(plugin._processSymbol('a'), 'a')
+		# Clear the lru_cache so our mock takes effect
+		_get_symbol_description.cache_clear()
+
+		# Configure mock to return a locale-specific name
+		cp_mock = sys.modules['characterProcessing']
+		original_fn = cp_mock.processSpeechSymbol
+		cp_mock.processSpeechSymbol = lambda locale, sym: {'.': 'dot', '!': 'bang'}.get(sym, sym)
+
+		try:
+			plugin = GlobalPlugin()
+			self.assertEqual(plugin._processSymbol('.'), 'dot')
+			self.assertEqual(plugin._processSymbol('!'), 'bang')
+			self.assertEqual(plugin._processSymbol('a'), 'a')
+		finally:
+			cp_mock.processSpeechSymbol = original_fn
+			_get_symbol_description.cache_clear()
+
+	@patch('globalPlugins.terminalAccess.ui')
+	def test_processSymbol_falls_back_to_unicode_name(self, mock_ui):
+		"""When NVDA has no mapping, _processSymbol falls back to Unicode name."""
+		import sys
+		from globalPlugins.terminalAccess import GlobalPlugin, _get_symbol_description
+
+		_get_symbol_description.cache_clear()
+
+		# Configure mock to return symbol unchanged (no mapping)
+		cp_mock = sys.modules['characterProcessing']
+		original_fn = cp_mock.processSpeechSymbol
+		cp_mock.processSpeechSymbol = lambda locale, sym: sym
+
+		try:
+			plugin = GlobalPlugin()
+			# Falls back to unicodedata.name: "!" → "exclamation mark"
+			self.assertEqual(plugin._processSymbol('!'), 'exclamation mark')
+		finally:
+			cp_mock.processSpeechSymbol = original_fn
+			_get_symbol_description.cache_clear()
 
 	@patch('globalPlugins.terminalAccess.ui')
 	def test_event_typedCharacter_speaks_symbol_name(self, mock_ui):
-		"""Typed punctuation should speak symbol names instead of raising errors."""
-		from globalPlugins.terminalAccess import GlobalPlugin
+		"""Typed punctuation should speak symbol names via NVDA character processing."""
+		import sys
+		from globalPlugins.terminalAccess import GlobalPlugin, _get_symbol_description
 
-		plugin = GlobalPlugin()
-		plugin.isTerminalApp = MagicMock(return_value=True)
-		plugin._positionCalculator = MagicMock()
+		_get_symbol_description.cache_clear()
 
-		plugin.event_typedCharacter(Mock(), lambda: None, '!')
+		# Configure mock to return locale-aware name
+		cp_mock = sys.modules['characterProcessing']
+		original_fn = cp_mock.processSpeechSymbol
+		cp_mock.processSpeechSymbol = lambda locale, sym: {'.': 'dot', '!': 'bang'}.get(sym, sym)
 
-		mock_ui.message.assert_called_with('exclamation mark')
+		try:
+			plugin = GlobalPlugin()
+			plugin.isTerminalApp = MagicMock(return_value=True)
+			plugin._positionCalculator = MagicMock()
+
+			plugin.event_typedCharacter(Mock(), lambda: None, '!')
+
+			mock_ui.message.assert_called_with('bang')
+		finally:
+			cp_mock.processSpeechSymbol = original_fn
+			_get_symbol_description.cache_clear()
 
 	def test_gestures_dont_propagate_to_globalCommands(self):
 		"""Test that comma and period gestures don't call globalCommands."""

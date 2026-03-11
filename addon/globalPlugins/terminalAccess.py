@@ -99,6 +99,8 @@ from scriptHandler import script
 import scriptHandler
 import globalCommands
 import speech
+import characterProcessing
+import languageHandler
 import tones
 from typing import Any
 
@@ -534,16 +536,27 @@ def _read_lines_on_main(terminal_obj, start_row: int, end_row: int, timeout: flo
 	return result[0]
 
 
-@functools.cache
-def _get_unicode_symbol_name(char: str) -> str:
+@functools.lru_cache(maxsize=512)
+def _get_symbol_description(locale: str, char: str) -> str:
 	"""
-	Return the lowercased Unicode name of *char*, or the character itself on failure.
+	Return a locale-aware spoken name for *char* using NVDA's character processing.
 
-	Cached with ``functools.cache`` so that repeated lookups for the same
-	character (common during typing) pay the ``unicodedata`` cost only once.
+	Delegates to ``characterProcessing.processSpeechSymbol`` so that symbol
+	names respect the user's configured NVDA language (e.g. ``.`` → "dot" in
+	English, "punto" in Spanish).  Falls back to the lowercased Unicode name
+	if NVDA has no mapping for the character.
+
+	Cached with ``functools.lru_cache`` keyed on *(locale, char)* so that
+	repeated lookups (common during typing) are fast, and a language change
+	invalidates stale entries naturally.
 	"""
 	if char.isalnum():
 		return char
+	result = characterProcessing.processSpeechSymbol(locale, char)
+	# processSpeechSymbol returns the character unchanged when no mapping exists
+	if result != char:
+		return result
+	# Fall back to Unicode name for unmapped symbols
 	name = unicodedata.name(char, "")
 	return name.lower() if name else char
 
@@ -7150,12 +7163,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	def _processSymbol(self, char):
 		"""
-		Return a human-friendly name for a symbol based on Unicode data.
+		Return a human-friendly, locale-aware name for a symbol.
 
-		Falls back to the character itself if no name is available.
-		Delegates to the module-level cached ``_get_unicode_symbol_name``.
+		Uses NVDA's character processing to respect the user's configured
+		language.  Falls back to the Unicode character name if no locale
+		mapping exists.
 		"""
-		return _get_unicode_symbol_name(char)
+		locale = languageHandler.getLanguage()
+		return _get_symbol_description(locale, char)
 
 	@script(
 		# Translators: Description for decreasing punctuation level

@@ -102,6 +102,19 @@ sys.modules['tones'] = MagicMock()
 sys.modules['logHandler'] = MagicMock()
 sys.modules['wx'] = MagicMock()
 
+# Mock characterProcessing with a realistic processSpeechSymbol
+char_processing_mock = MagicMock()
+def _mock_process_speech_symbol(locale, symbol):
+    """Mock that mirrors NVDA's behavior: returns symbol unchanged if no mapping."""
+    return symbol  # Default: no mapping (tests can override per-test)
+char_processing_mock.processSpeechSymbol = _mock_process_speech_symbol
+sys.modules['characterProcessing'] = char_processing_mock
+
+# Mock languageHandler
+lang_handler_mock = MagicMock()
+lang_handler_mock.getLanguage = MagicMock(return_value="en")
+sys.modules['languageHandler'] = lang_handler_mock
+
 # Mock translation function
 import builtins
 builtins._ = lambda x: x
@@ -205,7 +218,8 @@ def ensure_mocks():
     """Ensure NVDA mocks are always available in sys.modules."""
     # This fixture runs automatically before each test
     # It ensures that if any test deleted a mock, it's restored
-    required_modules = ['config', 'api', 'ui', 'gui', 'globalPluginHandler', 'textInfos', 'scriptHandler']
+    required_modules = ['config', 'api', 'ui', 'gui', 'globalPluginHandler', 'textInfos', 'scriptHandler',
+                        'characterProcessing', 'languageHandler']
 
     for module_name in required_modules:
         if module_name not in sys.modules:
