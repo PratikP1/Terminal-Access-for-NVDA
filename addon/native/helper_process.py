@@ -14,6 +14,14 @@ Communication uses a named pipe with length-prefixed JSON messages::
 
     [4-byte LE u32 length][UTF-8 JSON payload]
 
+The helper sends two kinds of outgoing messages:
+
+- **Responses** — correlated to a request by ``id`` field
+- **Notifications** — unsolicited pushes (``text_changed``, ``helper_ready``)
+
+A background reader thread demultiplexes incoming messages, dispatching
+responses to waiting callers and notifications to registered callbacks.
+
 Usage::
 
     from native.helper_process import HelperProcess
@@ -23,6 +31,9 @@ Usage::
 
     # Read terminal text without blocking the main thread
     text = helper.read_text(hwnd)
+
+    # Subscribe for push notifications
+    helper.subscribe(hwnd, on_text_changed=my_callback)
 
     # Clean shutdown
     helper.stop()
@@ -134,6 +145,28 @@ def _find_helper_exe() -> Optional[str]:
 
 
 # ═══════════════════════════════════════════════════════════════
+#  Pending response slot (used by reader thread to dispatch)
+# ═══════════════════════════════════════════════════════════════
+
+class _PendingResponse:
+    """A slot that a caller waits on for a response to a specific request."""
+
+    __slots__ = ("event", "result")
+
+    def __init__(self):
+        self.event = threading.Event()
+        self.result: Optional[Dict[str, Any]] = None
+
+    def set(self, msg: Dict[str, Any]):
+        self.result = msg
+        self.event.set()
+
+    def wait(self, timeout: float) -> Optional[Dict[str, Any]]:
+        self.event.wait(timeout)
+        return self.result
+
+
+# ═══════════════════════════════════════════════════════════════
 #  HelperProcess class
 # ═══════════════════════════════════════════════════════════════
 
@@ -146,6 +179,9 @@ class HelperProcess:
     # Auto-restart backoff parameters
     _RESTART_DELAYS = [1.0, 2.0, 4.0, 8.0, 16.0, 30.0]
 
+    # Timeout for waiting for a response (seconds)
+    _RESPONSE_TIMEOUT = 5.0
+
     def __init__(self):
         self._proc: Optional[subprocess.Popen] = None
         self._pipe_handle: Optional[int] = None
@@ -155,9 +191,16 @@ class HelperProcess:
         self._request_id = 0
         self._id_lock = threading.Lock()
         self._write_lock = threading.Lock()
-        self._read_lock = threading.Lock()
-        self._notification_thread: Optional[threading.Thread] = None
+
+        # Reader thread and response dispatch
+        self._reader_thread: Optional[threading.Thread] = None
+        self._pending: Dict[int, _PendingResponse] = {}
+        self._pending_lock = threading.Lock()
+
+        # Notification callbacks: type → list of callbacks
         self._notification_callbacks: Dict[str, List[Callable]] = {}
+        self._callback_lock = threading.Lock()
+
         self._stopping = False
         self._restart_count = 0
         self._exe_path = _find_helper_exe()
@@ -199,6 +242,11 @@ class HelperProcess:
 
         self._close_pipe()
 
+        # Wait for reader thread to finish
+        if self._reader_thread is not None:
+            self._reader_thread.join(timeout=2.0)
+            self._reader_thread = None
+
         if self._proc is not None:
             try:
                 self._proc.wait(timeout=3)
@@ -209,6 +257,12 @@ class HelperProcess:
                 except Exception:
                     pass
             self._proc = None
+
+        # Wake up any threads waiting for responses
+        with self._pending_lock:
+            for pending in self._pending.values():
+                pending.set({"type": "error", "code": "shutdown", "message": "Helper stopped"})
+            self._pending.clear()
 
         self._started = False
         self._ready.clear()
@@ -281,6 +335,71 @@ class HelperProcess:
             return False
 
     # ───────────────────────────────────────────────────────────
+    #  Subscription operations
+    # ───────────────────────────────────────────────────────────
+
+    def subscribe(self, hwnd: int, on_text_changed: Optional[Callable] = None) -> bool:
+        """Subscribe to text change notifications for a terminal HWND.
+
+        Args:
+            hwnd: Window handle to subscribe to.
+            on_text_changed: Callback ``f(hwnd: int, text: str)`` called
+                when the terminal's text changes.
+
+        Returns True if the helper accepted the subscription.
+        """
+        if not self.is_running:
+            return False
+
+        if on_text_changed is not None:
+            self.on("text_changed", on_text_changed)
+
+        try:
+            resp = self._send_request("subscribe", hwnd=hwnd)
+            return resp is not None and resp.get("type") == "subscribe_ok"
+        except Exception:
+            log.debug("subscribe failed", exc_info=True)
+            return False
+
+    def unsubscribe(self, hwnd: int) -> bool:
+        """Unsubscribe from text change notifications for a terminal HWND.
+
+        Returns True if the helper accepted the unsubscribe.
+        """
+        if not self.is_running:
+            return False
+
+        try:
+            resp = self._send_request("unsubscribe", hwnd=hwnd)
+            return resp is not None and resp.get("type") == "unsubscribe_ok"
+        except Exception:
+            log.debug("unsubscribe failed", exc_info=True)
+            return False
+
+    # ───────────────────────────────────────────────────────────
+    #  Notification callbacks
+    # ───────────────────────────────────────────────────────────
+
+    def on(self, event_type: str, callback: Callable) -> None:
+        """Register a callback for a notification type.
+
+        Supported types: ``text_changed``.
+        """
+        with self._callback_lock:
+            if event_type not in self._notification_callbacks:
+                self._notification_callbacks[event_type] = []
+            self._notification_callbacks[event_type].append(callback)
+
+    def off(self, event_type: str, callback: Callable) -> None:
+        """Unregister a callback for a notification type."""
+        with self._callback_lock:
+            cbs = self._notification_callbacks.get(event_type, [])
+            try:
+                cbs.remove(callback)
+            except ValueError:
+                pass
+
+    # ───────────────────────────────────────────────────────────
     #  Internal: process and pipe management
     # ───────────────────────────────────────────────────────────
 
@@ -328,14 +447,22 @@ class HelperProcess:
                 self._proc.kill()
             raise RuntimeError("Timed out connecting to helper pipe")
 
-        # Read HelperReady notification
-        msg = self._read_response()
+        # Read HelperReady notification (before reader thread starts)
+        msg = self._read_message()
         if msg is None or msg.get("type") != "helper_ready":
             raise RuntimeError(f"Expected helper_ready, got: {msg}")
 
         self._started = True
         self._ready.set()
+        self._stopping = False
         self._restart_count = 0
+
+        # Start the reader thread for demultiplexing responses/notifications
+        self._reader_thread = threading.Thread(
+            target=self._reader_loop, daemon=True, name="helper-reader"
+        )
+        self._reader_thread.start()
+
         log.info("Helper process started (PID %d)", self._proc.pid)
 
     def _close_pipe(self):
@@ -354,15 +481,29 @@ class HelperProcess:
             return self._request_id
 
     def _send_request(self, msg_type: str, **kwargs) -> Optional[Dict[str, Any]]:
-        """Send a request and wait for the matching response."""
+        """Send a request and wait for the matching response.
+
+        Uses the reader thread for response demultiplexing, so multiple
+        threads can have in-flight requests concurrently.
+        """
         req_id = self._next_id()
         msg = {"type": msg_type, "id": req_id, **kwargs}
 
-        with self._write_lock:
-            self._write_message(msg)
+        # Register a pending response slot BEFORE writing (to avoid races)
+        pending = _PendingResponse()
+        with self._pending_lock:
+            self._pending[req_id] = pending
 
-        with self._read_lock:
-            return self._read_response()
+        try:
+            with self._write_lock:
+                self._write_message(msg)
+
+            # Wait for the reader thread to deliver our response
+            result = pending.wait(self._RESPONSE_TIMEOUT)
+            return result
+        finally:
+            with self._pending_lock:
+                self._pending.pop(req_id, None)
 
     def _write_message(self, msg: Dict[str, Any]):
         """Write a length-prefixed JSON message to the pipe."""
@@ -414,8 +555,8 @@ class HelperProcess:
 
         return buf.raw[:nbytes]
 
-    def _read_response(self) -> Optional[Dict[str, Any]]:
-        """Read one length-prefixed JSON response from the pipe."""
+    def _read_message(self) -> Optional[Dict[str, Any]]:
+        """Read one length-prefixed JSON message from the pipe."""
         try:
             header = self._read_exact(4)
             length = struct.unpack("<I", header)[0]
@@ -424,8 +565,59 @@ class HelperProcess:
             payload = self._read_exact(length)
             return json.loads(payload.decode("utf-8"))
         except Exception:
-            log.debug("Failed to read response", exc_info=True)
+            log.debug("Failed to read message", exc_info=True)
             return None
+
+    # ───────────────────────────────────────────────────────────
+    #  Reader thread: demultiplexes responses and notifications
+    # ───────────────────────────────────────────────────────────
+
+    def _reader_loop(self):
+        """Background reader thread: reads messages and dispatches them.
+
+        - Messages with an ``id`` field → dispatched to the waiting caller
+        - Messages without ``id`` (notifications) → dispatched to callbacks
+        """
+        while not self._stopping and self._pipe_handle is not None:
+            msg = self._read_message()
+            if msg is None:
+                # Pipe closed or read error — helper crashed
+                break
+
+            msg_id = msg.get("id")
+            if msg_id is not None:
+                # This is a response — deliver to the waiting caller
+                with self._pending_lock:
+                    pending = self._pending.get(msg_id)
+                if pending is not None:
+                    pending.set(msg)
+                else:
+                    log.debug("No pending request for id %d", msg_id)
+            else:
+                # This is a notification — dispatch to callbacks
+                self._dispatch_notification(msg)
+
+        # If we exit unexpectedly, wake up any waiting callers
+        if not self._stopping:
+            log.warning("Helper reader thread exiting (pipe closed)")
+            with self._pending_lock:
+                for pending in self._pending.values():
+                    pending.set({"type": "error", "code": "disconnected", "message": "Pipe closed"})
+
+    def _dispatch_notification(self, msg: Dict[str, Any]):
+        """Dispatch a notification message to registered callbacks."""
+        msg_type = msg.get("type", "")
+        with self._callback_lock:
+            callbacks = list(self._notification_callbacks.get(msg_type, []))
+
+        for cb in callbacks:
+            try:
+                if msg_type == "text_changed":
+                    cb(msg.get("hwnd", 0), msg.get("text", ""))
+                else:
+                    cb(msg)
+            except Exception:
+                log.debug("Notification callback error", exc_info=True)
 
     # ───────────────────────────────────────────────────────────
     #  Auto-restart (for future use)

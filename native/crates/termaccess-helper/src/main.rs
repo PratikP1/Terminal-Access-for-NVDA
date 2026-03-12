@@ -4,6 +4,25 @@
 //! JSON messages. Runs UIA operations in its own COM STA apartment, freeing
 //! the NVDA main thread from blocking wx.CallAfter round-trips.
 //!
+//! ## Thread model
+//!
+//! Single-threaded event loop using `PeekNamedPipe` for non-blocking reads:
+//!
+//! ```text
+//! Main thread (STA):
+//!   CoInitializeEx(STA)
+//!   CoCreateInstance(IUIAutomation)
+//!   Loop:
+//!     PeekNamedPipe → data available?
+//!       yes → read request, handle it, write response
+//!       no  → check subscriptions (every 50ms)
+//!     sleep(5ms) to avoid busy-wait
+//! ```
+//!
+//! A single-threaded design is required because Windows serializes
+//! synchronous I/O operations from different threads on the same
+//! handle, which would deadlock a reader+writer thread pair.
+//!
 //! Usage: `termaccess-helper.exe --pipe-name \\.\pipe\termaccess-{pid}-{uuid}`
 
 mod pipe_server;
@@ -15,13 +34,23 @@ mod uia_reader;
 use std::env;
 use std::io;
 use std::process;
+use std::thread;
+use std::time::{Duration, Instant};
 
 use windows::Win32::System::Com::{CoInitializeEx, CoUninitialize, COINIT_APARTMENTTHREADED};
 
 use crate::pipe_server::PipeServer;
 use crate::protocol::{Notification, Request, Response};
 use crate::security::PipeSecurity;
+use crate::uia_events::SubscriptionManager;
 use crate::uia_reader::UiaReader;
+
+/// Interval between subscription checks (50ms).
+const SUBSCRIPTION_CHECK_INTERVAL: Duration = Duration::from_millis(50);
+
+/// Sleep duration when no pipe data is available (5ms).
+/// Keeps CPU usage minimal while maintaining responsiveness.
+const POLL_SLEEP: Duration = Duration::from_millis(5);
 
 fn main() {
     let pipe_name = match parse_pipe_name() {
@@ -79,7 +108,8 @@ fn run(pipe_name: &str) -> io::Result<()> {
     result
 }
 
-/// Inner loop: create UIA reader, set up pipe, process requests.
+/// Inner loop: create UIA reader, set up pipe, poll for requests
+/// and subscription changes on a single thread.
 fn run_pipe_loop(pipe_name: &str) -> io::Result<()> {
     // Create UIA reader. This may fail (e.g. in test environments without
     // a desktop), so we proceed without it — read requests will get errors.
@@ -101,26 +131,64 @@ fn run_pipe_loop(pipe_name: &str) -> io::Result<()> {
     // Tell the client we're ready to accept requests
     pipe.send_notification(Notification::HelperReady)?;
 
-    // Request–response loop
+    // Subscription manager for tracking terminal text changes
+    let mut subs = SubscriptionManager::new();
+
+    // Track when we last checked subscriptions
+    let mut last_sub_check = Instant::now();
+
+    // Single-threaded event loop:
+    // - Use PeekNamedPipe to check for available data
+    // - Read and handle requests when data is available
+    // - Check subscriptions every SUBSCRIPTION_CHECK_INTERVAL
+    // - Sleep briefly when idle to avoid burning CPU
     loop {
-        let request = match pipe.read_request() {
-            Ok(Some(req)) => req,
-            Ok(None) => {
-                // Client disconnected cleanly (EOF)
-                break;
+        // Check if there's data available on the pipe
+        match pipe.peek() {
+            Ok(0) => {
+                // No data available — check subscriptions if interval elapsed
+                if subs.has_subscriptions()
+                    && last_sub_check.elapsed() >= SUBSCRIPTION_CHECK_INTERVAL
+                {
+                    last_sub_check = Instant::now();
+                    if let Some(reader) = uia.as_ref() {
+                        let changes = subs.check(reader);
+                        for (hwnd, text) in changes {
+                            let notif = Notification::TextChanged { hwnd, text };
+                            if pipe.send_notification(notif).is_err() {
+                                return Ok(());
+                            }
+                        }
+                    }
+                }
+
+                // Brief sleep to avoid busy-waiting
+                thread::sleep(POLL_SLEEP);
+            }
+            Ok(_bytes_available) => {
+                // Data available — read and handle the request
+                let request = match pipe.read_request() {
+                    Ok(Some(req)) => req,
+                    Ok(None) => break, // Client disconnected
+                    Err(e) => {
+                        if e.kind() == io::ErrorKind::BrokenPipe {
+                            break;
+                        }
+                        return Err(e);
+                    }
+                };
+
+                if !handle_request(&pipe, &uia, &mut subs, &request)? {
+                    break;
+                }
             }
             Err(e) => {
+                // Peek failed — pipe is broken
                 if e.kind() == io::ErrorKind::BrokenPipe {
-                    // Client crashed or closed its end
                     break;
                 }
                 return Err(e);
             }
-        };
-
-        // handle_request returns false on Shutdown
-        if !handle_request(&pipe, &uia, &request)? {
-            break;
         }
     }
 
@@ -132,6 +200,7 @@ fn run_pipe_loop(pipe_name: &str) -> io::Result<()> {
 fn handle_request(
     pipe: &PipeServer,
     uia: &Option<UiaReader>,
+    subs: &mut SubscriptionManager,
     request: &Request,
 ) -> io::Result<bool> {
     match request {
@@ -176,23 +245,15 @@ fn handle_request(
             Ok(true)
         }
 
-        Request::Subscribe { id, .. } => {
-            // Step 3: UIA event subscription
-            pipe.send_response(Response::error(
-                *id,
-                "not_implemented",
-                "Subscribe not yet implemented",
-            ))?;
+        Request::Subscribe { id, hwnd } => {
+            subs.subscribe(*hwnd);
+            pipe.send_response(Response::SubscribeOk { id: *id })?;
             Ok(true)
         }
 
-        Request::Unsubscribe { id, .. } => {
-            // Step 3: UIA event subscription
-            pipe.send_response(Response::error(
-                *id,
-                "not_implemented",
-                "Unsubscribe not yet implemented",
-            ))?;
+        Request::Unsubscribe { id, hwnd } => {
+            subs.unsubscribe(*hwnd);
+            pipe.send_response(Response::UnsubscribeOk { id: *id })?;
             Ok(true)
         }
 

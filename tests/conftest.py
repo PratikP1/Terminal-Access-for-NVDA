@@ -215,6 +215,45 @@ def reset_config():
     yield
 
 
+@pytest.fixture(autouse=True, scope="session")
+def _prevent_helper_spawn():
+    """Prevent tests from spawning a real helper process.
+
+    The ``_get_helper()`` wrapper in ``terminalAccess.py`` would otherwise
+    find the built EXE and spawn it, leaving a zombie process that blocks
+    pytest from exiting.
+
+    We patch at both levels:
+    - ``native.termaccess_bridge.get_helper`` (new calls)
+    - ``globalPlugins.terminalAccess._get_helper`` (already-imported reference)
+    """
+    originals = {}
+    try:
+        from native import termaccess_bridge
+        originals["bridge"] = termaccess_bridge.get_helper
+        termaccess_bridge.get_helper = lambda: None
+    except ImportError:
+        pass
+
+    try:
+        from globalPlugins import terminalAccess
+        originals["plugin"] = terminalAccess._get_helper
+        terminalAccess._get_helper = lambda: None
+    except (ImportError, AttributeError):
+        pass
+
+    yield
+
+    # Restore originals
+    if "bridge" in originals:
+        from native import termaccess_bridge
+        termaccess_bridge.get_helper = originals["bridge"]
+        termaccess_bridge.stop_helper()
+    if "plugin" in originals:
+        from globalPlugins import terminalAccess
+        terminalAccess._get_helper = originals["plugin"]
+
+
 @pytest.fixture(autouse=True)
 def ensure_mocks():
     """Ensure NVDA mocks are always available in sys.modules."""

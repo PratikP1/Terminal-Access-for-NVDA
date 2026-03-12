@@ -118,10 +118,16 @@ try:
 		native_strip_ansi as _native_strip_ansi,
 		native_search_text as _native_search_text,
 		NativePositionCache as _NativePositionCache,
+		get_helper as _get_helper,
+		stop_helper as _stop_helper,
 	)
 	_native_available = _native_available_fn()
 except Exception:
 	_native_available = False
+	def _get_helper():
+		return None
+	def _stop_helper():
+		pass
 
 try:
 	addonHandler.initTranslation()
@@ -583,6 +589,42 @@ def _read_lines_on_main(terminal_obj, start_row: int, end_row: int, timeout: flo
 		return None
 	done.wait(timeout)
 	return result[0]
+
+
+def _read_terminal_text(terminal_obj, position=None, timeout: float = 2.0):
+	"""Read terminal text, preferring the helper process over main-thread marshaling.
+
+	Tries the native helper process first (bypasses wx.CallAfter entirely).
+	Falls back to ``_read_terminal_text_on_main()`` if the helper is unavailable.
+	"""
+	helper = _get_helper()
+	if helper is not None and hasattr(terminal_obj, 'windowHandle'):
+		try:
+			text = helper.read_text(terminal_obj.windowHandle)
+			if text is not None:
+				return text
+		except Exception:
+			pass
+	# Fallback: marshal to the main thread
+	return _read_terminal_text_on_main(terminal_obj, position, timeout)
+
+
+def _read_lines(terminal_obj, start_row: int, end_row: int, timeout: float = 5.0):
+	"""Read a range of terminal lines, preferring the helper process.
+
+	Tries the native helper process first (bypasses wx.CallAfter entirely).
+	Falls back to ``_read_lines_on_main()`` if the helper is unavailable.
+	"""
+	helper = _get_helper()
+	if helper is not None and hasattr(terminal_obj, 'windowHandle'):
+		try:
+			lines = helper.read_lines(terminal_obj.windowHandle, start_row, end_row)
+			if lines is not None:
+				return lines
+		except Exception:
+			pass
+	# Fallback: marshal to the main thread
+	return _read_lines_on_main(terminal_obj, start_row, end_row, timeout)
 
 
 @functools.lru_cache(maxsize=512)
@@ -3487,23 +3529,52 @@ class NewOutputAnnouncer:
 
 	def start_polling(self) -> None:
 		"""
-		Start background polling thread to detect new output.
+		Start monitoring for new output.
 
-		Called when the announce new output feature is enabled.
+		Prefers push-based subscription via the helper process (50ms latency).
+		Falls back to a background polling thread (300ms) if the helper is
+		unavailable or subscription fails.
 		"""
-		if self._poll_thread is not None:
-			return  # Already polling
+		if self._poll_thread is not None or getattr(self, "_subscribed_hwnd", None) is not None:
+			return  # Already monitoring
 
+		# Try subscription via helper process first
+		helper = _get_helper()
+		if helper is not None and self._terminal_obj is not None:
+			hwnd = getattr(self._terminal_obj, "windowHandle", None)
+			if hwnd is not None:
+				try:
+					if helper.subscribe(hwnd, on_text_changed=self._on_text_changed):
+						self._subscribed_hwnd = hwnd
+						log.debug("Subscribed to hwnd %d via helper", hwnd)
+						return
+				except Exception:
+					log.debug("Subscription failed, falling back to polling", exc_info=True)
+
+		# Fallback: polling
 		self._stop_polling.clear()
 		self._poll_thread = threading.Thread(target=self._poll_loop, daemon=True)
 		self._poll_thread.start()
 
 	def stop_polling(self) -> None:
 		"""
-		Stop background polling thread.
+		Stop monitoring for new output.
 
-		Called when the announce new output feature is disabled.
+		Handles both subscription mode and polling mode.
 		"""
+		# Unsubscribe if in subscription mode
+		hwnd = getattr(self, "_subscribed_hwnd", None)
+		if hwnd is not None:
+			helper = _get_helper()
+			if helper is not None:
+				try:
+					helper.unsubscribe(hwnd)
+					helper.off("text_changed", self._on_text_changed)
+				except Exception:
+					pass
+			self._subscribed_hwnd = None
+
+		# Stop polling if in polling mode
 		if self._poll_thread is None:
 			return
 
@@ -3511,6 +3582,13 @@ class NewOutputAnnouncer:
 		if self._poll_thread.is_alive():
 			self._poll_thread.join(timeout=1.0)
 		self._poll_thread = None
+
+	def _on_text_changed(self, hwnd: int, text: str) -> None:
+		"""Callback for helper process text_changed notifications."""
+		# Only process if this is for our terminal
+		subscribed = getattr(self, "_subscribed_hwnd", None)
+		if subscribed is not None and hwnd == subscribed and text:
+			self.feed(text)
 
 	def _poll_loop(self) -> None:
 		"""
@@ -3527,10 +3605,10 @@ class NewOutputAnnouncer:
 					continue
 
 				# Get terminal content and feed to announcer.
-				# Marshal to main thread — UIA COM objects are apartment-threaded.
+				# Uses helper process if available; falls back to main-thread marshaling.
 				if self._terminal_obj is not None:
 					try:
-						text = _read_terminal_text_on_main(self._terminal_obj)
+						text = _read_terminal_text(self._terminal_obj)
 						if text is not None:
 							self.feed(text)
 					except Exception:
@@ -3797,9 +3875,8 @@ class WindowMonitor:
 		lines = []
 
 		try:
-			# Marshal to main thread — this runs from a background polling thread
-			# and UIA COM objects are apartment-threaded.
-			all_text = _read_terminal_text_on_main(self._terminal)
+			# Uses helper process if available; falls back to main-thread marshaling.
+			all_text = _read_terminal_text(self._terminal)
 			if all_text is None:
 				return ""
 
@@ -5509,6 +5586,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if self._windowMonitor and self._windowMonitor.is_monitoring():
 			self._windowMonitor.stop_monitoring()
 
+		# Stop the native helper process
+		try:
+			_stop_helper()
+		except Exception:
+			pass
+
 		try:
 			gui.settingsDialogs.NVDASettingsDialog.categoryClasses.remove(TerminalAccessSettingsPanel)
 		except (ValueError, AttributeError):
@@ -5671,6 +5754,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 			# Store the terminal object and route the review cursor to it via the navigator
 			self._boundTerminal = obj
+
+			# Lazy-start the native helper process on first terminal focus.
+			# This is a no-op if already running or if the EXE is unavailable.
+			try:
+				_get_helper()
+			except Exception:
+				pass
 			api.setNavigatorObject(obj)
 
 			# Initialize TabManager for this terminal (Section 9 - v1.0.39+)
@@ -7861,10 +7951,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			endCol: Ending column (1-based)
 			progressDialog: Optional SelectionProgressDialog for visual feedback
 		"""
-		# Bulk-read all needed lines on the main thread in a single marshaled
-		# call.  This avoids per-line UIA COM calls from the background thread
-		# (apartment-threaded COM objects must be called from their owning thread).
-		raw_lines = _read_lines_on_main(terminal, startRow, endRow)
+		# Bulk-read all needed lines — uses helper process if available,
+		# otherwise marshals to the main thread in a single call.
+		raw_lines = _read_lines(terminal, startRow, endRow)
 		if raw_lines is None:
 			if threading.current_thread() != threading.main_thread():
 				wx.CallAfter(ui.message, _("Background copy failed"))
