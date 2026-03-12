@@ -635,12 +635,16 @@ class PositionCache:
 
 	def __init__(self) -> None:
 		"""Initialize an empty position cache."""
-		self._cache: dict[str, tuple[int, int, float]] = {}
+		from collections import OrderedDict
+		self._cache: OrderedDict[str, tuple[int, int, float]] = OrderedDict()
 		self._lock: threading.Lock = threading.Lock()
 
 	def get(self, bookmark: Any) -> tuple[int, int] | None:
 		"""
 		Retrieve cached position for a bookmark if valid.
+
+		Uses LRU eviction: a cache hit moves the entry to the end so
+		frequently accessed positions stay in the cache longer.
 
 		Args:
 			bookmark: TextInfo bookmark object
@@ -654,6 +658,8 @@ class PositionCache:
 			if entry is not None:
 				row, col, timestamp = entry
 				if (time.time() - timestamp) < self.CACHE_TIMEOUT_S:
+					# LRU: move to end so this entry is evicted last
+					self._cache.move_to_end(key)
 					return (row, col)
 				# Expired entry, remove it
 				del self._cache[key]
@@ -663,18 +669,23 @@ class PositionCache:
 		"""
 		Store position in cache with current timestamp.
 
+		Uses LRU eviction: when the cache is full, the least-recently
+		used entry is evicted instead of the oldest by insertion time.
+
 		Args:
 			bookmark: TextInfo bookmark object
 			row: Row number
 			col: Column number
 		"""
 		with self._lock:
-			# Enforce size limit - remove oldest entry if needed
-			if len(self._cache) >= self.MAX_CACHE_SIZE:
-				oldest_key = next(iter(self._cache))
-				del self._cache[oldest_key]
-
 			key = str(bookmark)
+			# If already present, update and move to end (LRU refresh)
+			if key in self._cache:
+				self._cache.move_to_end(key)
+			elif len(self._cache) >= self.MAX_CACHE_SIZE:
+				# Evict the least-recently used entry (front of OrderedDict)
+				self._cache.popitem(last=False)
+
 			self._cache[key] = (row, col, time.time())
 
 	def clear(self) -> None:
@@ -1713,15 +1724,15 @@ class WindowDefinition:
 
 	@classmethod
 	def fromDict(cls, data: dict[str, Any]) -> 'WindowDefinition':
-		"""Create window definition from dictionary."""
+		"""Create window definition from dictionary with validation."""
 		return cls(
-			name=data.get('name', ''),
-			top=data.get('top', 0),
-			bottom=data.get('bottom', 0),
-			left=data.get('left', 0),
-			right=data.get('right', 0),
-			mode=data.get('mode', 'announce'),
-			enabled=data.get('enabled', True),
+			name=_validateString(data.get('name', ''), 64, '', 'windowName'),
+			top=_validateInteger(data.get('top', 0), 0, MAX_WINDOW_DIMENSION, 0, 'windowTop'),
+			bottom=_validateInteger(data.get('bottom', 0), 0, MAX_WINDOW_DIMENSION, 0, 'windowBottom'),
+			left=_validateInteger(data.get('left', 0), 0, MAX_WINDOW_DIMENSION, 0, 'windowLeft'),
+			right=_validateInteger(data.get('right', 0), 0, MAX_WINDOW_DIMENSION, 0, 'windowRight'),
+			mode=data.get('mode', 'announce') if data.get('mode') in ('announce', 'monitor', 'silent') else 'announce',
+			enabled=bool(data.get('enabled', True)),
 		)
 
 
@@ -1832,25 +1843,51 @@ class ApplicationProfile:
 
 	@classmethod
 	def fromDict(cls, data: dict[str, Any]) -> 'ApplicationProfile':
-		"""Create profile from dictionary."""
-		profile = cls(data.get('appName', ''), data.get('displayName'))
-		profile.punctuationLevel = data.get('punctuationLevel')
-		profile.cursorTrackingMode = data.get('cursorTrackingMode')
-		profile.keyEcho = data.get('keyEcho')
-		profile.linePause = data.get('linePause')
-		profile.processSymbols = data.get('processSymbols')
-		profile.repeatedSymbols = data.get('repeatedSymbols')
-		profile.repeatedSymbolsValues = data.get('repeatedSymbolsValues')
-		profile.cursorDelay = data.get('cursorDelay')
-		profile.quietMode = data.get('quietMode')
-		profile.announceIndentation = data.get('announceIndentation')
-		profile.indentationOnLineRead = data.get('indentationOnLineRead')
+		"""Create profile from dictionary with field validation."""
+		profile = cls(
+			_validateString(data.get('appName', ''), 64, '', 'appName'),
+			_validateString(data.get('displayName', ''), 128, None, 'displayName'),
+		)
+
+		# Validate integer fields with known ranges (None = use global)
+		raw = data.get('punctuationLevel')
+		profile.punctuationLevel = _validateInteger(raw, 0, 3, 2, 'punctuationLevel') if raw is not None else None
+		raw = data.get('cursorTrackingMode')
+		profile.cursorTrackingMode = _validateInteger(raw, 0, 3, 1, 'cursorTrackingMode') if raw is not None else None
+		raw = data.get('linePause')
+		profile.linePause = _validateInteger(raw, 0, 1000, 20, 'linePause') if raw is not None else None
+		raw = data.get('cursorDelay')
+		profile.cursorDelay = _validateInteger(raw, 50, 2000, 200, 'cursorDelay') if raw is not None else None
+
+		# Validate boolean fields (None = use global)
+		for field in ('keyEcho', 'processSymbols', 'repeatedSymbols', 'quietMode',
+		              'announceIndentation', 'indentationOnLineRead'):
+			val = data.get(field)
+			setattr(profile, field, bool(val) if val is not None else None)
+
+		raw = data.get('repeatedSymbolsValues')
+		profile.repeatedSymbolsValues = _validateString(raw, MAX_REPEATED_SYMBOLS_LENGTH, '-_=!', 'repeatedSymbolsValues') if raw is not None else None
 
 		# Restore windows
-		for winData in data.get('windows', []):
-			profile.windows.append(WindowDefinition.fromDict(winData))
+		windows_data = data.get('windows', [])
+		if isinstance(windows_data, list):
+			for winData in windows_data:
+				if isinstance(winData, dict):
+					profile.windows.append(WindowDefinition.fromDict(winData))
 
-		profile.customGestures = data.get('customGestures', {})
+		# Validate customGestures: only allow known gesture pattern → script name
+		raw_gestures = data.get('customGestures', {})
+		if isinstance(raw_gestures, dict):
+			safe_gestures = {}
+			for gesture, script_name in raw_gestures.items():
+				# Gesture keys must be "kb:..." strings; script names must be alphanumeric
+				if (isinstance(gesture, str) and isinstance(script_name, str)
+						and gesture.startswith('kb:') and script_name.isidentifier()):
+					safe_gestures[gesture] = script_name
+			profile.customGestures = safe_gestures
+		else:
+			profile.customGestures = {}
+
 		return profile
 
 
@@ -2934,18 +2971,15 @@ class PositionCalculator:
 		Returns:
 			(row, col) tuple
 		"""
-		# Start from beginning of buffer
+		# Start from beginning of buffer and count lines forward to the target
 		startInfo = terminal.makeTextInfo(textInfos.POSITION_FIRST)
+		startInfo.collapse()
 
 		# Calculate row by counting lines
 		targetCopy = textInfo.copy()
 		targetCopy.collapse()
 
-		# Move to the end of content to get total lines
-		startInfo.move(textInfos.UNIT_LINE, 999999, endPoint="end")
-		startInfo.collapse(end=False)
-
-		# Count how many lines until target
+		# Count how many lines from buffer start until target
 		lineCount = 0
 		while startInfo.compareEndPoints(targetCopy, "startToStart") < 0:
 			moved = startInfo.move(textInfos.UNIT_LINE, 1)
@@ -3030,10 +3064,12 @@ class SelectionProgressDialog:
 		self._dialog: Any | None = None
 		self._cancelled: bool = False
 		self._lock: threading.Lock = threading.Lock()
+		self._ready: threading.Event = threading.Event()
 		# Create dialog on main thread
 		wx.CallAfter(self._create, parent, title, maximum)
-		# Give time for dialog to be created
-		time.sleep(0.1)
+		# Wait for the main thread to actually create the dialog (up to 2s).
+		# This replaces a fixed sleep(0.1) which could lose the race.
+		self._ready.wait(timeout=2.0)
 
 	def _create(self, parent, title: str, maximum: int) -> None:
 		"""
@@ -3057,6 +3093,8 @@ class SelectionProgressDialog:
 		except Exception as e:
 			import logHandler
 			logHandler.log.error(f"Terminal Access: Failed to create progress dialog: {e}")
+		finally:
+			self._ready.set()
 
 	def update(self, value: int, message: str) -> bool:
 		"""
@@ -3115,20 +3153,23 @@ class SelectionProgressDialog:
 		Close and destroy the progress dialog (thread-safe).
 		"""
 		with self._lock:
-			if self._dialog:
-				wx.CallAfter(self._destroy)
-				self._dialog = None
+			dialog = self._dialog
+			self._dialog = None
+		if dialog:
+			wx.CallAfter(self._destroy, dialog)
 
-	def _destroy(self) -> None:
+	def _destroy(self, dialog) -> None:
 		"""
 		Destroy the dialog (called on main thread).
+
+		Receives the dialog reference explicitly so it is not lost
+		when ``close()`` clears ``self._dialog`` before this runs.
 		"""
-		if self._dialog:
-			try:
-				self._dialog.Destroy()
-			except Exception as e:
-				import logHandler
-				logHandler.log.error(f"Terminal Access: Failed to destroy progress dialog: {e}")
+		try:
+			dialog.Destroy()
+		except Exception as e:
+			import logHandler
+			logHandler.log.error(f"Terminal Access: Failed to destroy progress dialog: {e}")
 
 
 class OperationQueue:
@@ -3615,22 +3656,30 @@ class WindowMonitor:
 	def _monitor_loop(self) -> None:
 		"""Background monitoring loop."""
 		while True:
+			# Collect monitors that are due for a check while holding the
+			# lock, then release it *before* any I/O.  _check_window calls
+			# _read_terminal_text_on_main which blocks waiting for the main
+			# thread — holding the lock during that call would deadlock if
+			# the main thread tried to acquire it (e.g. stop_monitoring).
+			due_monitors = []
 			with self._lock:
 				if not self._monitoring_active:
 					break
 
 				current_time = time.time() * 1000  # Convert to milliseconds
 
-				# Check each monitor
 				for monitor in self._monitors:
 					if not monitor['enabled']:
 						continue
-
-					# Check if it's time to poll this monitor
 					time_since_check = current_time - monitor['last_check']
 					if time_since_check >= monitor['interval']:
-						self._check_window(monitor, current_time)
-						monitor['last_check'] = current_time
+						due_monitors.append(monitor)
+
+			# Perform I/O outside the lock to avoid deadlock.
+			for monitor in due_monitors:
+				current_time = time.time() * 1000
+				self._check_window(monitor, current_time)
+				monitor['last_check'] = current_time
 
 			# Sleep briefly to avoid busy-waiting
 			time.sleep(0.1)
@@ -4276,6 +4325,24 @@ class OutputSearchManager:
 		if not self._terminal or not pattern:
 			return 0
 
+		# Validate regex early so callers get a clear error instead of a
+		# silent 0-match result buried inside the broad except below.
+		if use_regex:
+			try:
+				flags = 0 if case_sensitive else re.IGNORECASE
+				re.compile(pattern, flags)
+			except re.error as exc:
+				try:
+					import logHandler
+					logHandler.log.warning(f"Terminal Access: Invalid regex '{pattern}': {exc}")
+				except Exception:
+					pass
+				raise ValueError(f"Invalid regular expression: {exc}") from exc
+
+		# Use a local list so _store_match doesn't touch instance/per-tab
+		# state until the search is complete.
+		matches = []
+
 		def _store_match(line_info, line_text, line_num, char_offset):
 			"""
 			Store a search match with a bookmark and fallback position.
@@ -4288,7 +4355,7 @@ class OutputSearchManager:
 				fallback_pos = line_info.copy()
 			except Exception:
 				fallback_pos = line_info
-			self._matches.append((bookmark, line_text, line_num, fallback_pos, char_offset))
+			matches.append((bookmark, line_text, line_num, fallback_pos, char_offset))
 
 		def _find_match_offset(line_text, pattern, case_sensitive, use_regex):
 			"""Find the character offset of the first match in the line."""
@@ -4301,12 +4368,6 @@ class OutputSearchManager:
 				search_text = line_text if case_sensitive else line_text.lower()
 				offset = search_text.find(search_pattern)
 				return offset if offset >= 0 else 0
-
-		self._pattern = pattern
-		self._case_sensitive = case_sensitive
-		self._use_regex = use_regex
-		self._matches = []
-		self._current_match_index = -1
 
 		try:
 			# Get all terminal content
@@ -4356,7 +4417,7 @@ class OutputSearchManager:
 							break
 			except Exception:
 				# Fall back to per-match walk if single-pass fails.
-				self._matches = []
+				matches.clear()
 				for i in matching_indices:
 					try:
 						line_info = self._terminal.makeTextInfo(textInfos.POSITION_FIRST)
@@ -4366,7 +4427,17 @@ class OutputSearchManager:
 					except Exception:
 						pass
 
-			return len(self._matches)
+			# Save results through the tab-aware state mechanism so
+			# multi-tab and legacy modes stay in sync.
+			self._save_search_state({
+				'pattern': pattern,
+				'matches': matches,
+				'current_match_index': -1,
+				'case_sensitive': case_sensitive,
+				'use_regex': use_regex
+			})
+
+			return len(matches)
 
 		except Exception:
 			return 0
@@ -4378,11 +4449,14 @@ class OutputSearchManager:
 		Returns:
 			bool: True if jumped to next match
 		"""
-		if not self._matches:
+		state = self._get_search_state()
+		matches = state['matches']
+		if not matches:
 			return False
 
 		# Move to next match (wrap around)
-		self._current_match_index = (self._current_match_index + 1) % len(self._matches)
+		state['current_match_index'] = (state['current_match_index'] + 1) % len(matches)
+		self._save_search_state(state)
 		return self._jump_to_current_match()
 
 	def previous_match(self) -> bool:
@@ -4392,11 +4466,14 @@ class OutputSearchManager:
 		Returns:
 			bool: True if jumped to previous match
 		"""
-		if not self._matches:
+		state = self._get_search_state()
+		matches = state['matches']
+		if not matches:
 			return False
 
 		# Move to previous match (wrap around)
-		self._current_match_index = (self._current_match_index - 1) % len(self._matches)
+		state['current_match_index'] = (state['current_match_index'] - 1) % len(matches)
+		self._save_search_state(state)
 		return self._jump_to_current_match()
 
 	def first_match(self) -> bool:
@@ -4406,10 +4483,12 @@ class OutputSearchManager:
 		Returns:
 			bool: True if jumped to first match
 		"""
-		if not self._matches:
+		state = self._get_search_state()
+		if not state['matches']:
 			return False
 
-		self._current_match_index = 0
+		state['current_match_index'] = 0
+		self._save_search_state(state)
 		return self._jump_to_current_match()
 
 	def last_match(self) -> bool:
@@ -4419,10 +4498,12 @@ class OutputSearchManager:
 		Returns:
 			bool: True if jumped to last match
 		"""
-		if not self._matches:
+		state = self._get_search_state()
+		if not state['matches']:
 			return False
 
-		self._current_match_index = len(self._matches) - 1
+		state['current_match_index'] = len(state['matches']) - 1
+		self._save_search_state(state)
 		return self._jump_to_current_match()
 
 	def _unpack_match(self, match):
@@ -4441,12 +4522,15 @@ class OutputSearchManager:
 		Returns:
 			bool: True if jump successful
 		"""
-		if not self._matches or self._current_match_index < 0:
+		state = self._get_search_state()
+		matches = state['matches']
+		current_index = state['current_match_index']
+		if not matches or current_index < 0:
 			return False
 
 		try:
 			bookmark, line_text, line_num, pos_info, char_offset = self._unpack_match(
-				self._matches[self._current_match_index]
+				matches[current_index]
 			)
 
 			pos = None
@@ -4485,7 +4569,8 @@ class OutputSearchManager:
 		Returns:
 			int: Number of matches
 		"""
-		return len(self._matches)
+		state = self._get_search_state()
+		return len(state['matches'])
 
 	def get_current_match_info(self) -> tuple:
 		"""
@@ -4494,17 +4579,24 @@ class OutputSearchManager:
 		Returns:
 			tuple: (match_number, total_matches, line_text, line_num) or None
 		"""
-		if not self._matches or self._current_match_index < 0:
+		state = self._get_search_state()
+		matches = state['matches']
+		current_index = state['current_match_index']
+		if not matches or current_index < 0:
 			return None
 
-		_, line_text, line_num, _, _ = self._unpack_match(self._matches[self._current_match_index])
-		return (self._current_match_index + 1, len(self._matches), line_text, line_num)
+		_, line_text, line_num, _, _ = self._unpack_match(matches[current_index])
+		return (current_index + 1, len(matches), line_text, line_num)
 
 	def clear_search(self) -> None:
 		"""Clear current search results."""
-		self._pattern = None
-		self._matches = []
-		self._current_match_index = -1
+		self._save_search_state({
+			'pattern': None,
+			'matches': [],
+			'current_match_index': -1,
+			'case_sensitive': False,
+			'use_regex': False
+		})
 
 	def update_terminal(self, terminal_obj):
 		"""
@@ -4897,13 +4989,24 @@ class UrlExtractorManager:
 			return True
 		return False
 
+	# Schemes considered safe to open in a browser.
+	_SAFE_SCHEMES = ('http://', 'https://', 'ftp://')
+
 	def open_url(self, index: int) -> bool:
-		"""Open URL at index in default browser."""
+		"""Open URL at index in default browser.
+
+		Only http://, https://, and ftp:// URLs are opened.  Other schemes
+		(file://, javascript:, etc.) are rejected to prevent a malicious
+		terminal from launching local executables.
+		"""
 		if 0 <= index < len(self._urls):
 			url = self._urls[index].url
 			# Ensure scheme for www. URLs
 			if url.lower().startswith('www.'):
 				url = 'https://' + url
+			# Block unsafe schemes
+			if not url.lower().startswith(self._SAFE_SCHEMES):
+				return False
 			try:
 				webbrowser.open(url)
 				return True
@@ -5042,6 +5145,11 @@ class UrlListDialog(wx.Dialog):
 		url = entry.url
 		if url.lower().startswith('www.'):
 			url = 'https://' + url
+		# Block unsafe schemes (file://, javascript:, etc.)
+		if not url.lower().startswith(UrlExtractorManager._SAFE_SCHEMES):
+			# Translators: Announced when a URL with an unsafe scheme is blocked
+			ui.message(_("Cannot open this URL type for security reasons"))
+			return
 		try:
 			webbrowser.open(url)
 		except Exception:
@@ -5220,6 +5328,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self._markStart = None
 		self._markEnd = None
 
+		# Window definition two-step state (Section 6 - setWindow)
+		self._windowStartSet = False
+		self._windowStartBookmark = None
+		self._windowStartRow = 0
+		self._windowStartCol = 0
+
 		# Background calculation thread for long operations
 		self._backgroundCalculationThread = None
 
@@ -5233,15 +5347,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Window monitor for multi-window monitoring (Section 6.1 - v1.0.28+)
 		self._windowMonitor = None  # Initialized when terminal is bound
 
-		# New output announcer for automatically speaking appended terminal output
+		# New output announcer for automatically speaking appended terminal output.
+		# Polling is deferred until a terminal is actually focused (in
+		# event_gainFocus) to avoid spinning a background thread before there
+		# is anything to poll.
 		self._newOutputAnnouncer = NewOutputAnnouncer()
-
-		# Start polling if feature is enabled from previous session
-		try:
-			if config.conf["terminalAccess"]["announceNewOutput"]:
-				self._newOutputAnnouncer.start_polling()
-		except Exception:
-			pass
 
 		# Tab manager for managing terminal tabs (Section 9 - v1.0.39+)
 		self._tabManager = None  # Initialized when terminal is bound
@@ -5441,7 +5551,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 			row, col = self._positionCalculator.calculate(textInfo, terminal)
 			# Translators: Position context for verbose mode
-			return _("Row {row}, column {col}").format(row=row + 1, col=col + 1)
+			# calculate() returns 1-based values; do not add 1 again
+			return _("Row {row}, column {col}").format(row=row, col=col)
 		except Exception:
 			return ""
 
@@ -5547,6 +5658,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				self._urlExtractorManager = UrlExtractorManager(obj, self._tabManager)
 			else:
 				self._urlExtractorManager.update_terminal(obj)
+
+			# Start new-output polling lazily on first terminal focus
+			try:
+				self._newOutputAnnouncer.set_terminal(obj)
+				if config.conf["terminalAccess"]["announceNewOutput"]:
+					self._newOutputAnnouncer.start_polling()
+			except Exception:
+				pass
 
 			# Clear position cache when switching terminals
 			self._positionCalculator.clear_cache()
@@ -6524,24 +6643,39 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				ui.message(_("Unable to set window"))
 				return
 
+			terminal = self._boundTerminal if self._boundTerminal else api.getForegroundObject()
+			if not terminal:
+				ui.message(_("Unable to set window"))
+				return
+
 			if not self._windowStartSet:
-				# Set start position
+				# Set start position — calculate and store the row/col
+				startRow, startCol = self._positionCalculator.calculate(reviewPos, terminal)
 				self._windowStartBookmark = reviewPos.bookmark
+				self._windowStartRow = startRow
+				self._windowStartCol = startCol
 				self._windowStartSet = True
 				# Translators: Message when window start is set
 				ui.message(_("Window start set. Move to end position and press again."))
 			else:
-				# Set end position
-				# Note: Creating TextInfo objects for window boundary calculation
-				# These variables are used for validation but not needed for the current implementation
-				self._boundTerminal.makeTextInfo(self._windowStartBookmark)
-				reviewPos.copy()
+				# Set end position — calculate row/col and store both corners
+				endRow, endCol = self._positionCalculator.calculate(reviewPos, terminal)
 
-				# Store window boundaries (simplified - storing bookmarks instead of coordinates)
+				# Ensure top <= bottom and left <= right
+				windowTop = min(self._windowStartRow, endRow)
+				windowBottom = max(self._windowStartRow, endRow)
+				windowLeft = min(self._windowStartCol, endCol)
+				windowRight = max(self._windowStartCol, endCol)
+
+				config.conf["terminalAccess"]["windowTop"] = windowTop
+				config.conf["terminalAccess"]["windowBottom"] = windowBottom
+				config.conf["terminalAccess"]["windowLeft"] = windowLeft
+				config.conf["terminalAccess"]["windowRight"] = windowRight
 				config.conf["terminalAccess"]["windowEnabled"] = True
 				self._windowStartSet = False
-				# Translators: Message when window is defined
-				ui.message(_("Window defined"))
+				# Translators: Message when window is defined with coordinates
+				ui.message(_("Window defined: rows {top}-{bottom}, columns {left}-{right}").format(
+					top=windowTop, bottom=windowBottom, left=windowLeft, right=windowRight))
 		except Exception:
 			ui.message(_("Unable to set window"))
 			self._windowStartSet = False

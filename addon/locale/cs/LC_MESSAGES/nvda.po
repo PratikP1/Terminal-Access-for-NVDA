@@ -357,10 +357,6 @@ msgstr "Nelze nastavit okno"
 msgid "Window start set. Move to end position and press again."
 msgstr "Okno spuštěno. Přejděte do koncové polohy a stiskněte znovu."
 
-# Message when window is defined
-#: addon/globalPlugins/terminalAccess.py:6544
-msgid "Window defined"
-msgstr "Definované okno"
 
 # Description for clearing screen window
 #: addon/globalPlugins/terminalAccess.py:6551
@@ -1473,3 +1469,11 @@ msgstr ""
 #: buildVars.py:14
 msgid "Terminal Access for NVDA"
 msgstr "Přístup k terminálu pro NVDA"
+# Translators: Security message when trying to open an unsafe URL scheme
+msgid "Cannot open this URL type for security reasons"
+msgstr "Tento typ URL nelze otevřít z bezpečnostních důvodů"
+
+# Translators: Message when window is defined with coordinates
+msgid "Window defined: rows {top}-{bottom}, columns {left}-{right}"
+msgstr "Okno definováno: řádky {top}-{bottom}, sloupce {left}-{right}"
+

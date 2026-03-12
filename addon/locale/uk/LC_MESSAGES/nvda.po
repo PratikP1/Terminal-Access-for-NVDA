@@ -361,10 +361,6 @@ msgid "Window start set. Move to end position and press again."
 msgstr ""
 "Набір початку вікна. Перейдіть у кінцеве положення та натисніть ще раз."
 
-# Message when window is defined
-#: addon/globalPlugins/terminalAccess.py:6544
-msgid "Window defined"
-msgstr "Визначене вікно"
 
 # Description for clearing screen window
 #: addon/globalPlugins/terminalAccess.py:6551
@@ -1487,3 +1483,11 @@ msgstr ""
 #: buildVars.py:14
 msgid "Terminal Access for NVDA"
 msgstr "Доступ до терміналу для NVDA"
+# Translators: Security message when trying to open an unsafe URL scheme
+msgid "Cannot open this URL type for security reasons"
+msgstr "Неможливо відкрити цей тип URL з міркувань безпеки"
+
+# Translators: Message when window is defined with coordinates
+msgid "Window defined: rows {top}-{bottom}, columns {left}-{right}"
+msgstr "Вікно визначено: рядки {top}-{bottom}, стовпці {left}-{right}"
+

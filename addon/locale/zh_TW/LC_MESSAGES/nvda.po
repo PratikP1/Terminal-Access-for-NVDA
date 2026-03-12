@@ -350,10 +350,6 @@ msgstr "無法設定視窗"
 msgid "Window start set. Move to end position and press again."
 msgstr "窗戶啟動組。移動至終端位置後再次按壓。"
 
-# Message when window is defined
-#: addon/globalPlugins/terminalAccess.py:6544
-msgid "Window defined"
-msgstr "視窗定義"
 
 # Description for clearing screen window
 #: addon/globalPlugins/terminalAccess.py:6551
@@ -1424,3 +1420,11 @@ msgstr ""
 #: buildVars.py:14
 msgid "Terminal Access for NVDA"
 msgstr "終端存取功能適用於 NVDA"
+# Translators: Security message when trying to open an unsafe URL scheme
+msgid "Cannot open this URL type for security reasons"
+msgstr "基於安全考量，無法開啟此URL類型"
+
+# Translators: Message when window is defined with coordinates
+msgid "Window defined: rows {top}-{bottom}, columns {left}-{right}"
+msgstr "視窗已定義：列 {top}-{bottom}，欄 {left}-{right}"
+

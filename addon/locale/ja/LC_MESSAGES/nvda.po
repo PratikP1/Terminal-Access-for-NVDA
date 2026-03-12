@@ -350,10 +350,6 @@ msgstr "ウィンドウを設定できません"
 msgid "Window start set. Move to end position and press again."
 msgstr "ウィンドウ開始位置にセット。終端位置に移動し、再度押下してください。"
 
-# Message when window is defined
-#: addon/globalPlugins/terminalAccess.py:6544
-msgid "Window defined"
-msgstr "定義済みウィンドウ"
 
 # Description for clearing screen window
 #: addon/globalPlugins/terminalAccess.py:6551
@@ -1430,3 +1426,11 @@ msgstr ""
 #: buildVars.py:14
 msgid "Terminal Access for NVDA"
 msgstr "NVDAのターミナルアクセス"
+# Translators: Security message when trying to open an unsafe URL scheme
+msgid "Cannot open this URL type for security reasons"
+msgstr "セキュリティ上の理由により、このURLタイプは開けません"
+
+# Translators: Message when window is defined with coordinates
+msgid "Window defined: rows {top}-{bottom}, columns {left}-{right}"
+msgstr "ウィンドウ定義済み: 行 {top}-{bottom}、列 {left}-{right}"
+

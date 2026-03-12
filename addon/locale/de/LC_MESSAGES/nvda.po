@@ -360,10 +360,6 @@ msgstr "Fenster kann nicht eingestellt werden"
 msgid "Window start set. Move to end position and press again."
 msgstr "Fensterstart-Set. Fahren Sie zur Endposition und drücken Sie erneut."
 
-# Message when window is defined
-#: addon/globalPlugins/terminalAccess.py:6544
-msgid "Window defined"
-msgstr "Fenster definiert"
 
 # Description for clearing screen window
 #: addon/globalPlugins/terminalAccess.py:6551
@@ -1497,3 +1493,11 @@ msgstr ""
 #: buildVars.py:14
 msgid "Terminal Access for NVDA"
 msgstr "Terminalzugriff für NVDA"
+# Translators: Security message when trying to open an unsafe URL scheme
+msgid "Cannot open this URL type for security reasons"
+msgstr "Dieser URL-Typ kann aus Sicherheitsgründen nicht geöffnet werden"
+
+# Translators: Message when window is defined with coordinates
+msgid "Window defined: rows {top}-{bottom}, columns {left}-{right}"
+msgstr "Fenster definiert: Zeilen {top}-{bottom}, Spalten {left}-{right}"
+

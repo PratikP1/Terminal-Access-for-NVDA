@@ -365,10 +365,6 @@ msgstr ""
 "Set di avvio finestra. Spostarsi nella posizione finale e premere "
 "nuovamente."
 
-# Message when window is defined
-#: addon/globalPlugins/terminalAccess.py:6544
-msgid "Window defined"
-msgstr "Finestra definita"
 
 # Description for clearing screen window
 #: addon/globalPlugins/terminalAccess.py:6551
@@ -1510,3 +1506,11 @@ msgstr ""
 #: buildVars.py:14
 msgid "Terminal Access for NVDA"
 msgstr "Accesso al terminale per NVDA"
+# Translators: Security message when trying to open an unsafe URL scheme
+msgid "Cannot open this URL type for security reasons"
+msgstr "Impossibile aprire questo tipo di URL per motivi di sicurezza"
+
+# Translators: Message when window is defined with coordinates
+msgid "Window defined: rows {top}-{bottom}, columns {left}-{right}"
+msgstr "Finestra definita: righe {top}-{bottom}, colonne {left}-{right}"
+

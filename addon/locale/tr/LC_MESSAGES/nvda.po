@@ -355,10 +355,6 @@ msgstr "Pencere ayarlanamıyor"
 msgid "Window start set. Move to end position and press again."
 msgstr "Pencere başlangıç seti. Son konuma gidin ve tekrar basın."
 
-# Message when window is defined
-#: addon/globalPlugins/terminalAccess.py:6544
-msgid "Window defined"
-msgstr "Pencere tanımlandı"
 
 # Description for clearing screen window
 #: addon/globalPlugins/terminalAccess.py:6551
@@ -1474,3 +1470,11 @@ msgstr ""
 #: buildVars.py:14
 msgid "Terminal Access for NVDA"
 msgstr "NVDA için Terminal Erişimi"
+# Translators: Security message when trying to open an unsafe URL scheme
+msgid "Cannot open this URL type for security reasons"
+msgstr "Güvenlik nedeniyle bu URL türü açılamaz"
+
+# Translators: Message when window is defined with coordinates
+msgid "Window defined: rows {top}-{bottom}, columns {left}-{right}"
+msgstr "Pencere tanımlandı: satırlar {top}-{bottom}, sütunlar {left}-{right}"
+
