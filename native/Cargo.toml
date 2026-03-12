@@ -2,7 +2,7 @@
 members = [
     "crates/termaccess-core",
     "crates/termaccess-ffi",
-    # "crates/termaccess-helper",  # Phase 2
+    "crates/termaccess-helper",
 ]
 resolver = "2"
 
@@ -15,6 +15,8 @@ repository = "https://github.com/PratikP1/Terminal-Access-for-NVDA"
 [workspace.dependencies]
 regex = "1"
 lru = "0.12"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 
 [profile.release]
 opt-level = "z"

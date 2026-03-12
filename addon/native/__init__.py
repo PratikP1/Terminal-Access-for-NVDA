@@ -6,13 +6,9 @@
 """
 Native (Rust) acceleration layer for Terminal Access.
 
-This package provides optional drop-in replacements for CPU-bound
-Python classes.  If the native DLL is not found or fails to load,
-the caller should fall back to the pure-Python implementations.
+Phase 1 — DLL-based drop-in replacements for CPU-bound algorithms::
 
-Usage::
-
-    from addon.native.termaccess_bridge import (
+    from native.termaccess_bridge import (
         native_available,
         NativeTextDiffer,
         native_strip_ansi,
@@ -20,8 +16,18 @@ Usage::
         NativePositionCache,
     )
 
-    if native_available():
-        differ = NativeTextDiffer()
-    else:
-        differ = TextDiffer()  # Python fallback
+Phase 2 — Helper process for off-main-thread UIA reads::
+
+    from native.termaccess_bridge import (
+        helper_available,
+        get_helper,
+        stop_helper,
+    )
+
+    helper = get_helper()
+    if helper:
+        text = helper.read_text(hwnd)
+
+If the DLL or helper cannot be loaded, callers should fall back to
+the pure-Python implementations.
 """

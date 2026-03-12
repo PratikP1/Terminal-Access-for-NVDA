@@ -91,9 +91,20 @@ jobs:
         working-directory: native
         run: cargo build --release --target ${{ matrix.target }} -p termaccess-ffi
 
+      - name: Build release helper EXE
+        working-directory: native
+        run: cargo build --release --target ${{ matrix.target }} -p termaccess-helper
+
       - name: Upload DLL artifact
         uses: actions/upload-artifact@v4
         with:
           name: termaccess-dll-${{ matrix.arch }}
           path: native/target/${{ matrix.target }}/release/termaccess_ffi.dll
+          if-no-files-found: error
+
+      - name: Upload helper EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: termaccess-helper-${{ matrix.arch }}
+          path: native/target/${{ matrix.target }}/release/termaccess-helper.exe
           if-no-files-found: error

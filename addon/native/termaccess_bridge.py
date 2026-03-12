@@ -586,3 +586,54 @@ class NativePositionCache:
 
 	def __del__(self) -> None:
 		self.close()
+
+
+# ═══════════════════════════════════════════════════════════════
+#  Helper process integration (Phase 2)
+# ═══════════════════════════════════════════════════════════════
+
+_helper_instance = None
+_helper_lock = threading.Lock()
+
+
+def helper_available() -> bool:
+	"""Return True if the helper process is running and ready."""
+	h = _helper_instance
+	return h is not None and h.is_running
+
+
+def get_helper():
+	"""Get or create the singleton HelperProcess instance.
+
+	Uses double-check locking for thread safety.  The helper is
+	started lazily on first call.  Returns the HelperProcess
+	instance, or None if it could not be started.
+	"""
+	global _helper_instance
+	if _helper_instance is not None and _helper_instance.is_running:
+		return _helper_instance
+	with _helper_lock:
+		if _helper_instance is not None and _helper_instance.is_running:
+			return _helper_instance
+		try:
+			from native.helper_process import HelperProcess
+			helper = HelperProcess()
+			if helper.start():
+				_helper_instance = helper
+				return _helper_instance
+			return None
+		except Exception:
+			log.debug("Failed to start helper process", exc_info=True)
+			return None
+
+
+def stop_helper():
+	"""Stop the helper process if running."""
+	global _helper_instance
+	with _helper_lock:
+		if _helper_instance is not None:
+			try:
+				_helper_instance.stop()
+			except Exception:
+				pass
+			_helper_instance = None
