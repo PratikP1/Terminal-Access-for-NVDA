@@ -5251,6 +5251,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Output search manager for filtering and search (Section 8.2 - v1.0.30+)
 		self._searchManager = None  # Initialized when terminal is bound
+		self._searchDialogOpen = False  # Guard against multiple search dialog instances
 
 		# Command history manager for navigation (Section 8.1 - v1.0.31+)
 		self._commandHistoryManager = None  # Initialized when terminal is bound
@@ -8139,6 +8140,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			gesture.send()
 			return
 
+		# Prevent multiple dialog instances
+		if self._searchDialogOpen:
+			# Translators: Announced when search dialog is already open
+			ui.message(_("Search already open"))
+			return
+
 		if not self._searchManager:
 			# Translators: Error message when search manager not initialized
 			ui.message(_("Search not available"))
@@ -8146,46 +8153,57 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Prompt for search text using wx dialog
 		import wx
+		self._searchDialogOpen = True
 
 		def show_search_dialog():
 			"""Show search dialog."""
-			parent = gui.mainFrame
-			dlg = wx.TextEntryDialog(
-				parent,
-				# Translators: Search dialog prompt
-				_("Enter search text:"),
-				# Translators: Search dialog title
-				_("Search Terminal Output")
-			)
+			try:
+				gui.mainFrame.prePopup()
+				dlg = wx.TextEntryDialog(
+					gui.mainFrame,
+					# Translators: Search dialog prompt
+					_("Enter search text:"),
+					# Translators: Search dialog title
+					_("Search Terminal Output")
+				)
 
-			if dlg.ShowModal() == wx.ID_OK:
-				search_text = dlg.GetValue()
-				dlg.Destroy()
+				if dlg.ShowModal() == wx.ID_OK:
+					search_text = dlg.GetValue()
+					dlg.Destroy()
 
-				if search_text:
-					# Perform search (case insensitive by default)
-					match_count = self._searchManager.search(search_text, case_sensitive=False)
+					if search_text:
+						# Perform search (case insensitive by default)
+						match_count = self._searchManager.search(search_text, case_sensitive=False)
 
-					if match_count > 0:
-						# Jump to first match
-						self._searchManager.first_match()
+						if match_count > 0:
+							# Jump to first match
+							self._searchManager.first_match()
 
-						# Announce result
-						info = self._searchManager.get_current_match_info()
-						if info:
-							match_num, total, line_text, line_num = info
-							# Translators: Search results message
-							message = _("Found {total} matches. Match {num} of {total}: {text}").format(
-								num=match_num,
-								total=total,
-								text=line_text[:100]  # Truncate long lines
-							)
-							ui.message(message)
-					else:
-						# Translators: No matches found
-						ui.message(_("No matches found for '{pattern}'").format(pattern=search_text))
-			else:
-				dlg.Destroy()
+							# Announce result
+							info = self._searchManager.get_current_match_info()
+							if info:
+								match_num, total, line_text, line_num = info
+								# Translators: Search results message
+								message = _("Found {total} matches. Match {num} of {total}: {text}").format(
+									num=match_num,
+									total=total,
+									text=line_text[:100]  # Truncate long lines
+								)
+								ui.message(message)
+						else:
+							# Translators: No matches found
+							ui.message(_("No matches found for '{pattern}'").format(pattern=search_text))
+				else:
+					dlg.Destroy()
+			except Exception:
+				try:
+					import logHandler
+					logHandler.log.error("Search dialog failed", exc_info=True)
+				except Exception:
+					pass
+			finally:
+				gui.mainFrame.postPopup()
+				self._searchDialogOpen = False
 
 		# Run dialog in main thread
 		wx.CallAfter(show_search_dialog)
