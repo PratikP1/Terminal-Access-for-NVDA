@@ -1,0 +1,12 @@
+[package]
+name = "termaccess-ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "C ABI FFI layer for Terminal Access native components"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+termaccess-core = { path = "../termaccess-core" }

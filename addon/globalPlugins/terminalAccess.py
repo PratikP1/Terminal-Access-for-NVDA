@@ -110,6 +110,19 @@ try:
 except (ImportError, AttributeError):
 	_braille_available = False
 
+# Native (Rust) acceleration — optional, falls back to pure Python.
+try:
+	from native.termaccess_bridge import (
+		native_available as _native_available_fn,
+		NativeTextDiffer as _NativeTextDiffer,
+		native_strip_ansi as _native_strip_ansi,
+		native_search_text as _native_search_text,
+		NativePositionCache as _NativePositionCache,
+	)
+	_native_available = _native_available_fn()
+except Exception:
+	_native_available = False
+
 try:
 	addonHandler.initTranslation()
 except (ImportError, AttributeError, OSError):
@@ -819,6 +832,41 @@ class TextDiffer:
 	def last_text(self) -> str | None:
 		"""The last snapshot text, or ``None`` if no snapshot has been taken."""
 		return self._last_text
+
+
+# ═══════════════════════════════════════════════════════════════
+#  Native-or-fallback factory helpers
+# ═══════════════════════════════════════════════════════════════
+
+def _make_text_differ() -> TextDiffer:
+	"""Create a TextDiffer, using the native Rust implementation if available."""
+	if _native_available:
+		try:
+			return _NativeTextDiffer()
+		except Exception:
+			pass
+	return TextDiffer()
+
+
+def _make_position_cache() -> PositionCache:
+	"""Create a PositionCache, using the native Rust implementation if available."""
+	if _native_available:
+		try:
+			return _NativePositionCache()
+		except Exception:
+			pass
+	return PositionCache()
+
+
+def _strip_ansi(text: str) -> str:
+	"""Strip ANSI escape sequences, using the native Rust implementation if available."""
+	if _native_available:
+		try:
+			return _native_strip_ansi(text)
+		except Exception:
+			pass
+	# Fallback to Python regex (ANSIParser._STRIP_PATTERN is defined below)
+	return ANSIParser.stripANSI(text)
 
 
 class ANSIParser:
@@ -2754,7 +2802,7 @@ class PositionCalculator:
 
 	def __init__(self) -> None:
 		"""Initialize the position calculator with empty cache."""
-		self._cache = PositionCache()
+		self._cache = _make_position_cache()
 		self._last_known_position: tuple[Any, int, int] | None = None
 
 	def calculate(self, textInfo: Any, terminal: Any) -> tuple[int, int]:
@@ -3268,7 +3316,7 @@ class NewOutputAnnouncer:
 
 	def __init__(self) -> None:
 		"""Initialise with no previous snapshot."""
-		self._differ = TextDiffer()
+		self._differ = _make_text_differ()
 		self._lock = threading.Lock()
 		self._timer: threading.Timer | None = None
 		self._pending_text: str = ""
@@ -3330,7 +3378,7 @@ class NewOutputAnnouncer:
 				return
 			try:
 				if ta_conf["stripAnsiInOutput"]:
-					new_content = ANSIParser.stripANSI(new_content)
+					new_content = _strip_ansi(new_content)
 					if not new_content.strip():
 						return
 			except Exception:
@@ -3347,7 +3395,7 @@ class NewOutputAnnouncer:
 		# Strip ANSI escape codes if configured
 		try:
 			if ta_conf["stripAnsiInOutput"]:
-				new_content = ANSIParser.stripANSI(new_content)
+				new_content = _strip_ansi(new_content)
 				if not new_content.strip():
 					return
 		except Exception:
@@ -3572,7 +3620,7 @@ class WindowMonitor:
 				'mode': mode,
 				'last_check': 0,
 				'enabled': True,
-				'differ': TextDiffer(),  # Per-monitor differ for change detection
+				'differ': _make_text_differ(),  # Per-monitor differ for change detection
 			}
 			self._monitors.append(monitor)
 			self._last_content[name] = None
@@ -4380,7 +4428,7 @@ class OutputSearchManager:
 			# Strip ANSI escape sequences that some terminals leave in the
 			# text buffer.  Without this, embedded formatting codes can
 			# break substring matching for terms the user can clearly see.
-			all_text = ANSIParser._STRIP_PATTERN.sub('', all_text)
+			all_text = _strip_ansi(all_text)
 
 			# Split into lines and build a set of matching line numbers first
 			# (0-indexed internally, converted to 1-indexed for storage).
@@ -4697,7 +4745,7 @@ class CommandHistoryManager:
 
 			# Strip ANSI escape sequences that some terminals leave in the
 			# text buffer so prompt patterns match cleanly.
-			content = ANSIParser._STRIP_PATTERN.sub('', content)
+			content = _strip_ansi(content)
 
 			lines = content.split('\n')
 			new_commands = 0
@@ -4944,7 +4992,7 @@ class UrlExtractorManager:
 					osc8_urls[url] = line_num
 
 		# Phase 2: Extract plain-text URLs after ANSI stripping
-		clean_text = ANSIParser._STRIP_PATTERN.sub('', raw_text)
+		clean_text = _strip_ansi(raw_text)
 		lines = clean_text.split('\n')
 
 		# Deduplicate preserving first-occurrence order
@@ -7847,7 +7895,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			lineText = lineText.rstrip('\n\r')
 
 			# Strip ANSI codes for accurate column extraction
-			cleanText = ANSIParser.stripANSI(lineText)
+			cleanText = _strip_ansi(lineText)
 
 			# Extract column range using Unicode-aware helper (1-based columns)
 			columnText = UnicodeWidthHelper.extractColumnRange(cleanText, startCol, endCol)

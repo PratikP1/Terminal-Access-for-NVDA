@@ -9,15 +9,66 @@ permissions:
   contents: write
 
 jobs:
+  # ── Build native Rust DLLs (x86 + x64) ─────────────────────
+  build-native:
+    name: Build Native DLL (${{ matrix.arch }})
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            target: x86_64-pc-windows-msvc
+          - arch: x86
+            target: i686-pc-windows-msvc
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            native/target/
+          key: ${{ runner.os }}-cargo-release-${{ matrix.arch }}-${{ hashFiles('native/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-release-${{ matrix.arch }}-
+
+      - name: Run Rust tests
+        working-directory: native
+        run: cargo test --all
+
+      - name: Build release DLL
+        working-directory: native
+        run: cargo build --release --target ${{ matrix.target }} -p termaccess-ffi
+
+      - name: Upload DLL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: termaccess-dll-${{ matrix.arch }}
+          path: native/target/${{ matrix.target }}/release/termaccess_ffi.dll
+          if-no-files-found: error
+
+  # ── Build and release the NVDA addon ────────────────────────
   build-and-release:
     runs-on: ubuntu-latest
-    
+    needs: build-native
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -29,8 +80,6 @@ jobs:
       - name: Extract version from buildVars.py
         id: version
         run: |
-          # Extract version using regex to avoid importing buildVars.py
-          # (which requires site_scons/SCons dependencies)
           if [ ! -f buildVars.py ]; then
             echo "Error: buildVars.py not found" >&2
             exit 1
@@ -54,7 +103,7 @@ jobs:
 
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Detected version: $VERSION"
-      
+
       - name: Check if tag exists
         id: check_tag
         run: |
@@ -65,7 +114,22 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
             echo "Tag v${{ steps.version.outputs.version }} does not exist"
           fi
-      
+
+      - name: Download native DLLs
+        if: steps.check_tag.outputs.exists == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          pattern: termaccess-dll-*
+
+      - name: Place native DLLs in addon
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          mkdir -p addon/lib/x64 addon/lib/x86
+          cp termaccess-dll-x64/termaccess_ffi.dll addon/lib/x64/termaccess.dll
+          cp termaccess-dll-x86/termaccess_ffi.dll addon/lib/x86/termaccess.dll
+          echo "Native DLLs placed:"
+          ls -lh addon/lib/x64/termaccess.dll addon/lib/x86/termaccess.dll
+
       - name: Build add-on
         if: steps.check_tag.outputs.exists == 'false'
         run: |
@@ -76,11 +140,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'false'
         id: changelog
         run: |
-          # Extract the most recent version entry from CHANGELOG.md
-          # This awk command finds content between the first two version headers (## [x.y.z])
-          # to get only the latest version's changes
           if [ -f CHANGELOG.md ]; then
-            # Get content between the first two version headers
             CHANGELOG=$(awk '/^## \[/{if(++count==2)exit;if(count==1)next}count==1' CHANGELOG.md)
             if [ -z "$CHANGELOG" ]; then
               CHANGELOG="Release version ${{ steps.version.outputs.version }}"
@@ -88,10 +148,9 @@ jobs:
           else
             CHANGELOG="Release version ${{ steps.version.outputs.version }}"
           fi
-          # Save to file for multiline handling
           echo "$CHANGELOG" > changelog.txt
           echo "Changelog extracted"
-      
+
       - name: Create GitHub Release
         if: steps.check_tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v1
@@ -105,18 +164,16 @@ jobs:
             terminalAccess-${{ steps.version.outputs.version }}.nvda-addon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Update latest tag
         if: steps.check_tag.outputs.exists == 'false'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Delete the latest tag if it exists (both local and remote)
           git tag -d latest 2>/dev/null || true
           git push origin :refs/tags/latest 2>/dev/null || true
 
-          # Create and push new latest tag
           git tag -a latest -m "Latest release: v${{ steps.version.outputs.version }}"
           git push origin latest
 
