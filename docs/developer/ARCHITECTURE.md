@@ -1,16 +1,17 @@
 # TDSR for NVDA - Architecture Overview
 
-**Version:** 1.1.0
-**Last Updated:** 2026-03-03
+**Version:** 1.3.0
+**Last Updated:** 2026-03-12
 
 ## Table of Contents
 
 1. [System Overview](#system-overview)
 2. [Core Architecture](#core-architecture)
-3. [Key Components](#key-components)
-4. [Data Flow](#data-flow)
-5. [Extension Points](#extension-points)
-6. [Performance Considerations](#performance-considerations)
+3. [Native Acceleration Layer](#native-acceleration-layer)
+4. [Key Components](#key-components)
+5. [Data Flow](#data-flow)
+6. [Extension Points](#extension-points)
+7. [Performance Considerations](#performance-considerations)
 
 ## System Overview
 
@@ -25,10 +26,12 @@ TDSR for NVDA is implemented as an NVDA global plugin that enhances terminal acc
 
 ### Technology Stack
 
-- **Language**: Python 3.11+
+- **Language**: Python 3.11+ (addon), Rust (native acceleration layer)
 - **Framework**: NVDA Global Plugin API
 - **UI**: wxPython (via NVDA's GUI helpers)
-- **Dependencies**: wcwidth (for Unicode/CJK support)
+- **Native**: Rust workspace with 3 crates (core, FFI, helper)
+- **IPC**: Named pipe with length-prefixed JSON (helper process)
+- **Dependencies**: wcwidth (Python fallback for Unicode), unicode-width (Rust)
 
 ## Core Architecture
 
@@ -90,13 +93,156 @@ User Input → Script Handler → GlobalPlugin
                  ↓
          Profile Manager → Application Profile
                  ↓
-    Review Cursor (NVDA) ← Position Cache
+    Review Cursor (NVDA) ← Position Cache (native or Python)
                  ↓
          Text Extraction
+            ↓ (fast path)              ↓ (fallback)
+    Helper Process (Rust)         Python main thread
+    UIA → Console API fallback    makeTextInfo(POSITION_ALL)
                  ↓
-    ANSI Parser / Unicode Helper
+    ANSI Parser / Unicode Helper (native or Python)
                  ↓
          Speech Output (NVDA)
+```
+
+## Native Acceleration Layer
+
+The addon includes an optional Rust-based native acceleration layer that
+offloads CPU-bound operations off NVDA's main thread. Every native feature
+has a complete Python fallback — the addon works without any native binaries.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Python Addon                         │
+│                                                         │
+│  termaccess_bridge.py    helper_process.py              │
+│  (ctypes FFI wrapper)    (named pipe IPC client)        │
+│         │                         │                     │
+└─────────┼─────────────────────────┼─────────────────────┘
+          │ cdylib (DLL)            │ named pipe (JSON)
+          ▼                         ▼
+┌──────────────────┐   ┌────────────────────────────────┐
+│ termaccess-ffi   │   │ termaccess-helper              │
+│ (termaccess.dll) │   │ (termaccess-helper.exe)        │
+│                  │   │                                │
+│ C ABI exports:   │   │ Runs in own process:           │
+│ - Text diffing   │   │ - UIA terminal reads           │
+│ - ANSI stripping │   │ - Console API fallback         │
+│ - Text search    │   │ - Subscription polling         │
+│ - Position cache │   │ - Diff + ANSI strip            │
+│ - Unicode width  │   │ - Server-side search           │
+└────────┬─────────┘   └────────────┬───────────────────┘
+         │                          │
+         ▼                          ▼
+┌──────────────────────────────────────────────────────┐
+│                   termaccess-core                     │
+│ Pure Rust algorithms (no platform dependencies):      │
+│ - text_differ   (line-level diff)                    │
+│ - ansi_strip    (regex-based ANSI removal)           │
+│ - search        (plain + regex text search)          │
+│ - position_cache (LRU + TTL cache)                   │
+│ - unicode_width (CJK/combining char column widths)   │
+└──────────────────────────────────────────────────────┘
+```
+
+### Crate Layout
+
+| Crate | Type | Purpose |
+|-------|------|---------|
+| `termaccess-core` | lib | Pure algorithms, no platform deps |
+| `termaccess-ffi` | cdylib | C ABI exports for Python ctypes |
+| `termaccess-helper` | binary | Out-of-process UIA reader and search server |
+
+### FFI Interface (`termaccess-ffi` → `termaccess_bridge.py`)
+
+Communication: Python ctypes loads `termaccess.dll` (cdylib).
+Memory: Rust allocates output buffers; Python frees via `ta_free_string`.
+Strings: UTF-8 as `*const u8 + usize` pairs.
+Error codes: `0=OK, 1=NullPointer, 2=InvalidUTF8, 3=NotFound, 4=InvalidRegex`.
+
+Exported functions:
+- `ta_version` / `ta_version_len` — version info
+- `ta_free_string` — memory management
+- `ta_text_differ_new/free/update/reset/last_text` — text diffing
+- `ta_strip_ansi` — ANSI escape removal
+- `ta_search_text` / `ta_search_results_free` — pattern matching
+- `ta_position_cache_new/free/get/set/clear/invalidate` — position caching
+- `ta_char_width` — single character display width
+- `ta_text_width` — string display width
+- `ta_extract_column_range` — column-aware substring extraction
+- `ta_find_column_position` — column to char index mapping
+
+### Helper IPC Protocol (`termaccess-helper` → `helper_process.py`)
+
+Communication: Named pipe (`\\.\pipe\termaccess-{pid}-{uid}`).
+Wire format: `[4-byte LE u32 length][UTF-8 JSON payload]`.
+
+Request types: `ping`, `read_text`, `read_lines`, `subscribe`,
+`unsubscribe`, `search_text`, `shutdown`.
+
+Response types: `pong`, `text_result`, `lines_result`, `subscribe_ok`,
+`unsubscribe_ok`, `search_result`, `error`.
+
+Notifications (unsolicited): `helper_ready`, `text_changed`, `text_diff`.
+
+### Text Reading Fallback Chain
+
+The helper uses a multi-tier fallback for reading terminal text:
+
+1. **UIA TextPattern** — preferred, works with Windows Terminal and modern consoles
+2. **Win32 Console API** — `AttachConsole` + `ReadConsoleOutputCharacterW`, for legacy conhost
+3. **Python main-thread** — `makeTextInfo(POSITION_ALL)`, the original approach
+
+### Search Acceleration
+
+Three tiers of search, each falling back to the next:
+
+1. **Helper-side search** — reads buffer AND searches in one IPC round-trip (no buffer transfer)
+2. **DLL search** — `native_search_text()` runs Rust search on a Python-read buffer
+3. **Python matching** — character-by-character loop (original implementation)
+
+### File Layout
+
+```
+addon/
+├── native/
+│   ├── __init__.py
+│   ├── termaccess_bridge.py    # ctypes FFI wrapper for termaccess.dll
+│   └── helper_process.py       # Named pipe IPC client for helper.exe
+├── lib/
+│   ├── x64/
+│   │   ├── termaccess.dll      # Rust cdylib (64-bit)
+│   │   └── termaccess-helper.exe
+│   └── x86/
+│       ├── termaccess.dll      # Rust cdylib (32-bit)
+│       └── termaccess-helper.exe
+│
+native/                          # Rust workspace (not shipped in addon)
+├── Cargo.toml                   # Workspace manifest
+├── crates/
+│   ├── termaccess-core/         # Pure algorithms
+│   │   └── src/
+│   │       ├── lib.rs
+│   │       ├── ansi_strip.rs
+│   │       ├── position_cache.rs
+│   │       ├── search.rs
+│   │       ├── text_differ.rs
+│   │       └── unicode_width.rs
+│   ├── termaccess-ffi/          # C ABI FFI layer (cdylib)
+│   │   └── src/
+│   │       ├── lib.rs
+│   │       └── ffi_types.rs
+│   └── termaccess-helper/       # Helper process (binary)
+│       └── src/
+│           ├── main.rs
+│           ├── console_reader.rs
+│           ├── pipe_server.rs
+│           ├── protocol.rs
+│           ├── security.rs
+│           ├── uia_events.rs
+│           └── uia_reader.rs
 ```
 
 ## Key Components
@@ -153,9 +299,12 @@ class ANSIParser:
 - `extractColumnRange(text, startCol, endCol)` - Column-aware extraction
 - `findColumnPosition(text, targetCol)` - Column to index mapping
 
-**Location**: `addon/globalPlugins/tdsr.py:419-549`
+**Location**: `addon/globalPlugins/tdsr.py`
 
-**Uses**: wcwidth library with graceful fallback
+**Native acceleration**: Each method tries the Rust `unicode-width` crate via
+FFI (`ta_char_width`, `ta_text_width`, `ta_extract_column_range`,
+`ta_find_column_position`) first, falling back to the Python `wcwidth`
+library on failure.
 
 ### 4. Application Profiles
 
@@ -404,16 +553,30 @@ if attrs['bold'] and attrs['foreground'] == 'red':
 - Reused for all strip operations
 - Minimal overhead
 
-### 5. Unicode Width Fallback
+### 5. Unicode Width (Three-Tier)
 
-**Graceful Degradation**:
-```python
-try:
-    import wcwidth
-    width = wcwidth.wcwidth(char)
-except ImportError:
-    width = 1  # Fallback to ASCII assumption
-```
+**Priority order**:
+1. Rust `unicode-width` crate via FFI (fastest, most accurate)
+2. Python `wcwidth` library (reliable fallback)
+3. ASCII assumption (`width = 1`) if wcwidth unavailable
+
+Each `UnicodeWidthHelper` method wraps the native call in try/except
+so any FFI failure silently falls through to Python.
+
+### 6. Native Helper Process
+
+**Off-main-thread UIA reads** eliminate the `wx.CallAfter` + `Event.wait()`
+round-trip that blocked NVDA's main thread.
+
+**Event-driven output** via diff-based subscriptions: the helper polls
+subscribed terminals, diffs text snapshots, strips ANSI, and pushes only
+changed content over the named pipe.
+
+**Server-side search** reads the terminal buffer and searches it in a
+single IPC round-trip, avoiding a full buffer transfer to Python.
+
+**Console API fallback** uses `AttachConsole` + `ReadConsoleOutputCharacterW`
+for terminals without UIA TextPattern support.
 
 ## Code Organization
 
@@ -463,9 +626,7 @@ Format: ConfigObj specification
 
 ### Unit Tests
 
-Location: `tests/`
-
-Files:
+**Python tests** (`tests/`):
 - `test_validation.py` - Input validation (40+ tests)
 - `test_cache.py` - PositionCache (15+ tests)
 - `test_config.py` - Configuration (20+ tests)
@@ -473,13 +634,20 @@ Files:
 - `test_integration.py` - Workflows (30+ tests)
 - `test_performance.py` - Benchmarks (20+ tests)
 - `test_ansi_unicode_profiles.py` - v1.0.18 features (20+ tests)
+- `test_native_bridge.py` - FFI wrapper tests (67 tests, skipped when DLL absent)
+- `test_helper_process.py` - Helper IPC unit tests (42 tests)
+- `test_helper_e2e.py` - End-to-end helper tests (12 tests)
+
+**Rust tests** (`native/`):
+- `termaccess-core`: 66 tests (diff, ANSI strip, search, cache, unicode width)
+- `termaccess-helper`: 35 tests (protocol serde, pipe framing, security, subscriptions)
 
 ### Test Infrastructure
 
-- **Framework**: pytest with unittest.TestCase
-- **Mocking**: NVDA modules mocked in conftest.py
-- **CI/CD**: GitHub Actions (Python 3.11)
-- **Coverage**: 70%+ target, enforced in CI
+- **Python**: pytest with unittest.TestCase, NVDA mocks in conftest.py
+- **Rust**: `cargo test --all` (101 tests)
+- **CI/CD**: GitHub Actions — `rust-build.yml` (test + build), `release.yml` (release), `nightly.yml` (nightly with native artifacts)
+- **Coverage**: 70%+ target for Python, enforced in CI
 
 ### Manual Testing
 
@@ -512,6 +680,25 @@ See: `TESTING.md` for comprehensive manual test procedures
 4. **Script Recording**: Macro system for common tasks
 5. **Remote Terminals**: SSH/telnet support
 
+## CI/CD Pipeline
+
+### Workflows
+
+| Workflow | Trigger | What it does |
+|----------|---------|-------------|
+| `rust-build.yml` | Push/PR touching `native/` | Run Rust tests, clippy, build DLL+EXE for x86/x64 |
+| `release.yml` | Push to `main` | Build native, bundle into addon, create GitHub release |
+| `nightly.yml` | Daily cron + manual | Build native, bundle nightly addon with version suffix |
+| `changelog-check.yml` | PR | Verify changelog entry exists |
+
+### Build Artifacts
+
+The release and nightly workflows produce these artifacts:
+- `termaccess-dll-x64` / `termaccess-dll-x86` — `termaccess_ffi.dll` renamed to `termaccess.dll`
+- `termaccess-helper-x64` / `termaccess-helper-x86` — `termaccess-helper.exe`
+
+These are placed into `addon/lib/{arch}/` before the addon `.nvda-addon` zip is built.
+
 ## References
 
 - [NVDA Developer Guide](https://www.nvaccess.org/files/nvda/documentation/developerGuide.html)
@@ -519,9 +706,11 @@ See: `TESTING.md` for comprehensive manual test procedures
 - [TextInfo API Documentation](https://www.nvaccess.org/files/nvda/documentation/developerGuide.html#textInfos)
 - [ANSI Escape Codes](https://en.wikipedia.org/wiki/ANSI_escape_code)
 - [wcwidth Library](https://pypi.org/project/wcwidth/)
+- [unicode-width Crate](https://crates.io/crates/unicode-width)
+- [Windows UI Automation](https://learn.microsoft.com/en-us/windows/win32/winauto/entry-uiauto-win32)
 
 ---
 
 **Document Maintained By**: TDSR Development Team
-**Last Review**: 2026-02-21
+**Last Review**: 2026-03-12
 **Next Review**: After major architectural changes

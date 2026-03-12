@@ -10,19 +10,16 @@ permissions:
   contents: write
 
 jobs:
-  nightly-build:
+  # ── Check for changes ──────────────────────────────────────────
+  check-changes:
     runs-on: ubuntu-latest
-
+    outputs:
+      has_changes: ${{ steps.check_changes.outputs.has_changes }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
 
       - name: Check for changes since last nightly
         id: check_changes
@@ -46,8 +43,86 @@ jobs:
             fi
           fi
 
+  # ── Build native Rust DLLs (x86 + x64) ─────────────────────
+  build-native:
+    name: Build Native (${{ matrix.arch }})
+    runs-on: windows-latest
+    needs: check-changes
+    if: needs.check-changes.outputs.has_changes == 'true'
+
+    strategy:
+      matrix:
+        include:
+          - arch: x64
+            target: x86_64-pc-windows-msvc
+          - arch: x86
+            target: i686-pc-windows-msvc
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            native/target/
+          key: ${{ runner.os }}-cargo-nightly-${{ matrix.arch }}-${{ hashFiles('native/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-nightly-${{ matrix.arch }}-
+
+      - name: Run Rust tests
+        working-directory: native
+        run: cargo test --all
+
+      - name: Build release DLL
+        working-directory: native
+        run: cargo build --release --target ${{ matrix.target }} -p termaccess-ffi
+
+      - name: Build release helper EXE
+        working-directory: native
+        run: cargo build --release --target ${{ matrix.target }} -p termaccess-helper
+
+      - name: Upload DLL artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: termaccess-dll-${{ matrix.arch }}
+          path: native/target/${{ matrix.target }}/release/termaccess_ffi.dll
+          if-no-files-found: error
+
+      - name: Upload helper EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: termaccess-helper-${{ matrix.arch }}
+          path: native/target/${{ matrix.target }}/release/termaccess-helper.exe
+          if-no-files-found: error
+
+  # ── Build and release the nightly addon ─────────────────────
+  nightly-build:
+    runs-on: ubuntu-latest
+    needs: [check-changes, build-native]
+    if: needs.check-changes.outputs.has_changes == 'true'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Extract version from buildVars.py
-        if: steps.check_changes.outputs.has_changes == 'true'
         id: version
         run: |
           VERSION=$(python3 -c "
@@ -66,25 +141,36 @@ jobs:
           echo "Nightly version: $NIGHTLY_VERSION"
 
       - name: Update version for nightly
-        if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           # Temporarily modify buildVars.py for nightly version
           sed -i "s/addon_version=\"[^\"]*\"/addon_version=\"${{ steps.version.outputs.nightly_version }}\"/" buildVars.py
 
+      - name: Download native artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: termaccess-*
+
+      - name: Place native binaries in addon
+        run: |
+          mkdir -p addon/lib/x64 addon/lib/x86
+          cp termaccess-dll-x64/termaccess_ffi.dll addon/lib/x64/termaccess.dll
+          cp termaccess-dll-x86/termaccess_ffi.dll addon/lib/x86/termaccess.dll
+          cp termaccess-helper-x64/termaccess-helper.exe addon/lib/x64/termaccess-helper.exe
+          cp termaccess-helper-x86/termaccess-helper.exe addon/lib/x86/termaccess-helper.exe
+          echo "Native binaries placed:"
+          ls -lh addon/lib/x64/ addon/lib/x86/
+
       - name: Install build dependencies
-        if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           python -m pip install --upgrade pip
           pip install scons markdown
 
       - name: Build nightly add-on
-        if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           scons
           ls -lh *.nvda-addon
 
       - name: Generate nightly changelog
-        if: steps.check_changes.outputs.has_changes == 'true'
         id: changelog
         run: |
           # Get commits since last nightly
@@ -109,7 +195,6 @@ jobs:
           cat nightly_changelog.txt
 
       - name: Create nightly tag
-        if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -121,7 +206,6 @@ jobs:
           echo "Created tag: $TAG_NAME"
 
       - name: Create/Update Nightly Release
-        if: steps.check_changes.outputs.has_changes == 'true'
         uses: softprops/action-gh-release@v1
         with:
           tag_name: nightly-$(date +%Y%m%d)
@@ -134,7 +218,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  # ── Skip notification ──────────────────────────────────────────
+  skip-build:
+    runs-on: ubuntu-latest
+    needs: check-changes
+    if: needs.check-changes.outputs.has_changes == 'false'
+    steps:
       - name: Skip build (no changes)
-        if: steps.check_changes.outputs.has_changes == 'false'
         run: |
           echo "No changes detected since last nightly build. Skipping."

@@ -110,6 +110,28 @@ try:
 except (ImportError, AttributeError):
 	_braille_available = False
 
+# Native (Rust) acceleration — optional, falls back to pure Python.
+try:
+	from native.termaccess_bridge import (
+		native_available as _native_available_fn,
+		NativeTextDiffer as _NativeTextDiffer,
+		native_strip_ansi as _native_strip_ansi,
+		native_search_text as _native_search_text,
+		NativePositionCache as _NativePositionCache,
+		get_helper as _get_helper,
+		stop_helper as _stop_helper,
+		start_helper_eagerly as _start_helper_eagerly,
+	)
+	_native_available = _native_available_fn()
+except Exception:
+	_native_available = False
+	def _get_helper():
+		return None
+	def _stop_helper():
+		pass
+	def _start_helper_eagerly():
+		pass
+
 try:
 	addonHandler.initTranslation()
 except (ImportError, AttributeError, OSError):
@@ -572,6 +594,42 @@ def _read_lines_on_main(terminal_obj, start_row: int, end_row: int, timeout: flo
 	return result[0]
 
 
+def _read_terminal_text(terminal_obj, position=None, timeout: float = 2.0):
+	"""Read terminal text, preferring the helper process over main-thread marshaling.
+
+	Tries the native helper process first (bypasses wx.CallAfter entirely).
+	Falls back to ``_read_terminal_text_on_main()`` if the helper is unavailable.
+	"""
+	helper = _get_helper()
+	if helper is not None and hasattr(terminal_obj, 'windowHandle'):
+		try:
+			text = helper.read_text(terminal_obj.windowHandle)
+			if text is not None:
+				return text
+		except Exception:
+			pass
+	# Fallback: marshal to the main thread
+	return _read_terminal_text_on_main(terminal_obj, position, timeout)
+
+
+def _read_lines(terminal_obj, start_row: int, end_row: int, timeout: float = 5.0):
+	"""Read a range of terminal lines, preferring the helper process.
+
+	Tries the native helper process first (bypasses wx.CallAfter entirely).
+	Falls back to ``_read_lines_on_main()`` if the helper is unavailable.
+	"""
+	helper = _get_helper()
+	if helper is not None and hasattr(terminal_obj, 'windowHandle'):
+		try:
+			lines = helper.read_lines(terminal_obj.windowHandle, start_row, end_row)
+			if lines is not None:
+				return lines
+		except Exception:
+			pass
+	# Fallback: marshal to the main thread
+	return _read_lines_on_main(terminal_obj, start_row, end_row, timeout)
+
+
 @functools.lru_cache(maxsize=512)
 def _get_symbol_description(locale: str, char: str) -> str:
 	"""
@@ -819,6 +877,41 @@ class TextDiffer:
 	def last_text(self) -> str | None:
 		"""The last snapshot text, or ``None`` if no snapshot has been taken."""
 		return self._last_text
+
+
+# ═══════════════════════════════════════════════════════════════
+#  Native-or-fallback factory helpers
+# ═══════════════════════════════════════════════════════════════
+
+def _make_text_differ() -> TextDiffer:
+	"""Create a TextDiffer, using the native Rust implementation if available."""
+	if _native_available:
+		try:
+			return _NativeTextDiffer()
+		except Exception:
+			pass
+	return TextDiffer()
+
+
+def _make_position_cache() -> PositionCache:
+	"""Create a PositionCache, using the native Rust implementation if available."""
+	if _native_available:
+		try:
+			return _NativePositionCache()
+		except Exception:
+			pass
+	return PositionCache()
+
+
+def _strip_ansi(text: str) -> str:
+	"""Strip ANSI escape sequences, using the native Rust implementation if available."""
+	if _native_available:
+		try:
+			return _native_strip_ansi(text)
+		except Exception:
+			pass
+	# Fallback to Python regex (ANSIParser._STRIP_PATTERN is defined below)
+	return ANSIParser.stripANSI(text)
 
 
 class ANSIParser:
@@ -1190,6 +1283,12 @@ class UnicodeWidthHelper:
 			int: Display width (0, 1, or 2 columns)
 		"""
 		try:
+			from native.termaccess_bridge import native_char_width, native_available
+			if native_available():
+				return native_char_width(char)
+		except Exception:
+			pass
+		try:
 			import wcwidth
 			width = wcwidth.wcwidth(char)
 			# wcwidth returns -1 for control characters, treat as 0
@@ -1212,6 +1311,12 @@ class UnicodeWidthHelper:
 		Returns:
 			int: Total display width in columns
 		"""
+		try:
+			from native.termaccess_bridge import native_text_width, native_available
+			if native_available():
+				return native_text_width(text)
+		except Exception:
+			pass
 		try:
 			import wcwidth
 			width = wcwidth.wcswidth(text)
@@ -1247,6 +1352,12 @@ class UnicodeWidthHelper:
 		"""
 		if not text:
 			return ""
+		try:
+			from native.termaccess_bridge import native_extract_column_range, native_available
+			if native_available():
+				return native_extract_column_range(text, startCol, endCol)
+		except Exception:
+			pass
 
 		result = []
 		currentCol = 1
@@ -1288,6 +1399,12 @@ class UnicodeWidthHelper:
 		"""
 		if not text:
 			return 0
+		try:
+			from native.termaccess_bridge import native_find_column_position, native_available
+			if native_available():
+				return native_find_column_position(text, targetCol)
+		except Exception:
+			pass
 
 		currentCol = 1
 		for i, char in enumerate(text):
@@ -2754,7 +2871,7 @@ class PositionCalculator:
 
 	def __init__(self) -> None:
 		"""Initialize the position calculator with empty cache."""
-		self._cache = PositionCache()
+		self._cache = _make_position_cache()
 		self._last_known_position: tuple[Any, int, int] | None = None
 
 	def calculate(self, textInfo: Any, terminal: Any) -> tuple[int, int]:
@@ -3268,7 +3385,7 @@ class NewOutputAnnouncer:
 
 	def __init__(self) -> None:
 		"""Initialise with no previous snapshot."""
-		self._differ = TextDiffer()
+		self._differ = _make_text_differ()
 		self._lock = threading.Lock()
 		self._timer: threading.Timer | None = None
 		self._pending_text: str = ""
@@ -3330,7 +3447,7 @@ class NewOutputAnnouncer:
 				return
 			try:
 				if ta_conf["stripAnsiInOutput"]:
-					new_content = ANSIParser.stripANSI(new_content)
+					new_content = _strip_ansi(new_content)
 					if not new_content.strip():
 						return
 			except Exception:
@@ -3347,13 +3464,61 @@ class NewOutputAnnouncer:
 		# Strip ANSI escape codes if configured
 		try:
 			if ta_conf["stripAnsiInOutput"]:
-				new_content = ANSIParser.stripANSI(new_content)
+				new_content = _strip_ansi(new_content)
 				if not new_content.strip():
 					return
 		except Exception:
 			pass
 
 		self._schedule_coalesce(new_content, replace=False, ta_conf=ta_conf)
+
+	def feed_diff(self, kind: int, content: str) -> None:
+		"""Feed a pre-computed diff result from the helper process.
+
+		Unlike :meth:`feed`, this bypasses the local TextDiffer since the
+		helper already performed ANSI stripping and diff detection. This
+		avoids duplicate work and removes the need to transfer the full
+		terminal buffer over the pipe.
+
+		Args:
+			kind: Diff kind from the helper (2=Appended, 3=Changed,
+				4=LastLineUpdated).
+			content: The diff content (appended lines or updated last line).
+		"""
+		# Throttle: skip if the last feed was very recent
+		now = time.time()
+		if (now - self._last_feed_time) < self._MIN_FEED_INTERVAL:
+			return
+		self._last_feed_time = now
+
+		# Respect quiet mode and master toggle
+		try:
+			ta_conf = config.conf["terminalAccess"]
+			if ta_conf["quietMode"] or not ta_conf["announceNewOutput"]:
+				return
+		except Exception:
+			return
+
+		stripped = content.strip()
+		if not stripped:
+			return
+
+		# The helper already strips ANSI, but if the user has stripAnsiInOutput
+		# enabled and somehow ANSI slipped through, strip again as safety net.
+		try:
+			if ta_conf["stripAnsiInOutput"]:
+				content = _strip_ansi(content)
+				if not content.strip():
+					return
+		except Exception:
+			pass
+
+		if kind == self._DIFF_KIND_LAST_LINE_UPDATED:
+			self._schedule_coalesce(content, replace=True, ta_conf=ta_conf)
+		elif kind == self._DIFF_KIND_APPENDED:
+			self._schedule_coalesce(content, replace=False, ta_conf=ta_conf)
+		# kind == _DIFF_KIND_CHANGED: content is empty (full screen change),
+		# nothing to announce.
 
 	def _schedule_coalesce(self, content: str, *, replace: bool, ta_conf) -> None:
 		"""
@@ -3439,23 +3604,55 @@ class NewOutputAnnouncer:
 
 	def start_polling(self) -> None:
 		"""
-		Start background polling thread to detect new output.
+		Start monitoring for new output.
 
-		Called when the announce new output feature is enabled.
+		Prefers push-based subscription via the helper process (50ms latency).
+		Falls back to a background polling thread (300ms) if the helper is
+		unavailable or subscription fails.
 		"""
-		if self._poll_thread is not None:
-			return  # Already polling
+		if self._poll_thread is not None or getattr(self, "_subscribed_hwnd", None) is not None:
+			return  # Already monitoring
 
+		# Try subscription via helper process first
+		helper = _get_helper()
+		if helper is not None and self._terminal_obj is not None:
+			hwnd = getattr(self._terminal_obj, "windowHandle", None)
+			if hwnd is not None:
+				try:
+					if helper.subscribe(hwnd):
+						self._subscribed_hwnd = hwnd
+						helper.on("text_diff", self._on_text_diff)
+						helper.on("helper_crashed", self._on_helper_crashed)
+						log.debug("Subscribed to hwnd %d via helper (diff mode)", hwnd)
+						return
+				except Exception:
+					log.debug("Subscription failed, falling back to polling", exc_info=True)
+
+		# Fallback: polling
 		self._stop_polling.clear()
 		self._poll_thread = threading.Thread(target=self._poll_loop, daemon=True)
 		self._poll_thread.start()
 
 	def stop_polling(self) -> None:
 		"""
-		Stop background polling thread.
+		Stop monitoring for new output.
 
-		Called when the announce new output feature is disabled.
+		Handles both subscription mode and polling mode.
 		"""
+		# Unsubscribe if in subscription mode
+		hwnd = getattr(self, "_subscribed_hwnd", None)
+		if hwnd is not None:
+			helper = _get_helper()
+			if helper is not None:
+				try:
+					helper.unsubscribe(hwnd)
+					helper.off("text_diff", self._on_text_diff)
+					helper.off("helper_crashed", self._on_helper_crashed)
+				except Exception:
+					pass
+			self._subscribed_hwnd = None
+
+		# Stop polling if in polling mode
 		if self._poll_thread is None:
 			return
 
@@ -3463,6 +3660,47 @@ class NewOutputAnnouncer:
 		if self._poll_thread.is_alive():
 			self._poll_thread.join(timeout=1.0)
 		self._poll_thread = None
+
+	# Mapping from Rust DiffKind numeric values to Python-side processing.
+	# 0 = Initial, 1 = Unchanged, 2 = Appended, 3 = Changed, 4 = LastLineUpdated
+	_DIFF_KIND_APPENDED = 2
+	_DIFF_KIND_CHANGED = 3
+	_DIFF_KIND_LAST_LINE_UPDATED = 4
+
+	def _on_text_diff(self, hwnd: int, kind: int, content: str) -> None:
+		"""Callback for helper process text_diff notifications.
+
+		Receives pre-diffed content from the helper, bypassing the local
+		TextDiffer. The helper already strips ANSI and computes diffs.
+
+		Args:
+			hwnd: Window handle of the terminal.
+			kind: Diff kind (2=Appended, 3=Changed, 4=LastLineUpdated).
+			content: The diff content (appended text or updated last line).
+		"""
+		subscribed = getattr(self, "_subscribed_hwnd", None)
+		if subscribed is not None and hwnd == subscribed and content:
+			self.feed_diff(kind, content)
+
+	def _on_helper_crashed(self, msg) -> None:
+		"""Callback when the helper process gives up restarting.
+
+		Falls back to polling mode so output detection continues even
+		after the helper dies permanently.
+		"""
+		if getattr(self, "_subscribed_hwnd", None) is None:
+			return  # Not in subscription mode
+
+		log.warning("Helper crashed permanently, falling back to polling")
+		self._subscribed_hwnd = None
+
+		# Start polling thread as fallback
+		if self._poll_thread is None:
+			self._stop_polling.clear()
+			self._poll_thread = threading.Thread(
+				target=self._poll_loop, daemon=True
+			)
+			self._poll_thread.start()
 
 	def _poll_loop(self) -> None:
 		"""
@@ -3479,10 +3717,10 @@ class NewOutputAnnouncer:
 					continue
 
 				# Get terminal content and feed to announcer.
-				# Marshal to main thread — UIA COM objects are apartment-threaded.
+				# Uses helper process if available; falls back to main-thread marshaling.
 				if self._terminal_obj is not None:
 					try:
-						text = _read_terminal_text_on_main(self._terminal_obj)
+						text = _read_terminal_text(self._terminal_obj)
 						if text is not None:
 							self.feed(text)
 					except Exception:
@@ -3572,7 +3810,7 @@ class WindowMonitor:
 				'mode': mode,
 				'last_check': 0,
 				'enabled': True,
-				'differ': TextDiffer(),  # Per-monitor differ for change detection
+				'differ': _make_text_differ(),  # Per-monitor differ for change detection
 			}
 			self._monitors.append(monitor)
 			self._last_content[name] = None
@@ -3749,9 +3987,8 @@ class WindowMonitor:
 		lines = []
 
 		try:
-			# Marshal to main thread — this runs from a background polling thread
-			# and UIA COM objects are apartment-threaded.
-			all_text = _read_terminal_text_on_main(self._terminal)
+			# Uses helper process if available; falls back to main-thread marshaling.
+			all_text = _read_terminal_text(self._terminal)
 			if all_text is None:
 				return ""
 
@@ -4370,48 +4607,116 @@ class OutputSearchManager:
 				return offset if offset >= 0 else 0
 
 		try:
-			# Get all terminal content
-			info = self._terminal.makeTextInfo(textInfos.POSITION_ALL)
-			all_text = info.text
+			# ─── Fast path: helper-side search (no buffer transfer) ───
+			# When the helper is running, it reads the terminal buffer via
+			# UIA and searches it in one IPC round-trip.  This avoids the
+			# expensive makeTextInfo(POSITION_ALL) call entirely.
+			helper_search_result = None
+			try:
+				helper = _get_helper()
+			except Exception:
+				helper = None
 
-			if not all_text:
-				return 0
+			if helper is not None and helper.is_running:
+				hwnd = getattr(self._terminal, "windowHandle", None)
+				if hwnd:
+					try:
+						resp = helper.search_text(
+							hwnd, pattern, case_sensitive, use_regex,
+						)
+						if resp is not None:
+							helper_search_result = resp
+					except ValueError:
+						raise
+					except Exception:
+						pass
 
-			# Strip ANSI escape sequences that some terminals leave in the
-			# text buffer.  Without this, embedded formatting codes can
-			# break substring matching for terms the user can clearly see.
-			all_text = ANSIParser._STRIP_PATTERN.sub('', all_text)
-
-			# Split into lines and build a set of matching line numbers first
-			# (0-indexed internally, converted to 1-indexed for storage).
-			lines = all_text.split('\n')
-
-			if use_regex:
-				flags = 0 if case_sensitive else re.IGNORECASE
-				compiled = re.compile(pattern, flags)
-				matching_indices = [i for i, line in enumerate(lines) if compiled.search(line)]
+			if helper_search_result is not None:
+				# Helper returned matches — build matching_indices and
+				# line_text/offset maps from the response.
+				resp = helper_search_result
+				matching_indices = [m["line_index"] for m in resp.get("matches", [])]
+				native_offset_map = {
+					m["line_index"]: m["char_offset"]
+					for m in resp.get("matches", [])
+				}
+				helper_line_texts = {
+					m["line_index"]: m["line_text"]
+					for m in resp.get("matches", [])
+				}
+				total_lines = resp.get("total_lines", 0)
+				lines = None  # Not available in helper path
 			else:
-				search_pattern = pattern if case_sensitive else pattern.lower()
-				matching_indices = [
-					i for i, line in enumerate(lines)
-					if search_pattern in (line if case_sensitive else line.lower())
-				]
+				# ─── Standard path: read buffer + match locally ───
+				info = self._terminal.makeTextInfo(textInfos.POSITION_ALL)
+				all_text = info.text
+
+				if not all_text:
+					return 0
+
+				# Strip ANSI escape sequences that some terminals leave
+				# in the text buffer.
+				all_text = _strip_ansi(all_text)
+
+				# Split into lines and build matching indices.
+				lines = all_text.split('\n')
+				total_lines = len(lines)
+				helper_line_texts = None
+
+				# Try Rust-accelerated search first.
+				native_offset_map = None
+				if _native_available:
+					try:
+						native_matches = _native_search_text(
+							all_text, pattern, case_sensitive, use_regex,
+						)
+						matching_indices = [m[0] for m in native_matches]
+						native_offset_map = {m[0]: m[1] for m in native_matches}
+					except ValueError:
+						raise
+					except Exception:
+						native_offset_map = None
+
+				if native_offset_map is None:
+					# Python fallback: match line by line.
+					if use_regex:
+						flags = 0 if case_sensitive else re.IGNORECASE
+						compiled = re.compile(pattern, flags)
+						matching_indices = [i for i, line in enumerate(lines) if compiled.search(line)]
+					else:
+						search_pattern = pattern if case_sensitive else pattern.lower()
+						matching_indices = [
+							i for i, line in enumerate(lines)
+							if search_pattern in (line if case_sensitive else line.lower())
+						]
 
 			if not matching_indices:
 				return 0
 
+			# ─── Bookmark walk ───
 			# Single forward pass from POSITION_FIRST: walk line by line,
 			# collecting bookmarks only for matching lines.
-			# This replaces the previous per-match O(line_num) walk with a
-			# single O(total_lines) walk for the entire search.
+			def _get_line_text(line_index):
+				"""Get line text from whichever source is available."""
+				if helper_line_texts is not None and line_index in helper_line_texts:
+					return helper_line_texts[line_index]
+				if lines is not None and line_index < len(lines):
+					return lines[line_index]
+				return ""
+
+			walk_end = total_lines - 1 if total_lines > 0 else 0
 			try:
 				cursor = self._terminal.makeTextInfo(textInfos.POSITION_FIRST)
 				match_set = set(matching_indices)
-				for line_index in range(len(lines) - 1 if lines[-1] == '' else len(lines)):
+				for line_index in range(walk_end + 1):
 					if line_index in match_set:
-						char_offset = _find_match_offset(lines[line_index], pattern, case_sensitive, use_regex)
-						_store_match(cursor, lines[line_index], line_index + 1, char_offset)
-					if line_index < len(lines) - 1:
+						line_text = _get_line_text(line_index)
+						if native_offset_map is not None and line_index in native_offset_map:
+							char_offset = native_offset_map[line_index]
+						else:
+							char_offset = _find_match_offset(line_text, pattern, case_sensitive, use_regex)
+						_store_match(cursor, line_text, line_index + 1, char_offset)
+					if line_index < walk_end:
 						moved = cursor.move(textInfos.UNIT_LINE, 1)
 						if not moved:
 							break
@@ -4422,8 +4727,12 @@ class OutputSearchManager:
 					try:
 						line_info = self._terminal.makeTextInfo(textInfos.POSITION_FIRST)
 						line_info.move(textInfos.UNIT_LINE, i)
-						char_offset = _find_match_offset(lines[i], pattern, case_sensitive, use_regex)
-						_store_match(line_info, lines[i], i + 1, char_offset)
+						line_text = _get_line_text(i)
+						if native_offset_map is not None and i in native_offset_map:
+							char_offset = native_offset_map[i]
+						else:
+							char_offset = _find_match_offset(line_text, pattern, case_sensitive, use_regex)
+						_store_match(line_info, line_text, i + 1, char_offset)
 					except Exception:
 						pass
 
@@ -4697,7 +5006,7 @@ class CommandHistoryManager:
 
 			# Strip ANSI escape sequences that some terminals leave in the
 			# text buffer so prompt patterns match cleanly.
-			content = ANSIParser._STRIP_PATTERN.sub('', content)
+			content = _strip_ansi(content)
 
 			lines = content.split('\n')
 			new_commands = 0
@@ -4944,7 +5253,7 @@ class UrlExtractorManager:
 					osc8_urls[url] = line_num
 
 		# Phase 2: Extract plain-text URLs after ANSI stripping
-		clean_text = ANSIParser._STRIP_PATTERN.sub('', raw_text)
+		clean_text = _strip_ansi(raw_text)
 		lines = clean_text.split('\n')
 
 		# Deduplicate preserving first-occurrence order
@@ -5353,6 +5662,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# is anything to poll.
 		self._newOutputAnnouncer = NewOutputAnnouncer()
 
+		# Start the helper process eagerly on a background thread so it's warm
+		# by the time a terminal is focused.  Non-blocking and non-fatal.
+		threading.Thread(target=_start_helper_eagerly, daemon=True).start()
+
 		# Tab manager for managing terminal tabs (Section 9 - v1.0.39+)
 		self._tabManager = None  # Initialized when terminal is bound
 
@@ -5460,6 +5773,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Stop window monitoring if active
 		if self._windowMonitor and self._windowMonitor.is_monitoring():
 			self._windowMonitor.stop_monitoring()
+
+		# Stop the native helper process
+		try:
+			_stop_helper()
+		except Exception:
+			pass
 
 		try:
 			gui.settingsDialogs.NVDASettingsDialog.categoryClasses.remove(TerminalAccessSettingsPanel)
@@ -5623,6 +5942,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 			# Store the terminal object and route the review cursor to it via the navigator
 			self._boundTerminal = obj
+
+			# Lazy-start the native helper process on first terminal focus.
+			# This is a no-op if already running or if the EXE is unavailable.
+			try:
+				_get_helper()
+			except Exception:
+				pass
 			api.setNavigatorObject(obj)
 
 			# Initialize TabManager for this terminal (Section 9 - v1.0.39+)
@@ -5874,6 +6200,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		Also updates the terminal object reference for polling.
 
+		When the helper process is subscribed and pushing diff notifications,
+		the expensive ``makeTextInfo(POSITION_ALL)`` read is skipped entirely —
+		the helper's 50ms push loop handles output detection. This eliminates
+		the 10KB-1MB UIA read from the main thread on every caret event.
+
 		This is a best-effort helper: any exception is silently ignored so it
 		never disrupts normal caret handling.
 
@@ -5883,6 +6214,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		try:
 			# Update terminal object for polling (in case it changed)
 			self._newOutputAnnouncer.set_terminal(obj)
+			# When the helper is subscribed and pushing diffs, skip the expensive
+			# POSITION_ALL read — the helper handles output detection at 50ms.
+			if getattr(self._newOutputAnnouncer, "_subscribed_hwnd", None) is not None:
+				return
 			# Gate the expensive POSITION_ALL read behind cheap config/throttle checks.
 			# On conhost this avoids reading the entire buffer (10KB-1MB) hundreds of
 			# times per second when announceNewOutput is off or in quiet mode.
@@ -7813,10 +8148,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			endCol: Ending column (1-based)
 			progressDialog: Optional SelectionProgressDialog for visual feedback
 		"""
-		# Bulk-read all needed lines on the main thread in a single marshaled
-		# call.  This avoids per-line UIA COM calls from the background thread
-		# (apartment-threaded COM objects must be called from their owning thread).
-		raw_lines = _read_lines_on_main(terminal, startRow, endRow)
+		# Bulk-read all needed lines — uses helper process if available,
+		# otherwise marshals to the main thread in a single call.
+		raw_lines = _read_lines(terminal, startRow, endRow)
 		if raw_lines is None:
 			if threading.current_thread() != threading.main_thread():
 				wx.CallAfter(ui.message, _("Background copy failed"))
@@ -7847,7 +8181,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			lineText = lineText.rstrip('\n\r')
 
 			# Strip ANSI codes for accurate column extraction
-			cleanText = ANSIParser.stripANSI(lineText)
+			cleanText = _strip_ansi(lineText)
 
 			# Extract column range using Unicode-aware helper (1-based columns)
 			columnText = UnicodeWidthHelper.extractColumnRange(cleanText, startCol, endCol)

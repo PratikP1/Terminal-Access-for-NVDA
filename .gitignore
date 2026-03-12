@@ -46,6 +46,11 @@ desktop.ini
 sconsSign.dblite
 .sconsign.dblite
 
+# Rust / native DLL build artifacts
+native/target/
+addon/lib/x86/
+addon/lib/x64/
+
 # Testing
 .pytest_cache/
 .coverage

@@ -1,0 +1,11 @@
+[package]
+name = "termaccess-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Core text processing algorithms for Terminal Access for NVDA"
+
+[dependencies]
+regex = { workspace = true }
+lru = { workspace = true }
+unicode-width = { workspace = true }

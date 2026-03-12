@@ -2,6 +2,35 @@
 
 All notable changes to Terminal Access for NVDA will be documented in this file.
 
+## [Unreleased]
+
+### Added
+
+- **Native Rust acceleration layer**: CPU-bound text processing (ANSI stripping, diff computation,
+  regex search, unicode width calculation) is now handled by a native Rust DLL (`termaccess.dll`)
+  loaded via ctypes. Falls back gracefully to pure-Python when the DLL is unavailable.
+- **Helper process for off-main-thread UIA reads**: A background `termaccess-helper.exe` process
+  reads terminal buffers via UIA TextPattern over a named-pipe IPC channel, keeping NVDA's main
+  thread responsive. Supports UIA subscriptions with event-driven `TextDiff` notifications.
+- **Console API fallback**: Terminals without UIA TextPattern (some conhost configurations, mintty,
+  older PuTTY builds) can now be read via `ReadConsoleOutputCharacterW` as a fallback path.
+- **Rust-accelerated search**: `OutputSearchManager.search()` now delegates pattern matching to the
+  native DLL (with ANSI stripping built in). When the helper is running, search executes as a single
+  IPC round-trip with no buffer transfer to Python.
+- **Unicode width offloading**: `UnicodeWidthHelper` methods (`getCharWidth`, `getTextWidth`,
+  `extractColumnRange`, `findColumnPosition`) now use the Rust `unicode-width` crate via FFI,
+  falling back to Python `wcwidth` and then ASCII width assumptions.
+- **Helper auto-restart**: Exponential backoff with crash recovery — the helper process restarts
+  automatically on unexpected termination, with configurable max retries and backoff intervals.
+
+### Changed
+
+- **Nightly CI pipeline**: Restructured from a single Ubuntu job to a 3-job pipeline
+  (`check-changes` → `build-native` on Windows x86/x64 → `nightly-build` on Ubuntu) so that
+  nightly builds include the native Rust DLL and helper EXE for both architectures.
+- **Architecture documentation**: Major update to `docs/developer/ARCHITECTURE.md` documenting the
+  native acceleration layer, FFI interface, IPC protocol, fallback chains, and CI/CD pipeline.
+
 ## [1.2.7] - 2026-03-12
 
 ### Security

@@ -1,0 +1,40 @@
+[package]
+name = "termaccess-helper"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Helper process for Terminal Access - independent UIA terminal reads via named pipe IPC"
+
+[[bin]]
+name = "termaccess-helper"
+path = "src/main.rs"
+
+[dependencies]
+termaccess-core = { path = "../termaccess-core" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[dependencies.windows]
+version = "0.58"
+features = [
+    # COM fundamentals
+    "Win32_System_Com",
+    "Win32_Foundation",
+    # UI Automation
+    "Win32_UI_Accessibility",
+    # Named pipes and file I/O
+    "Win32_System_Pipes",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    # Security (DACL)
+    "Win32_Security",
+    "Win32_Security_Authorization",
+    # Memory (LocalFree for DACL cleanup)
+    "Win32_System_Memory",
+    # Process / thread
+    "Win32_System_Threading",
+    # Window validation
+    "Win32_UI_WindowsAndMessaging",
+    # Console API (fallback for non-UIA terminals)
+    "Win32_System_Console",
+]
