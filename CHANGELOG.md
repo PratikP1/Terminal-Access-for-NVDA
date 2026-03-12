@@ -2,6 +2,75 @@
 
 All notable changes to Terminal Access for NVDA will be documented in this file.
 
+## [1.2.7] - 2026-03-12
+
+### Security
+
+- **URL scheme whitelist**: `webbrowser.open()` is now restricted to `http://`, `https://`, and
+  `ftp://` schemes. Malicious terminal output containing `file://` or `javascript:` URLs can no
+  longer trick users into opening dangerous links from the URL list dialog.
+- **Profile import validation**: All fields imported via `ApplicationProfile.fromDict()` and
+  `WindowDefinition.fromDict()` are now validated — integers are clamped to safe ranges, strings
+  are sanitized, window modes are checked against a whitelist, and custom gesture keys must start
+  with `kb:` with values that are valid Python identifiers. Prevents arbitrary code execution or
+  crashes from maliciously crafted profile files.
+
+### Fixed
+
+- **URL list reliability**: Added error handling and logging around URL extraction and dialog
+  creation. The close button now uses `wx.ID_CANCEL` with `SetEscapeId` so the Escape key works
+  from any control. The number of found URLs is announced before the dialog opens.
+- **Singleton dialogs**: Both the URL list (NVDA+Alt+U) and search (NVDA+Alt+F) dialogs now
+  prevent multiple instances from spawning. If the dialog is already open, a spoken message
+  informs the user. Dialogs use `gui.mainFrame.prePopup()`/`postPopup()` to appear in the
+  foreground instead of behind the terminal window.
+- **Position calculation algorithm**: `_calculate_full` was broken — it moved to the end of the
+  buffer then iterated forward, so the loop never executed. Now starts from `POSITION_FIRST` and
+  walks forward, correctly counting lines to the target position.
+- **Off-by-one in position context**: `_getPositionContext` was adding +1 to row and column
+  values that were already 1-based from `calculate()`, reporting positions like "Row 2, column 2"
+  when the cursor was at row 1, column 1.
+- **Window definition coordinates**: `script_setWindow` now uses `_positionCalculator.calculate()`
+  to compute actual row/column values for both start and end positions. Previously, calculated
+  positions were discarded into throwaway local variables. The confirmation message now reports the
+  exact coordinate range (e.g., "Window defined: rows 1-10, columns 1-80").
+- **Multi-tab search state divergence**: All search methods (`search()`, `next_match()`,
+  `previous_match()`, `get_match_count()`, `get_current_match_info()`, `clear_search()`) now
+  route through `_get_search_state()`/`_save_search_state()`. Previously, `search()` wrote
+  directly to instance variables while the tab-aware path used a separate per-tab dictionary,
+  causing all tabs to share the same search results.
+- **WindowMonitor deadlock**: The monitoring loop held its lock while calling
+  `_read_terminal_text_on_main()`, which blocks waiting for the main thread. If the main thread
+  tried to acquire the same lock (e.g., `stop_monitoring()`), both threads would deadlock. The
+  lock is now released before any blocking I/O.
+- **SelectionProgressDialog race condition**: Replaced `time.sleep(0.1)` after dialog creation
+  with `threading.Event.wait(2.0)`. The fixed sleep was a race — 100ms was not always enough for
+  the main thread to create the dialog, causing early `update()` calls to silently skip.
+- **Uninitialized attributes**: `_windowStartSet`, `_windowStartBookmark`, `_windowStartRow`, and
+  `_windowStartCol` are now initialized in `__init__`, preventing `AttributeError` if window
+  commands were invoked before these attributes were first set.
+- **Regex validation**: `search()` now validates user-supplied regular expressions before
+  performing any terminal I/O. Invalid patterns raise `ValueError` with a descriptive message
+  instead of silently returning 0 matches.
+
+### Changed
+
+- **Deferred polling thread**: The new-output polling thread no longer starts eagerly in
+  `__init__` (on plugin load). It now starts lazily when a terminal is actually focused in
+  `event_gainFocus`, avoiding a background thread that does nothing until the user opens a
+  terminal.
+- **LRU cache eviction**: `PositionCache` now uses `OrderedDict.move_to_end()` to implement
+  least-recently-used eviction. Previously it used plain dict insertion-order (FIFO), which
+  evicted stable frequently-accessed positions while keeping stale one-off entries.
+
+### Translations
+
+- Added 9 new languages: Arabic, Czech, Hungarian, Italian, Korean, Dutch, Polish, Turkish, and
+  Ukrainian (17 languages total).
+- All translations updated using DeepL API for improved quality.
+- New translatable strings for URL security message and window coordinate feedback translated
+  across all 17 languages.
+
 ## [1.2.6] - 2026-03-11
 
 ### Added
