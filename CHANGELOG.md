@@ -4,6 +4,11 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+### Reverted
+
+- **Dynamic content changes suppression**: Reverted the automatic suppression of NVDA's
+  "Report dynamic content changes" on terminal focus, as it completely silenced the terminal.
+
 ## [1.3.2] - 2026-03-13
 
 ### Added

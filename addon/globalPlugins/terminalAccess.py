@@ -5615,9 +5615,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.copyMode = False
 		self._inCommandLayer = False
 		self._boundTerminal = None
-		# Saved NVDA core setting: reportDynamicContentChanges.
-		# Captured on terminal focus, restored on focus loss.
-		self._savedDynamicContent: bool | None = None
 		self._cursorTrackingTimer = None
 		self._lastCaretPosition = None
 		self._lastTypedChar = None
@@ -5743,27 +5740,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			except Exception:
 				pass
 		self._gesturesBound = True
-		# Suppress NVDA's "report dynamic content changes" while a terminal
-		# is focused to prevent intermittent "unknown" announcements caused
-		# by transient UIA elements during rapid content updates.
-		try:
-			self._savedDynamicContent = config.conf["presentation"]["reportDynamicContentChanges"]
-			config.conf["presentation"]["reportDynamicContentChanges"] = False
-		except (KeyError, TypeError):
-			self._savedDynamicContent = None
 
 	def _disableTerminalGestures(self):
 		"""Unbind Terminal Access gestures outside terminal focus."""
 		if not self._terminalGestures:
 			return
-		# Restore NVDA's "report dynamic content changes" to the user's
-		# original setting now that focus has left the terminal.
-		if self._savedDynamicContent is not None:
-			try:
-				config.conf["presentation"]["reportDynamicContentChanges"] = self._savedDynamicContent
-			except (KeyError, TypeError):
-				pass
-			self._savedDynamicContent = None
 		# Exit command layer silently before unbinding (focus loss auto-exit)
 		if getattr(self, "_inCommandLayer", False):
 			self._exitCommandLayer()
@@ -5812,13 +5793,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			_stop_helper()
 		except Exception:
 			pass
-
-		# Restore NVDA core settings that may have been modified
-		if self._savedDynamicContent is not None:
-			try:
-				config.conf["presentation"]["reportDynamicContentChanges"] = self._savedDynamicContent
-			except (KeyError, TypeError):
-				pass
 
 		try:
 			gui.settingsDialogs.NVDASettingsDialog.categoryClasses.remove(TerminalAccessSettingsPanel)
