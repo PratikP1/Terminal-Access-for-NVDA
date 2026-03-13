@@ -4,6 +4,12 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Search not positioning review cursor**: After finding matches, the review cursor
+  snapped back to the prompt because `event_gainFocus` reset the navigator when focus
+  returned from the search dialog. A suppression flag now preserves the review position.
+
 ### Reverted
 
 - **Dynamic content changes suppression**: Reverted the automatic suppression of NVDA's

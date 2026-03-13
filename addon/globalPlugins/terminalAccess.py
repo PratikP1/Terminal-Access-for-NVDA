@@ -5615,6 +5615,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self.copyMode = False
 		self._inCommandLayer = False
 		self._boundTerminal = None
+		self._searchJumpPending = False
 		self._cursorTrackingTimer = None
 		self._lastCaretPosition = None
 		self._lastTypedChar = None
@@ -5963,7 +5964,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				_get_helper()
 			except Exception:
 				pass
-			api.setNavigatorObject(obj)
+
+			# After a search jump, skip the navigator reset so the review
+			# cursor stays on the matched line instead of snapping to the caret.
+			if self._searchJumpPending:
+				self._searchJumpPending = False
+			else:
+				api.setNavigatorObject(obj)
 
 			# Initialize TabManager for this terminal (Section 9 - v1.0.39+)
 			if not self._tabManager:
@@ -8658,6 +8665,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 						match_count = self._searchManager.search(search_text, case_sensitive=False)
 
 						if match_count > 0:
+							# Suppress navigator reset when focus returns to
+							# the terminal so the review cursor stays on the match.
+							self._searchJumpPending = True
 							# Jump to first match
 							self._searchManager.first_match()
 
