@@ -410,7 +410,7 @@ class TestSearchText(unittest.TestCase):
 
     @patch.object(HelperProcess, "_send_request")
     def test_search_text_returns_matches(self, mock_send):
-        """search_text returns match list on success."""
+        """search_text returns full result dict on success."""
         mock_send.return_value = {
             "type": "search_result",
             "matches": [
@@ -421,14 +421,17 @@ class TestSearchText(unittest.TestCase):
         }
         result = self.helper.search_text(12345, "error")
         self.assertIsNotNone(result)
-        self.assertEqual(len(result), 2)
-        self.assertEqual(result[0]["line_index"], 0)
-        self.assertEqual(result[0]["char_offset"], 5)
-        self.assertEqual(result[1]["line_text"], "error: again")
+        self.assertIsInstance(result, dict)
+        matches = result["matches"]
+        self.assertEqual(len(matches), 2)
+        self.assertEqual(matches[0]["line_index"], 0)
+        self.assertEqual(matches[0]["char_offset"], 5)
+        self.assertEqual(matches[1]["line_text"], "error: again")
+        self.assertEqual(result["total_lines"], 5)
 
     @patch.object(HelperProcess, "_send_request")
     def test_search_text_empty_matches(self, mock_send):
-        """search_text returns empty list when no matches found."""
+        """search_text returns result dict with empty matches list when no matches found."""
         mock_send.return_value = {
             "type": "search_result",
             "matches": [],
@@ -436,7 +439,9 @@ class TestSearchText(unittest.TestCase):
         }
         result = self.helper.search_text(12345, "notfound")
         self.assertIsNotNone(result)
-        self.assertEqual(len(result), 0)
+        self.assertIsInstance(result, dict)
+        self.assertEqual(len(result["matches"]), 0)
+        self.assertEqual(result["total_lines"], 10)
 
     @patch.object(HelperProcess, "_send_request")
     def test_search_text_error_returns_none(self, mock_send):

@@ -346,13 +346,14 @@ class HelperProcess:
         pattern: str,
         case_sensitive: bool = False,
         use_regex: bool = False,
-    ) -> Optional[List[Dict[str, Any]]]:
+    ) -> Optional[Dict[str, Any]]:
         """Search terminal text via the helper process.
 
         The helper reads the terminal buffer via UIA and runs the search
         in a single IPC round-trip — no buffer transfer to Python needed.
 
-        Returns a list of match dicts ``{line_index, char_offset, line_text}``
+        Returns the full search result dict
+        ``{matches: [{line_index, char_offset, line_text}, ...], total_lines: N}``
         on success, or ``None`` on error.
 
         Raises ``ValueError`` for invalid regex patterns.
@@ -371,7 +372,7 @@ class HelperProcess:
             if resp is None:
                 return None
             if resp.get("type") == "search_result":
-                return resp.get("matches", [])
+                return resp
             if resp.get("type") == "error":
                 code = resp.get("code", "")
                 if code == "invalid_regex":

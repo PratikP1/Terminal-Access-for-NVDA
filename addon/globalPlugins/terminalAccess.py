@@ -4629,7 +4629,11 @@ class OutputSearchManager:
 					except ValueError:
 						raise
 					except Exception:
-						pass
+						try:
+							import logHandler
+							logHandler.log.debug("Terminal Access: helper search_text failed", exc_info=True)
+						except Exception:
+							pass
 
 			if helper_search_result is not None:
 				# Helper returned matches — build matching_indices and
@@ -4675,6 +4679,11 @@ class OutputSearchManager:
 					except ValueError:
 						raise
 					except Exception:
+						try:
+							import logHandler
+							logHandler.log.debug("Terminal Access: native search_text failed", exc_info=True)
+						except Exception:
+							pass
 						native_offset_map = None
 
 				if native_offset_map is None:
@@ -4749,6 +4758,11 @@ class OutputSearchManager:
 			return len(matches)
 
 		except Exception:
+			try:
+				import logHandler
+				logHandler.log.error("Terminal Access: search() failed", exc_info=True)
+			except Exception:
+				pass
 			return 0
 
 	def next_match(self) -> bool:

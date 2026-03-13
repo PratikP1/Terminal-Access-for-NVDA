@@ -4,6 +4,14 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Search not returning results**: The helper-side search path returned a bare list
+  of match dicts, but the search manager expected a dict with `matches` and `total_lines`
+  keys, causing an `AttributeError` silently swallowed by a broad exception handler.
+  Fixed by returning the full IPC response dict from the helper and adding diagnostic
+  logging to all search error paths.
+
 ## [1.3.1] - 2026-03-13
 
 ### Added
