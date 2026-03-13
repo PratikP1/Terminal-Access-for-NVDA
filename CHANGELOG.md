@@ -4,6 +4,8 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-03-13
+
 ### Added
 
 - **Native Rust acceleration layer**: CPU-bound text processing (ANSI stripping, diff computation,
