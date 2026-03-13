@@ -4,19 +4,6 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
 
 ## [Unreleased]
 
-### Fixed
-
-- **Search not positioning review cursor**: After finding matches, the review cursor
-  snapped back to the prompt because `event_gainFocus` reset the navigator when focus
-  returned from the search dialog. A suppression flag now preserves the review position.
-
-### Reverted
-
-- **Dynamic content changes suppression**: Reverted the automatic suppression of NVDA's
-  "Report dynamic content changes" on terminal focus, as it completely silenced the terminal.
-
-## [1.3.2] - 2026-03-13
-
 ### Added
 
 - **Native Rust acceleration layer**: CPU-bound text processing (ANSI stripping, diff computation,
@@ -45,18 +32,22 @@ All notable changes to Terminal Access for NVDA will be documented in this file.
   keys, causing an `AttributeError` silently swallowed by a broad exception handler.
   Fixed by returning the full IPC response dict from the helper and adding diagnostic
   logging to all search error paths.
+- **Search not positioning review cursor**: After finding matches, the review cursor
+  snapped back to the prompt because `event_gainFocus` reset the navigator when focus
+  returned from the search dialog. A suppression flag now preserves the review position.
 - **Settings panel not loading**: The settings panel failed to launch from NVDA preferences
   because a throwaway loop variable `_` in the gesture bindings section shadowed the `_()`
   translation function, causing `UnboundLocalError` on every translatable string in the panel.
-- **Intermittent "unknown" announcements**: NVDA's "Report dynamic content changes" is now
-  automatically suppressed while a terminal is focused, preventing spurious "unknown" speech
-  caused by transient UIA elements during rapid terminal updates. The user's original setting
-  is restored when focus leaves the terminal.
 - **CI release missing changelog**: The release workflow's changelog extraction skipped the
   versioned section and fell back to a generic message. Fixed to properly extract the release
   notes for the version being published.
 - **CI release missing build dependency**: Added `markdown` to the release workflow's
   `pip install` to match the build chain's import requirements.
+
+### Reverted
+
+- **Dynamic content changes suppression**: Reverted the automatic suppression of NVDA's
+  "Report dynamic content changes" on terminal focus, as it completely silenced the terminal.
 
 ### Changed
 
