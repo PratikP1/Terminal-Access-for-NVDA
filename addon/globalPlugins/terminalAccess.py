@@ -6024,14 +6024,14 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				if profile:
 					self._currentProfile = profile
 					import logHandler
-					logHandler.log.info(f"Terminal Access: Activated profile for {profile.displayName}")
+					logHandler.log.debug(f"Terminal Access: Activated profile for {profile.displayName}")
 			else:
 				# No app-specific profile detected, check for default profile setting
 				defaultProfileName = config.conf["terminalAccess"].get("defaultProfile", "")
 				if defaultProfileName and defaultProfileName in self._profileManager.profiles:
 					self._currentProfile = self._profileManager.getProfile(defaultProfileName)
 					import logHandler
-					logHandler.log.info(f"Terminal Access: Using default profile {self._currentProfile.displayName}")
+					logHandler.log.debug(f"Terminal Access: Using default profile {self._currentProfile.displayName}")
 				else:
 					self._currentProfile = None
 
@@ -6121,6 +6121,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Process the character for speech
 		if ch:
+			# Skip newline/carriage-return — Enter submits a command in
+			# terminals; echoing "Blank" for it is not useful.
+			if ch in ('\r', '\n'):
+				return
+
 			# Check if we should condense repeated symbols
 			if self._getEffective("repeatedSymbols"):
 				repeatedSymbolsValues = self._getEffective("repeatedSymbolsValues")
@@ -6191,15 +6196,19 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		Announces cursor position changes if cursorTracking is enabled.
 		Uses cursorDelay to debounce rapid movements.
+
+		For terminal applications, nextHandler() is NOT called to prevent
+		NVDA core's terminal handler from announcing "Blank" on empty lines
+		(e.g. after pressing Enter). Terminal Access provides its own output
+		handling via NewOutputAnnouncer and cursor tracking.
 		"""
-		nextHandler()
+		if not self.isTerminalApp(obj):
+			nextHandler()
+			return
 
 		# Feed terminal content to the new output announcer when enabled.
 		# This is done before the quiet/cursorTracking guards so that the
 		# announcer's own quiet-mode check governs output independently.
-		if not self.isTerminalApp(obj):
-			return
-
 		self._feedNewOutputAnnouncer(obj)
 
 		# Only handle if cursor tracking is enabled
@@ -6760,7 +6769,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def script_copyMode(self, gesture):
 		"""Enter copy mode to copy line or screen."""
 		if not self.isTerminalApp():
-			gesture.send()
+			self._passThroughGesture(gesture)
 			return
 
 		# Enter copy mode
@@ -6772,6 +6781,25 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Translators: Message entering copy mode
 		ui.message(_("Copy mode. Press L to copy line, S to copy screen, or Escape to cancel."))
 
+	def _passThroughGesture(self, gesture, fallbackName: str | None = None):
+		"""Attempt to pass the original gesture through without raising."""
+		send = getattr(gesture, "send", None)
+		if callable(send):
+			try:
+				send()
+				return
+			except TypeError:
+				# Some call paths can hand in an unbound descriptor-like object.
+				pass
+			except Exception:
+				return
+		if fallbackName:
+			try:
+				import keyboardHandler
+				keyboardHandler.KeyboardInputGesture.fromName(fallbackName).send()
+			except Exception:
+				pass
+
 	@script(
 		# Translators: Description for copying line
 		description=_("Copy line in copy mode"),
@@ -6780,7 +6808,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def script_copyLine(self, gesture):
 		"""Copy the current line to clipboard."""
 		if not self.copyMode:
-			gesture.send()
+			self._passThroughGesture(gesture, "l")
 			return
 
 		try:
@@ -6811,7 +6839,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def script_copyScreen(self, gesture):
 		"""Copy the entire screen to clipboard."""
 		if not self.copyMode:
-			gesture.send()
+			self._passThroughGesture(gesture, "s")
 			return
 
 		try:
@@ -6842,7 +6870,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def script_exitCopyMode(self, gesture):
 		"""Exit copy mode."""
 		if not self.copyMode:
-			gesture.send()
+			self._passThroughGesture(gesture, "escape")
 			return
 
 		# Translators: Message when copy mode is canceled
