@@ -164,7 +164,7 @@ addon/
 
 5. **Context**
    - Read translator comments (lines starting with `#.`)
-   - Context helps ensure accurate translations
+   - Context helps produce accurate translations
 
 ### Terminology Guide
 
@@ -244,14 +244,23 @@ scons
 | Language | Code | Status | Completeness | Maintainer |
 |----------|------|--------|--------------|------------|
 | English | en | Native | 100% | Terminal Access Team |
-| Spanish | es | In Progress | 0% | Open |
-| French | fr | In Progress | 0% | Open |
-| German | de | In Progress | 0% | Open |
-| Portuguese | pt | In Progress | 0% | Open |
+| Arabic | ar | In Progress | 0% | Open |
 | Chinese (Simplified) | zh_CN | In Progress | 0% | Open |
 | Chinese (Traditional) | zh_TW | In Progress | 0% | Open |
+| Czech | cs | In Progress | 0% | Open |
+| Dutch | nl | In Progress | 0% | Open |
+| French | fr | In Progress | 0% | Open |
+| German | de | In Progress | 0% | Open |
+| Hungarian | hu | In Progress | 0% | Open |
+| Italian | it | In Progress | 0% | Open |
 | Japanese | ja | In Progress | 0% | Open |
+| Korean | ko | In Progress | 0% | Open |
+| Polish | pl | In Progress | 0% | Open |
+| Portuguese | pt | In Progress | 0% | Open |
 | Russian | ru | In Progress | 0% | Open |
+| Spanish | es | In Progress | 0% | Open |
+| Turkish | tr | In Progress | 0% | Open |
+| Ukrainian | uk | In Progress | 0% | Open |
 
 **Want to become a maintainer?** Contact us via GitHub issues!
 
@@ -308,7 +317,7 @@ msgstr "Se encontraron {count} coincidencias"  # {count} stays as-is
 **Cause:** Incorrect file encoding
 
 **Solution:**
-- Ensure `.po` file is saved as UTF-8
+- Save the `.po` file as UTF-8
 - Check header: `"Content-Type: text/plain; charset=UTF-8\n"`
 
 ## Translation Tools
@@ -400,6 +409,15 @@ msgstr "Se encontraron {count} coincidencias"  # {count} stays as-is
    - May ask for changes or clarifications
    - Once approved, your translation will be merged
 
+## Reporting Translation Bugs
+
+If you find a wrong, missing, or broken translation:
+
+1. Open an issue at https://github.com/PratikP1/Terminal-Access-for-NVDA/issues
+2. Include the language code (e.g., `es`, `fr`)
+3. Quote the incorrect string and suggest a fix
+4. Label the issue with "translation" if possible
+
 ## Getting Help
 
 ### Support Channels
@@ -416,14 +434,9 @@ msgstr "Se encontraron {count} coincidencias"  # {count} stays as-is
 
 ## Credits
 
-Translations are made possible by our community contributors. Thank you to all translators who make Terminal Access accessible to users worldwide!
+Translations are contributed by community volunteers.
 
 ## License
 
-All translations are distributed under the same license as Terminal Access for NVDA (GPL v2). By contributing translations, you agree to license your work under this license.
+All translations are distributed under the same license as Terminal Access for NVDA (GPL v3). By contributing translations, you agree to license your work under this license.
 
----
-
-**Thank you for contributing to Terminal Access for NVDA!**
-
-For questions or assistance, please open an issue on GitHub or contact the maintainers.

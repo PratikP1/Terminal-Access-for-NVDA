@@ -1,10 +1,10 @@
-# TDSR for NVDA - Roadmap and Specifications
+# Terminal Access for NVDA - Roadmap and Specifications
 
 ## Project Overview
 
-**Project Name:** TDSR for NVDA  
-**Version:** 1.0.0  
-**Purpose:** Provide enhanced terminal accessibility for NVDA users on Windows  
+**Project Name:** Terminal Access for NVDA
+**Version:** 1.4.0
+**Purpose:** Make Windows terminal applications accessible to NVDA users
 **Target Audience:** Blind and visually impaired developers, system administrators, and power users who use command-line interfaces
 
 ## Requirements Specification
@@ -53,7 +53,7 @@
 - **FR6.3:** Copy screen functionality
 
 #### FR7: Documentation
-- **FR7.1:** Comprehensive user guide in HTML format
+- **FR7.1:** User guide in HTML format
 - **FR7.2:** Keyboard command reference
 - **FR7.3:** Installation instructions
 - **FR7.4:** Configuration guide
@@ -70,17 +70,17 @@
 
 #### NFR2: Performance
 - **NFR2.1:** Minimal latency (<100ms) for keyboard commands
-- **NFR2.2:** Efficient resource usage (minimal CPU and memory overhead)
+- **NFR2.2:** Low resource usage (minimal CPU and memory overhead)
 - **NFR2.3:** No interference with terminal application performance
 
 #### NFR3: Usability
 - **NFR3.1:** Intuitive keyboard shortcuts following NVDA conventions
 - **NFR3.2:** Clear and concise speech feedback
 - **NFR3.3:** Accessible settings interface
-- **NFR3.4:** Comprehensive documentation
+- **NFR3.4:** Clear documentation
 
 #### NFR4: Reliability
-- **NFR4.1:** Graceful handling of errors
+- **NFR4.1:** Graceful error handling
 - **NFR4.2:** No crashes or freezes
 - **NFR4.3:** Persistent configuration across sessions
 - **NFR4.4:** Safe operation with other NVDA add-ons
@@ -94,10 +94,8 @@
 ## Development Roadmap
 
 ### Phase 1: Foundation (COMPLETED)
-**Duration:** Initial development  
-**Status:** ✅ Complete
+**Status:** Done
 
-#### Deliverables:
 - [x] Project structure setup
 - [x] Manifest and build configuration files
 - [x] Basic global plugin infrastructure
@@ -105,35 +103,29 @@
 - [x] Settings panel framework
 
 ### Phase 2: Core Features (COMPLETED)
-**Duration:** Initial development  
-**Status:** ✅ Complete
+**Status:** Done
 
-#### Deliverables:
-- [x] Line navigation implementation
-- [x] Word navigation implementation
-- [x] Character navigation implementation
+- [x] Line navigation
+- [x] Word navigation
+- [x] Character navigation
 - [x] Phonetic character reading
 - [x] Quiet mode toggle
 - [x] Help system (NVDA+Shift+F1)
 - [x] Launch announcements
 
 ### Phase 3: Advanced Features (COMPLETED)
-**Duration:** Initial development  
-**Status:** ✅ Complete
+**Status:** Done
 
-#### Deliverables:
 - [x] Symbol processing
 - [x] Repeated symbol condensation
-- [x] Selection and copy functionality
+- [x] Selection and copy
 - [x] Cursor tracking
 - [x] Key echo
 - [x] All configuration settings
 
 ### Phase 4: Documentation (COMPLETED)
-**Duration:** Initial development  
-**Status:** ✅ Complete
+**Status:** Done
 
-#### Deliverables:
 - [x] User guide (HTML)
 - [x] README.md
 - [x] Installation guide
@@ -141,46 +133,46 @@
 - [x] Keyboard reference
 - [x] Troubleshooting guide
 
-### Phase 5: Testing and Refinement (NEXT)
-**Duration:** 2-4 weeks  
-**Status:** 🔄 Planned
+### Phase 5: Testing and Refinement (COMPLETED)
+**Status:** Done
 
-#### Activities:
-- [ ] Manual testing on Windows 10
-- [ ] Manual testing on Windows 11
-- [ ] Testing with NVDA 2025.1 (minimum version)
-- [ ] Testing with latest NVDA version
-- [ ] Testing with all supported terminals
-- [ ] Accessibility testing
-- [ ] Performance testing
-- [ ] User acceptance testing
+- [x] 778 passing tests across 40 test files, ~54% total coverage
+- [x] CI/CD pipeline: pytest on Python 3.11, flake8 lint, scons build
+- [x] Manual testing on Windows 10 and Windows 11
+- [x] Testing with NVDA 2025.1+
+- [x] Testing with all supported terminals
 
-#### Success Criteria:
-- All features working as specified
-- No critical bugs
-- Positive feedback from test users
-- Performance meets requirements
+### Phase 6: v2.0 Prep (IN PROGRESS)
+**Status:** Partially complete
 
-### Phase 6: Enhancement (FUTURE)
-**Duration:** Ongoing  
-**Status:** 📋 Planned
+#### Done:
+- [x] Settings panel with three flat sections: Speech and Tracking, NVDA Gesture Conflicts, Application Profiles
+- [x] Error/warning line detection (`ErrorLineDetector`: 18 error + 5 warning regex patterns with word boundaries)
+- [x] Audio cues: `_checkErrorAudioCue` (error tones in quiet mode), `_checkOutputActivityTone` (activity tones on output)
+- [x] New config keys: `errorAudioCues`, `errorAudioCuesInQuietMode`, `outputActivityTones`, `outputActivityDebounce`
+- [x] Profile transparency (announces profile name on terminal switch)
+- [x] Gesture conflict detection (`GestureConflictDetector` in `lib/gesture_conflicts.py`)
+- [x] `getScript()` override for gesture scoping (gestures bound but returns None outside terminals)
+- [x] `_CONFLICTING_GESTURES` frozenset for settings checklist
+- [x] Terminal detection via exact match on `appModule.appName` (not substring)
+- [x] Removed `NewOutputAnnouncer` entirely
 
-#### Planned Enhancements:
+#### Remaining for v2.0 release:
+- [ ] Remove Command History Navigation (NVDA+H/G, NVDA+Shift+H, NVDA+Shift+L)
+- [ ] Remove Highlight cursor tracking mode (`CT_HIGHLIGHT`)
+- [ ] Remove Rectangular selection (NVDA+Shift+C)
+- [ ] Write migration guide for users of deprecated features
+
+### Phase 7: Future Enhancements
+**Status:** Planned
+
 - [ ] Advanced terminal output parsing (tables, progress bars)
-- [ ] Command history navigation
-- [ ] Output filtering and search
-- [ ] Bookmark/marker functionality
-- [ ] Multi-language support
 - [ ] Sound schemes for different event types
 - [ ] Integration with TDSR plugins
-- [ ] Windows Subsystem for Linux (WSL) support
-- [ ] Additional terminal emulator support
 
-### Phase 7: Maintenance (ONGOING)
-**Duration:** Ongoing  
-**Status:** 🔄 Active
+### Phase 8: Maintenance (ONGOING)
+**Status:** Active
 
-#### Activities:
 - [ ] Bug fixes as reported
 - [ ] NVDA compatibility updates
 - [ ] Windows version compatibility
@@ -188,58 +180,58 @@
 - [ ] User support
 - [ ] Community engagement
 
-## Feature Comparison: TDSR vs. TDSR for NVDA
+## Feature Comparison: TDSR vs. Terminal Access
 
-| Feature | Original TDSR | TDSR for NVDA |
+| Feature | Original TDSR | Terminal Access for NVDA |
 |---------|---------------|---------------|
-| Line navigation | ✅ | ✅ |
-| Word navigation | ✅ | ✅ |
-| Character navigation | ✅ | ✅ |
-| Phonetic reading | ✅ | ✅ |
-| Symbol processing | ✅ | ✅ |
-| Quiet mode | ✅ | ✅ |
-| Selection/Copy | ✅ | ✅ |
-| Configuration menu | ✅ | ✅ (GUI) |
+| Line navigation | Yes | Yes |
+| Word navigation | Yes | Yes |
+| Character navigation | Yes | Yes |
+| Phonetic reading | Yes | Yes |
+| Symbol processing | Yes | Yes |
+| Quiet mode | Yes | Yes |
+| Selection/Copy | Yes | Yes |
+| Configuration menu | Yes | Yes (GUI) |
 | Speech synthesis | External | NVDA built-in |
 | Platform | Unix/Linux/macOS | Windows |
-| Plugin system | ✅ | 🔮 Planned |
-| Standalone app | ✅ | ❌ (NVDA add-on) |
+| Plugin system | Yes | Planned |
+| Standalone app | Yes | No (NVDA add-on) |
 
 ## Technical Architecture
 
 ### Components
 
-1. **Global Plugin** (`tdsr.py`)
+1. **Global Plugin** (`terminalAccess.py`)
    - Main entry point
    - Event handling
    - Terminal detection
    - Command routing
 
-2. **Settings Panel** (`TDSRSettingsPanel`)
-   - GUI for configuration
+2. **Library Modules** (`addon/lib/`)
+   - 11 modules, ~5556 lines total
+   - Extracted from `terminalAccess.py` for testability
+   - Use `_runtime.py` for dependency injection
+
+3. **Settings Panel** (`lib/settings_panel.py`)
+   - Three flat sections: Speech and Tracking, NVDA Gesture Conflicts, Application Profiles
    - Settings validation
    - Persistence management
 
-3. **Configuration System**
-   - NVDA config integration
-   - Default values
-   - Validation rules
-
-4. **Navigation System**
+4. **Navigation System** (`lib/navigation.py`)
    - Review cursor management
-   - Line/word/character tracking
-   - Text extraction
+   - Tab management
+   - Bookmarks with line content labels
 
-5. **Speech System**
-   - NVDA speech integration
-   - Symbol processing
-   - Phonetic translation
+5. **Speech System** (`lib/text_processing.py`)
+   - ANSI parsing
+   - Unicode width calculation
+   - Error line classification
 
 ### Data Flow
 
 ```
-User Input → Global Plugin → Terminal Detection → Command Handler → 
-Navigation System → Text Extraction → Speech Processing → NVDA Speech
+User Input -> Global Plugin -> Terminal Detection -> Command Handler ->
+Navigation System -> Text Extraction -> Speech Processing -> NVDA Speech
 ```
 
 ### Configuration Storage
@@ -247,7 +239,7 @@ Navigation System → Text Extraction → Speech Processing → NVDA Speech
 Settings are stored in NVDA's configuration system:
 ```
 %APPDATA%\nvda\nvda.ini
-[TDSR]
+[terminalAccess]
 cursorTracking = True
 keyEcho = True
 linePause = True
@@ -258,32 +250,11 @@ linePause = True
 
 ### Test Categories
 
-1. **Functional Testing**
-   - All keyboard commands
-   - All settings options
-   - Help system
-   - Terminal detection
-
-2. **Compatibility Testing**
-   - Windows 10 versions
-   - Windows 11 versions
-   - NVDA versions 2025.1+
-   - All supported terminals
-
-3. **Accessibility Testing**
-   - Settings dialog accessibility
-   - Keyboard navigation
-   - Screen reader feedback
-
-4. **Performance Testing**
-   - Command response time
-   - Resource usage
-   - Long terminal sessions
-
-5. **Integration Testing**
-   - Interaction with other NVDA add-ons
-   - NVDA speech system integration
-   - Windows accessibility APIs
+1. **Unit Testing**: 40+ test files, 1073 passing tests
+2. **Integration Testing**: Core workflows, multi-component interactions
+3. **Performance Testing**: Benchmarks and regression tests
+4. **Compatibility Testing**: Windows 10/11, NVDA 2025.1+, all supported terminals
+5. **Manual Testing**: Keyboard commands, settings, profiles
 
 ### Test Environments
 
@@ -292,29 +263,11 @@ linePause = True
 - NVDA 2025.1, 2025.x, 2026.x
 - Windows Terminal, PowerShell, cmd.exe
 
-## Success Metrics
-
-1. **Adoption**
-   - Downloads
-   - Active users
-   - User feedback
-
-2. **Quality**
-   - Bug reports
-   - Crash rate
-   - User satisfaction
-
-3. **Performance**
-   - Command latency
-   - Resource usage
-   - Compatibility
-
 ## Support and Maintenance
 
 ### Support Channels
 - GitHub Issues
 - Project wiki
-- User community forum (planned)
 
 ### Maintenance Schedule
 - Bug fixes: As needed
@@ -324,44 +277,13 @@ linePause = True
 
 ## Licensing
 
-**License:** GNU General Public License v3.0  
-**Rationale:** 
+**License:** GNU General Public License v3.0
 - Consistent with NVDA's license
-- Ensures software remains free and open source
+- Keeps software free and open source
 - Compatible with original TDSR license
-
-## Future Considerations
-
-### Potential Extensions
-1. **TDSR Plugin Compatibility**
-   - Adapt TDSR plugin system for Windows
-   - Support for custom parsing plugins
-   - Community plugin repository
-
-2. **Advanced Terminal Features**
-   - ANSI escape sequence handling
-   - Color and formatting announcement
-   - Table structure detection
-   - Progress bar monitoring
-
-3. **AI-Enhanced Features**
-   - Command suggestion
-   - Output summarization
-   - Error explanation
-
-4. **Cloud Integration**
-   - Configuration sync
-   - Collaborative features
-   - Remote terminal support
-
-### Community Engagement
-- Contribution guidelines
-- Developer documentation
-- Community forum
-- Regular release cycle
 
 ---
 
-**Document Version:** 1.0  
-**Last Updated:** 2024-02-19  
-**Maintained By:** TDSR for NVDA Contributors
+**Document Version:** 1.3
+**Last Updated:** 2026-03-22
+**Maintained By:** Terminal Access for NVDA Contributors

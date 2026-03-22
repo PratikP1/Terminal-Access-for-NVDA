@@ -1,33 +1,33 @@
 # Contributing to Terminal Access for NVDA
 
-Thank you for your interest in contributing to Terminal Access for NVDA! This document provides guidelines and instructions for contributing to the project.
+Thanks for your interest in contributing. This document covers guidelines, setup, and coding standards.
 
 ## Code of Conduct
 
 - Be respectful and inclusive
-- Provide constructive feedback
-- Focus on what is best for the community
+- Give constructive feedback
+- Focus on what helps the community
 - Show empathy towards other contributors
 
 ## How to Contribute
 
 ### Reporting Bugs
 
-If you find a bug, please create an issue on GitHub with:
+Create a GitHub issue with:
 
 1. **Clear title** describing the issue
 2. **Detailed description** of the problem
 3. **Steps to reproduce** the issue
-4. **Expected behavior** vs. actual behavior
-5. **Environment information:**
+4. **Expected vs. actual behavior**
+5. **Environment info:**
    - Windows version (10 or 11)
    - NVDA version
    - Terminal application and version
    - Terminal Access add-on version
 
-### Suggesting Enhancements
+### Suggesting Features
 
-Feature requests are welcome! Please include:
+Feature requests are welcome. Include:
 
 1. **Clear description** of the feature
 2. **Use case** explaining why it's needed
@@ -41,8 +41,8 @@ Feature requests are welcome! Please include:
    ```bash
    git checkout -b feature/your-feature-name
    ```
-3. **Make your changes** following the coding standards
-4. **Test your changes** thoroughly
+3. **Make your changes** following the coding standards below
+4. **Test your changes**
 5. **Commit with clear messages**
    ```bash
    git commit -m "Add feature: brief description"
@@ -62,7 +62,7 @@ Feature requests are welcome! Please include:
 - **Git** for version control
 - **Text editor or IDE** (VS Code recommended with Python extension)
 
-### Setting Up Development Environment
+### Setting Up
 
 1. **Clone the repository**:
    ```bash
@@ -83,29 +83,35 @@ Feature requests are welcome! Please include:
    - scons (build system)
    - markdown (documentation)
 
-3. **Understand the project structure**:
+3. **Project structure**:
    ```
    Terminal-Access-for-NVDA/
    ├── addon/
    │   ├── globalPlugins/
-   │   │   └── terminalAccess.py # Main plugin (2600+ lines)
-   │   ├── locale/                # Translation files
+   │   │   └── terminalAccess.py    # Main plugin (~3773 lines)
+   │   ├── lib/
+   │   │   ├── _runtime.py          # Dependency injection registry
+   │   │   ├── caching.py           # PositionCache, TextDiffer
+   │   │   ├── config.py            # Config constants, confspec, ConfigManager
+   │   │   ├── gesture_conflicts.py # GestureConflictDetector
+   │   │   ├── navigation.py        # TabManager, BookmarkManager, BookmarkListDialog
+   │   │   ├── operations.py        # SelectionProgressDialog, OperationQueue
+   │   │   ├── profiles.py          # ApplicationProfile, WindowDefinition, ProfileManager
+   │   │   ├── search.py            # OutputSearchManager, UrlExtractorManager
+   │   │   ├── settings_panel.py    # Settings panel (Basic/Advanced progressive disclosure)
+   │   │   ├── text_processing.py   # ANSIParser, UnicodeWidthHelper, ErrorLineDetector
+   │   │   └── window_management.py # WindowMonitor, WindowManager
+   │   ├── locale/                   # Translation files (17 languages)
    │   └── doc/
    │       └── en/
-   │           └── readme.html    # User guide
-   ├── tests/
-   │   ├── conftest.py            # Test fixtures and mocks
-   │   ├── test_*.py              # Test files (150+ tests)
-   │   └── README.md
-   ├── docs/                      # Organized documentation
-   │   ├── user/                  # User guides
-   │   ├── developer/             # Architecture & API
-   │   ├── testing/               # Testing guide
-   │   └── archive/               # Historical docs
-   ├── manifest.ini               # Add-on metadata
-   ├── buildVars.py               # Build configuration
-   ├── CHANGELOG.md               # Version history
-   └── requirements-dev.txt       # Dev dependencies
+   │           └── readme.html       # User guide
+   ├── tests/                        # pytest suite (40 test files, 778 tests)
+   ├── docs/                         # Developer, testing, and user documentation
+   ├── native/                       # Rust workspace for FFI acceleration
+   ├── manifest.ini                  # Add-on metadata
+   ├── buildVars.py                  # Build configuration (version source of truth)
+   ├── CHANGELOG.md                  # Version history
+   └── requirements-dev.txt          # Dev dependencies
    ```
 
 4. **Build the add-on**:
@@ -130,7 +136,9 @@ Feature requests are welcome! Please include:
 
 **Run all tests**:
 ```bash
-pytest
+python run_tests.py
+# or
+pytest tests/
 ```
 
 **Run specific test file**:
@@ -140,14 +148,8 @@ pytest tests/test_cache.py
 
 **Run with coverage**:
 ```bash
-pytest --cov=addon/globalPlugins --cov-report=html
+pytest --cov=addon --cov-report=html tests/
 # View htmlcov/index.html for coverage report
-```
-
-**Run tests for specific Python version**:
-```bash
-python3.7 -m pytest
-python3.11 -m pytest
 ```
 
 ### Code Quality Checks
@@ -174,23 +176,40 @@ Tests run automatically on:
 
 **Requirements**:
 - All tests must pass
-- Code coverage ≥70%
+- Code coverage >= 70%
 - No linting errors
 - Successful build
 
 ## Coding Standards
 
-### Python Style Guide
+### Python Style
 
-- Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide
-- Use 4 spaces for indentation (not tabs)
-- Maximum line length: 100 characters
+- Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/)
+- Use tabs for indentation (NVDA convention)
+- Maximum line length: 120 characters (per setup.cfg)
 - Use descriptive variable and function names
+- **New code uses snake_case.** Legacy code uses camelCase; both are accepted. The `profiles.py` module provides camelCase aliases for backward compatibility.
+
+### Dependency Injection with `_runtime.py`
+
+The `lib/_runtime.py` module provides a centralized dependency registry. Instead of importing NVDA modules directly (which breaks in tests), register and retrieve dependencies through the runtime:
+
+```python
+from addon.lib._runtime import runtime
+
+# Registration (at plugin startup)
+runtime.register('speech', speech)
+
+# Retrieval (in library code)
+speech = runtime.get('speech')
+```
+
+This pattern keeps library modules testable without NVDA running.
 
 ### Documentation
 
 - Add docstrings to all functions and classes
-- Use clear and concise comments
+- Use clear, concise comments
 - Update user guide if adding features
 - Keep CHANGELOG.md updated
 
@@ -200,11 +219,11 @@ Tests run automatically on:
 def myFunction(param1, param2):
 	"""
 	Brief description of what the function does.
-	
+
 	Args:
 		param1: Description of first parameter
 		param2: Description of second parameter
-		
+
 	Returns:
 		Description of return value
 	"""
@@ -280,13 +299,16 @@ When adding features:
 
 ### Key Components
 
-Terminal Access is organized into several key components (see `ARCHITECTURE.md` for details):
+Terminal Access is split across `terminalAccess.py` (command layer, events, scripts) and `addon/lib/` (11 modules). See `ARCHITECTURE.md` for details.
 
-1. **PositionCache**: Performance optimization for position calculations
-2. **ANSIParser**: Color and formatting detection
-3. **UnicodeWidthHelper**: CJK and combining character support
-4. **ApplicationProfile**: App-specific settings and window definitions
-5. **ProfileManager**: Profile detection and management
+1. **PositionCache** (`lib/caching.py`): Performance optimization for position calculations
+2. **ANSIParser** (`lib/text_processing.py`): Color and formatting detection
+3. **UnicodeWidthHelper** (`lib/text_processing.py`): CJK and combining character support
+4. **ErrorLineDetector** (`lib/text_processing.py`): Classifies lines as error/warning for audio cues
+5. **ApplicationProfile** (`lib/profiles.py`): App-specific settings and window definitions
+6. **ProfileManager** (`lib/profiles.py`): Profile detection and management
+7. **GestureConflictDetector** (`lib/gesture_conflicts.py`): Detects and reports gesture collisions with other add-ons
+8. **TerminalAccessSettingsPanel** (`lib/settings_panel.py`): Basic/Advanced progressive disclosure settings
 
 ### Adding New Features
 
@@ -363,9 +385,9 @@ By contributing, you agree that your contributions will be licensed under the GN
 
 ## Recognition
 
-Contributors will be recognized in:
+Contributors are recognized in:
 - CHANGELOG.md
 - GitHub contributors page
 - Project documentation
 
-Thank you for contributing to make terminals more accessible!
+Thanks for helping make terminals more accessible.

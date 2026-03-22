@@ -69,24 +69,6 @@ impl UiaReader {
         }
     }
 
-    /// Read a range of lines from a terminal.
-    ///
-    /// `start_row` and `end_row` are 1-based, inclusive.
-    pub fn read_lines(&self, hwnd: isize, start_row: i32, end_row: i32) -> io::Result<Vec<String>> {
-        // Read all text and extract the requested line range
-        let all_text = self.read_text(hwnd)?;
-        let lines: Vec<&str> = all_text.split('\n').collect();
-
-        let start = (start_row - 1).max(0) as usize;
-        let end = (end_row as usize).min(lines.len());
-
-        if start >= lines.len() {
-            return Ok(Vec::new());
-        }
-
-        Ok(lines[start..end].iter().map(|s| s.to_string()).collect())
-    }
-
     /// Get a reference to the underlying IUIAutomation instance.
     pub fn automation(&self) -> &IUIAutomation {
         &self.automation

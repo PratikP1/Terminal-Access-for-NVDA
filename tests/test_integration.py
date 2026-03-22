@@ -276,5 +276,142 @@ class TestErrorRecovery(unittest.TestCase):
         self.assertIsInstance(result, bool)
 
 
+class TestMultiStepWorkflows(unittest.TestCase):
+    """Test complete multi-step user workflows."""
+
+    def setUp(self):
+        from globalPlugins.terminalAccess import GlobalPlugin
+        self.plugin = GlobalPlugin()
+        self.plugin.isTerminalApp = Mock(return_value=True)
+        self.plugin._boundTerminal = Mock()
+        self.gesture = Mock()
+
+    def test_mark_set_and_clear(self):
+        """Setting a mark then clearing it resets state."""
+        self.plugin._markStart = None
+        self.plugin._markEnd = None
+
+        # Set first mark
+        self.plugin.script_toggleMark(self.gesture)
+        # Set second mark (or it may just set _markStart)
+        # Clear marks
+        self.plugin.script_clearMarks(self.gesture)
+        self.assertIsNone(self.plugin._markStart)
+        self.assertIsNone(self.plugin._markEnd)
+
+    def test_focus_terminal_then_non_terminal(self):
+        """Focus terminal (bound) then non-terminal (gestures stay, guard handles)."""
+        terminal = Mock()
+        terminal.appModule.appName = "windowsterminal"
+        self.plugin.isTerminalApp = Mock(return_value=True)
+
+        result = self.plugin._updateGestureBindingsForFocus(terminal)
+        self.assertTrue(result)
+
+        notepad = Mock()
+        notepad.appModule.appName = "notepad"
+        self.plugin.isTerminalApp = Mock(return_value=False)
+
+        result = self.plugin._updateGestureBindingsForFocus(notepad)
+        self.assertFalse(result)
+
+    def test_command_layer_enter_execute_exit(self):
+        """Enter command layer, execute a script, exit."""
+        self.plugin.bindGesture = Mock()
+        self.plugin.removeGestureBinding = Mock()
+
+        # Enter
+        self.plugin._enterCommandLayer()
+        self.assertTrue(self.plugin._inCommandLayer)
+
+        # Simulate a script call while in layer
+        self.plugin.script_readCurrentLine(self.gesture)
+
+        # Exit
+        self.plugin._exitCommandLayer()
+        self.assertFalse(self.plugin._inCommandLayer)
+
+    def test_punctuation_level_cycle(self):
+        """Punctuation level increases and wraps."""
+        config_mod = sys.modules['config']
+        config_mod.conf["terminalAccess"]["punctuationLevel"] = 0
+
+        self.plugin.script_increasePunctuationLevel(self.gesture)
+        self.assertEqual(config_mod.conf["terminalAccess"]["punctuationLevel"], 1)
+
+        self.plugin.script_increasePunctuationLevel(self.gesture)
+        self.assertEqual(config_mod.conf["terminalAccess"]["punctuationLevel"], 2)
+
+        self.plugin.script_increasePunctuationLevel(self.gesture)
+        self.assertEqual(config_mod.conf["terminalAccess"]["punctuationLevel"], 3)
+
+    def test_quiet_mode_suppresses_key_echo(self):
+        """Quiet mode disables key echo announcements."""
+        config_mod = sys.modules['config']
+        config_mod.conf["terminalAccess"]["quietMode"] = False
+
+        self.plugin.script_toggleQuietMode(self.gesture)
+        self.assertTrue(config_mod.conf["terminalAccess"]["quietMode"])
+
+
+class TestErrorPropagation(unittest.TestCase):
+    """Test error handling in edge cases."""
+
+    def setUp(self):
+        from globalPlugins.terminalAccess import GlobalPlugin
+        self.plugin = GlobalPlugin()
+        self.plugin.isTerminalApp = Mock(return_value=True)
+        self.plugin._boundTerminal = Mock()
+        self.gesture = Mock()
+
+    def test_search_with_no_terminal(self):
+        """Searching without a bound terminal doesn't crash."""
+        self.plugin._boundTerminal = None
+        self.plugin._searchManager = None
+        # Should handle gracefully (message or no-op)
+        try:
+            self.plugin.script_searchOutput(self.gesture)
+        except Exception as e:
+            self.fail(f"script_searchOutput raised {type(e).__name__}: {e}")
+
+    def test_copy_with_no_marks(self):
+        """Copying with no marks set produces a warning, not a crash."""
+        self.plugin._markStart = None
+        self.plugin._markEnd = None
+        ui_mock = sys.modules['ui']
+        ui_mock.message.reset_mock()
+
+        self.plugin.script_copyLinearSelection(self.gesture)
+        ui_mock.message.assert_called()
+
+    def test_bookmark_jump_invalid_index(self):
+        """Jumping to an unset bookmark doesn't crash."""
+        from globalPlugins.terminalAccess import BookmarkManager
+        terminal = Mock()
+        bm = BookmarkManager(terminal)
+        # No bookmarks set — jump should return falsy (not crash)
+        result = bm.jump_to_bookmark(5)
+        self.assertFalse(result)
+
+    def test_isTerminalApp_handles_missing_appName(self):
+        """isTerminalApp returns False when appName is not a string."""
+        from globalPlugins.terminalAccess import GlobalPlugin
+        plugin = GlobalPlugin()  # Fresh plugin without mocked isTerminalApp
+        broken = Mock()
+        broken.appModule.appName = None
+        result = plugin.isTerminalApp(broken)
+        self.assertFalse(result)
+
+    def test_profile_manager_detect_unknown_app(self):
+        """ProfileManager.detectApplication handles unknown apps."""
+        from globalPlugins.terminalAccess import ProfileManager
+        mgr = ProfileManager()
+        mock_obj = Mock()
+        mock_obj.appModule.appName = "unknown_app_xyz"
+        result = mgr.detectApplication(mock_obj)
+        # Should return default or None, not crash
+        self.assertIsNotNone(result)
+
+
 if __name__ == '__main__':
     unittest.main()

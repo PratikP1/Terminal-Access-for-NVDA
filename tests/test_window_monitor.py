@@ -148,22 +148,22 @@ class TestWindowMonitor(unittest.TestCase):
 		self.assertEqual(status[1]['mode'], 'silent')
 		self.assertTrue(status[1]['enabled'])
 
-	def test_extract_window_content_simple(self):
+	@patch('lib._runtime.read_terminal_text')
+	def test_extract_window_content_simple(self, mock_read):
 		"""Test extracting window content from simple terminal."""
-		# Set up terminal with content
-		self.mock_terminal.content = "Line 1\nLine 2\nLine 3\nLine 4\nLine 5"
+		mock_read.return_value = "Line 1\nLine 2\nLine 3\nLine 4\nLine 5"
 
-		# Extract window content
+		# Extract window content (top, left, bottom, right)
 		content = self.monitor._extract_window_content((2, 1, 4, 10))
 
 		# Should get lines 2-4
 		expected = "Line 2\nLine 3\nLine 4"
 		self.assertEqual(content, expected)
 
-	def test_extract_window_content_with_columns(self):
+	@patch('lib._runtime.read_terminal_text')
+	def test_extract_window_content_with_columns(self, mock_read):
 		"""Test extracting window content with column bounds."""
-		# Set up terminal with content
-		self.mock_terminal.content = "ABCDEFGHIJ\n0123456789\nZYXWVUTSRQ"
+		mock_read.return_value = "ABCDEFGHIJ\n0123456789\nZYXWVUTSRQ"
 
 		# Extract middle columns (columns 3-7) from rows 1-2
 		content = self.monitor._extract_window_content((1, 3, 2, 7))
@@ -179,9 +179,10 @@ class TestWindowMonitor(unittest.TestCase):
 		content = monitor._extract_window_content((1, 1, 10, 80))
 		self.assertEqual(content, "")
 
-	def test_extract_window_content_bounds_exceed_content(self):
+	@patch('lib._runtime.read_terminal_text')
+	def test_extract_window_content_bounds_exceed_content(self, mock_read):
 		"""Test extracting content when bounds exceed terminal size."""
-		self.mock_terminal.content = "Line 1\nLine 2"
+		mock_read.return_value = "Line 1\nLine 2"
 
 		# Request rows beyond available content
 		content = self.monitor._extract_window_content((1, 1, 100, 80))

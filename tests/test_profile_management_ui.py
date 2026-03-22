@@ -14,103 +14,48 @@ class TestProfileManagementUI(unittest.TestCase):
 	"""Test profile management UI in settings panel."""
 
 	def setUp(self):
-		"""Set up test fixtures."""
-		# Mock all required NVDA modules
-		self.mock_wx = MagicMock()
-		self.mock_config = MagicMock()
-		self.mock_gui = MagicMock()
-		self.mock_guiHelper = MagicMock()
-		self.mock_nvdaControls = MagicMock()
-		self.mock_settingsDialogs = MagicMock()
-		self.mock_globalPluginHandler = MagicMock()
-		self.mock_api = MagicMock()
-		self.mock_ui = MagicMock()
-		self.mock_textInfos = MagicMock()
-		self.mock_addonHandler = MagicMock()
-		self.mock_scriptHandler = MagicMock()
-		self.mock_globalCommands = MagicMock()
-		self.mock_speech = MagicMock()
+		"""Set up test fixtures.
 
-		sys.modules['wx'] = self.mock_wx
-		sys.modules['config'] = self.mock_config
-		sys.modules['gui'] = self.mock_gui
-		sys.modules['gui.guiHelper'] = self.mock_guiHelper
-		sys.modules['gui.nvdaControls'] = self.mock_nvdaControls
-		sys.modules['gui.settingsDialogs'] = self.mock_settingsDialogs
-		sys.modules['globalPluginHandler'] = self.mock_globalPluginHandler
-		sys.modules['api'] = self.mock_api
-		sys.modules['ui'] = self.mock_ui
-		sys.modules['textInfos'] = self.mock_textInfos
-		sys.modules['addonHandler'] = self.mock_addonHandler
-		sys.modules['scriptHandler'] = self.mock_scriptHandler
-		sys.modules['globalCommands'] = self.mock_globalCommands
-		sys.modules['speech'] = self.mock_speech
-
-		# Set up config with spec
-		mock_conf_obj = MagicMock()
-		mock_conf_obj.__getitem__ = lambda self, key: {"terminalAccess": {}}[key]
-		mock_conf_obj.spec = {}
-		self.mock_config.conf = mock_conf_obj
-
-		# Mock wx constants
-		self.mock_wx.NOT_FOUND = -1
-		self.mock_wx.YES = 5103
-		self.mock_wx.NO = 5104
-		self.mock_wx.OK = 5100
-		self.mock_wx.ID_CANCEL = 5101
-		self.mock_wx.ICON_INFORMATION = 0
-		self.mock_wx.ICON_ERROR = 0
-		self.mock_wx.ICON_QUESTION = 0
-		self.mock_wx.YES_NO = 0
-		self.mock_wx.NO_DEFAULT = 0
-
-	def tearDown(self):
-		"""Clean up after tests."""
-		modules_to_remove = [
-			'wx', 'config', 'gui', 'gui.guiHelper', 'gui.nvdaControls',
-			'gui.settingsDialogs', 'globalPluginHandler', 'api', 'ui',
-			'textInfos', 'addonHandler', 'scriptHandler', 'globalCommands',
-			'speech', 'addon.globalPlugins.terminalAccess', 'addon.globalPlugins', 'addon'
-		]
-		for module in modules_to_remove:
-			if module in sys.modules:
-				del sys.modules[module]
+		Uses the mocks already installed by conftest.py.
+		No local sys.modules manipulation needed.
+		"""
+		pass
 
 	def test_profile_list_exists(self):
-		"""Test profile list control exists in settings panel."""
-		# This would require more complex mocking to actually instantiate the panel
-		# For now, verify the structure exists in code
-		pass
+		"""TerminalAccessSettingsPanel class exists and is callable."""
+		from lib.settings_panel import TerminalAccessSettingsPanel
+		self.assertTrue(callable(TerminalAccessSettingsPanel))
 
 	def test_get_profile_names(self):
-		"""Test _getProfileNames method returns sorted profile list."""
-		# Verify default profiles are sorted first, then custom profiles
-		default_profiles = ['vim', 'tmux', 'htop', 'less', 'git', 'nano', 'irssi']
-		custom_profiles = ['custom1', 'custom2']
-		all_profiles = default_profiles + custom_profiles
+		"""ProfileManager.profiles contains default profile names."""
+		from globalPlugins.terminalAccess import ProfileManager
 
-		# Would need to mock the ProfileManager instance
-		# For now, verify the sorting logic exists
-		pass
+		mgr = ProfileManager()
+		names = sorted(mgr.profiles.keys())
+		# Should contain known defaults
+		for expected in ['vim', 'tmux', 'htop', 'less', 'git']:
+			self.assertIn(expected, names)
 
 	def test_is_default_profile(self):
-		"""Test _isDefaultProfile correctly identifies default profiles."""
-		# Test that default profiles are identified
-		default_profiles = ['vim', 'nvim', 'tmux', 'htop', 'less', 'more', 'git', 'nano', 'irssi']
-		for profile in default_profiles:
-			# Should identify as default
-			pass
+		"""_BUILTIN_PROFILE_NAMES identifies default vs custom profiles."""
+		from globalPlugins.terminalAccess import _BUILTIN_PROFILE_NAMES
 
-		# Test that custom profiles are not identified as default
-		custom_profiles = ['myapp', 'custom']
-		for profile in custom_profiles:
-			# Should not identify as default
-			pass
+		for profile in ['vim', 'tmux', 'htop', 'less', 'git', 'nano', 'irssi']:
+			self.assertIn(profile, _BUILTIN_PROFILE_NAMES,
+				f"{profile} should be a built-in profile")
 
-	def test_delete_button_disabled_for_default_profiles(self):
-		"""Test delete button is disabled for default profiles."""
-		# Verify onProfileSelection disables delete button for default profiles
-		pass
+		for profile in ['myapp', 'custom_tool']:
+			self.assertNotIn(profile, _BUILTIN_PROFILE_NAMES,
+				f"{profile} should NOT be a built-in profile")
+
+	def test_delete_button_protected_for_defaults(self):
+		"""Default profiles cannot be removed via removeProfile."""
+		from globalPlugins.terminalAccess import ProfileManager
+
+		mgr = ProfileManager()
+		mgr.removeProfile('vim')
+		self.assertIn('vim', mgr.profiles,
+			"Default profile 'vim' must survive removeProfile")
 
 	def test_profile_export_creates_json_file(self):
 		"""Test profile export creates valid JSON file."""
@@ -154,50 +99,6 @@ class TestProfileManagementUI(unittest.TestCase):
 
 class TestProfileManagerIntegration(unittest.TestCase):
 	"""Test ProfileManager integration with UI."""
-
-	def setUp(self):
-		"""Set up test fixtures."""
-		# Mock NVDA modules
-		self.mock_config = MagicMock()
-		self.mock_globalPluginHandler = MagicMock()
-		self.mock_api = MagicMock()
-		self.mock_ui = MagicMock()
-		self.mock_textInfos = MagicMock()
-		self.mock_addonHandler = MagicMock()
-		self.mock_scriptHandler = MagicMock()
-		self.mock_globalCommands = MagicMock()
-		self.mock_speech = MagicMock()
-		self.mock_wx = MagicMock()
-		self.mock_gui = MagicMock()
-
-		sys.modules['config'] = self.mock_config
-		sys.modules['globalPluginHandler'] = self.mock_globalPluginHandler
-		sys.modules['api'] = self.mock_api
-		sys.modules['ui'] = self.mock_ui
-		sys.modules['textInfos'] = self.mock_textInfos
-		sys.modules['addonHandler'] = self.mock_addonHandler
-		sys.modules['scriptHandler'] = self.mock_scriptHandler
-		sys.modules['globalCommands'] = self.mock_globalCommands
-		sys.modules['speech'] = self.mock_speech
-		sys.modules['wx'] = self.mock_wx
-		sys.modules['gui'] = self.mock_gui
-
-		# Set up config
-		mock_conf_obj = MagicMock()
-		mock_conf_obj.__getitem__ = lambda self, key: {"terminalAccess": {}}[key]
-		mock_conf_obj.spec = {}
-		self.mock_config.conf = mock_conf_obj
-
-	def tearDown(self):
-		"""Clean up after tests."""
-		modules_to_remove = [
-			'wx', 'config', 'gui', 'globalPluginHandler', 'api', 'ui',
-			'textInfos', 'addonHandler', 'scriptHandler', 'globalCommands',
-			'speech', 'addon.globalPlugins.terminalAccess', 'addon.globalPlugins', 'addon'
-		]
-		for module in modules_to_remove:
-			if module in sys.modules:
-				del sys.modules[module]
 
 	def test_profile_manager_has_export_method(self):
 		"""Test ProfileManager has exportProfile method."""

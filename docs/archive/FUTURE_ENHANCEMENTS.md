@@ -1,4 +1,4 @@
-# TDSR for NVDA - Future Enhancements Analysis
+# Terminal Access for NVDA - Future Enhancements Analysis
 
 **Document Version:** 8.0
 **Current Version:** 1.0.32+
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This document analyzes all specification and requirement documents to identify features that have NOT yet been implemented in TDSR for NVDA v1.0.30+. This analysis compares the current implementation against:
+This document analyzes all specification and requirement documents to identify features that have NOT yet been implemented in Terminal Access for NVDA v1.0.30+. This analysis compares the current implementation against:
 
 - SPEAKUP_SPECS_REQUIREMENTS.md - Speakup-inspired feature specifications
 - REMAINING_WORK.md - Comprehensive remaining work analysis

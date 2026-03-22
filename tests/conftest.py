@@ -18,12 +18,36 @@ sys.path.insert(0, addon_path)
 # Mock NVDA modules that aren't available during testing
 # Create a proper GlobalPlugin base class for globalPluginHandler
 class MockGlobalPlugin:
-    """Mock base class for GlobalPlugin."""
+    """Mock base class for GlobalPlugin.
+
+    Mirrors the NVDA ScriptableObject gesture API so tests can verify
+    bind/unbind behavior that affects the Input Gestures dialog.
+    """
     def __init__(self):
-        pass
+        self._gestureMap = {}
 
     def terminate(self):
         pass
+
+    def bindGesture(self, gestureIdentifier, scriptName):
+        self._gestureMap[gestureIdentifier] = scriptName
+
+    def bindGestures(self, gestureMap):
+        self._gestureMap.update(gestureMap)
+
+    def removeGestureBinding(self, gestureIdentifier):
+        self._gestureMap.pop(gestureIdentifier, None)
+
+    def clearGestureBindings(self):
+        self._gestureMap.clear()
+
+    def getScript(self, gesture):
+        """Mock getScript: look up gesture in _gestureMap and return the script method."""
+        for identifier in gesture.normalizedIdentifiers:
+            scriptName = self._gestureMap.get(identifier)
+            if scriptName:
+                return getattr(self, f"script_{scriptName}", None)
+        return None
 
 globalPluginHandler_mock = MagicMock()
 globalPluginHandler_mock.GlobalPlugin = MockGlobalPlugin
@@ -119,38 +143,44 @@ sys.modules['languageHandler'] = lang_handler_mock
 import builtins
 builtins._ = lambda x: x
 
-# Set up mock config
+# Populate runtime registry with test defaults so lib.search works
+import lib._runtime as _rt
+_rt.api_module = sys.modules['api']
+_rt.webbrowser_module = MagicMock()
+
+
+def _default_conf_dict():
+    """Single source of truth for the default config dict."""
+    return {
+        "terminalAccess": {
+            "cursorTracking": True,
+            "cursorTrackingMode": 1,
+            "keyEcho": True,
+            "linePause": True,
+            "processSymbols": False,
+            "punctuationLevel": 2,
+            "repeatedSymbols": False,
+            "repeatedSymbolsValues": "-_=!",
+            "cursorDelay": 20,
+            "quietMode": False,
+            "verboseMode": False,
+            "indentationOnLineRead": False,
+            "windowTop": 0,
+            "windowBottom": 0,
+            "windowLeft": 0,
+            "windowRight": 0,
+            "windowEnabled": False,
+            "unboundGestures": "",
+        },
+        "keyboard": {
+            "speakTypedCharacters": False,
+        },
+    }
+
+
+# Set up mock config using the single source of truth
 config_mock = sys.modules['config']
-conf_dict = {
-    "terminalAccess": {
-        "cursorTracking": True,
-        "cursorTrackingMode": 1,
-        "keyEcho": True,
-        "linePause": True,
-        "processSymbols": False,
-        "punctuationLevel": 2,
-        "repeatedSymbols": False,
-        "repeatedSymbolsValues": "-_=!",
-        "cursorDelay": 20,
-        "quietMode": False,
-        "verboseMode": False,  # Added verboseMode
-        "indentationOnLineRead": False,
-        "windowTop": 0,
-        "windowBottom": 0,
-        "windowLeft": 0,
-        "windowRight": 0,
-        "windowEnabled": False,
-        "announceNewOutput": False,
-        "newOutputCoalesceMs": 200,
-        "newOutputMaxLines": 20,
-        "stripAnsiInOutput": True,
-        "unboundGestures": "",
-    },
-    "keyboard": {
-        "speakTypedCharacters": False,
-    },
-}
-# Create a mock conf object that acts like a dict but also has a spec attribute
+conf_dict = _default_conf_dict()
 config_mock.conf = Mock()
 config_mock.conf.__getitem__ = lambda self, key: conf_dict[key]
 config_mock.conf.__setitem__ = lambda self, key, value: conf_dict.__setitem__(key, value)
@@ -183,35 +213,12 @@ def mock_textinfo():
 
 @pytest.fixture
 def reset_config():
-    """Reset config to defaults before each test."""
-    config_mock = sys.modules['config']
-    config_mock.conf["terminalAccess"] = {
-        "cursorTracking": True,
-        "cursorTrackingMode": 1,
-        "keyEcho": True,
-        "linePause": True,
-        "processSymbols": False,
-        "punctuationLevel": 2,
-        "repeatedSymbols": False,
-        "repeatedSymbolsValues": "-_=!",
-        "cursorDelay": 20,
-        "quietMode": False,
-        "verboseMode": False,
-        "indentationOnLineRead": False,
-        "windowTop": 0,
-        "windowBottom": 0,
-        "windowLeft": 0,
-        "windowRight": 0,
-        "windowEnabled": False,
-        "announceNewOutput": False,
-        "newOutputCoalesceMs": 200,
-        "newOutputMaxLines": 20,
-        "stripAnsiInOutput": True,
-        "unboundGestures": "",
-    }
-    config_mock.conf["keyboard"] = {
-        "speakTypedCharacters": False,
-    }
+    """Reset config to defaults before each test.
+
+    Note: ensure_mocks (autouse) already resets config before every test.
+    This fixture exists for backward compatibility with tests that
+    explicitly request it.
+    """
     yield
 
 
@@ -230,82 +237,112 @@ def _prevent_helper_spawn():
     originals = {}
     try:
         from native import termaccess_bridge
-        originals["bridge"] = termaccess_bridge.get_helper
+        originals["bridge_get"] = termaccess_bridge.get_helper
+        originals["bridge_stop"] = termaccess_bridge.stop_helper
         termaccess_bridge.get_helper = lambda: None
+        termaccess_bridge.stop_helper = lambda: None
     except ImportError:
         pass
 
     try:
         from globalPlugins import terminalAccess
-        originals["plugin"] = terminalAccess._get_helper
+        originals["plugin_get"] = terminalAccess._get_helper
+        originals["plugin_stop"] = terminalAccess._stop_helper
         terminalAccess._get_helper = lambda: None
+        terminalAccess._stop_helper = lambda: None
     except (ImportError, AttributeError):
         pass
 
     yield
 
     # Restore originals
-    if "bridge" in originals:
+    if "bridge_get" in originals:
         from native import termaccess_bridge
-        termaccess_bridge.get_helper = originals["bridge"]
-        termaccess_bridge.stop_helper()
-    if "plugin" in originals:
+        termaccess_bridge.get_helper = originals["bridge_get"]
+        termaccess_bridge.stop_helper = originals["bridge_stop"]
+    if "plugin_get" in originals:
         from globalPlugins import terminalAccess
-        terminalAccess._get_helper = originals["plugin"]
+        terminalAccess._get_helper = originals["plugin_get"]
+        terminalAccess._stop_helper = originals["plugin_stop"]
+
+
+# Snapshot of sys.modules after initial mock setup — used by ensure_mocks
+# to restore any module that a test deleted or replaced.
+_MOCK_SNAPSHOT = {
+    name: sys.modules[name]
+    for name in [
+        'config', 'api', 'ui', 'gui', 'gui.guiHelper', 'gui.nvdaControls',
+        'gui.settingsDialogs', 'globalPluginHandler', 'textInfos',
+        'addonHandler', 'scriptHandler', 'globalCommands', 'speech',
+        'tones', 'logHandler', 'wx', 'braille',
+        'characterProcessing', 'languageHandler',
+    ]
+    if name in sys.modules
+}
 
 
 @pytest.fixture(autouse=True)
 def ensure_mocks():
-    """Ensure NVDA mocks are always available in sys.modules."""
-    # This fixture runs automatically before each test
-    # It ensures that if any test deleted a mock, it's restored
-    required_modules = ['config', 'api', 'ui', 'gui', 'globalPluginHandler', 'textInfos', 'scriptHandler',
-                        'characterProcessing', 'languageHandler']
+    """Ensure NVDA mocks and config are in a clean state for every test.
 
-    for module_name in required_modules:
-        if module_name not in sys.modules:
-            # Restore from our global setup
-            if module_name == 'config':
-                config_mock = MagicMock()
-                conf_dict = {
-                    "terminalAccess": {
-                        "cursorTracking": True,
-                        "cursorTrackingMode": 1,
-                        "keyEcho": True,
-                        "linePause": True,
-                        "processSymbols": False,
-                        "punctuationLevel": 2,
-                        "repeatedSymbols": False,
-                        "repeatedSymbolsValues": "-_=!",
-                        "cursorDelay": 20,
-                        "quietMode": False,
-                        "verboseMode": False,
-                        "windowTop": 0,
-                        "windowBottom": 0,
-                        "windowLeft": 0,
-                        "windowRight": 0,
-                        "windowEnabled": False,
-                        "announceNewOutput": False,
-                        "newOutputCoalesceMs": 200,
-                        "newOutputMaxLines": 20,
-                        "stripAnsiInOutput": True,
-                        "unboundGestures": "",
-                    },
-                    "keyboard": {
-                        "speakTypedCharacters": False,
-                    },
-                }
-                config_mock.conf = Mock()
-                config_mock.conf.__getitem__ = lambda self, key: conf_dict[key]
-                config_mock.conf.__setitem__ = lambda self, key, value: conf_dict.__setitem__(key, value)
-                config_mock.conf.spec = {}
-                sys.modules['config'] = config_mock
-            elif module_name == 'scriptHandler':
-                scriptHandler_reset = types.ModuleType("scriptHandler")
-                scriptHandler_reset.script = _script_decorator
-                scriptHandler_reset.getLastScriptRepeatCount = _get_last_script_repeat_count
-                sys.modules['scriptHandler'] = scriptHandler_reset
-            else:
-                sys.modules[module_name] = MagicMock()
+    Restores deleted modules and resets the shared config dict so
+    mutations from one test don't leak into the next.
+    """
+    # Restore any deleted modules
+    for name, original in _MOCK_SNAPSHOT.items():
+        if name not in sys.modules:
+            sys.modules[name] = original
+
+    # Reset config dict to defaults before each test
+    config_mock = sys.modules.get('config')
+    if config_mock is not None:
+        fresh = _default_conf_dict()
+        try:
+            config_mock.conf.__getitem__ = lambda self, key: fresh[key]
+            config_mock.conf.__setitem__ = lambda self, key, value: fresh.__setitem__(key, value)
+            config_mock.conf.spec = {}
+        except (AttributeError, TypeError):
+            pass
 
     yield
+
+
+@pytest.fixture
+def make_focus():
+    """Factory fixture for creating mock NVDA focus objects.
+
+    Usage: obj = make_focus("windowsterminal")
+    """
+    def _make(app_name, window_class="ConsoleWindowClass"):
+        obj = Mock()
+        obj.appModule = Mock()
+        obj.appModule.appName = app_name
+        obj.windowClassName = window_class
+        obj.windowHandle = 0x12345
+        obj.windowText = ""
+        return obj
+    return _make
+
+
+@pytest.fixture
+def make_plugin():
+    """Create a GlobalPlugin instance with mocked NVDA dependencies."""
+    def _make():
+        from globalPlugins.terminalAccess import GlobalPlugin
+        return GlobalPlugin()
+    return _make
+
+
+@pytest.fixture
+def plugin_with_terminal(make_focus, make_plugin):
+    """Create a GlobalPlugin wired to a mock terminal.
+
+    Returns (plugin, terminal_mock).
+    """
+    def _make(app_name="windowsterminal"):
+        plugin = make_plugin()
+        terminal = make_focus(app_name)
+        plugin.isTerminalApp = Mock(return_value=True)
+        plugin._boundTerminal = terminal
+        return plugin, terminal
+    return _make

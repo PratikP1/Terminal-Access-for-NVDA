@@ -62,47 +62,215 @@ class TestGestureDocumentation(unittest.TestCase):
 					f"Script {attr_name} missing docstring")
 
 
+class TestGestureBindingsVisibility(unittest.TestCase):
+	"""Test that gesture bindings remain visible for NVDA's Input Gestures dialog.
+
+	NVDA's Input Gestures dialog reads from the plugin instance's gesture map.
+	If bindings are removed (e.g. by _disableTerminalGestures), the dialog
+	shows scripts under 'Terminal Access' but with no gesture assigned.
+	"""
+
+	def test_all_gestures_bound_at_init(self):
+		"""All gestures are bound at init so they appear in Input Gestures dialog."""
+		from globalPlugins.terminalAccess import GlobalPlugin, _DEFAULT_GESTURES
+
+		plugin = GlobalPlugin()
+
+		gesture_map = getattr(plugin, '_gestureMap', {})
+		missing = set(_DEFAULT_GESTURES.keys()) - set(gesture_map.keys())
+		self.assertEqual(len(missing), 0,
+			f"Default gestures missing from _gestureMap after __init__(): "
+			f"{missing}. This breaks NVDA's Input Gestures dialog.")
+
+	def test_excluded_gesture_removed_others_remain(self):
+		"""Only user-excluded gestures should be removed."""
+		import config as config_mod
+		from globalPlugins.terminalAccess import GlobalPlugin, _DEFAULT_GESTURES, _ALWAYS_BOUND
+
+		config_mod.conf["terminalAccess"]["unboundGestures"] = "kb:NVDA+u"
+
+		plugin = GlobalPlugin()
+
+		gesture_map = getattr(plugin, '_gestureMap', {})
+		self.assertNotIn("kb:NVDA+u", gesture_map,
+			"Excluded gesture should be removed from _gestureMap")
+		expected_present = set(_DEFAULT_GESTURES.keys()) - {"kb:NVDA+u"}
+		actually_present = set(gesture_map.keys())
+		missing = expected_present - actually_present
+		self.assertEqual(len(missing), 0,
+			f"Non-excluded gestures missing from _gestureMap: {missing}")
+
+		config_mod.conf["terminalAccess"]["unboundGestures"] = ""
+
+	def test_isTerminalApp_guard_on_all_scripts(self):
+		"""Every script method should check isTerminalApp and call gesture.send().
+
+		This guard is what makes gestures safe to keep always-bound — they
+		pass through when not in a terminal.
+		"""
+		from globalPlugins.terminalAccess import GlobalPlugin
+		import inspect
+
+		# Scripts that intentionally skip the isTerminalApp guard:
+		# - showHelp: always available (in _ALWAYS_BOUND)
+		# - copyLine/copyScreen/exitCopyMode: guarded by self.copyMode
+		# - exitCommandLayer: guarded by self._inCommandLayer
+		always_active = {
+			'script_showHelp',
+			'script_copyLine', 'script_copyScreen', 'script_exitCopyMode',
+			'script_exitCommandLayer',
+		}
+
+		for attr_name in dir(GlobalPlugin):
+			if not attr_name.startswith('script_'):
+				continue
+			if attr_name in always_active:
+				continue
+			method = getattr(GlobalPlugin, attr_name)
+			if not callable(method):
+				continue
+			source = inspect.getsource(method)
+			self.assertIn('isTerminalApp', source,
+				f"{attr_name} must check isTerminalApp() to guard "
+				f"against execution outside terminals")
+
+
 class TestGestureExecution(unittest.TestCase):
 	"""Test gesture execution and behavior."""
 
-	# Note: Tests for specific script methods have been removed as they tested
-	# functionality that was never implemented (script_toggleVerboseMode,
-	# script_reportCurrentLine, script_reportPosition, script_reportSelection, etc.)
-	# The actual implementation uses different method names like script_toggleQuietMode,
-	# script_readCurrentLine, script_announcePosition, etc.
-	pass
-
-
-class TestGestureScoping(unittest.TestCase):
-	"""Test that gestures only activate when a terminal has focus."""
-
-	def test_gestures_disable_when_not_terminal(self):
+	def test_readCurrentLine_calls_review(self):
+		"""script_readCurrentLine should delegate to NVDA review on terminal."""
 		from globalPlugins.terminalAccess import GlobalPlugin
 
 		plugin = GlobalPlugin()
-		plugin._terminalGestures = {"kb:NVDA+alt+u": "readPreviousLine"}
-		plugin._gesturesBound = True
+		plugin.isTerminalApp = MagicMock(return_value=True)
+		gesture = MagicMock()
+		# Should not raise — delegates to globalCommands
+		plugin.script_readCurrentLine(gesture)
+		gesture.send.assert_not_called()
+
+	def test_toggleQuietMode_flips_config(self):
+		"""script_toggleQuietMode should toggle the quietMode setting."""
+		import config as config_mod
+		from globalPlugins.terminalAccess import GlobalPlugin
+
+		plugin = GlobalPlugin()
+		plugin.isTerminalApp = MagicMock(return_value=True)
+		gesture = MagicMock()
+
+		config_mod.conf["terminalAccess"]["quietMode"] = False
+		plugin.script_toggleQuietMode(gesture)
+		self.assertTrue(config_mod.conf["terminalAccess"]["quietMode"])
+		plugin.script_toggleQuietMode(gesture)
+		self.assertFalse(config_mod.conf["terminalAccess"]["quietMode"])
+
+	def test_script_sends_gesture_when_not_terminal(self):
+		"""Scripts should pass gesture through when not in terminal."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+
+		plugin = GlobalPlugin()
+		plugin.isTerminalApp = MagicMock(return_value=False)
+		gesture = MagicMock()
+
+		plugin.script_readCurrentLine(gesture)
+		gesture.send.assert_called_once()
+
+	def test_announcePosition_speaks(self):
+		"""script_announcePosition should call ui.message."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+
+		plugin = GlobalPlugin()
+		plugin.isTerminalApp = MagicMock(return_value=True)
+		plugin._boundTerminal = MagicMock()
+		gesture = MagicMock()
+
+		# Mock the position calculation
+		plugin._positionCalculator = MagicMock()
+		plugin._positionCalculator.calculate = MagicMock(return_value=(5, 10))
+
+		plugin.script_announcePosition(gesture)
+		ui_mock = sys.modules['ui']
+		ui_mock.message.assert_called()
+
+	def test_copyLinearSelection_no_marks_warns(self):
+		"""Copying without marks should produce a warning message."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+
+		plugin = GlobalPlugin()
+		plugin.isTerminalApp = MagicMock(return_value=True)
+		plugin._markStart = None
+		plugin._markEnd = None
+		gesture = MagicMock()
+
+		plugin.script_copyLinearSelection(gesture)
+		ui_mock = sys.modules['ui']
+		ui_mock.message.assert_called()
+
+
+class TestGestureScoping(unittest.TestCase):
+	"""Test that gestures pass through to applications when not in a terminal.
+
+	With the always-bound architecture, gestures are never removed.
+	Instead, each script checks isTerminalApp() and calls gesture.send()
+	for non-terminal focus.  _updateGestureBindingsForFocus handles
+	command layer auto-exit on focus loss.
+	"""
+
+	def test_gestures_stay_bound_after_focus_loss(self):
+		"""Gestures stay in _gestureMap after focus loss (for Input Gestures dialog)."""
+		from globalPlugins.terminalAccess import GlobalPlugin, _DEFAULT_GESTURES
+
+		plugin = GlobalPlugin()
+
+		non_terminal = MagicMock()
+		non_terminal.appModule = MagicMock()
+		non_terminal.appModule.appName = "notepad"
+		plugin._updateGestureBindingsForFocus(non_terminal)
+
+		gesture_map = plugin._gestureMap
+		for gesture in _DEFAULT_GESTURES:
+			self.assertIn(gesture, gesture_map)
+
+	def test_getScript_blocks_terminal_gestures_outside_terminal(self):
+		"""getScript returns None for terminal gestures when no terminal focused."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+
+		plugin = GlobalPlugin()
+		plugin._boundTerminal = None
+
+		gesture = MagicMock()
+		gesture.normalizedIdentifiers = ["kb:NVDA+l"]
+
+		result = plugin.getScript(gesture)
+		self.assertIsNone(result)
+
+	def test_focus_loss_exits_command_layer(self):
+		"""Switching to non-terminal exits command layer."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+
+		plugin = GlobalPlugin()
+		plugin._inCommandLayer = True
 
 		non_terminal = MagicMock()
 		non_terminal.appModule = MagicMock()
 		non_terminal.appModule.appName = "notepad"
 
 		plugin._updateGestureBindingsForFocus(non_terminal)
-		self.assertFalse(plugin._gesturesBound)
+		self.assertFalse(plugin._inCommandLayer)
 
-	def test_gestures_enable_for_terminal(self):
+	def test_focus_loss_exits_copy_mode(self):
+		"""Switching to non-terminal exits copy mode."""
 		from globalPlugins.terminalAccess import GlobalPlugin
 
 		plugin = GlobalPlugin()
-		plugin._terminalGestures = {"kb:NVDA+alt+u": "readPreviousLine"}
-		plugin._gesturesBound = False
+		plugin.copyMode = True
 
-		terminal = MagicMock()
-		terminal.appModule = MagicMock()
-		terminal.appModule.appName = "windowsterminal"
+		non_terminal = MagicMock()
+		non_terminal.appModule = MagicMock()
+		non_terminal.appModule.appName = "notepad"
 
-		plugin._updateGestureBindingsForFocus(terminal)
-		self.assertTrue(plugin._gesturesBound)
+		plugin._updateGestureBindingsForFocus(non_terminal)
+		self.assertFalse(plugin.copyMode)
 
 
 # ------------------------------------------------------------------
@@ -268,12 +436,14 @@ class TestCommandLayerFocusLoss(unittest.TestCase):
 		self.plugin.bindGesture = MagicMock()
 		self.plugin.removeGestureBinding = MagicMock()
 
-	def test_disable_gestures_exits_layer(self):
-		"""_disableTerminalGestures must exit command layer."""
+	def test_focus_loss_exits_layer(self):
+		"""Focus loss to non-terminal must exit command layer."""
 		self.plugin._inCommandLayer = True
-		self.plugin._terminalGestures = {"kb:NVDA+alt+u": "readPreviousLine"}
-		self.plugin._gesturesBound = True
-		self.plugin._disableTerminalGestures()
+		non_terminal = MagicMock()
+		non_terminal.appModule = MagicMock()
+		non_terminal.appModule.appName = "notepad"
+		self.plugin.isTerminalApp = MagicMock(return_value=False)
+		self.plugin._updateGestureBindingsForFocus(non_terminal)
 		self.assertFalse(self.plugin._inCommandLayer)
 
 	def test_focus_to_non_terminal_exits_layer(self):
@@ -281,8 +451,6 @@ class TestCommandLayerFocusLoss(unittest.TestCase):
 		# Enter the layer
 		self.plugin._enterCommandLayer()
 		self.assertTrue(self.plugin._inCommandLayer)
-		self.plugin._terminalGestures = {"kb:NVDA+alt+u": "readPreviousLine"}
-		self.plugin._gesturesBound = True
 
 		# Now make isTerminalApp return False for the non-terminal object
 		self.plugin.isTerminalApp = MagicMock(return_value=False)

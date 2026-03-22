@@ -249,7 +249,7 @@ class TestUrlExtractorManager(unittest.TestCase):
 		manager.extract_urls()
 		self.assertEqual(manager.get_url_count(), 2)
 
-	@patch('globalPlugins.terminalAccess.api')
+	@patch('lib._runtime.api_module')
 	def test_copy_url(self, mock_api):
 		from globalPlugins.terminalAccess import UrlExtractorManager
 		terminal = self._make_terminal("https://example.com\n")
@@ -266,7 +266,7 @@ class TestUrlExtractorManager(unittest.TestCase):
 		manager.extract_urls()
 		self.assertFalse(manager.copy_url(5))
 
-	@patch('globalPlugins.terminalAccess.webbrowser')
+	@patch('lib._runtime.webbrowser_module')
 	def test_open_url(self, mock_wb):
 		from globalPlugins.terminalAccess import UrlExtractorManager
 		terminal = self._make_terminal("https://example.com\n")
@@ -276,7 +276,7 @@ class TestUrlExtractorManager(unittest.TestCase):
 		self.assertTrue(result)
 		mock_wb.open.assert_called_once_with("https://example.com")
 
-	@patch('globalPlugins.terminalAccess.webbrowser')
+	@patch('lib._runtime.webbrowser_module')
 	def test_open_www_url_adds_scheme(self, mock_wb):
 		from globalPlugins.terminalAccess import UrlExtractorManager
 		terminal = self._make_terminal("www.example.com\n")

@@ -28,6 +28,10 @@ addon/manifest.ini
 addon/doc/*.css
 addon/doc/en/
 
+# Claude Code
+CLAUDE.md
+.claude/
+
 # IDE
 .vscode/
 .idea/

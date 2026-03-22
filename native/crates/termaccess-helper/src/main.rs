@@ -248,107 +248,108 @@ fn handle_request(
     request: &Request,
 ) -> io::Result<bool> {
     match request {
-        Request::Ping { id } => {
-            pipe.send_response(Response::Pong { id: *id })?;
-            Ok(true)
+        Request::Ping { id } => handle_ping(pipe, *id),
+        Request::ReadText { id, hwnd } => handle_read_text(pipe, uia, *id, *hwnd),
+        Request::ReadLines { id, hwnd, start_row, end_row } => {
+            handle_read_lines(pipe, uia, *id, *hwnd, *start_row, *end_row)
         }
-
-        Request::ReadText { id, hwnd } => {
-            let response = match read_text_with_fallback(uia, *hwnd) {
-                Ok(text) => {
-                    let line_count = text.lines().count() as u32;
-                    Response::TextResult {
-                        id: *id,
-                        text,
-                        line_count,
-                    }
-                }
-                Err(e) => Response::error(*id, "read_failed", e),
-            };
-            pipe.send_response(response)?;
-            Ok(true)
+        Request::Subscribe { id, hwnd } => handle_subscribe(pipe, subs, *id, *hwnd),
+        Request::Unsubscribe { id, hwnd } => handle_unsubscribe(pipe, subs, *id, *hwnd),
+        Request::SearchText { id, hwnd, ref pattern, case_sensitive, use_regex } => {
+            handle_search(pipe, uia, *id, *hwnd, pattern, *case_sensitive, *use_regex)
         }
-
-        Request::ReadLines {
-            id,
-            hwnd,
-            start_row,
-            end_row,
-        } => {
-            let response = match read_text_with_fallback(uia, *hwnd) {
-                Ok(all_text) => {
-                    let lines: Vec<&str> = all_text.split('\n').collect();
-                    let start = (*start_row - 1).max(0) as usize;
-                    let end = (*end_row as usize).min(lines.len());
-                    if start >= lines.len() {
-                        Response::LinesResult {
-                            id: *id,
-                            lines: Vec::new(),
-                        }
-                    } else {
-                        Response::LinesResult {
-                            id: *id,
-                            lines: lines[start..end].iter().map(|s| s.to_string()).collect(),
-                        }
-                    }
-                }
-                Err(e) => Response::error(*id, "read_failed", e),
-            };
-            pipe.send_response(response)?;
-            Ok(true)
-        }
-
-        Request::Subscribe { id, hwnd } => {
-            subs.subscribe(*hwnd);
-            pipe.send_response(Response::SubscribeOk { id: *id })?;
-            Ok(true)
-        }
-
-        Request::Unsubscribe { id, hwnd } => {
-            subs.unsubscribe(*hwnd);
-            pipe.send_response(Response::UnsubscribeOk { id: *id })?;
-            Ok(true)
-        }
-
-        Request::SearchText {
-            id,
-            hwnd,
-            ref pattern,
-            case_sensitive,
-            use_regex,
-        } => {
-            let response = match read_text_with_fallback(uia, *hwnd) {
-                Ok(text) => {
-                    use termaccess_core::search;
-                    let line_count = text.split('\n').count() as u32;
-                    match search::search_text(&text, pattern, *case_sensitive, *use_regex) {
-                        Ok(matches) => Response::SearchResult {
-                            id: *id,
-                            matches: matches
-                                .into_iter()
-                                .map(|m| protocol::SearchMatchResult {
-                                    line_index: m.line_index,
-                                    char_offset: m.char_offset,
-                                    line_text: m.line_text,
-                                })
-                                .collect(),
-                            total_lines: line_count,
-                        },
-                        Err(search::SearchError::InvalidRegex(msg)) => {
-                            Response::error(*id, "invalid_regex", msg)
-                        }
-                    }
-                }
-                Err(e) => Response::error(*id, "read_failed", e),
-            };
-            pipe.send_response(response)?;
-            Ok(true)
-        }
-
         Request::Shutdown { id } => {
-            // Acknowledge shutdown, then signal exit
             let _ = pipe.send_response(Response::Pong { id: *id });
             Ok(false)
         }
     }
+}
+
+fn handle_ping(pipe: &PipeServer, id: u64) -> io::Result<bool> {
+    pipe.send_response(Response::Pong { id })?;
+    Ok(true)
+}
+
+fn handle_read_text(pipe: &PipeServer, uia: &Option<UiaReader>, id: u64, hwnd: isize) -> io::Result<bool> {
+    let response = match read_text_with_fallback(uia, hwnd) {
+        Ok(text) => {
+            let line_count = text.lines().count() as u32;
+            Response::TextResult { id, text, line_count }
+        }
+        Err(e) => Response::error(id, "read_failed", e),
+    };
+    pipe.send_response(response)?;
+    Ok(true)
+}
+
+fn handle_read_lines(
+    pipe: &PipeServer, uia: &Option<UiaReader>, id: u64, hwnd: isize,
+    start_row: i32, end_row: i32,
+) -> io::Result<bool> {
+    let response = match read_text_with_fallback(uia, hwnd) {
+        Ok(all_text) => {
+            let lines: Vec<&str> = all_text.split('\n').collect();
+            let start = (start_row - 1).max(0) as usize;
+            let end = (end_row as usize).min(lines.len());
+            if start >= lines.len() {
+                Response::LinesResult { id, lines: Vec::new() }
+            } else {
+                Response::LinesResult {
+                    id,
+                    lines: lines[start..end].iter().map(|s| s.to_string()).collect(),
+                }
+            }
+        }
+        Err(e) => Response::error(id, "read_failed", e),
+    };
+    pipe.send_response(response)?;
+    Ok(true)
+}
+
+fn handle_subscribe(
+    pipe: &PipeServer, subs: &mut SubscriptionManager, id: u64, hwnd: isize,
+) -> io::Result<bool> {
+    subs.subscribe(hwnd);
+    pipe.send_response(Response::SubscribeOk { id })?;
+    Ok(true)
+}
+
+fn handle_unsubscribe(
+    pipe: &PipeServer, subs: &mut SubscriptionManager, id: u64, hwnd: isize,
+) -> io::Result<bool> {
+    subs.unsubscribe(hwnd);
+    pipe.send_response(Response::UnsubscribeOk { id })?;
+    Ok(true)
+}
+
+fn handle_search(
+    pipe: &PipeServer, uia: &Option<UiaReader>, id: u64, hwnd: isize,
+    pattern: &str, case_sensitive: bool, use_regex: bool,
+) -> io::Result<bool> {
+    let response = match read_text_with_fallback(uia, hwnd) {
+        Ok(text) => {
+            use termaccess_core::search;
+            let line_count = text.split('\n').count() as u32;
+            match search::search_text(&text, pattern, case_sensitive, use_regex) {
+                Ok(matches) => Response::SearchResult {
+                    id,
+                    matches: matches
+                        .into_iter()
+                        .map(|m| protocol::SearchMatchResult {
+                            line_index: m.line_index,
+                            char_offset: m.char_offset,
+                            line_text: m.line_text,
+                        })
+                        .collect(),
+                    total_lines: line_count,
+                },
+                Err(search::SearchError::InvalidRegex(msg)) => {
+                    Response::error(id, "invalid_regex", msg)
+                }
+            }
+        }
+        Err(e) => Response::error(id, "read_failed", e),
+    };
+    pipe.send_response(response)?;
+    Ok(true)
 }

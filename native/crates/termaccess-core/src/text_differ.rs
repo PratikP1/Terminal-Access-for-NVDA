@@ -64,6 +64,9 @@ impl TextDiffer {
 
     /// Compare `current_text` to the stored snapshot and return a diff result.
     ///
+    /// The input text should already be ANSI-stripped; this method normalizes
+    /// trailing whitespace internally but does not strip escape sequences.
+    ///
     /// Uses length pre-checks to avoid expensive full-string comparisons
     /// on the common unchanged and append cases.
     pub fn update(&mut self, current_text: &str) -> DiffResult {

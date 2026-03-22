@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 ## Bug Description
-A clear and concise description of what the bug is.
+Describe the bug.
 
 ## Steps to Reproduce
 1. Open [terminal application]
@@ -17,13 +17,13 @@ A clear and concise description of what the bug is.
 4. Observe [behavior]
 
 ## Expected Behavior
-A clear and concise description of what you expected to happen.
+What should have happened.
 
 ## Actual Behavior
-A clear and concise description of what actually happened.
+What happened instead.
 
 ## Environment
-- **NVDA Version**: [e.g., 2024.1]
+- **NVDA Version**: [e.g., 2025.1]
 - **Terminal Access Version**: [e.g., 1.0.32 - check NVDA Add-ons Manager]
 - **Terminal Application**: [e.g., Windows Terminal, PuTTY, Cmder]
 - **Terminal Version**: [if known]

@@ -69,31 +69,18 @@ pub fn search_text(
             }
         }
     } else {
-        // Literal search
-        let search_pattern: String;
-        let pattern_ref: &str;
-
-        if case_sensitive {
-            pattern_ref = pattern;
+        // Literal search — pre-normalize the pattern once for case-insensitive mode.
+        let normalized_pattern = if case_sensitive { pattern.to_string() } else { pattern.to_lowercase() };
+        let normalize_line: fn(&str) -> String = if case_sensitive {
+            |l| l.to_string()
         } else {
-            search_pattern = pattern.to_lowercase();
-            pattern_ref = &search_pattern;
-        }
+            |l| l.to_lowercase()
+        };
 
         for (i, line) in lines.iter().enumerate() {
-            let haystack: String;
-            let haystack_ref: &str;
-
-            if case_sensitive {
-                haystack_ref = line;
-            } else {
-                haystack = line.to_lowercase();
-                haystack_ref = &haystack;
-            }
-
-            if let Some(byte_offset) = haystack_ref.find(pattern_ref) {
-                // Convert byte offset to character offset
-                let char_offset = haystack_ref[..byte_offset].chars().count() as u32;
+            let haystack = normalize_line(line);
+            if let Some(byte_offset) = haystack.find(&*normalized_pattern) {
+                let char_offset = haystack[..byte_offset].chars().count() as u32;
                 matches.push(SearchMatch {
                     line_index: i as u32,
                     char_offset,

@@ -52,7 +52,7 @@ Explain why you prefer this terminal over supported alternatives:
 ## Proposed Profile Settings
 If you have preferences for how Terminal Access should behave with this terminal:
 - **Punctuation Level**: None / Some / Most / All
-- **Cursor Tracking**: Off / Standard / Highlight / Window
+- **Cursor Tracking**: Off / Standard / Window
 - **Special Regions**: Any status bars or UI elements that should be silenced?
 
 ## Additional Context

@@ -172,6 +172,24 @@ impl From<Notification> for Outgoing {
 }
 
 // ═══════════════════════════════════════════════════════════════
+//  JSON helpers
+// ═══════════════════════════════════════════════════════════════
+
+/// Deserialize JSON bytes, mapping serde errors to `io::Error(InvalidData)`.
+fn parse_json<T: serde::de::DeserializeOwned>(bytes: &[u8]) -> io::Result<T> {
+    serde_json::from_slice(bytes).map_err(|e| {
+        io::Error::new(io::ErrorKind::InvalidData, format!("Invalid JSON: {e}"))
+    })
+}
+
+/// Serialize a value to JSON bytes, mapping serde errors to `io::Error(InvalidData)`.
+fn serialize_json<T: serde::Serialize>(value: &T) -> io::Result<Vec<u8>> {
+    serde_json::to_vec(value).map_err(|e| {
+        io::Error::new(io::ErrorKind::InvalidData, format!("Serialize error: {e}"))
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════
 //  Length-prefixed framing
 // ═══════════════════════════════════════════════════════════════
 
@@ -201,19 +219,12 @@ pub fn read_message<R: Read>(reader: &mut R) -> io::Result<Option<Request>> {
     reader.read_exact(&mut payload)?;
 
     // Deserialize
-    serde_json::from_slice(&payload).map(Some).map_err(|e| {
-        io::Error::new(
-            io::ErrorKind::InvalidData,
-            format!("Invalid JSON: {e}"),
-        )
-    })
+    parse_json(&payload).map(Some)
 }
 
 /// Write one length-prefixed JSON message to a byte stream.
 pub fn write_message<W: Write>(writer: &mut W, msg: &Outgoing) -> io::Result<()> {
-    let payload = serde_json::to_vec(msg).map_err(|e| {
-        io::Error::new(io::ErrorKind::InvalidData, format!("Serialize error: {e}"))
-    })?;
+    let payload = serialize_json(msg)?;
 
     let length = payload.len() as u32;
     if length > MAX_MESSAGE_SIZE {

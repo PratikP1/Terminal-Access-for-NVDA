@@ -1,10 +1,10 @@
 # Release Process
 
-This document describes the automated release process for Terminal Access for NVDA.
+This document describes the release process for Terminal Access for NVDA.
 
 ## Overview
 
-The project uses GitHub Actions to automatically build and publish releases when changes are pushed to the `main` branch. This ensures consistent, reproducible releases without manual intervention.
+GitHub Actions builds and publishes releases automatically when changes land on `main`.
 
 ## Automated Release Workflow
 
@@ -70,7 +70,17 @@ Edit `CHANGELOG.md` and add a new entry at the top:
 - Bug fix description
 ```
 
-### 3. Commit and Push
+### 3. Local Release Validation
+
+Run the gated local release workflow before pushing:
+
+```bash
+python release.py
+```
+
+This validates version, changelog, tests, build, and manifest in sequence.
+
+### 4. Commit and Push
 
 ```bash
 git add buildVars.py manifest.ini CHANGELOG.md
@@ -78,7 +88,7 @@ git commit -m "Bump version to 1.0.2"
 git push origin main
 ```
 
-### 4. Automatic Release
+### 5. Automatic Release
 
 The GitHub Action will automatically:
 - Build the add-on
@@ -87,7 +97,7 @@ The GitHub Action will automatically:
 - Update the `latest` tag
 - GitHub will automatically generate source code archives
 
-### 5. Verify Release
+### 6. Verify Release
 
 Visit the [Releases page](https://github.com/PratikP1/Terminal-Access-for-NVDA/releases) to verify the release was created successfully.
 
@@ -124,12 +134,12 @@ If you accidentally push the same version number twice:
 If the build fails:
 1. Check the workflow logs in the Actions tab
 2. Test the build locally with `python build.py --non-interactive`
-3. Ensure all required files are present in the repository
+3. Check that all required files exist in the repository
 4. Verify Python syntax with `python validate.py`
 
 ## Manual Release (Not Recommended)
 
-While the automated process is preferred, you can create a manual release:
+While the automated process is recommended, you can create a manual release:
 
 1. Build locally: `python build.py`
 2. Go to [Releases page](https://github.com/PratikP1/Terminal-Access-for-NVDA/releases)
@@ -151,7 +161,7 @@ While the automated process is preferred, you can create a manual release:
 
 2. **Changelog**: Always update `CHANGELOG.md` before releasing
 
-3. **Testing**: Test the add-on thoroughly before updating versions
+3. **Testing**: Test the add-on before updating versions
 
 4. **Consistency**: Keep `buildVars.py` and `manifest.ini` versions in sync
 

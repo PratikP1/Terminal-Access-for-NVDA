@@ -3,8 +3,7 @@ Tests for the typing-based blank suppression in _announceStandardCursor.
 
 When the caret lands on an empty / newline position:
   - If the user recently typed a character (within _BLANK_AFTER_TYPING_GRACE
-    seconds), the "Blank" announcement is suppressed entirely.  The real
-    output will be announced by the NewOutputAnnouncer.
+    seconds), the "Blank" announcement is suppressed entirely.
   - If the blank results from navigation (arrow keys, page up/down), "Blank"
     is announced immediately — this is meaningful feedback for the user.
 
@@ -63,15 +62,15 @@ class TestBlankSuppression(unittest.TestCase):
 		return plugin, mock_obj
 
 	# ------------------------------------------------------------------
-	# _lastTypedTime initialization
+	# _lastTypedCharTime initialization
 	# ------------------------------------------------------------------
 
 	def test_last_typed_time_initialized_zero(self):
-		"""_lastTypedTime must start as 0.0 (no recent typing)."""
+		"""_lastTypedCharTime must start as 0.0 (no recent typing)."""
 		from globalPlugins.terminalAccess import GlobalPlugin
 
 		plugin = GlobalPlugin()
-		self.assertEqual(plugin._lastTypedTime, 0.0)
+		self.assertEqual(plugin._lastTypedCharTime, 0.0)
 
 	# ------------------------------------------------------------------
 	# Blank suppressed after recent typing (e.g. pressing Enter)
@@ -83,7 +82,7 @@ class TestBlankSuppression(unittest.TestCase):
 		plugin, mock_obj = self._make_plugin_with_cursor('')
 
 		# Simulate that the user just typed (e.g. pressed Enter).
-		plugin._lastTypedTime = time.time()
+		plugin._lastTypedCharTime = time.time()
 
 		plugin._announceStandardCursor(mock_obj)
 
@@ -95,7 +94,7 @@ class TestBlankSuppression(unittest.TestCase):
 		"""Newline at caret must be suppressed when the user typed recently."""
 		plugin, mock_obj = self._make_plugin_with_cursor('\n')
 
-		plugin._lastTypedTime = time.time()
+		plugin._lastTypedCharTime = time.time()
 		plugin._announceStandardCursor(mock_obj)
 
 		mock_ui.message.assert_not_called()
@@ -105,7 +104,7 @@ class TestBlankSuppression(unittest.TestCase):
 		"""Carriage return at caret must be suppressed when the user typed recently."""
 		plugin, mock_obj = self._make_plugin_with_cursor('\r')
 
-		plugin._lastTypedTime = time.time()
+		plugin._lastTypedCharTime = time.time()
 		plugin._announceStandardCursor(mock_obj)
 
 		mock_ui.message.assert_not_called()
@@ -119,7 +118,7 @@ class TestBlankSuppression(unittest.TestCase):
 		"""Blank must be announced when there was no recent typing (navigation)."""
 		plugin, mock_obj = self._make_plugin_with_cursor('')
 
-		# _lastTypedTime is 0.0 (default) — long in the past.
+		# _lastTypedCharTime is 0.0 (default) — long in the past.
 		plugin._announceStandardCursor(mock_obj)
 
 		mock_ui.message.assert_called_once()
@@ -160,7 +159,7 @@ class TestBlankSuppression(unittest.TestCase):
 		plugin, mock_obj = self._make_plugin_with_cursor('')
 
 		# Simulate typing that happened well beyond the grace period.
-		plugin._lastTypedTime = time.time() - (GlobalPlugin._BLANK_AFTER_TYPING_GRACE + 0.1)
+		plugin._lastTypedCharTime = time.time() - (GlobalPlugin._BLANK_AFTER_TYPING_GRACE + 0.1)
 
 		plugin._announceStandardCursor(mock_obj)
 
@@ -178,7 +177,7 @@ class TestBlankSuppression(unittest.TestCase):
 		plugin, mock_obj = self._make_plugin_with_cursor('a')
 
 		# Even with recent typing, normal characters are announced.
-		plugin._lastTypedTime = time.time()
+		plugin._lastTypedCharTime = time.time()
 		plugin._announceStandardCursor(mock_obj)
 
 		mock_ui.message.assert_called_once()
@@ -189,7 +188,7 @@ class TestBlankSuppression(unittest.TestCase):
 		"""Space at the caret must always be announced."""
 		plugin, mock_obj = self._make_plugin_with_cursor(' ')
 
-		plugin._lastTypedTime = time.time()
+		plugin._lastTypedCharTime = time.time()
 		plugin._announceStandardCursor(mock_obj)
 
 		mock_ui.message.assert_called_once()
@@ -199,7 +198,7 @@ class TestBlankSuppression(unittest.TestCase):
 		"""A printable character at the caret is announced even without recent typing."""
 		plugin, mock_obj = self._make_plugin_with_cursor('x')
 
-		# _lastTypedTime = 0.0 (default, no recent typing).
+		# _lastTypedCharTime = 0.0 (default, no recent typing).
 		plugin._announceStandardCursor(mock_obj)
 
 		mock_ui.message.assert_called_once()
@@ -216,7 +215,7 @@ class TestBlankSuppression(unittest.TestCase):
 		plugin, mock_obj = self._make_plugin_with_cursor('')
 
 		# Simulate recent typing.
-		plugin._lastTypedTime = time.time()
+		plugin._lastTypedCharTime = time.time()
 		plugin._announceStandardCursor(mock_obj)
 
 		# Blank must NOT be spoken.

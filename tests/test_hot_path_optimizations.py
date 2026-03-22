@@ -132,8 +132,7 @@ class TestContentGenerationTracking(unittest.TestCase):
         plugin._bookmarkManager = None
         plugin._searchManager = None
         plugin._commandHistoryManager = None
-        plugin._terminalGestures = {}
-        plugin._gesturesBound = False
+        # No dynamic gesture state needed — gestures are always bound
         return plugin
 
     def test_initial_content_generation(self):
@@ -145,6 +144,7 @@ class TestContentGenerationTracking(unittest.TestCase):
         from unittest.mock import patch
         plugin = self._make_plugin()
         plugin.isTerminalApp = Mock(return_value=True)
+        plugin._boundTerminal = Mock()
         plugin._positionCalculator.clear_cache = Mock()
         plugin._shouldProcessSymbol = Mock(return_value=False)
 

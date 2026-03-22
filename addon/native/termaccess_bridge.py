@@ -49,13 +49,6 @@ ERR_INVALID_UTF8 = 2
 ERR_NOT_FOUND = 3
 ERR_INVALID_REGEX = 4
 
-_ERROR_MESSAGES = {
-	ERR_NULL_POINTER: "Internal error: null pointer passed to native function",
-	ERR_INVALID_UTF8: "Invalid UTF-8 in input text",
-	ERR_NOT_FOUND: "Key not found or expired",
-	ERR_INVALID_REGEX: "Invalid regular expression",
-}
-
 # ═══════════════════════════════════════════════════════════════
 #  DLL loading
 # ═══════════════════════════════════════════════════════════════
@@ -215,43 +208,14 @@ def _setup_signatures(lib: ctypes.CDLL) -> None:
 	lib.ta_position_cache_invalidate.restype = None
 
 	# Unicode width
-	lib.ta_char_width.argtypes = [c_uint32]
-	lib.ta_char_width.restype = c_uint32
-
 	lib.ta_text_width.argtypes = [POINTER(c_ubyte), c_size_t]
 	lib.ta_text_width.restype = c_uint32
-
-	lib.ta_extract_column_range.argtypes = [
-		POINTER(c_ubyte),  # text_ptr
-		c_size_t,          # text_len
-		c_uint32,          # start_col
-		c_uint32,          # end_col
-		POINTER(POINTER(c_ubyte)),  # out_ptr
-		POINTER(c_size_t),          # out_len
-	]
-	lib.ta_extract_column_range.restype = c_int32
-
-	lib.ta_find_column_position.argtypes = [
-		POINTER(c_ubyte),  # text_ptr
-		c_size_t,          # text_len
-		c_uint32,          # target_col
-	]
-	lib.ta_find_column_position.restype = c_uint32
 
 
 def native_available() -> bool:
 	"""Return True if the native DLL is loaded and ready."""
 	return _get_dll() is not None
 
-
-def get_native_version() -> str | None:
-	"""Return the native DLL version string, or None if unavailable."""
-	lib = _get_dll()
-	if lib is None:
-		return None
-	ver_ptr = lib.ta_version()
-	ver_len = lib.ta_version_len()
-	return ctypes.string_at(ver_ptr, ver_len).decode("utf-8")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -293,8 +257,13 @@ def _read_ffi_string(lib: ctypes.CDLL, ptr: Any, length: int) -> str:
 def _check_rc(rc: int, fn_name: str) -> None:
 	"""Raise RuntimeError if a native function returned an error."""
 	if rc != ERR_OK:
-		msg = _ERROR_MESSAGES.get(rc, f"Unknown error code {rc}")
-		raise RuntimeError(f"{fn_name} failed: {msg}")
+		messages = {
+			ERR_NULL_POINTER: "null pointer",
+			ERR_INVALID_UTF8: "invalid UTF-8",
+			ERR_NOT_FOUND: "key not found",
+			ERR_INVALID_REGEX: "invalid regex",
+		}
+		raise RuntimeError(f"{fn_name} failed: {messages.get(rc, f'error {rc}')}")
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -616,21 +585,6 @@ class NativePositionCache:
 #  Unicode Width
 # ═══════════════════════════════════════════════════════════════
 
-def native_char_width(char: str) -> int:
-	"""Get display width of a single Unicode character (0, 1, or 2).
-
-	Drop-in replacement for ``UnicodeWidthHelper.getCharWidth(char)``.
-	"""
-	lib = _get_dll()
-	if lib is None:
-		raise RuntimeError("Native DLL not available")
-
-	if not char:
-		return 0
-	codepoint = ord(char[0])
-	return lib.ta_char_width(c_uint32(codepoint))
-
-
 def native_text_width(text: str) -> int:
 	"""Calculate total display width of a text string.
 
@@ -647,53 +601,6 @@ def native_text_width(text: str) -> int:
 	return result
 
 
-def native_extract_column_range(text: str, start_col: int, end_col: int) -> str:
-	"""Extract text from column range (1-based, inclusive), respecting Unicode widths.
-
-	Drop-in replacement for ``UnicodeWidthHelper.extractColumnRange(text, startCol, endCol)``.
-	"""
-	lib = _get_dll()
-	if lib is None:
-		raise RuntimeError("Native DLL not available")
-
-	if not text:
-		return ""
-
-	text_buf, text_len = _str_to_utf8(text)
-
-	out_ptr = POINTER(c_ubyte)()
-	out_len = c_size_t(0)
-
-	rc = lib.ta_extract_column_range(
-		text_buf,
-		c_size_t(text_len),
-		c_uint32(start_col),
-		c_uint32(end_col),
-		byref(out_ptr),
-		byref(out_len),
-	)
-	_check_rc(rc, "ta_extract_column_range")
-
-	return _read_ffi_string(lib, out_ptr, out_len.value)
-
-
-def native_find_column_position(text: str, target_col: int) -> int:
-	"""Find the char index for a target column position (1-based).
-
-	Drop-in replacement for ``UnicodeWidthHelper.findColumnPosition(text, targetCol)``.
-	"""
-	lib = _get_dll()
-	if lib is None:
-		raise RuntimeError("Native DLL not available")
-
-	if not text:
-		return 0
-
-	text_buf, text_len = _str_to_utf8(text)
-	result = lib.ta_find_column_position(text_buf, c_size_t(text_len), c_uint32(target_col))
-	if result == 0xFFFFFFFF:  # u32::MAX = error
-		raise RuntimeError("ta_find_column_position failed")
-	return result
 
 
 # ═══════════════════════════════════════════════════════════════

@@ -257,6 +257,7 @@ class TestCharacterReading(unittest.TestCase):
 		try:
 			plugin = GlobalPlugin()
 			plugin.isTerminalApp = MagicMock(return_value=True)
+			plugin._boundTerminal = Mock()
 			plugin._positionCalculator = MagicMock()
 
 			plugin.event_typedCharacter(Mock(), lambda: None, '!')
@@ -421,8 +422,8 @@ class TestCharacterReading(unittest.TestCase):
 
 	# -- Per-gesture unbinding tests --
 
-	def test_collectTerminalGestures_excludes_unbound(self):
-		"""Excluded gestures are filtered from _terminalGestures."""
+	def test_excluded_gestures_removed_from_map(self):
+		"""Excluded gestures are removed from _gestureMap."""
 		import sys
 		from globalPlugins.terminalAccess import GlobalPlugin, _DEFAULT_GESTURES
 
@@ -431,15 +432,14 @@ class TestCharacterReading(unittest.TestCase):
 
 		try:
 			plugin = GlobalPlugin()
-			gestures = plugin._collectTerminalGestures()
-			self.assertNotIn("kb:NVDA+c", gestures)
-			self.assertNotIn("kb:NVDA+r", gestures)
+			self.assertNotIn("kb:NVDA+c", plugin._gestureMap)
+			self.assertNotIn("kb:NVDA+r", plugin._gestureMap)
 			# A gesture not in the exclusion list should still be present
-			self.assertIn("kb:NVDA+u", gestures)
+			self.assertIn("kb:NVDA+u", plugin._gestureMap)
 		finally:
 			config_mock.conf["terminalAccess"]["unboundGestures"] = ""
 
-	def test_collectTerminalGestures_always_bound_cannot_exclude(self):
+	def test_always_bound_cannot_exclude(self):
 		"""_ALWAYS_BOUND gestures survive even if in unboundGestures."""
 		import sys
 		from globalPlugins.terminalAccess import GlobalPlugin, _ALWAYS_BOUND
@@ -449,13 +449,12 @@ class TestCharacterReading(unittest.TestCase):
 
 		try:
 			plugin = GlobalPlugin()
-			gestures = plugin._collectTerminalGestures()
-			self.assertIn("kb:NVDA+'", gestures)
+			self.assertIn("kb:NVDA+'", plugin._gestureMap)
 		finally:
 			config_mock.conf["terminalAccess"]["unboundGestures"] = ""
 
-	def test_collectTerminalGestures_empty_config(self):
-		"""Empty unboundGestures returns the full set."""
+	def test_all_gestures_bound_at_init(self):
+		"""All gestures are bound at init (visible in Input Gestures dialog)."""
 		import sys
 		from globalPlugins.terminalAccess import GlobalPlugin, _DEFAULT_GESTURES
 
@@ -463,11 +462,86 @@ class TestCharacterReading(unittest.TestCase):
 		config_mock.conf["terminalAccess"]["unboundGestures"] = ""
 
 		plugin = GlobalPlugin()
-		gestures = plugin._collectTerminalGestures()
-		self.assertEqual(len(gestures), len(_DEFAULT_GESTURES))
+		for gesture in _DEFAULT_GESTURES:
+			self.assertIn(gesture, plugin._gestureMap)
 
-	def test_reloadGestures_rebuilds_bindings(self):
-		"""_reloadGestures rebuilds _terminalGestures from config."""
+	def test_getScript_returns_none_outside_terminal(self):
+		"""getScript returns None for terminal gestures when no terminal is focused."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+		from unittest.mock import MagicMock
+
+		plugin = GlobalPlugin()
+		plugin._boundTerminal = None  # No terminal focused
+
+		gesture = MagicMock()
+		gesture.normalizedIdentifiers = ["kb:NVDA+u"]
+
+		result = plugin.getScript(gesture)
+		self.assertIsNone(result)
+
+	def test_getScript_returns_callable_script_in_terminal(self):
+		"""getScript returns a callable script when a terminal is focused."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+		from unittest.mock import MagicMock, Mock
+
+		plugin = GlobalPlugin()
+		plugin._boundTerminal = Mock()  # Terminal is focused
+
+		gesture = MagicMock()
+		gesture.normalizedIdentifiers = ["kb:NVDA+u"]
+
+		result = plugin.getScript(gesture)
+		self.assertIsNotNone(result, "getScript should return a script in terminal")
+		self.assertTrue(callable(result), "getScript result should be callable")
+
+	def test_getScript_help_works_outside_terminal(self):
+		"""Help gesture returns a callable script even outside terminals."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+		from unittest.mock import MagicMock
+
+		plugin = GlobalPlugin()
+		plugin._boundTerminal = None  # No terminal focused
+
+		gesture = MagicMock()
+		gesture.normalizedIdentifiers = ["kb:NVDA+shift+f1"]
+
+		result = plugin.getScript(gesture)
+		self.assertIsNotNone(result, "Help should work outside terminals")
+		self.assertTrue(callable(result))
+
+	def test_getScript_command_layer_works_outside_terminal(self):
+		"""Command layer toggle returns a callable script even outside terminals."""
+		from globalPlugins.terminalAccess import GlobalPlugin
+		from unittest.mock import MagicMock
+
+		plugin = GlobalPlugin()
+		plugin._boundTerminal = None  # No terminal focused
+
+		gesture = MagicMock()
+		gesture.normalizedIdentifiers = ["kb:NVDA+'"]
+
+		result = plugin.getScript(gesture)
+		self.assertIsNotNone(result, "Command layer toggle should work outside terminals")
+		self.assertTrue(callable(result))
+
+	def test_getScript_blocks_multiple_terminal_gestures_outside(self):
+		"""All terminal-specific gestures return None outside terminals."""
+		from globalPlugins.terminalAccess import GlobalPlugin, _DEFAULT_GESTURES, _ALWAYS_BOUND
+		from unittest.mock import MagicMock
+
+		plugin = GlobalPlugin()
+		plugin._boundTerminal = None  # No terminal focused
+
+		terminal_gestures = [g for g in _DEFAULT_GESTURES if g not in _ALWAYS_BOUND]
+		for gesture_id in terminal_gestures[:10]:
+			gesture = MagicMock()
+			gesture.normalizedIdentifiers = [gesture_id]
+			result = plugin.getScript(gesture)
+			self.assertIsNone(result,
+				f"{gesture_id} should return None outside terminal")
+
+	def test_reloadGestures_applies_exclusions(self):
+		"""_reloadGestures re-binds all defaults then re-applies exclusions."""
 		import sys
 		from globalPlugins.terminalAccess import GlobalPlugin, _DEFAULT_GESTURES
 
@@ -475,21 +549,19 @@ class TestCharacterReading(unittest.TestCase):
 		config_mock.conf["terminalAccess"]["unboundGestures"] = ""
 
 		plugin = GlobalPlugin()
-		original_count = len(plugin._terminalGestures)
-		self.assertEqual(original_count, len(_DEFAULT_GESTURES))
+		original_count = len(plugin._gestureMap)
 
 		# Exclude two gestures and reload
 		config_mock.conf["terminalAccess"]["unboundGestures"] = "kb:NVDA+c,kb:NVDA+r"
 		plugin._reloadGestures()
 
-		self.assertEqual(len(plugin._terminalGestures), original_count - 2)
-		self.assertNotIn("kb:NVDA+c", plugin._terminalGestures)
-		self.assertNotIn("kb:NVDA+r", plugin._terminalGestures)
+		self.assertNotIn("kb:NVDA+c", plugin._gestureMap)
+		self.assertNotIn("kb:NVDA+r", plugin._gestureMap)
 
-		# Restore and verify
+		# Restore and verify all come back
 		config_mock.conf["terminalAccess"]["unboundGestures"] = ""
 		plugin._reloadGestures()
-		self.assertEqual(len(plugin._terminalGestures), original_count)
+		self.assertEqual(len(plugin._gestureMap), original_count)
 
 	def test_gestureLabel_formatting(self):
 		"""_gestureLabel formats gesture and script name correctly."""
@@ -508,6 +580,70 @@ class TestCharacterReading(unittest.TestCase):
 
 		label = _gestureLabel("kb:NVDA+u", "readCurrentLine")
 		self.assertEqual(label, "NVDA+U \u2014 Read Current Line")
+
+
+	# -- Gesture conflict avoidance tests --
+
+	def test_punctuation_gestures_use_minus_equals(self):
+		"""Punctuation gestures use minus/equals to avoid NVDA+[/] conflicts."""
+		from globalPlugins.terminalAccess import _DEFAULT_GESTURES, _COMMAND_LAYER_MAP
+
+		# Direct gestures
+		self.assertIn("kb:NVDA+-", _DEFAULT_GESTURES)
+		self.assertIn("kb:NVDA+=", _DEFAULT_GESTURES)
+		self.assertNotIn("kb:NVDA+[", _DEFAULT_GESTURES)
+		self.assertNotIn("kb:NVDA+]", _DEFAULT_GESTURES)
+
+		# Command layer
+		self.assertIn("kb:-", _COMMAND_LAYER_MAP)
+		self.assertIn("kb:=", _COMMAND_LAYER_MAP)
+		self.assertNotIn("kb:[", _COMMAND_LAYER_MAP)
+		self.assertNotIn("kb:]", _COMMAND_LAYER_MAP)
+
+	def test_copy_gesture_uses_nvda_c(self):
+		"""Copy gesture uses NVDA+C (conflict managed via getScript and settings)."""
+		from globalPlugins.terminalAccess import _DEFAULT_GESTURES, _CONFLICTING_GESTURES
+
+		self.assertIn("kb:NVDA+c", _DEFAULT_GESTURES)
+		self.assertEqual(_DEFAULT_GESTURES["kb:NVDA+c"], "copyLinearSelection")
+		self.assertIn("kb:NVDA+c", _CONFLICTING_GESTURES)
+
+	def test_conflicting_gestures_subset_of_defaults(self):
+		"""Every conflicting gesture must exist in _DEFAULT_GESTURES."""
+		from globalPlugins.terminalAccess import _DEFAULT_GESTURES, _CONFLICTING_GESTURES
+
+		for gesture in _CONFLICTING_GESTURES:
+			self.assertIn(gesture, _DEFAULT_GESTURES,
+				f"Conflicting gesture {gesture} not found in _DEFAULT_GESTURES")
+
+	def test_conflicting_gestures_not_in_always_bound(self):
+		"""Conflicting gestures must not overlap with _ALWAYS_BOUND."""
+		from globalPlugins.terminalAccess import _CONFLICTING_GESTURES, _ALWAYS_BOUND
+
+		overlap = _CONFLICTING_GESTURES & _ALWAYS_BOUND
+		self.assertEqual(len(overlap), 0,
+			f"Gestures cannot be both conflicting and always-bound: {overlap}")
+
+	def test_gesture_label_from_runtime_matches(self):
+		"""gesture_label imported from _runtime produces correct output."""
+		from lib._runtime import gesture_label
+
+		result = gesture_label("kb:NVDA+shift+c", "copyRectangularSelection")
+		self.assertIn("NVDA", result)
+		self.assertIn("Shift", result)
+		self.assertIn("C", result)
+		self.assertIn("Copy", result)
+
+		result2 = gesture_label("kb:NVDA+u", "readCurrentLine")
+		self.assertEqual(result2, "NVDA+U \u2014 Read Current Line")
+
+	def test_gesture_label_imported_identically_in_both_modules(self):
+		"""Both terminalAccess and settings_panel use the same gesture_label."""
+		from globalPlugins.terminalAccess import _gestureLabel as ta_label
+		from lib.settings_panel import _gestureLabel as sp_label
+
+		self.assertIs(ta_label, sp_label,
+			"Both modules should import the same function from _runtime")
 
 
 if __name__ == '__main__':

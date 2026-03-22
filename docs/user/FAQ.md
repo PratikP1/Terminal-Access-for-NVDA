@@ -16,11 +16,11 @@
 
 ### What is Terminal Access for NVDA?
 
-Terminal Access is an NVDA add-on that provides enhanced accessibility for Windows terminal applications. It enables screen reader users to efficiently navigate and interact with command-line interfaces using features inspired by the Speakup screen reader and TDSR (Terminal Data Structure Reader).
+Terminal Access is an NVDA add-on that adds keyboard-driven navigation and reading commands to Windows terminal applications. It draws on ideas from the Speakup screen reader and TDSR (Terminal Data Structure Reader).
 
 ### What terminals does Terminal Access support?
 
-**As of v1.0.26**, Terminal Access supports 18 terminal applications:
+Terminal Access supports 30 terminal applications:
 
 **Built-in Windows Terminals (5)**:
 - Windows Terminal
@@ -29,7 +29,10 @@ Terminal Access is an NVDA add-on that provides enhanced accessibility for Windo
 - PowerShell Core (pwsh)
 - Console Host (conhost)
 
-**Third-Party Terminals (13)**:
+**Windows Subsystem for Linux (WSL)**:
+- WSL1 and WSL2 (all distributions)
+
+**Third-Party Terminals (24)**:
 - Cmder
 - ConEmu (32-bit and 64-bit)
 - mintty (Git Bash, Cygwin)
@@ -41,17 +44,26 @@ Terminal Access is an NVDA add-on that provides enhanced accessibility for Windo
 - WezTerm
 - Tabby
 - FluentTerminal
+- Ghostty
+- Rio
+- Wave Terminal
+- Contour
+- Cool Retro Term
+- MobaXterm
+- SecureCRT
+- Tera Term
+- mRemoteNG
+- Royal TS
 
 ### How is Terminal Access different from NVDA's built-in terminal support?
 
-Terminal Access provides additional features specifically designed for terminal workflows:
-- **Enhanced Navigation**: Navigate by line, word, character, column, and row
-- **Rectangular Selection**: Select columns of text (useful for tables and formatted output)
-- **Application Profiles**: Automatic optimization for vim, tmux, git, and other CLI tools
+Terminal Access adds features built for terminal workflows:
+- **Navigation**: Move by line, word, character, column, and row
+- **Application Profiles**: Automatic settings for vim, tmux, git, and other CLI tools
 - **Window Definitions**: Define and track specific screen regions
 - **Cursor Tracking Modes**: Multiple modes for different workflows
 - **Symbol Processing**: Configurable punctuation levels
-- **Advanced Unicode**: RTL text support (Arabic, Hebrew) and emoji sequences
+- **Unicode**: RTL text support (Arabic, Hebrew) and emoji sequences
 
 ### Is Terminal Access free and open source?
 
@@ -84,7 +96,6 @@ Default settings are optimized for general use:
 - **Key Echo**: Enabled
 - **Line Pause**: Enabled (helpful for long lines)
 
-You can adjust these later as you become more comfortable.
 
 ### Can I reset Terminal Access to default settings?
 
@@ -99,7 +110,7 @@ Yes:
 
 ### Does Terminal Access work with third-party terminals?
 
-Yes! As of v1.0.26, Terminal Access supports 13 popular third-party terminal emulators including Cmder, ConEmu, mintty (Git Bash), PuTTY, Terminus, Hyper, Alacritty, WezTerm, and more.
+Yes. Terminal Access supports 24 third-party terminal emulators including Cmder, ConEmu, mintty, PuTTY, Alacritty, WezTerm, Ghostty, MobaXterm, and more. See the README for the full list.
 
 ### How do I request support for a new terminal?
 
@@ -138,13 +149,11 @@ The application profile for PuTTY is optimized for remote terminal sessions.
 ### What keyboard shortcuts does Terminal Access provide?
 
 Key navigation commands (customize in NVDA Input Gestures):
-- **Line Navigation**: NVDA+Up/Down arrows
-- **Word Navigation**: NVDA+Control+Left/Right arrows
-- **Character Navigation**: NVDA+Left/Right arrows
-- **Column/Row Navigation**: NVDA+Shift+Left/Right/Up/Down
-- **Selection**: NVDA+Shift+selection keys
-- **Cursor Tracking**: NVDA+T (cycle modes)
-- **Read Position**: NVDA+NumpadDelete (current coordinates)
+- **Line Navigation**: NVDA+U/I/O (previous/current/next)
+- **Word Navigation**: NVDA+J/K/L (previous/current/next)
+- **Help**: NVDA+Shift+F1
+- **Cursor Tracking**: NVDA+Alt+Y (cycle modes)
+- **Search**: NVDA+F
 
 Refer to the main README for the complete gesture list.
 
@@ -188,12 +197,14 @@ To import:
 
 Cursor tracking automatically announces the cursor's position as you navigate. Terminal Access offers four modes:
 
-- **Off**: No automatic announcements
-- **Standard**: Announces character at cursor
-- **Highlight**: Announces cursor position with context
-- **Window**: Announces cursor within defined window regions
+| Mode | Description |
+|------|-------------|
+| **Off** | No automatic announcements |
+| **Standard** | Announces character at cursor |
+| **Highlight** | *(deprecated, removed in v2)* Tracks highlighted/inverse video text |
+| **Window** | Announces cursor within defined window regions |
 
-Cycle modes with NVDA+T.
+Cycle modes with NVDA+Alt+Y.
 
 ### What are window definitions?
 
@@ -221,17 +232,16 @@ This prevents repetitive announcements of status bars and other UI elements.
 ### Cursor tracking announces too much/too little
 
 **Adjust cursor tracking mode**:
-- Press NVDA+T to cycle through modes
+- Press NVDA+Alt+Y to cycle through modes
 - Try different modes for different workflows:
   - **Standard**: For general use
-  - **Highlight**: For more context
   - **Window**: For applications with defined regions
   - **Off**: When you prefer manual navigation
 
 ### Rectangular selection copies strange text
 
 **Possible causes**:
-1. **CJK characters**: Terminal Access handles double-width characters, but ensure your terminal displays them correctly
+1. **CJK characters**: Terminal Access handles double-width characters, but your terminal must display them correctly too
 2. **Tab characters**: Tabs may not align as expected
 3. **ANSI codes**: Some terminals include escape sequences
 
@@ -312,8 +322,8 @@ Without these libraries, Terminal Access provides basic Unicode support but not 
 
 **Solutions**:
 1. **Enable Cursor Tracking**: NVDA menu > Preferences > Settings > Terminal Settings > Enable "Cursor Tracking"
-2. **Check Quiet Mode**: Press NVDA+Alt+Q to toggle quiet mode off
-3. **Verify tracking mode**: Press NVDA+Alt+Y (or layer: Y) to cycle through tracking modes (ensure not "Off")
+2. **Check Quiet Mode**: Press NVDA+Shift+Q to toggle quiet mode off
+3. **Verify tracking mode**: Press NVDA+Alt+Y (or layer: Y) to cycle through tracking modes (check it is not "Off")
 4. **Adjust Cursor Delay**: Try setting delay to 0ms if responses are too slow
 
 ### Punctuation not announced
@@ -321,30 +331,30 @@ Without these libraries, Terminal Access provides basic Unicode support but not 
 **Problem**: Symbols and punctuation aren't being read.
 
 **Solutions**:
-1. **Increase punctuation level**: Press NVDA+Alt+] to increase level
+1. **Increase punctuation level**: Press NVDA+equals to increase level
 2. **Check current level**: Open Terminal Settings to see punctuation level (0-3)
 3. **Try level 3**: Set to "All" (level 3) to hear everything
 4. **Note**: Level 0 (None) doesn't announce any punctuation
 
 ### Colors/formatting not announced
 
-**Problem**: NVDA+Alt+Shift+A doesn't announce colors.
+**Problem**: NVDA+Shift+A doesn't announce colors.
 
 **Solutions**:
 1. **Verify color codes exist**: Colors may not be present in current terminal content
-2. **Check terminal support**: Ensure terminal supports ANSI color codes
+2. **Check terminal support**: Verify your terminal supports ANSI color codes
 3. **Try test**: Run `echo -e "\x1b[31mRed text\x1b[0m"` to test with known colored text
-4. **Update**: Ensure you have v1.0.18 or later for full ANSI support
+4. **Update**: You need v1.0.18 or later for full ANSI support
 
 ### Selection marks not working
 
 **Problem**: Can't set or clear selection marks.
 
 **Solutions**:
-1. **Correct sequence**: Press NVDA+Alt+R three times: first sets start, second sets end, third clears
+1. **Correct sequence**: Press NVDA+R to toggle marks. First press sets start, second sets end, third clears.
 2. **Check messages**: Listen for "Mark start set", "Mark end set", or "Marks cleared"
-3. **Copy after marks**: Only copy commands (NVDA+Alt+C or NVDA+Alt+Shift+C) after both marks set
-4. **Clear and retry**: Press NVDA+Alt+X to clear marks if confused
+3. **Copy after marks**: Press NVDA+C after both marks are set
+4. **Clear and retry**: Press NVDA+X to clear marks if confused
 
 ### Window tracking silent
 
@@ -362,7 +372,7 @@ Without these libraries, Terminal Access provides basic Unicode support but not 
 
 **Solutions**:
 1. **Save properly**: Click "OK" or "Apply" in settings dialog
-2. **Check permissions**: Ensure NVDA can write to configuration directory
+2. **Check permissions**: Verify NVDA can write to the configuration directory
 3. **NVDA profile**: If using NVDA profiles, settings are profile-specific
 4. **Reset config**: Try deleting NVDA configuration and reconfiguring
 
@@ -371,7 +381,7 @@ Without these libraries, Terminal Access provides basic Unicode support but not 
 **Problem**: Can't build or install the add-on.
 
 **Solutions**:
-1. **Python version**: Ensure Python 3.11 or later is installed
+1. **Python version**: You need Python 3.11 or later
 2. **Dependencies**: Run `pip install -r requirements-dev.txt` for development
 3. **Build command**: Use `python build.py` or `scons` from project root
 4. **NVDA restart**: Always restart NVDA after installing/updating add-on
@@ -484,6 +494,34 @@ pip install python-bidi arabic-reshaper emoji
 ```
 
 Terminal Access gracefully degrades without these libraries.
+
+### How do I check for gesture conflicts?
+
+Terminal Access detects when its keyboard shortcuts conflict with other NVDA add-ons. Open NVDA menu > Preferences > Settings > Terminal Settings. The "NVDA Gesture Conflicts" section lists all direct gestures. Uncheck any gesture to disable it and avoid the conflict. Disabled gestures remain accessible through the command layer (NVDA+apostrophe).
+
+### What are the audio tones during line navigation?
+
+Terminal Access plays distinct tones when you navigate to a line containing an error or a warning. Error lines produce a low tone; warning lines produce a higher tone. These cues help you spot problems in build output or log files without reading every line. The feature is controlled by the **Error Audio Cues** setting (on by default). A separate setting, **Error Audio Cues in Quiet Mode**, enables these tones on caret events while quiet mode is active (off by default).
+
+### What are output activity tones?
+
+When **Output Activity Tones** is enabled (off by default), Terminal Access plays two ascending tones (600 Hz then 800 Hz) whenever new program output appears. The **Output Activity Debounce** setting controls the minimum interval between tones (default 1000 ms, range 100 to 10000 ms). This is useful when you want an audible signal that a command has produced output without reading every line.
+
+### Do Terminal Access gestures work outside terminals?
+
+No. Terminal Access gestures only activate inside supported terminals. Outside a terminal window, the gestures pass through to NVDA or other add-ons. Terminal detection uses exact match on the process name, so only recognized terminal applications trigger the add-on.
+
+### Which features are deprecated?
+
+These features still work but will be removed in v2:
+
+| Feature | Gestures | Reason |
+|---------|----------|--------|
+| **Command History Navigation** | NVDA+H/G, NVDA+Shift+H, NVDA+Shift+L | Shells have their own history navigation. |
+| **Highlight cursor tracking** | Cycle with NVDA+Alt+Y | Most modern terminals strip ANSI from UIA text. |
+| **Rectangular selection** | NVDA+Shift+C | Linear copy handles most use cases. |
+
+If you depend on any of these, open an issue on [GitHub](https://github.com/PratikP1/Terminal-Access-for-NVDA/issues) before they are removed.
 
 ### Can I contribute to Terminal Access development?
 

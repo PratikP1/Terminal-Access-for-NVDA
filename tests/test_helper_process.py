@@ -17,17 +17,14 @@ from native.helper_process import HelperProcess
 class TestRestartConfig(unittest.TestCase):
     """Verify auto-restart configuration constants."""
 
-    def test_restart_delays(self):
-        """Backoff array is 1, 2, 4, 8, 16, 30."""
-        self.assertEqual(
-            HelperProcess._RESTART_DELAYS,
-            [1.0, 2.0, 4.0, 8.0, 16.0, 30.0],
-        )
+    def test_restart_delay(self):
+        """Fixed restart delay is 2 seconds."""
+        self.assertEqual(HelperProcess._RESTART_DELAY, 2.0)
 
     def test_max_restart_attempts(self):
         """Max restart attempts is defined and positive."""
         self.assertGreaterEqual(HelperProcess._MAX_RESTART_ATTEMPTS, 1)
-        self.assertEqual(HelperProcess._MAX_RESTART_ATTEMPTS, 6)
+        self.assertEqual(HelperProcess._MAX_RESTART_ATTEMPTS, 3)
 
     def test_response_timeout(self):
         """Response timeout is a positive number."""
@@ -88,25 +85,17 @@ class TestMaybeRestart(unittest.TestCase):
         self.assertEqual(self.helper._restart_count, 1)
 
     @patch.object(HelperProcess, "_start_process")
-    def test_restart_uses_backoff_delay(self, mock_start):
-        """Restart sleeps for the correct backoff delay."""
+    def test_restart_uses_fixed_delay(self, mock_start):
+        """Restart sleeps for the fixed 2-second delay."""
         self.helper._stopping = False
         self.helper._restart_count = 0
         self.helper._maybe_restart()
-        self.mock_sleep.assert_called_once_with(1.0)
+        self.mock_sleep.assert_called_once_with(2.0)
 
         self.mock_sleep.reset_mock()
         self.helper._restart_count = 1
         self.helper._maybe_restart()
         self.mock_sleep.assert_called_once_with(2.0)
-
-    @patch.object(HelperProcess, "_start_process")
-    def test_restart_caps_at_max_delay(self, mock_start):
-        """Delay caps at the last value in _RESTART_DELAYS."""
-        self.helper._stopping = False
-        self.helper._restart_count = 5  # Last index
-        self.helper._maybe_restart()
-        self.mock_sleep.assert_called_once_with(30.0)
 
     def test_max_attempts_gives_up(self):
         """After _MAX_RESTART_ATTEMPTS, _maybe_restart gives up."""
@@ -134,7 +123,7 @@ class TestMaybeRestart(unittest.TestCase):
         # _start_process sets _restart_count = 0 internally
         self.helper._stopping = False
         self.helper._started = False
-        self.helper._restart_count = 3
+        self.helper._restart_count = 2
 
         # Simulate successful start: _start_process sets _restart_count=0
         # and restores _proc (which _maybe_restart clears during cleanup)
@@ -160,7 +149,7 @@ class TestMaybeRestart(unittest.TestCase):
         dispatched = []
         self.helper._dispatch_notification = lambda msg: dispatched.append(msg)
 
-        # Should not raise — retries all 6 attempts, then gives up
+        # Should not raise — retries all 3 attempts, then gives up
         self.helper._maybe_restart()
         self.assertEqual(
             self.helper._restart_count, HelperProcess._MAX_RESTART_ATTEMPTS

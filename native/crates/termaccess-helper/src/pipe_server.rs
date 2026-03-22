@@ -13,6 +13,19 @@ use crate::security::PipeSecurity;
 /// Buffer size for pipe I/O (64 KB).
 const PIPE_BUFFER_SIZE: u32 = 65536;
 
+/// Map a Windows pipe error to an `io::Error`.
+///
+/// `ERROR_BROKEN_PIPE` and `ERROR_NO_DATA` are mapped to `BrokenPipe`;
+/// everything else becomes `Other`.
+fn map_pipe_error(e: windows::core::Error) -> io::Error {
+    let code = e.code().0 as u32;
+    if code == ERROR_BROKEN_PIPE.0 || code == ERROR_NO_DATA.0 {
+        io::Error::new(io::ErrorKind::BrokenPipe, "Pipe disconnected")
+    } else {
+        io::Error::new(io::ErrorKind::Other, e.to_string())
+    }
+}
+
 /// A named pipe server that handles one client at a time.
 pub struct PipeServer {
     handle: HANDLE,
@@ -23,14 +36,7 @@ pub struct PipeServer {
 fn pipe_read(handle: HANDLE, buf: &mut [u8]) -> io::Result<usize> {
     let mut bytes_read: u32 = 0;
     unsafe {
-        ReadFile(handle, Some(buf), Some(&mut bytes_read), None).map_err(|e| {
-            let code = e.code().0 as u32;
-            if code == ERROR_BROKEN_PIPE.0 || code == ERROR_NO_DATA.0 {
-                io::Error::new(io::ErrorKind::BrokenPipe, "Pipe disconnected")
-            } else {
-                io::Error::new(io::ErrorKind::Other, e.to_string())
-            }
-        })?;
+        ReadFile(handle, Some(buf), Some(&mut bytes_read), None).map_err(map_pipe_error)?;
     }
     Ok(bytes_read as usize)
 }
@@ -39,14 +45,7 @@ fn pipe_read(handle: HANDLE, buf: &mut [u8]) -> io::Result<usize> {
 fn pipe_write(handle: HANDLE, buf: &[u8]) -> io::Result<usize> {
     let mut bytes_written: u32 = 0;
     unsafe {
-        WriteFile(handle, Some(buf), Some(&mut bytes_written), None).map_err(|e| {
-            let code = e.code().0 as u32;
-            if code == ERROR_BROKEN_PIPE.0 || code == ERROR_NO_DATA.0 {
-                io::Error::new(io::ErrorKind::BrokenPipe, "Pipe disconnected")
-            } else {
-                io::Error::new(io::ErrorKind::Other, e.to_string())
-            }
-        })?;
+        WriteFile(handle, Some(buf), Some(&mut bytes_written), None).map_err(map_pipe_error)?;
     }
     Ok(bytes_written as usize)
 }
@@ -175,14 +174,7 @@ impl PipeServer {
                 Some(&mut available),
                 None,
             )
-            .map_err(|e| {
-                let code = e.code().0 as u32;
-                if code == ERROR_BROKEN_PIPE.0 {
-                    io::Error::new(io::ErrorKind::BrokenPipe, "Pipe disconnected")
-                } else {
-                    io::Error::new(io::ErrorKind::Other, e.to_string())
-                }
-            })?;
+            .map_err(map_pipe_error)?;
         }
         Ok(available)
     }

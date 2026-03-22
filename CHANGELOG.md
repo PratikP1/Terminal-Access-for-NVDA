@@ -2,7 +2,49 @@
 
 All notable changes to Terminal Access for NVDA will be documented in this file.
 
-## [Unreleased]
+## [1.4.0] - 2026-03-22
+
+### Added
+- **Error and warning audio cues**: Low tone (220 Hz) on error lines, higher tone (440 Hz) on warning lines during navigation. Uses word-boundary regex matching for compiler, linter, and shell patterns from GCC, Clang, MSVC, Rust, Python, TypeScript, ESLint, Go, Java, Maven, Git, Docker, Make, and CMake. Controlled by "Error and Warning Audio Cues" setting.
+- **Error audio cues in quiet mode**: Optional error/warning beeps on caret events while quiet mode is active. Lets users hear errors during fast output without speech. Controlled by "Error Audio Cues in Quiet Mode" setting.
+- **Output activity tones**: Two ascending tones (600 Hz then 800 Hz) when new program output appears. Does not fire during typing. Debounce interval configurable (100 to 10000 ms). Controlled by "Output Activity Tones" and "Output Activity Debounce" settings.
+- **Profile selection dialog**: Press NVDA+F10 twice to open a list of all profiles. Press Enter to activate one.
+- **Search results dialog**: Search (NVDA+F) shows a browsable results list with match number, line number, and content. Select a match and press Enter to jump there.
+- **Gesture conflict detection**: Detects gesture collisions with other installed add-ons.
+- **Gesture scoping**: Terminal Access gestures only activate inside terminal windows. Outside terminals, NVDA's native commands (NVDA+L, NVDA+C, etc.) work normally. All gestures remain visible in the Input Gestures dialog.
+
+### Enhanced
+- **Bookmarks**: Labels capture full line text (expanded from review cursor). Bookmark list dialog shows Number and Line Content columns. Jump resolves by line number when bookmarks are unavailable. Bookmarks no longer silently deleted on failed jump.
+- **Settings panel**: Four sections (Speech and Tracking, Audio Cues, NVDA Gesture Conflicts, Application Profiles). Audio Cues section has four new controls. Gesture Conflicts section shows only the 12 gestures that conflict with NVDA defaults, not all 56. Users customize other gestures through NVDA's Input Gestures dialog.
+- **Search performance**: Removed full-buffer bookmark walk that caused NVDA to freeze on large terminal buffers (4999 UIA calls on a 5000-line buffer). Matches stored as lightweight tuples; TextInfo resolved lazily on jump.
+- **Dialog foreground**: All dialogs (Bookmarks, Search Results, URL List, Profile Selection) call Raise() and use prePopup/postPopup for proper z-order.
+- **Quiet mode**: Now fully silences terminal output by skipping NVDA's native event handlers. Error and activity audio cues still play if enabled.
+- **Terminal detection**: Changed from substring matching to exact match on process name. Fixes false positives from PowerToys Command Palette and similar apps.
+
+### Changed
+- **Punctuation gestures**: NVDA+minus (decrease), NVDA+equals (increase). Previously NVDA+[/] which conflicted with NVDA mouse click commands. Command layer uses - and = keys.
+- **Copy gesture**: NVDA+C (was temporarily NVDA+Alt+C; conflict managed via gesture scoping and settings checklist).
+- **Architecture**: Main plugin reduced from 9,590 to 3,890 lines. Extracted 12 lib modules. Centralized dependency registry in lib/_runtime.py. Shared gesture_label() function. event_gainFocus broken into focused helper methods.
+- **Startup**: Helper process no longer started eagerly during plugin init (caused NVDA restart freeze). Started lazily on first terminal focus.
+- **Shutdown**: Helper process stopped on background thread (stop() was blocking main thread for up to 7 seconds during NVDA restart).
+
+### Fixed
+- **NVDA restart freeze**: Eager helper process startup blocked main thread during init (subprocess + named pipe GIL contention). Helper process shutdown blocked for up to 7 seconds during terminate().
+- **Search freeze**: Full-buffer bookmark walk removed. Previously iterated every line calling move(UNIT_LINE) per line.
+- **Bookmark blank labels**: set_bookmark now expands review position to full line via expand(UNIT_LINE).
+- **Bookmark jump failure**: Falls back to line number navigation when pos.bookmark is None. No longer silently deletes bookmarks on failed jump.
+- **Bookmark review cursor reset**: Added _bookmarkJumpPending flag to suppress navigator reset after dialog bookmark jump.
+- **ta_conf NameError**: Stale config variable reference in event_caret after refactoring.
+- **PowerToys false positive**: microsoft.cmdpal no longer detected as terminal.
+- **Gesture leaking**: Terminal gestures no longer intercept NVDA commands outside terminals.
+
+### Removed
+- **Announce New Output feature**: NVDA+Shift+N toggle, coalesce delay, max lines, strip ANSI settings. Terminal output handled by addon's own caret tracking.
+
+### Deprecated
+- **Command History Navigation**: NVDA+H/G, NVDA+Shift+H, NVDA+Shift+L. Shells have built-in history. Will be removed in v2.
+- **Highlight cursor tracking mode**: Modern terminals strip ANSI from UIA text. Will be removed in v2.
+- **Rectangular selection**: NVDA+Shift+C. Linear copy covers most needs. Will be removed in v2.
 
 ## [1.3.3] - 2026-03-13
 

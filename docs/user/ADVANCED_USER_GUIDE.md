@@ -3,11 +3,14 @@
 ## Table of Contents
 
 1. [Command Layer](#command-layer)
-2. [Application Profiles](#application-profiles)
-3. [Third-Party Terminal Support](#third-party-terminal-support)
-4. [Window Definitions](#window-definitions)
-5. [Unicode and CJK Text](#unicode-and-cjk-text)
-6. [Performance Optimization](#performance-optimization)
+2. [Bookmarks](#bookmarks)
+3. [Error and Warning Detection](#error-and-warning-detection)
+4. [Gesture Conflict Detection](#gesture-conflict-detection)
+5. [Application Profiles](#application-profiles)
+6. [Third-Party Terminal Support](#third-party-terminal-support)
+7. [Window Definitions](#window-definitions)
+8. [Unicode and CJK Text](#unicode-and-cjk-text)
+9. [Performance Optimization](#performance-optimization)
 
 ---
 
@@ -17,8 +20,10 @@ The command layer is a modal input mode that lets you execute Terminal Access co
 
 ### Entering and Exiting
 
-- **NVDA+'** (apostrophe) — Enter the command layer. You'll hear "Terminal commands" and a high-pitched tone (880 Hz).
-- **Escape** or **NVDA+'** — Exit the command layer. You'll hear "Exit terminal commands" and a lower tone (440 Hz).
+| Gesture                        | Action                                                                   |
+|--------------------------------|--------------------------------------------------------------------------|
+| **NVDA+apostrophe**            | Enter the command layer. You hear "Terminal commands" and a high tone.    |
+| **Escape** or **NVDA+apostrophe** | Exit the command layer. You hear "Exit terminal commands" and a low tone. |
 
 The layer stays active until you explicitly exit. Each command you press keeps you in the layer so you can chain multiple commands. The layer automatically exits if focus leaves the terminal.
 
@@ -52,7 +57,7 @@ While in the command layer, the following keys are active:
 |-----|--------|
 | **R** | Toggle mark (start/end) |
 | **C** | Copy linear selection |
-| **Shift+C** | Copy rectangular selection |
+| **Shift+C** | Copy rectangular selection *(deprecated, removed in v2)* |
 | **X** | Clear marks |
 | **V** | Enter copy mode (L=line, S=screen, Esc=cancel) |
 
@@ -68,23 +73,26 @@ While in the command layer, the following keys are active:
 | Key | Action |
 |-----|--------|
 | **Q** | Toggle quiet mode |
-| **N** | Toggle announce new output |
-| **[** / **]** | Decrease / increase punctuation level |
+| **- / =** | Decrease / increase punctuation level |
 | **D** | Toggle indentation announcement |
-| **P** | Announce active profile |
+| **P** | Announce active profile. Press twice to select. |
 
 #### Bookmarks
 | Key | Action |
 |-----|--------|
 | **0-9** | Jump to bookmark |
-| **Shift+0-9** | Set bookmark |
-| **B** | List all bookmarks |
+| **Shift+0-9** | Set bookmark at current line (line text is captured as a label) |
+| **B** | Open bookmark list dialog (shows bookmark number + line content; press Enter to jump, Delete to remove) |
 
-#### Tabs & History
+#### Tabs
 | Key | Action |
 |-----|--------|
 | **T** | Create new tab |
 | **Shift+T** | List tabs |
+
+#### Command History *(deprecated, removed in v2)*
+| Key | Action |
+|-----|--------|
 | **H / G** | Previous / next command in history |
 | **Shift+H** | Scan command history |
 | **Shift+L** | List command history |
@@ -116,12 +124,14 @@ All Terminal Access commands (both layer and direct) are registered under the "T
 
 Press **E** in the command layer (or **NVDA+Alt+U** directly) to scan the terminal buffer for URLs. An interactive dialog opens with:
 
-- **Filter box** — type to narrow results
-- **URL list** — shows each URL, its line number, and surrounding text context
-- **Open** (Alt+O) — opens the selected URL in your default browser
-- **Copy URL** (Alt+C) — copies the URL to the clipboard
-- **Move to line** (Alt+M) — announces the line containing the URL
-- **Close** (Escape) — closes the dialog
+| Control | Description |
+|---------|-------------|
+| **Filter box** | Type to narrow results |
+| **URL list** | Shows each URL, its line number, and surrounding text |
+| **Open** (Alt+O) | Opens the selected URL in your default browser |
+| **Copy URL** (Alt+C) | Copies the URL to the clipboard |
+| **Move to line** (Alt+M) | Announces the line containing the URL |
+| **Close** (Escape) | Closes the dialog |
 
 Supported URL types: HTTP/HTTPS, FTP, www-prefixed, and OSC 8 terminal hyperlinks. Duplicate URLs are deduplicated automatically.
 
@@ -129,9 +139,69 @@ Supported URL types: HTTP/HTTPS, FTP, www-prefixed, and OSC 8 terminal hyperlink
 
 ---
 
+## Bookmarks
+
+Bookmarks let you save and revisit specific lines in the terminal buffer.
+
+### Setting Bookmarks
+
+Press **Shift+0** through **Shift+9** in the command layer (or **NVDA+Alt+0** through **NVDA+Alt+9** directly) to set a bookmark at the current line. The line's text is captured as a label so you can identify it later.
+
+### Jumping to Bookmarks
+
+Press **0-9** in the command layer (or **Alt+0** through **Alt+9** directly) to jump to that bookmark.
+
+### Bookmark List Dialog
+
+Press **B** in the command layer (or **NVDA+Shift+B** directly) to open an interactive list. The dialog shows two columns: bookmark number and line content. Press Enter to jump to the selected bookmark, or Delete to remove it.
+
+Bookmarks are isolated per tab when using Windows Terminal tabs.
+
+---
+
+## Error and Warning Detection
+
+Terminal Access plays audio cues when you navigate to lines that contain errors or warnings. This helps you scan build output, test results, or log files by ear.
+
+- **Error lines** produce a low-pitched tone.
+- **Warning lines** produce a higher-pitched tone.
+
+The detector recognizes common patterns from compilers, linters, and shell output (e.g., `error:`, `ERROR`, `warning:`, `WARN`).
+
+### Audio Cue Settings
+
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| **Error Audio Cues** | boolean | True | Play tones on error/warning lines during navigation. |
+| **Error Audio Cues in Quiet Mode** | boolean | False | Play error/warning tones on caret events while quiet mode is active. |
+| **Output Activity Tones** | boolean | False | Play two ascending tones (600+800 Hz) when new program output appears. |
+| **Output Activity Debounce** | integer | 1000 ms | Minimum interval between activity tones. Range: 100 to 10000 ms. |
+
+Configure these in NVDA menu > Preferences > Settings > Terminal Settings.
+
+### Gesture Scoping
+
+All Terminal Access gestures only activate inside supported terminals. Outside a terminal, `getScript` returns None, so the gestures pass through to NVDA or other add-ons. Terminal detection uses exact match on the process name.
+
+---
+
+## Gesture Conflict Detection
+
+Terminal Access detects when its keyboard shortcuts conflict with other installed NVDA add-ons. When a conflict is found, Terminal Access warns you so you can decide which binding to keep.
+
+To resolve conflicts:
+
+1. Open NVDA menu > Preferences > Settings > Terminal Settings.
+2. In the "NVDA Gesture Conflicts" section, uncheck any gesture you want to disable.
+3. Disabled direct gestures remain accessible through the command layer (NVDA+apostrophe).
+
+The command layer and help gestures (NVDA+Shift+F1) cannot be disabled.
+
+---
+
 ## Application Profiles
 
-Application profiles allow Terminal Access to automatically adjust its settings based on the terminal application you're using. Each profile can customize punctuation levels, cursor tracking modes, and define window regions for specialized behavior.
+Application profiles allow Terminal Access to adjust its settings based on the terminal application you're using. Each profile can customize punctuation levels, cursor tracking modes, and define window regions for specialized behavior.
 
 ### Understanding Profiles
 
@@ -265,7 +335,7 @@ Example profile JSON structure:
 
 ## Third-Party Terminal Support
 
-Terminal Access supports 23 third-party terminal emulators in addition to the 5 built-in Windows terminals (30 total).
+Terminal Access supports 24 third-party terminal emulators in addition to the 5 built-in Windows terminals and WSL (30 total).
 
 ### Supported Terminals
 
@@ -574,14 +644,14 @@ When the native component is available (`termaccess.dll`), CPU-bound text proces
 
 A background **helper process** (`termaccess-helper.exe`) reads terminal buffers via UIA on a separate thread, keeping NVDA's main thread responsive. For terminals without UIA TextPattern support (some conhost configurations, mintty, older PuTTY builds), the helper falls back to reading via the Win32 Console API (`ReadConsoleOutputCharacterW`).
 
-All native features fall back gracefully to pure Python when the native components are unavailable — no user action is required.
+All native features fall back gracefully to pure Python when the native components are unavailable. No user action is required.
 
 ---
 
 ## Additional Resources
 
 For troubleshooting and frequently asked questions, see:
-- **[FAQ.md](FAQ.md)** - Comprehensive troubleshooting section with solutions for common issues
+- **[FAQ.md](FAQ.md)** - Troubleshooting and answers to common questions
 - **[GitHub Repository](https://github.com/PratikP1/Terminal-Access-for-NVDA)** - Source code and issue tracker
 - **[CHANGELOG.md](../../CHANGELOG.md)** - Detailed version history
 - **[API_REFERENCE.md](../developer/API_REFERENCE.md)** - Developer API documentation

@@ -12,6 +12,13 @@ use termaccess_core::position_cache::PositionCache;
 mod ffi_types;
 use ffi_types::*;
 
+/// Check that all given pointers are non-null; return `ERR_NULL_POINTER` if any is null.
+macro_rules! check_ptrs {
+    ($($p:expr),+ $(,)?) => {
+        $(if $p.is_null() { return ERR_NULL_POINTER; })+
+    };
+}
+
 // ═══════════════════════════════════════════════════════════════
 //  Version
 // ═══════════════════════════════════════════════════════════════
@@ -113,9 +120,7 @@ pub unsafe extern "C" fn ta_text_differ_update(
     out_content_ptr: *mut *mut u8,
     out_content_len: *mut usize,
 ) -> i32 {
-    if handle.is_null() || out_kind.is_null() || out_content_ptr.is_null() || out_content_len.is_null() {
-        return ERR_NULL_POINTER;
-    }
+    check_ptrs!(handle, out_kind, out_content_ptr, out_content_len);
 
     let text = match read_utf8(text_ptr, text_len) {
         Ok(s) => s,
@@ -155,9 +160,7 @@ pub unsafe extern "C" fn ta_text_differ_last_text(
     out_ptr: *mut *mut u8,
     out_len: *mut usize,
 ) -> i32 {
-    if handle.is_null() || out_ptr.is_null() || out_len.is_null() {
-        return ERR_NULL_POINTER;
-    }
+    check_ptrs!(handle, out_ptr, out_len);
 
     let differ = &*handle;
     match differ.last_text() {
@@ -193,9 +196,7 @@ pub unsafe extern "C" fn ta_strip_ansi(
     out_ptr: *mut *mut u8,
     out_len: *mut usize,
 ) -> i32 {
-    if out_ptr.is_null() || out_len.is_null() {
-        return ERR_NULL_POINTER;
-    }
+    check_ptrs!(out_ptr, out_len);
 
     let text = match read_utf8(text_ptr, text_len) {
         Ok(s) => s,
@@ -248,9 +249,7 @@ pub unsafe extern "C" fn ta_search_text(
     use_regex: u32,
     out_results: *mut TaSearchResults,
 ) -> i32 {
-    if out_results.is_null() {
-        return ERR_NULL_POINTER;
-    }
+    check_ptrs!(out_results);
 
     let text = match read_utf8(text_ptr, text_len) {
         Ok(s) => s,
@@ -365,9 +364,7 @@ pub unsafe extern "C" fn ta_position_cache_get(
     out_row: *mut i32,
     out_col: *mut i32,
 ) -> i32 {
-    if handle.is_null() || out_row.is_null() || out_col.is_null() {
-        return ERR_NULL_POINTER;
-    }
+    check_ptrs!(handle, out_row, out_col);
 
     let key = match read_utf8(key_ptr, key_len) {
         Ok(s) => s,
@@ -489,9 +486,7 @@ pub unsafe extern "C" fn ta_extract_column_range(
     out_ptr: *mut *mut u8,
     out_len: *mut usize,
 ) -> i32 {
-    if out_ptr.is_null() || out_len.is_null() {
-        return ERR_NULL_POINTER;
-    }
+    check_ptrs!(out_ptr, out_len);
 
     let text = match read_utf8(text_ptr, text_len) {
         Ok(s) => s,

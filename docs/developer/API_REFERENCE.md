@@ -1,545 +1,379 @@
-# TDSR for NVDA - API Reference
+# Terminal Access for NVDA - API Reference
 
-**Version:** 1.0.18
-**Last Updated:** 2026-02-21
+**Version:** 1.4.0
+**Last Updated:** 2026-03-22
 
 ## Table of Contents
 
 1. [Public Classes](#public-classes)
-2. [Core Methods](#core-methods)
-3. [Configuration API](#configuration-api)
-4. [Extension API](#extension-api)
-5. [Event Hooks](#event-hooks)
+2. [New in This Release](#new-in-this-release)
+3. [Removed](#removed)
+4. [Deprecated for v2](#deprecated-for-v2)
+5. [Configuration API](#configuration-api)
+6. [Runtime Registry](#runtime-registry)
+7. [Extension API](#extension-api)
+8. [Event Hooks](#event-hooks)
+9. [Constants](#constants)
 
 ## Public Classes
 
-### PositionCache
+### PositionCache (`lib/caching.py`)
 
-**Purpose**: Cache terminal position calculations to improve performance.
+Caches terminal row/column calculations with timestamp-based invalidation. Stores `bookmark -> (row, col, timestamp)` mappings to skip repeated O(n) position calculations.
 
 #### Methods
 
 ##### `get(bookmark) -> tuple[int, int] | None`
 
-Retrieve cached position for a bookmark.
-
-**Parameters**:
-- `bookmark`: TextInfo bookmark object
-
-**Returns**:
-- `(row, col)` tuple if cache hit and valid
-- `None` if cache miss or expired
-
-**Example**:
-```python
-cache = PositionCache()
-position = cache.get(textInfo.bookmark)
-if position:
-    row, col = position
-```
+Return cached position for a bookmark, or `None` if the entry is missing or expired.
 
 ##### `set(bookmark, row, col) -> None`
 
-Store position in cache.
-
-**Parameters**:
-- `bookmark`: TextInfo bookmark object
-- `row` (int): Row number (1-based)
-- `col` (int): Column number (1-based)
-
-**Example**:
-```python
-cache.set(textInfo.bookmark, 10, 25)
-```
+Store a position in the cache.
 
 ##### `clear() -> None`
 
-Clear all cached positions.
-
-**Example**:
-```python
-cache.clear()  # Clear on terminal switch
-```
+Remove all cached entries. Called on terminal switch.
 
 ##### `invalidate(bookmark) -> None`
 
-Invalidate a specific cached position.
-
-**Parameters**:
-- `bookmark`: TextInfo bookmark to invalidate
-
-**Example**:
-```python
-cache.invalidate(textInfo.bookmark)
-```
+Remove a specific cached entry.
 
 #### Constants
 
-- `CACHE_TIMEOUT_MS` (int): Cache entry timeout in milliseconds (default: 1000)
-- `MAX_CACHE_SIZE` (int): Maximum number of cached entries (default: 100)
+- `CACHE_TIMEOUT_MS` (int): Entry lifetime in milliseconds (default: 1000)
+- `MAX_CACHE_SIZE` (int): Maximum cached entries (default: 100)
 
 ---
 
-### ANSIParser
+### TextDiffer (`lib/caching.py`)
 
-**Purpose**: Parse ANSI escape sequences for color and formatting detection.
+Detects line-level changes between consecutive terminal snapshots. Strips trailing whitespace and ANSI codes before comparing.
 
 #### Methods
 
-##### `__init__() -> None`
+##### `update(new_text: str) -> str | None`
 
-Initialize parser with default state.
-
-**Example**:
-```python
-parser = ANSIParser()
-```
-
-##### `parse(text: str) -> dict`
-
-Parse ANSI codes from text and return attributes.
-
-**Parameters**:
-- `text` (str): Text containing ANSI escape sequences
-
-**Returns**:
-Dictionary with keys:
-- `foreground`: Color name, (R,G,B) tuple, or None
-- `background`: Color name, (R,G,B) tuple, or None
-- `bold` (bool): Text is bold
-- `dim` (bool): Text is dim
-- `italic` (bool): Text is italic
-- `underline` (bool): Text is underlined
-- `blink` (bool): Text is blinking
-- `inverse` (bool): Colors are inverted
-- `hidden` (bool): Text is hidden
-- `strikethrough` (bool): Text has strikethrough
-
-**Example**:
-```python
-parser = ANSIParser()
-attrs = parser.parse('\x1b[31;1mRed Bold Text\x1b[0m')
-print(attrs['foreground'])  # 'red'
-print(attrs['bold'])  # True
-```
-
-##### `formatAttributes(mode='detailed') -> str`
-
-Format current attributes as human-readable text.
-
-**Parameters**:
-- `mode` (str): Format mode - 'brief' or 'detailed'
-
-**Returns**:
-- Formatted attribute description string
-
-**Example**:
-```python
-parser.parse('\x1b[31;1;4mText\x1b[0m')
-description = parser.formatAttributes('detailed')
-# Returns: "red foreground, bold, underline"
-```
+Compare `new_text` against the previously stored snapshot. Returns the changed text, or `None` if nothing changed.
 
 ##### `reset() -> None`
 
-Reset parser state to defaults.
+Clear stored state.
 
-**Example**:
-```python
-parser.reset()  # Clear all attributes
-```
+---
+
+### ANSIParser (`lib/text_processing.py`)
+
+Parses ANSI escape sequences to detect colors and formatting attributes.
+
+Handles standard 8 colors (30-37, 40-47), bright colors (90-97, 100-107), 256-color palette (`ESC[38;5;N`), RGB/TrueColor (`ESC[38;2;R;G;B`), and format attributes (bold, dim, italic, underline, blink, inverse, hidden, strikethrough).
+
+#### Methods
+
+##### `parse(text: str) -> dict`
+
+Parse ANSI codes and return a dict with keys: `foreground`, `background`, `bold`, `dim`, `italic`, `underline`, `blink`, `inverse`, `hidden`, `strikethrough`.
+
+##### `formatAttributes(mode='detailed') -> str`
+
+Format current attributes as a human-readable string. `mode` is `'brief'` or `'detailed'`.
+
+##### `reset() -> None`
+
+Clear all attributes to defaults.
 
 ##### `stripANSI(text: str) -> str` (static)
 
 Remove all ANSI escape sequences from text.
 
-**Parameters**:
-- `text` (str): Text with ANSI codes
-
-**Returns**:
-- Clean text without ANSI codes
-
-**Example**:
-```python
-clean = ANSIParser.stripANSI('\x1b[31mRed\x1b[0m')
-print(clean)  # 'Red'
-```
-
-#### Color Constants
-
-- `STANDARD_COLORS` (dict): Standard color codes (30-37, 90-97)
-- `BACKGROUND_COLORS` (dict): Background color codes (40-47, 100-107)
-- `FORMAT_CODES` (dict): Format attribute codes (1-9)
-
 ---
 
-### UnicodeWidthHelper
+### UnicodeWidthHelper (`lib/text_processing.py`)
 
-**Purpose**: Calculate display width for Unicode text (CJK, combining characters).
+Calculates display width for Unicode text. Handles CJK characters (width 2) and combining characters (width 0). Each method tries Rust FFI first, then falls back to Python `wcwidth`.
 
 #### Methods (all static)
 
 ##### `getCharWidth(char: str) -> int`
 
-Get display width of a single character.
-
-**Parameters**:
-- `char` (str): Single character
-
-**Returns**:
-- `0`: Combining character or control character
-- `1`: Standard ASCII character
-- `2`: CJK (Chinese/Japanese/Korean) character
-
-**Example**:
-```python
-width = UnicodeWidthHelper.getCharWidth('A')  # 1
-width = UnicodeWidthHelper.getCharWidth('中')  # 2
-```
+Returns 0 (combining/control), 1 (standard), or 2 (CJK).
 
 ##### `getTextWidth(text: str) -> int`
 
-Calculate total display width of text.
-
-**Parameters**:
-- `text` (str): Text string
-
-**Returns**:
-- Total display width in columns
-
-**Example**:
-```python
-width = UnicodeWidthHelper.getTextWidth('Hello')  # 5
-width = UnicodeWidthHelper.getTextWidth('你好')  # 4 (2+2)
-```
+Total display width of a string in columns.
 
 ##### `extractColumnRange(text: str, startCol: int, endCol: int) -> str`
 
-Extract text from specific column range.
-
-**Parameters**:
-- `text` (str): Source text
-- `startCol` (int): Starting column (1-based)
-- `endCol` (int): Ending column (1-based, inclusive)
-
-**Returns**:
-- Text within specified column range
-
-**Example**:
-```python
-text = 'Hello World'
-result = UnicodeWidthHelper.extractColumnRange(text, 7, 11)
-print(result)  # 'World'
-```
+Extract text within a column range (1-based, inclusive).
 
 ##### `findColumnPosition(text: str, targetCol: int) -> int`
 
-Find string index for a column position.
-
-**Parameters**:
-- `text` (str): Source text
-- `targetCol` (int): Target column (1-based)
-
-**Returns**:
-- String index (0-based) corresponding to column
-
-**Example**:
-```python
-text = 'Hello'
-index = UnicodeWidthHelper.findColumnPosition(text, 3)
-print(index)  # 2 (0-based index for column 3)
-```
+Map a 1-based column position to a 0-based string index.
 
 ---
 
-### WindowDefinition
+### ErrorLineDetector (`lib/text_processing.py`)
 
-**Purpose**: Define screen regions for window tracking.
+Classifies terminal output lines as errors, warnings, or neither. The main plugin plays audio cues based on the classification.
+
+#### Methods
+
+##### `classify(line_text: str) -> str | None` (static)
+
+Returns `'error'`, `'warning'`, or `None`. Uses regex patterns with word boundaries (`\b`) to avoid false positives on substrings.
+
+18 error patterns:
+
+| Pattern | Pattern | Pattern |
+|---------|---------|---------|
+| `error` | `err:` | `fatal` |
+| `failed` | `failure` | `exception` |
+| `traceback` | `panic` | `segfault` |
+| `permission denied` | `not found` | `no such file` |
+| `cannot` | `unable to` | `refused` |
+| `abort` | `critical` | `unhandled` |
+
+5 warning patterns:
+
+| Pattern | Pattern | Pattern |
+|---------|---------|---------|
+| `warning` | `warn:` | `deprecated` |
+| `caution` | `notice` | |
+
+---
+
+### WindowDefinition (`lib/profiles.py`)
+
+Defines a rectangular screen region for window tracking.
 
 #### Constructor
 
 ```python
-WindowDefinition(name: str, top: int, bottom: int, left: int, right: int,
-                 mode: str = 'announce', enabled: bool = True)
+WindowDefinition(name, top, bottom, left, right, mode='announce', enabled=True)
 ```
 
-**Parameters**:
-- `name` (str): Window name
-- `top` (int): Top row (1-based)
-- `bottom` (int): Bottom row (1-based)
-- `left` (int): Left column (1-based)
-- `right` (int): Right column (1-based)
-- `mode` (str): Window mode - 'announce', 'silent', or 'monitor'
-- `enabled` (bool): Whether window is active
-
-**Example**:
-```python
-window = WindowDefinition('status', 1, 2, 1, 80, mode='silent')
-```
+- `mode`: `'announce'` (speak changes), `'silent'` (suppress), or `'monitor'` (background polling)
+- All coordinates are 1-based.
 
 #### Methods
 
-##### `contains(row: int, col: int) -> bool`
-
-Check if position is within window.
-
-**Parameters**:
-- `row` (int): Row number (1-based)
-- `col` (int): Column number (1-based)
-
-**Returns**:
-- `True` if position is within window bounds
-- `False` otherwise
-
-**Example**:
-```python
-if window.contains(1, 40):
-    print("Position is in window")
-```
-
-##### `toDict() -> dict`
-
-Convert window to dictionary for serialization.
-
-**Returns**:
-- Dictionary with window properties
-
-**Example**:
-```python
-data = window.toDict()
-# {'name': 'status', 'top': 1, 'bottom': 2, ...}
-```
-
-##### `fromDict(data: dict) -> WindowDefinition` (class method)
-
-Create window from dictionary.
-
-**Parameters**:
-- `data` (dict): Window properties
-
-**Returns**:
-- New WindowDefinition instance
-
-**Example**:
-```python
-window = WindowDefinition.fromDict(data)
-```
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `contains(row, col)` | `bool` | Check if a position falls inside this window |
+| `toDict()` | `dict` | Serialize to dictionary |
+| `fromDict(data)` (classmethod) | `WindowDefinition` | Deserialize from dictionary |
 
 ---
 
-### ApplicationProfile
+### ApplicationProfile (`lib/profiles.py`)
 
-**Purpose**: Application-specific configuration profile.
+Holds per-application settings overrides and window definitions. A `None` value for any setting means "use the global setting."
 
 #### Constructor
 
 ```python
-ApplicationProfile(appName: str, displayName: str = None)
+ApplicationProfile(appName, displayName=None)
 ```
 
-**Parameters**:
-- `appName` (str): Application identifier
-- `displayName` (str): Human-readable name (optional)
+#### Properties (overrides)
 
-**Example**:
-```python
-profile = ApplicationProfile('vim', 'Vim/Neovim')
-```
+All properties accept `int | bool | str | None`. A `None` value means "use the global setting."
 
-#### Properties
+| Property | Type |
+|----------|------|
+| `punctuationLevel` | `int` or `None` |
+| `cursorTrackingMode` | `int` or `None` |
+| `keyEcho` | `bool` or `None` |
+| `linePause` | `bool` or `None` |
+| `repeatedSymbols` | `bool` or `None` |
+| `repeatedSymbolsValues` | `str` or `None` |
+| `cursorDelay` | `int` or `None` |
+| `quietMode` | `bool` or `None` |
 
-Settings overrides (None = use global setting):
-- `punctuationLevel` (int | None)
-- `cursorTrackingMode` (int | None)
-- `keyEcho` (bool | None)
-- `linePause` (bool | None)
-- `repeatedSymbols` (bool | None)
-- `repeatedSymbolsValues` (str | None)
-- `cursorDelay` (int | None)
-- `quietMode` (bool | None)
+#### Collections
 
-Collections:
-- `windows` (list): WindowDefinition objects
-- `customGestures` (dict): Custom gesture mappings
+- `windows` (list): `WindowDefinition` objects
+- `customGestures` (dict): custom gesture mappings
 
 #### Methods
 
-##### `addWindow(name: str, top: int, bottom: int, left: int, right: int, mode: str = 'announce') -> WindowDefinition`
-
-Add window definition to profile.
-
-**Parameters**:
-- `name` (str): Window name
-- `top` (int): Top row
-- `bottom` (int): Bottom row
-- `left` (int): Left column
-- `right` (int): Right column
-- `mode` (str): Window mode
-
-**Returns**:
-- Created WindowDefinition
-
-**Example**:
-```python
-profile.addWindow('editor', 1, 20, 1, 80, mode='announce')
-profile.addWindow('status', 21, 24, 1, 80, mode='silent')
-```
-
-##### `getWindowAtPosition(row: int, col: int) -> WindowDefinition | None`
-
-Get window containing position.
-
-**Parameters**:
-- `row` (int): Row number
-- `col` (int): Column number
-
-**Returns**:
-- WindowDefinition if position is in a window
-- None otherwise
-
-**Example**:
-```python
-window = profile.getWindowAtPosition(5, 40)
-if window and window.mode == 'silent':
-    # Don't announce in this region
-    pass
-```
-
-##### `toDict() -> dict`
-
-Serialize profile to dictionary.
-
-##### `fromDict(data: dict) -> ApplicationProfile` (class method)
-
-Deserialize profile from dictionary.
+- `addWindow(name, top, bottom, left, right, mode='announce') -> WindowDefinition`
+- `getWindowAtPosition(row, col) -> WindowDefinition | None`
+- `toDict() -> dict`
+- `fromDict(data) -> ApplicationProfile` (classmethod)
 
 ---
 
-### ProfileManager
+### ProfileManager (`lib/profiles.py`)
 
-**Purpose**: Manage application profiles and detection.
-
-#### Constructor
-
-```python
-ProfileManager()
-```
-
-Initializes with default profiles for vim, tmux, htop, less, git, nano, irssi.
-
-**Example**:
-```python
-manager = ProfileManager()
-```
-
-#### Properties
-
-- `profiles` (dict): App name → ApplicationProfile
-- `activeProfile` (ApplicationProfile | None): Currently active profile
+Detects applications and manages profiles. Ships with defaults for vim, tmux, htop, less, git, nano, irssi.
 
 #### Methods
 
-##### `detectApplication(focusObject) -> str`
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `detectApplication(focusObject)` | `str` | Returns app name or `'default'` |
+| `getProfile(appName)` | `ApplicationProfile` or `None` | Retrieve a profile by app name |
+| `get_profile_names()` | `list[str]` | Sorted list of unique profile app names |
+| `setActiveProfile(appName)` | `None` | Set the currently active profile |
+| `addProfile(profile)` | `None` | Add or update a profile |
+| `removeProfile(appName)` | `None` | Remove a profile (refuses built-in profiles) |
+| `exportProfile(appName)` | `dict` or `None` | Export profile to dictionary |
+| `importProfile(data)` | `ApplicationProfile` | Import profile from dictionary |
 
-Detect application from focus object.
+---
 
-**Parameters**:
-- `focusObject`: NVDA focus object
+### TabManager (`lib/navigation.py`)
 
-**Returns**:
-- Application name if detected
-- 'default' if no match
+Detects and tracks terminal tabs. Isolates bookmarks, searches, and history per tab.
 
-**Example**:
-```python
-appName = manager.detectApplication(api.getFocusObject())
-```
+#### Methods
 
-##### `getProfile(appName: str) -> ApplicationProfile | None`
+- `get_current_tab_id() -> str`
+- `list_tabs() -> list`
+- `update_terminal(obj) -> None`
 
-Get profile for application.
+---
 
-**Parameters**:
-- `appName` (str): Application name
+### BookmarkManager (`lib/navigation.py`)
 
-**Returns**:
-- ApplicationProfile if exists
-- None otherwise
+Manages numbered bookmarks at terminal positions. Each bookmark captures the line content at the time it was set, displayed as a label.
 
-**Example**:
-```python
-profile = manager.getProfile('vim')
-if profile:
-    # Use profile settings
-    pass
-```
+#### Methods
 
-##### `setActiveProfile(appName: str) -> None`
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `set_bookmark(number, textInfo)` | `None` | Store bookmark with line content label |
+| `get_bookmark(number)` | `textInfo` or `None` | Retrieve a bookmark |
+| `clear_bookmark(number)` | `None` | Remove a single bookmark |
+| `clear_all()` | `None` | Remove all bookmarks |
+| `list_bookmarks()` | `list` | Returns bookmarks with number and line content |
+| `show_list_dialog(parent)` | `None` | Opens `BookmarkListDialog` |
 
-Set currently active profile.
+---
 
-**Parameters**:
-- `appName` (str): Application name
+### BookmarkListDialog (`lib/navigation.py`)
 
-**Example**:
-```python
-manager.setActiveProfile('vim')
-```
+A `wx.Dialog` that shows all bookmarks in a two-column list (Number, Line Content). Supports jumping to a bookmark via Enter, deleting via the Delete key, and closing via Escape. Fully keyboard-navigable.
 
-##### `addProfile(profile: ApplicationProfile) -> None`
+---
 
-Add or update profile.
+### OutputSearchManager (`lib/search.py`)
 
-**Parameters**:
-- `profile`: ApplicationProfile to add
+Searches terminal output with plain text or regex patterns. Uses three-tier acceleration: helper-side search, DLL search, then Python fallback.
 
-**Example**:
-```python
-custom = ApplicationProfile('myapp')
-manager.addProfile(custom)
-```
+#### Key Methods
 
-##### `removeProfile(appName: str) -> None`
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `search(pattern, regex=False)` | `list` | Find all matches |
+| `search_next()` | `textInfo` or `None` | Jump to next match |
+| `search_previous()` | `textInfo` or `None` | Jump to previous match |
+| `clear()` | `None` | Clear search state |
+| `update_terminal(obj)` | `None` | Update terminal reference |
 
-Remove profile (except default profiles).
+---
 
-**Parameters**:
-- `appName` (str): Application name
+### UrlExtractorManager (`lib/search.py`)
 
-**Example**:
-```python
-manager.removeProfile('myapp')
-```
+Finds URLs in terminal output (HTTP/HTTPS/FTP, `www.` prefixed, `file://`, OSC 8 hyperlinks). Lets users cycle through and open them.
 
-##### `exportProfile(appName: str) -> dict | None`
+#### Key Methods
 
-Export profile to dictionary.
+- `extract_urls() -> list`
+- `next_url() -> str | None`
+- `previous_url() -> str | None`
+- `open_current() -> None`
 
-**Parameters**:
-- `appName` (str): Application name
+---
 
-**Returns**:
-- Profile dictionary or None
+### SelectionProgressDialog (`lib/operations.py`)
 
-**Example**:
-```python
-data = manager.exportProfile('vim')
-```
+Thread-safe progress dialog for long-running selection operations. Uses `wx.CallAfter` to keep UI updates on the main thread.
 
-##### `importProfile(data: dict) -> ApplicationProfile`
+#### Methods
 
-Import profile from dictionary.
+- `update(value, message=None) -> None`
+- `is_cancelled() -> bool`
+- `close() -> None`
 
-**Parameters**:
-- `data` (dict): Profile data
+---
 
-**Returns**:
-- Imported ApplicationProfile
+### OperationQueue (`lib/operations.py`)
 
-**Example**:
-```python
-profile = manager.importProfile(data)
-```
+Prevents overlapping background operations. Only one long-running operation runs at a time.
+
+#### Methods
+
+- `submit(operation, callback=None) -> bool`
+- `is_busy() -> bool`
+- `cancel() -> None`
+
+---
+
+### WindowManager (`lib/window_management.py`)
+
+Tracks rectangular screen regions with different speech modes. Persists window state through `ConfigManager`.
+
+---
+
+### WindowMonitor (`lib/window_management.py`)
+
+Polls multiple terminal windows for content changes in the background. Diffs text snapshots and announces new content.
+
+---
+
+### ConfigManager (`lib/config.py`)
+
+Wraps `config.conf["terminalAccess"]` with typed get/set, validation, and legacy migration.
+
+#### Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `get(key, default=None)` | `Any` | Read a config value |
+| `set(key, value)` | `bool` | Validates before writing. Returns `False` on invalid input. |
+| `validate_all()` | `None` | Re-validates all stored values |
+| `reset_to_defaults()` | `None` | Reset all settings to defaults |
+
+---
+
+### TerminalAccessSettingsPanel (`lib/settings_panel.py`)
+
+NVDA settings panel with three flat sections.
+
+| Section | Controls |
+|---------|----------|
+| **Speech and Tracking** | Cursor tracking, key echo, quiet mode, punctuation level, tracking mode, cursor delay, line pause, verbose mode, indentation, repeated symbols, error audio cues, output activity tones, default profile, reset button |
+| **NVDA Gesture Conflicts** | Checklist of all direct shortcuts. Unchecked gestures are disabled but remain accessible through the command layer. |
+| **Application Profiles** | Dropdown with Active/Default indicators, New/Edit/Delete/Import/Export buttons |
+
+---
+
+## New in This Release
+
+| Class / Module | Location | What it does |
+|----------------|----------|-------------|
+| `ErrorLineDetector` | `lib/text_processing.py` | Classifies lines as error/warning for audio cues |
+| `BookmarkListDialog` | `lib/navigation.py` | Dialog showing bookmarks with line content labels |
+| `TerminalAccessSettingsPanel` | `lib/settings_panel.py` | Extracted settings panel with three flat sections |
+| `lib/_runtime.py` | `lib/_runtime.py` | Centralized dependency registry replacing scattered DI stubs |
+
+## Removed
+
+| Item | Was in | Notes |
+|------|--------|-------|
+| `NewOutputAnnouncer` | `lib/operations.py` | Fully removed. NVDA+Shift+N toggle and related settings (coalesce, max-lines, strip-ansi) are gone. |
+
+## Deprecated for v2
+
+These remain functional but will be removed in v2.0:
+
+| Item | Location | Replacement |
+|------|----------|-------------|
+| `CommandHistoryManager` | `lib/search.py` | None planned. Contact PratikP1 on GitHub if you use this. |
+| `CT_HIGHLIGHT` (mode 2) | `lib/config.py` | Use `CT_STANDARD` or `CT_WINDOW` instead. |
+| Rectangular Selection | `terminalAccess.py` | Use linear selection (NVDA+C). |
 
 ---
 
@@ -547,96 +381,61 @@ profile = manager.importProfile(data)
 
 ### Config Spec
 
-Access TDSR configuration through NVDA's config system:
+Access settings through NVDA's config system:
 
 ```python
 import config
-
-# Read settings
-cursor_tracking = config.conf["TDSR"]["cursorTracking"]
-punct_level = config.conf["TDSR"]["punctuationLevel"]
-
-# Write settings
-config.conf["TDSR"]["cursorDelay"] = 50
+tracking = config.conf["terminalAccess"]["cursorTracking"]
+config.conf["terminalAccess"]["cursorDelay"] = 50
 ```
 
 ### Configuration Keys
 
-| Key | Type | Default | Range | Description |
-|-----|------|---------|-------|-------------|
-| `cursorTracking` | bool | True | - | Enable cursor tracking |
-| `cursorTrackingMode` | int | 1 | 0-3 | Tracking mode (Off/Standard/Highlight/Window) |
-| `keyEcho` | bool | True | - | Announce typed characters |
-| `linePause` | bool | True | - | Pause at line endings |
-| `punctuationLevel` | int | 2 | 0-3 | Punctuation verbosity |
-| `repeatedSymbols` | bool | False | - | Condense repeated symbols |
-| `repeatedSymbolsValues` | str | '-_=!' | - | Symbols to condense |
-| `cursorDelay` | int | 20 | 0-1000 | Cursor tracking delay (ms) |
-| `quietMode` | bool | False | - | Temporarily disable announcements |
-| `windowTop` | int | 0 | 0-10000 | Window top row |
-| `windowBottom` | int | 0 | 0-10000 | Window bottom row |
-| `windowLeft` | int | 0 | 0-10000 | Window left column |
-| `windowRight` | int | 0 | 0-10000 | Window right column |
-| `windowEnabled` | bool | False | - | Enable window tracking |
+| Key | Type | Default | Range | What it controls |
+|-----|------|---------|-------|-----------------|
+| `cursorTracking` | bool | True | |Cursor tracking on/off |
+| `cursorTrackingMode` | int | 1 | 0-3 | Off / Standard / Highlight (deprecated) / Window |
+| `keyEcho` | bool | True | |Announce typed characters |
+| `linePause` | bool | True | |Pause at line endings |
+| `punctuationLevel` | int | 2 | 0-3 | None / Some / Most / All |
+| `repeatedSymbols` | bool | False | |Condense repeated symbols |
+| `repeatedSymbolsValues` | str | `-_=!` | max 50 chars | Which symbols to condense |
+| `cursorDelay` | int | 20 | 0-1000 | Tracking delay in ms |
+| `quietMode` | bool | False | |Suppress announcements |
+| `verboseMode` | bool | False | |Extra context in announcements |
+| `indentationOnLineRead` | bool | False | |Announce indentation on line nav |
+| `windowTop/Bottom/Left/Right` | int | 0 | 0-10000 | Window tracking region |
+| `windowEnabled` | bool | False | |Window tracking on/off |
+| `defaultProfile` | str | `""` | |Fallback profile name |
+| `errorAudioCues` | bool | True | | Master switch for error/warning tones during navigation |
+| `errorAudioCuesInQuietMode` | bool | False | | Error/warning tones on caret events in quiet mode |
+| `outputActivityTones` | bool | False | | Ascending two-tone on new program output |
+| `outputActivityDebounce` | int | 1000 | 100-10000 | Milliseconds between activity tone repeats |
+| `unboundGestures` | str | `""` | | Comma-separated disabled gestures |
 
 ### Validation Helpers
 
-#### `_validateInteger(value, minValue, maxValue, default, fieldName) -> int`
+- `_validateInteger(value, minValue, maxValue, default, fieldName) -> int`
+- `_validateString(value, maxLength, default, fieldName) -> str`
+- `_validateSelectionSize(startRow, endRow, startCol, endCol) -> tuple[bool, str | None]`
 
-Validate integer configuration value.
+---
 
-**Parameters**:
-- `value`: Value to validate
-- `minValue` (int): Minimum allowed
-- `maxValue` (int): Maximum allowed
-- `default` (int): Default if invalid
-- `fieldName` (str): Field name for logging
+## Runtime Registry
 
-**Returns**:
-- Validated value or default
+`lib/_runtime.py` holds function references that library modules need but cannot import directly. The main plugin populates these at startup.
 
-**Example**:
 ```python
-delay = _validateInteger(value, 0, 1000, 20, "cursorDelay")
-```
+import lib._runtime as _rt
 
-#### `_validateString(value, maxLength, default, fieldName) -> str`
-
-Validate string configuration value.
-
-**Parameters**:
-- `value`: Value to validate
-- `maxLength` (int): Maximum length
-- `default` (str): Default if invalid
-- `fieldName` (str): Field name for logging
-
-**Returns**:
-- Validated value (truncated if needed) or default
-
-**Example**:
-```python
-symbols = _validateString(value, 50, "-_=!", "repeatedSymbolsValues")
-```
-
-#### `_validateSelectionSize(startRow, endRow, startCol, endCol) -> tuple[bool, str | None]`
-
-Validate selection size against resource limits.
-
-**Parameters**:
-- `startRow` (int): Starting row
-- `endRow` (int): Ending row
-- `startCol` (int): Starting column
-- `endCol` (int): Ending column
-
-**Returns**:
-- `(True, None)` if valid
-- `(False, error_message)` if exceeds limits
-
-**Example**:
-```python
-valid, error = _validateSelectionSize(1, 5000, 1, 100)
-if not valid:
-    ui.message(error)
+# Available slots:
+_rt.strip_ansi          # text -> text (default: identity)
+_rt.make_text_differ    # TextDiffer class
+_rt.native_available    # bool (default: False)
+_rt.native_search_text  # Rust search function or None
+_rt.get_helper          # returns helper process or None
+_rt.read_terminal_text  # terminal buffer reader or None
+_rt.make_position_cache # PositionCache factory or None
 ```
 
 ---
@@ -645,117 +444,65 @@ if not valid:
 
 ### Adding Navigation Commands
 
-Create custom navigation scripts:
-
 ```python
 @script(
-    description=_("Your command description"),
-    gesture="kb:NVDA+alt+yourkey"
+    description=_("My custom command"),
+    gesture="kb:NVDA+alt+newkey"
 )
-def script_yourCommand(self, gesture):
-    """Your command implementation."""
-    # Check if in terminal
+def script_myCustomCommand(self, gesture):
     if not self.isTerminalApp():
         gesture.send()
         return
-
-    try:
-        # Get review position
-        reviewPos = self._getReviewPosition()
-        if reviewPos is None:
-            ui.message(_("Unable to navigate"))
-            return
-
-        # Your navigation logic
-        # ...
-
-        # Announce result
-        ui.message("Result")
-    except Exception:
-        ui.message(_("Navigation failed"))
+    reviewPos = self._getReviewPosition()
+    # ... navigate and announce
 ```
 
-### Custom Profile Creation
+### Custom Profiles
 
 ```python
-# Create custom profile
 profile = ApplicationProfile('myapp', 'My Application')
-
-# Configure settings
 profile.punctuationLevel = 2
 profile.cursorTrackingMode = 1
-profile.keyEcho = True
-
-# Add window definitions
 profile.addWindow('header', 1, 5, 1, 80, mode='announce')
 profile.addWindow('footer', 20, 24, 1, 80, mode='silent')
-
-# Register profile
 self._profileManager.addProfile(profile)
-```
-
-### Custom ANSI Processing
-
-```python
-# Parse ANSI codes
-parser = ANSIParser()
-attrs = parser.parse(text)
-
-# Check specific attributes
-if attrs['bold'] and attrs['foreground'] == 'red':
-    # Custom handling for bold red text
-    pass
-
-# Strip ANSI codes
-clean_text = ANSIParser.stripANSI(text)
 ```
 
 ---
 
 ## Event Hooks
 
-### Terminal Events
+### event_gainFocus(obj, nextHandler)
 
-#### `event_gainFocus(obj, nextHandler)`
+Fires when a terminal gains focus. Detects the terminal app, activates a profile, binds the review cursor, and clears the position cache.
 
-Called when terminal gains focus.
+### event_typedCharacter(obj, nextHandler, ch)
 
-**Use Cases**:
-- Detect terminal application
-- Activate application profile
-- Bind review cursor
-- Clear position cache
+Fires on each typed character. Handles key echo, symbol processing, and repeated symbol detection.
 
-#### `event_typedCharacter(obj, nextHandler, ch)`
+### event_caret(obj, nextHandler)
 
-Called when character is typed.
+Fires on caret movement. Starts a delay timer, then announces the cursor position based on the active tracking mode.
 
-**Use Cases**:
-- Key echo
-- Symbol processing
-- Repeated symbol detection
+### _checkErrorAudioCue(obj)
 
-#### `event_caret(obj, nextHandler)`
+Called from `event_caret`. When `errorAudioCuesInQuietMode` is enabled and quiet mode is active, reads the current line and calls `ErrorLineDetector.classify()`. Plays a tone if the line is an error or warning.
 
-Called when caret position changes.
+### _checkOutputActivityTone()
 
-**Use Cases**:
-- Cursor tracking
-- Position announcement
-- Window tracking
+Called when new terminal output is detected. Plays two ascending tones (600 Hz + 800 Hz) to signal program activity. Controlled by the `outputActivityTones` config key. Repeated tones are suppressed for the duration set by `outputActivityDebounce`.
 
-### Script Hooks
+---
 
-All navigation scripts follow this pattern:
+## Gesture Scoping
 
-```python
-@script(description=_("Description"), gesture="kb:gesture")
-def script_name(self, gesture):
-    if not self.isTerminalApp():
-        gesture.send()
-        return
-    # Implementation
-```
+### getScript() Override
+
+All gestures remain in `_gestureMap` so they appear in NVDA's Input Gestures dialog. The `getScript()` method returns `None` for Terminal Access gestures when the current focus is not a supported terminal. This lets NVDA fall through to its native command for the same key.
+
+### _CONFLICTING_GESTURES
+
+A `frozenset` of gesture identifiers that conflict with NVDA built-in commands (e.g., NVDA+C for copy vs. clipboard read). Only these gestures appear in the NVDA Gesture Conflicts checklist in the settings panel. Users can disable individual conflicting gestures without affecting other Terminal Access shortcuts.
 
 ---
 
@@ -765,9 +512,9 @@ def script_name(self, gesture):
 
 ```python
 CT_OFF = 0        # No tracking
-CT_STANDARD = 1   # Announce character
-CT_HIGHLIGHT = 2  # Track highlights
-CT_WINDOW = 3     # Window tracking
+CT_STANDARD = 1   # Announce character at cursor
+CT_HIGHLIGHT = 2  # Track highlights (DEPRECATED)
+CT_WINDOW = 3     # Only announce within defined window
 ```
 
 ### Punctuation Levels
@@ -782,32 +529,10 @@ PUNCT_ALL = 3     # All symbols
 ### Resource Limits
 
 ```python
-MAX_SELECTION_ROWS = 10000     # Max rows for selection
-MAX_SELECTION_COLS = 1000      # Max columns for selection
-MAX_WINDOW_DIMENSION = 10000   # Max window coordinate
-MAX_REPEATED_SYMBOLS_LENGTH = 50  # Max repeated symbols string
-```
-
----
-
-## Error Handling
-
-All public methods should handle errors gracefully:
-
-```python
-try:
-    # Operation
-    result = operation()
-except (RuntimeError, AttributeError) as e:
-    # Specific exceptions
-    import logHandler
-    logHandler.log.error(f"TDSR: Operation failed - {type(e).__name__}: {e}")
-    ui.message(_("Specific error message"))
-except Exception as e:
-    # Generic fallback
-    import logHandler
-    logHandler.log.error(f"TDSR: Unexpected error - {type(e).__name__}: {e}")
-    ui.message(_("Generic error message"))
+MAX_SELECTION_ROWS = 10000
+MAX_SELECTION_COLS = 1000
+MAX_WINDOW_DIMENSION = 10000
+MAX_REPEATED_SYMBOLS_LENGTH = 50
 ```
 
 ---
@@ -817,9 +542,7 @@ except Exception as e:
 - [NVDA Developer Guide](https://www.nvaccess.org/files/nvda/documentation/developerGuide.html)
 - [TextInfo API](https://www.nvaccess.org/files/nvda/documentation/developerGuide.html#textInfos)
 - [NVDA Config System](https://www.nvaccess.org/files/nvda/documentation/developerGuide.html#config)
-- [Script Decorator](https://www.nvaccess.org/files/nvda/documentation/developerGuide.html#baseObject.ScriptableObject.script)
 
 ---
 
-**Document Maintained By**: TDSR Development Team
-**Last Updated**: 2026-02-21
+**Last Updated**: 2026-03-22

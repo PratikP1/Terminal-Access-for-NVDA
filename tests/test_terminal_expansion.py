@@ -2,7 +2,6 @@
 Tests for the terminal support expansion:
 - Comprehensive ANSI escape stripping (OSC, DCS, private modes, charset, 2-char ESC)
 - TextDiffer KIND_LAST_LINE_UPDATED detection
-- NewOutputAnnouncer handling of KIND_LAST_LINE_UPDATED
 - New terminal emulator entries and profiles
 - TUI application profiles and window title detection
 """
@@ -147,28 +146,6 @@ class TestTextDifferLastLineUpdated(unittest.TestCase):
 
 		kind, _ = differ.update("Building...\n-")
 		self.assertEqual(kind, TextDiffer.KIND_LAST_LINE_UPDATED)
-
-
-class TestNewOutputAnnouncerLastLineUpdated(unittest.TestCase):
-	"""Tests for NewOutputAnnouncer handling of KIND_LAST_LINE_UPDATED."""
-
-	def test_feed_replaces_pending_on_last_line_update(self):
-		"""KIND_LAST_LINE_UPDATED should REPLACE pending text, not accumulate."""
-		from globalPlugins.terminalAccess import TextDiffer
-
-		differ = TextDiffer()
-
-		# Simulate the sequence that triggers last-line-updated
-		differ.update("header\nstatus: loading...")
-		kind, content = differ.update("header\nstatus: 50% done")
-		self.assertEqual(kind, TextDiffer.KIND_LAST_LINE_UPDATED)
-		self.assertEqual(content, "status: 50% done")
-
-		# Another last-line update overwrites again
-		kind, content = differ.update("header\nstatus: 100% complete")
-		self.assertEqual(kind, TextDiffer.KIND_LAST_LINE_UPDATED)
-		self.assertEqual(content, "status: 100% complete")
-		# Content is just the new tail, not accumulated
 
 
 class TestSupportedTerminals(unittest.TestCase):

@@ -176,11 +176,9 @@ class HelperProcess:
     Thread-safe: all public methods acquire locks as needed.
     """
 
-    # Auto-restart backoff parameters
-    _RESTART_DELAYS = [1.0, 2.0, 4.0, 8.0, 16.0, 30.0]
-
-    # Stop trying to restart after this many consecutive failures
-    _MAX_RESTART_ATTEMPTS = 6
+    # Auto-restart parameters
+    _RESTART_DELAY = 2.0
+    _MAX_RESTART_ATTEMPTS = 3
 
     # Timeout for waiting for a response (seconds)
     _RESPONSE_TIMEOUT = 5.0
@@ -723,19 +721,16 @@ class HelperProcess:
                 log.debug("Notification callback error", exc_info=True)
 
     # ───────────────────────────────────────────────────────────
-    #  Auto-restart with exponential backoff
+    #  Auto-restart after crash
     # ───────────────────────────────────────────────────────────
 
     def _maybe_restart(self):
         """Attempt to restart the helper after a crash.
 
-        Uses exponential backoff: 1s, 2s, 4s, 8s, 16s, 30s (cap).
-        Retries up to ``_MAX_RESTART_ATTEMPTS`` consecutive failures,
-        then dispatches a ``helper_crashed`` notification so subscribers
-        can fall back to polling.
-
-        Runs iteratively to handle consecutive failures without
-        recursion or leaving the helper permanently dead.
+        Retries up to ``_MAX_RESTART_ATTEMPTS`` times with a fixed
+        2-second delay between attempts.  On final failure, dispatches
+        a ``helper_crashed`` notification so subscribers can fall back
+        to polling.
         """
         while True:
             if self._stopping:
@@ -749,13 +744,10 @@ class HelperProcess:
                 self._dispatch_notification({"type": "helper_crashed"})
                 return
 
-            idx = min(self._restart_count, len(self._RESTART_DELAYS) - 1)
-            delay = self._RESTART_DELAYS[idx]
             self._restart_count += 1
-
             log.warning(
                 "Helper crashed, restarting in %.1fs (attempt %d/%d)",
-                delay,
+                self._RESTART_DELAY,
                 self._restart_count,
                 self._MAX_RESTART_ATTEMPTS,
             )
@@ -779,10 +771,8 @@ class HelperProcess:
                 except Exception:
                     pass
 
-            time.sleep(delay)
+            time.sleep(self._RESTART_DELAY)
 
-            # Re-check stopping flag after the sleep — stop() may have
-            # been called while we were waiting.
             if self._stopping:
                 return
 

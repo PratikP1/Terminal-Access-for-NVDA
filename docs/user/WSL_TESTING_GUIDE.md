@@ -1,12 +1,11 @@
 # WSL (Windows Subsystem for Linux) Testing Guide
 
-**Version:** 1.0.27+
-**Status:** Initial WSL Support
-**Last Updated:** 2026-02-21
+**Version:** 1.3.3+
+**Last Updated:** 2026-03-21
 
 ## Overview
 
-Terminal Access for NVDA v1.0.27+ includes support for Windows Subsystem for Linux (WSL), enabling screen reader users to work effectively in Linux terminal environments directly from Windows.
+Terminal Access for NVDA supports Windows Subsystem for Linux (WSL). Screen reader users can work in Linux terminal environments directly from Windows.
 
 ## What is WSL?
 
@@ -22,7 +21,7 @@ Windows Subsystem for Linux (WSL) is a compatibility layer for running Linux bin
 ### Prerequisites
 
 1. **NVDA** 2025.1 or later
-2. **Terminal Access for NVDA** v1.0.27 or later
+2. **Terminal Access for NVDA** v1.3.3 or later
 3. **Windows 10** version 2004+ or **Windows 11**
 4. **WSL** installed with a Linux distribution
 
@@ -82,7 +81,7 @@ The WSL profile is automatically activated when Terminal Access detects a WSL te
 
 ## WSL Profile Settings
 
-Terminal Access's WSL profile (v1.0.27+) includes optimizations for Linux command-line usage:
+Terminal Access's WSL profile includes optimizations for Linux command-line usage:
 
 ### Default Settings
 
@@ -108,7 +107,7 @@ Terminal Access's WSL profile (v1.0.27+) includes optimizations for Linux comman
 
 - [ ] WSL terminal is detected by Terminal Access
 - [ ] WSL profile automatically activates
-- [ ] NVDA+Alt+H gesture shows Terminal Access help in WSL
+- [ ] NVDA+Shift+F1 gesture shows Terminal Access help in WSL
 - [ ] Standard terminal navigation works (lines, words, characters)
 
 ### Command Execution
@@ -170,9 +169,9 @@ Test cursor tracking and output handling:
 
 ### File Navigation
 
-- [ ] Browse multi-line output with NVDA+Alt+U/I/O (previous/current/next line)
-- [ ] Read long lines with NVDA+Alt+J/K/L (previous/current/next word)
-- [ ] Character navigation with NVDA+Alt+M/Comma/Period
+- [ ] Browse multi-line output with NVDA+U/I/O (previous/current/next line)
+- [ ] Read long lines with NVDA+J/K/L (previous/current/next word)
+- [ ] Character navigation with NVDA+M/Comma/Period
 
 ## Known Limitations
 
@@ -200,7 +199,7 @@ Test cursor tracking and output handling:
 **Issue**: Terminal Access gestures don't work in WSL terminal
 
 **Solutions**:
-1. Verify Terminal Access version: Check NVDA Add-ons Manager for v1.0.27+
+1. Verify Terminal Access version in NVDA's Add-ons Manager
 2. Check application module:
    - Open NVDA Python console (NVDA+Control+Z)
    - Run: `api.getForegroundObject().appModule.appName`
@@ -286,7 +285,7 @@ You can create a custom profile for specific Linux distributions:
 
 **Fedora**:
 - Package manager: `dnf`
-- Cutting-edge packages
+- Latest upstream packages
 - SELinux enabled
 
 ## Testing Matrix

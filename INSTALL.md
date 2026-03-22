@@ -22,18 +22,17 @@
 2. **Install the Add-on**
    - Navigate to the downloaded `.nvda-addon` file
    - Press Enter to open it
-   - NVDA will display an installation confirmation dialog
-   - Press Enter to confirm the installation
+   - NVDA displays an installation confirmation dialog
+   - Press Enter to confirm
 
 3. **Restart NVDA**
-   - NVDA will prompt you to restart
+   - NVDA prompts you to restart
    - Press Enter to restart now, or Tab to "Restart later"
-   - The add-on will be active after NVDA restarts
+   - The add-on activates after NVDA restarts
 
 4. **Verify Installation**
    - Open a supported terminal application (e.g., Windows Terminal or PowerShell)
-   - NVDA should announce: "Terminal Access support active. Press NVDA+shift+f1 for help."
-   - If you hear this message, the installation was successful!
+   - NVDA announces: "Terminal Access support active. Press NVDA+shift+f1 for help."
 
 ### Method 2: Manual Installation
 
@@ -50,7 +49,7 @@
 3. **Restart NVDA**
    - Press `NVDA+Q` to quit NVDA
    - Start NVDA again
-   - The add-on will be loaded automatically
+   - The add-on loads automatically
 
 ## Verifying Installation
 
@@ -59,20 +58,19 @@ To verify the add-on is installed and working:
 1. Press `NVDA+N` to open the NVDA menu
 2. Navigate to "Tools" > "Manage add-ons"
 3. Look for "Terminal Access" or "terminalAccess" in the list of installed add-ons
-4. Ensure it is not disabled
+4. Confirm it is not disabled
 
 ## First Use
 
 1. **Open a Terminal**
    - Launch Windows Terminal, PowerShell, or Command Prompt
-   - NVDA will announce that Terminal Access support is active
+   - NVDA announces that Terminal Access support is active
 
 2. **Access Help**
-   - Press `NVDA+Shift+F1` to open the comprehensive user guide
-   - This guide contains all keyboard commands and settings information
+   - Press `NVDA+Shift+F1` to open the user guide
+   - The guide covers all keyboard commands and settings
 
 3. **Configure Settings**
-   - Press `NVDA+Alt+C` while in a terminal, or
    - Press `NVDA+N` > "Preferences" > "Settings" > "Terminal Settings"
    - Adjust settings to your preferences
 
@@ -90,19 +88,19 @@ If you need to uninstall the add-on:
 ## Troubleshooting Installation
 
 ### Add-on Won't Install
-- Ensure you're using NVDA 2025.1 or later
+- Confirm you're using NVDA 2025.1 or later
 - Check that the file downloaded completely (not corrupted)
 - Try downloading the file again
-- Ensure NVDA has proper permissions to write to its configuration directory
+- Check that NVDA has write access to its configuration directory
 
 ### Add-on Not Working After Installation
 - Verify the add-on is enabled in the Add-ons Manager
-- Ensure you've restarted NVDA after installation
+- Restart NVDA after installation
 - Check that you're using a supported terminal application
 - Review the troubleshooting section in the user guide
 
 ### Permission Issues
-- If running NVDA with elevated privileges, ensure the add-on installation is also performed with elevated privileges
+- If running NVDA with elevated privileges, install the add-on with elevated privileges too
 - Check that NVDA has write access to its configuration directory
 
 ## Updating
@@ -110,9 +108,9 @@ If you need to uninstall the add-on:
 To update to a newer version:
 
 1. Install the new version following the standard installation steps above
-2. NVDA will automatically replace the old version
+2. NVDA replaces the old version automatically
 3. Restart NVDA when prompted
-4. Your settings will be preserved
+4. Your settings carry over
 
 ## Getting Help
 
@@ -122,6 +120,3 @@ If you encounter issues during installation:
 2. Visit the project repository: https://github.com/PratikP1/Terminal-Access-for-NVDA
 3. Report issues on the project's issue tracker
 
----
-
-**Note:** This add-on requires only NVDA and a supported terminal application. No additional software or dependencies are needed.

@@ -1,6 +1,6 @@
-# Testing Guide for TDSR for NVDA
+# Testing Guide for Terminal Access for NVDA
 
-This comprehensive guide covers both automated and manual testing procedures for the TDSR add-on.
+This guide covers automated and manual testing procedures for the Terminal Access add-on.
 
 ---
 
@@ -8,12 +8,9 @@ This comprehensive guide covers both automated and manual testing procedures for
 
 ### Python Version Requirements
 
-**TDSR is compatible with NVDA 2025.1 and later**, which corresponds to:
-- **Minimum Python Version**: 3.11 (NVDA 2025.1 runtime)
-- **Maximum Python Version**: 3.11 (latest tested)
-- **Tested Versions**: 3.11 (NVDA runtime)
+**Terminal Access requires NVDA 2025.1 or later**, which uses Python 3.11.
 
-The test suite runs on all these Python versions via CI/CD to ensure compatibility.
+The test suite runs on Python 3.11 via CI/CD.
 
 ### Quick Start
 
@@ -30,20 +27,27 @@ pytest tests/
 
 ### Test Suite Overview
 
-The TDSR test suite includes:
+The test suite has **40 test files** with **778 passing tests** (67 skipped for native bridge).
 
-#### Unit Tests
-- **test_validation.py**: Input validation and resource limit tests (40+ tests)
-- **test_cache.py**: PositionCache functionality and thread safety (15+ tests)
-- **test_config.py**: Configuration management and sanitization (20+ tests)
-- **test_selection.py**: Selection operations and terminal detection (25+ tests)
-- **test_integration.py**: Integration tests for core workflows (30+ tests)
-- **test_performance.py**: Performance benchmarks and regression tests (20+ tests)
+Tests cover:
+- Input validation and security hardening
+- Position caching and thread safety
+- Configuration management
+- Selection operations and terminal detection
+- Application profiles and profile management
+- Bookmarks, search, URL extraction
+- Error line detection
+- Gesture conflict detection
+- Settings panel
+- Native bridge (skipped when Rust DLL unavailable)
+- Performance benchmarks and regression tests
+- Integration workflows
 
-#### Coverage Goal
-- **Overall Target**: 70%+ code coverage
-- **Core Methods**: 80%+ coverage
-- **Configuration**: 70%+ coverage
+#### Coverage
+
+- **Total coverage**: ~54% (measures both `terminalAccess.py` and `addon/lib/`)
+- **CI threshold**: 70% on covered modules
+- **lib/ modules**: Higher coverage since they were extracted for testability
 
 ### Running Tests
 
@@ -52,23 +56,16 @@ The TDSR test suite includes:
 python run_tests.py
 ```
 
-This will:
-1. Run all tests with verbose output
-2. Generate coverage report
-3. Display summary of results
+This runs all tests with verbose output and generates a coverage report.
 
 #### Run Specific Test Files
 ```bash
-# Run validation tests only
 pytest tests/test_validation.py -v
-
-# Run cache tests only
-pytest tests/test_cache.py -v
+pytest tests/test_gesture_conflicts.py -v
 ```
 
 #### Run Specific Test Methods
 ```bash
-# Run a single test
 pytest tests/test_validation.py::TestValidation::test_integer_range -v
 ```
 
@@ -79,7 +76,6 @@ pytest --cov=addon --cov-report=html tests/
 
 # Open coverage report
 # Windows: start htmlcov/index.html
-# Linux: xdg-open htmlcov/index.html
 ```
 
 ### CI/CD Testing
@@ -139,7 +135,7 @@ def test_with_terminal(mock_terminal):
 - [ ] Windows 10 or Windows 11
 - [ ] NVDA 2025.1 or later installed
 - [ ] At least one supported terminal application
-- [ ] TDSR add-on installed
+- [ ] Terminal Access add-on installed
 
 #### Supported Terminal Applications
 **Built-in Terminals:**
@@ -149,7 +145,7 @@ def test_with_terminal(mock_terminal):
 - Command Prompt (cmd.exe)
 - Console Host (conhost.exe)
 
-**Third-Party Terminals (v1.0.26+):**
+**Third-Party Terminals:**
 - Cmder, ConEmu, mintty (Git Bash)
 - PuTTY, KiTTY
 - Terminus, Hyper, Alacritty, WezTerm, Tabby, FluentTerminal
@@ -160,7 +156,7 @@ def test_with_terminal(mock_terminal):
 
 #### Test 1.1: Fresh Installation
 **Steps:**
-1. Download TDSR-*.nvda-addon file
+1. Download terminalAccess-*.nvda-addon file
 2. Press Enter on the file
 3. Confirm installation
 
@@ -185,14 +181,14 @@ def test_with_terminal(mock_terminal):
 
 #### Test 1.3: Uninstallation
 **Steps:**
-1. Open NVDA menu → Tools → Manage Add-ons
-2. Select TDSR
+1. Open NVDA menu > Tools > Manage Add-ons
+2. Select Terminal Access
 3. Click Remove
 4. Restart NVDA
 
 **Expected Result:**
 - Add-on removed successfully
-- TDSR features no longer available
+- Terminal Access features no longer available
 - No NVDA errors after restart
 
 **Status:** [ ] Pass [ ] Fail
@@ -207,12 +203,12 @@ def test_with_terminal(mock_terminal):
 2. Observe NVDA behavior
 
 **Expected Result:**
-- NVDA announces "TDSR terminal support active. Press NVDA+shift+f1 for help."
-- TDSR features become available
+- NVDA announces "Terminal Access support active. Press NVDA+Shift+F1 for help."
+- Terminal Access features become available
 
 **Status:** [ ] Pass [ ] Fail
 
-#### Test 2.2: Third-Party Terminal Detection (v1.0.26+)
+#### Test 2.2: Third-Party Terminal Detection
 **Repeat for each supported terminal:**
 - [ ] Cmder
 - [ ] ConEmu
@@ -231,10 +227,10 @@ def test_with_terminal(mock_terminal):
 #### Test 3.1: Line Navigation
 **Steps:**
 1. Open terminal with multiple lines of output
-2. Press `NVDA+Alt+U` (previous line)
-3. Press `NVDA+Alt+O` (next line)
-4. Press `NVDA+Alt+I` (current line)
-5. Press `NVDA+Alt+I` twice quickly (indentation level)
+2. Press `NVDA+U` (previous line)
+3. Press `NVDA+O` (next line)
+4. Press `NVDA+I` (current line)
+5. Press `NVDA+I` twice quickly (indentation level)
 
 **Expected Result:**
 - Previous line reads previous line content
@@ -247,9 +243,9 @@ def test_with_terminal(mock_terminal):
 #### Test 3.2: Word Navigation
 **Steps:**
 1. Position on a line with multiple words
-2. Press `NVDA+Alt+J` (previous word)
-3. Press `NVDA+Alt+L` (next word)
-4. Press `NVDA+Alt+K` (current word)
+2. Press `NVDA+J` (previous word)
+3. Press `NVDA+L` (next word)
+4. Press `NVDA+K` (current word)
 
 **Expected Result:**
 - Navigation moves by word correctly
@@ -262,9 +258,9 @@ def test_with_terminal(mock_terminal):
 1. Position on text
 2. Press `NVDA+Alt+M` (previous character)
 3. Press `NVDA+Alt+Period` (next character)
-4. Press `NVDA+Alt+Comma` (current character)
-5. Press `NVDA+Alt+Comma` twice (phonetic)
-6. Press `NVDA+Alt+Comma` three times (character code)
+4. Press `NVDA+Comma` (current character)
+5. Press `NVDA+Comma` twice (phonetic)
+6. Press `NVDA+Comma` three times (character code)
 
 **Expected Result:**
 - Character navigation works correctly
@@ -310,7 +306,7 @@ def test_with_terminal(mock_terminal):
 1. Press `NVDA+Alt+R` (set start mark)
 2. Navigate to different position
 3. Press `NVDA+Alt+R` (set end mark)
-4. Press `NVDA+Alt+C` (copy linear selection)
+4. Press `NVDA+C` (copy linear selection)
 
 **Expected Result:**
 - Marks set successfully
@@ -319,20 +315,9 @@ def test_with_terminal(mock_terminal):
 
 **Status:** [ ] Pass [ ] Fail
 
-#### Test 5.2: Rectangular Selection
-**Steps:**
-1. Set marks on different lines
-2. Press `NVDA+Alt+Shift+C` (copy rectangular)
-
-**Expected Result:**
-- Rectangular selection copied
-- Column alignment preserved
-
-**Status:** [ ] Pass [ ] Fail
-
 ---
 
-### 6. Color and Formatting Testing (v1.0.18+)
+### 6. Color and Formatting Testing
 
 #### Test 6.1: ANSI Color Detection
 **Steps:**
@@ -348,12 +333,12 @@ def test_with_terminal(mock_terminal):
 
 ---
 
-### 7. Application Profile Testing (v1.0.18+)
+### 7. Application Profile Testing
 
 #### Test 7.1: Vim Profile
 **Steps:**
 1. Open Vim in terminal
-2. Verify TDSR detects Vim
+2. Verify Terminal Access detects Vim
 3. Check status line behavior
 
 **Expected Result:**
@@ -376,7 +361,7 @@ def test_with_terminal(mock_terminal):
 
 ---
 
-### 8. Window Monitoring Testing (v1.0.28+)
+### 8. Window Monitoring Testing
 
 #### Test 8.1: Define Window
 **Steps:**
@@ -393,7 +378,7 @@ def test_with_terminal(mock_terminal):
 
 ### 9. Search and Bookmarks Testing
 
-#### Test 9.1: Output Search (v1.0.30+)
+#### Test 9.1: Output Search
 **Steps:**
 1. Press `NVDA+Alt+F`
 2. Enter search text
@@ -407,58 +392,34 @@ def test_with_terminal(mock_terminal):
 
 **Status:** [ ] Pass [ ] Fail
 
-#### Test 9.2: Bookmarks (v1.0.29+)
+#### Test 9.2: Bookmarks
 **Steps:**
 1. Press `NVDA+Alt+1` (set bookmark 1)
 2. Navigate away
 3. Press `Alt+1` (jump to bookmark 1)
 
 **Expected Result:**
-- Bookmark set at position
+- Bookmark set at position with line content label
 - Jump returns to bookmarked position
+- Bookmark list (NVDA+Shift+B) shows number and line content
 
 **Status:** [ ] Pass [ ] Fail
 
 ---
 
-### 10. Command History Testing (v1.0.31+)
+### 10. Settings Testing
 
-#### Test 10.1: Command Detection
+#### Test 10.1: Settings Dialog
 **Steps:**
-1. Execute several commands in terminal
-2. Press `NVDA+Alt+Shift+H` (scan for commands)
+1. Open NVDA menu > Preferences > Settings > Terminal Access
+2. Verify Basic/Advanced toggle works
+3. Modify punctuation level
+4. Change cursor tracking mode
+5. Click OK
 
 **Expected Result:**
-- Commands detected and stored
-- Command count announced
-
-**Status:** [ ] Pass [ ] Fail
-
-#### Test 10.2: Command Navigation
-**Steps:**
-1. Press `NVDA+H` (previous command)
-2. Press `NVDA+G` (next command)
-3. Press `NVDA+Shift+L` (list commands)
-
-**Expected Result:**
-- Navigation jumps to previous/next command
-- Command list announced with recent commands
-
-**Status:** [ ] Pass [ ] Fail
-
----
-
-### 11. Settings Testing
-
-#### Test 11.1: Settings Dialog
-**Steps:**
-1. Open NVDA menu → Preferences → Settings → TDSR Settings
-2. Modify punctuation level
-3. Change cursor tracking mode
-4. Click OK
-
-**Expected Result:**
-- Settings dialog opens correctly
+- Settings dialog opens with Basic view by default
+- "Show advanced" expands additional settings
 - Changes apply immediately
 - Settings persist after NVDA restart
 
@@ -466,16 +427,16 @@ def test_with_terminal(mock_terminal):
 
 ---
 
-### 12. Translation Testing (v1.0.32+)
+### 11. Translation Testing
 
-#### Test 12.1: Language Support
+#### Test 11.1: Language Support
 **Steps:**
 1. Change NVDA language (if translations available)
 2. Restart NVDA
-3. Test TDSR messages in new language
+3. Test Terminal Access messages in new language
 
 **Expected Result:**
-- TDSR messages appear in selected language
+- Terminal Access messages appear in selected language
 - Fallback to English for untranslated strings
 
 **Status:** [ ] Pass [ ] Fail
@@ -491,7 +452,7 @@ def test_with_terminal(mock_terminal):
 3. Measure response time
 
 **Expected Result:**
-- Navigation remains responsive (<100ms per operation)
+- Navigation stays responsive (<100ms per operation)
 - No noticeable lag
 
 **Status:** [ ] Pass [ ] Fail
@@ -504,7 +465,7 @@ After any code changes, run these critical tests:
 1. [ ] Terminal detection (Test 2.1)
 2. [ ] Line navigation (Test 3.1)
 3. [ ] Selection and copy (Test 5.1)
-4. [ ] Settings persistence (Test 11.1)
+4. [ ] Settings persistence (Test 10.1)
 
 ---
 
@@ -514,7 +475,7 @@ If any test fails:
 1. Note the test number and description
 2. Record exact steps to reproduce
 3. Include NVDA version, Windows version, terminal application
-4. Check NVDA log (NVDA menu → Tools → View Log)
+4. Check NVDA log (NVDA menu > Tools > View Log)
 5. Report via GitHub: https://github.com/PratikP1/Terminal-Access-for-NVDA/issues
 
 ---

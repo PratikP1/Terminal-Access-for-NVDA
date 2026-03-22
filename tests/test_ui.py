@@ -16,7 +16,7 @@ class TestSettingsPanel(unittest.TestCase):
 	def test_settings_panel_structure(self):
 		"""Test settings panel has correct structure."""
 		# Import using globalPlugins (conftest.py provides mocks)
-		from globalPlugins.terminalAccess import TerminalAccessSettingsPanel
+		from lib.settings_panel import TerminalAccessSettingsPanel
 
 		# Verify class exists and has required attributes
 		self.assertTrue(hasattr(TerminalAccessSettingsPanel, 'title'))
@@ -104,7 +104,7 @@ class TestConfigManager(unittest.TestCase):
 
 	def test_settings_panel_handles_missing_profile_manager(self):
 		"""Ensure settings panel builds without a profile manager."""
-		from globalPlugins.terminalAccess import TerminalAccessSettingsPanel
+		from lib.settings_panel import TerminalAccessSettingsPanel
 		import globalPluginHandler
 
 		# Simulate no running plugins / profile manager

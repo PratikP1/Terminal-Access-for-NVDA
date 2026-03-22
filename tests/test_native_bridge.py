@@ -31,35 +31,13 @@ try:
 		native_strip_ansi,
 		native_search_text,
 		NativePositionCache,
-		get_native_version,
-		native_char_width,
 		native_text_width,
-		native_extract_column_range,
-		native_find_column_position,
 	)
 	_HAS_NATIVE = native_available()
 except Exception:
 	_HAS_NATIVE = False
 
 _skip_msg = "Native DLL not available"
-
-
-@unittest.skipUnless(_HAS_NATIVE, _skip_msg)
-class TestNativeVersion(unittest.TestCase):
-	"""Test that the native DLL is loadable and reports a version."""
-
-	def test_version_is_string(self):
-		ver = get_native_version()
-		self.assertIsInstance(ver, str)
-		self.assertTrue(len(ver) > 0)
-
-	def test_version_format(self):
-		ver = get_native_version()
-		# Should be semver-like: X.Y.Z
-		parts = ver.split(".")
-		self.assertEqual(len(parts), 3)
-		for part in parts:
-			self.assertTrue(part.isdigit(), f"Version part '{part}' is not numeric")
 
 
 @unittest.skipUnless(_HAS_NATIVE, _skip_msg)
@@ -446,21 +424,6 @@ class TestNativeResourceCleanup(unittest.TestCase):
 class TestUnicodeWidth(unittest.TestCase):
 	"""Tests for native unicode width functions."""
 
-	def test_native_char_width_ascii(self):
-		"""ASCII characters should be width 1."""
-		result = native_char_width('A')
-		self.assertEqual(result, 1)
-
-	def test_native_char_width_cjk(self):
-		"""CJK characters should be width 2."""
-		result = native_char_width('\u4e2d')
-		self.assertEqual(result, 2)
-
-	def test_native_char_width_empty(self):
-		"""Empty string should return 0."""
-		result = native_char_width('')
-		self.assertEqual(result, 0)
-
 	def test_native_text_width_ascii(self):
 		"""Pure ASCII text width equals length."""
 		result = native_text_width("Hello")
@@ -474,43 +437,6 @@ class TestUnicodeWidth(unittest.TestCase):
 	def test_native_text_width_empty(self):
 		"""Empty text width is 0."""
 		result = native_text_width("")
-		self.assertEqual(result, 0)
-
-	def test_native_extract_column_range_ascii(self):
-		"""Extract from ASCII text."""
-		result = native_extract_column_range("Hello World", 1, 5)
-		self.assertEqual(result, "Hello")
-
-	def test_native_extract_column_range_middle(self):
-		"""Extract middle range from ASCII text."""
-		result = native_extract_column_range("Hello World", 7, 11)
-		self.assertEqual(result, "World")
-
-	def test_native_extract_column_range_cjk(self):
-		"""Extract range with CJK characters."""
-		# A=col1, B=col2, \u4e2d=col3-4, \u6587=col5-6, C=col7, D=col8
-		result = native_extract_column_range("AB\u4e2d\u6587CD", 3, 6)
-		self.assertEqual(result, "\u4e2d\u6587")
-
-	def test_native_extract_column_range_empty(self):
-		"""Empty text returns empty."""
-		result = native_extract_column_range("", 1, 5)
-		self.assertEqual(result, "")
-
-	def test_native_find_column_position(self):
-		"""Find char index for column."""
-		result = native_find_column_position("Hello", 3)
-		self.assertEqual(result, 2)
-
-	def test_native_find_column_position_cjk(self):
-		"""Find char index in CJK text."""
-		# A=col1, B=col2, \u4e2d=col3-4
-		result = native_find_column_position("AB\u4e2d\u6587", 3)
-		self.assertEqual(result, 2)
-
-	def test_native_find_column_position_empty(self):
-		"""Empty text returns 0."""
-		result = native_find_column_position("", 3)
 		self.assertEqual(result, 0)
 
 

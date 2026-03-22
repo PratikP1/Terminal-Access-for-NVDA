@@ -1,332 +1,325 @@
-# Terminal Access for NVDA - Quick Start Guide
+# Terminal Access for NVDA: Quick Start
 
-Welcome to Terminal Access for NVDA! This quick start guide will help you get up and running in minutes.
+Terminal Access adds keyboard-driven navigation and reading commands to 30 Windows terminals. Inspired by [TDSR](https://github.com/tspivey/tdsr) and [Speakup](https://github.com/linux-speakup/speakup).
 
-## What is Terminal Access for NVDA?
+## Installation
 
-Terminal Access for NVDA is an add-on that enhances terminal accessibility on Windows. It provides navigation, reading, and interaction features specifically designed for command-line interfaces. Inspired by [TDSR](https://github.com/tspivey/tdsr) and [Speakup](https://github.com/linux-speakup/speakup).
+1. Download the latest `.nvda-addon` file from the [GitHub Releases page](https://github.com/PratikP1/Terminal-Access-for-NVDA/releases/latest).
+2. Press Enter on the downloaded file.
+3. Confirm installation.
+4. Restart NVDA.
 
-## Installation (1 minute)
+## First Steps
 
-1. Download the latest `.nvda-addon` file from the [GitHub Releases page](https://github.com/PratikP1/Terminal-Access-for-NVDA/releases/latest)
-2. Press Enter on the downloaded file
-3. Confirm installation
-4. Restart NVDA
+### Open a Terminal
 
-That's it! The add-on is now installed.
+Open any supported terminal: Windows Terminal, PowerShell, Command Prompt, WSL, or any of the 30 supported emulators.
 
-## First Steps (5 minutes)
+You will hear: "Terminal Access support active. Press NVDA+shift+f1 for help."
 
-### Step 1: Open a Terminal
-Open any supported terminal: Windows Terminal, PowerShell, Command Prompt, WSL, or any of the 30 supported terminal emulators (including Alacritty, WezTerm, Ghostty, MobaXterm, and more).
+### Enter the Command Layer
 
-You'll hear: *"Terminal Access support active. Press NVDA+shift+f1 for help."*
+Press **NVDA+apostrophe** to enter the command layer. You will hear "Terminal commands" and a high tone. Every command becomes a single key press.
 
-### Step 2: Enter the Command Layer (Recommended)
-Press **NVDA+'** (apostrophe) to enter the **command layer**. You'll hear "Terminal commands" and a high-pitched tone. Now every command is a single key press — no modifier combos needed!
+| Key        | Action             |
+|------------|--------------------|
+| **I**      | Read current line  |
+| **O**      | Read next line     |
+| **U**      | Read previous line |
+| **K**      | Read current word  |
+| **L**      | Read next word     |
+| **J**      | Read previous word |
+| **Escape** | Exit the layer     |
 
-Try navigating:
-- **I** - Read current line
-- **O** - Read next line
-- **U** - Read previous line
-- **K** - Read current word
-- **L** - Read next word
-- **J** - Read previous word
-- **Escape** or **NVDA+'** - Exit the command layer
+### More Commands in the Layer
 
-### Step 3: Try More Commands in the Layer
-While in the command layer:
+| Key     | Action                          |
+|---------|---------------------------------|
+| **A**   | Continuous reading (say all)    |
+| **;**   | Announce position (row, column) |
+| **F**   | Search terminal output          |
+| **Q**   | Toggle quiet mode               |
+| **F1**  | Open user guide                 |
 
-- **A** - Continuous reading (say all)
-- **;** - Announce position (row, column)
-- **F** - Search terminal output
-- **Q** - Toggle quiet mode
-- **F1** - Open user guide
+### Character Reading
 
-Press **Escape** when done.
+| Key                 | Action                           |
+|---------------------|----------------------------------|
+| **M**               | Read previous character          |
+| **,** (comma)       | Read current character           |
+| **,** (twice)       | Phonetic reading                 |
+| **,** (three times) | Character code (decimal and hex) |
+| **.** (period)      | Read next character              |
 
-### Step 4: Character Reading
-Enter the command layer (**NVDA+'**) and try:
+### Buffer Navigation
 
-- **M** - Read previous character
-- **,** (comma) - Read current character (twice for phonetic, three times for code)
-- **.** (period) - Read next character
+| Key               | Action                    |
+|-------------------|---------------------------|
+| **Home / End**    | Start or end of line      |
+| **PageUp / Down** | Top or bottom of buffer   |
+| **Shift+Left**    | Read to start of line     |
+| **Shift+Right**   | Read to end of line       |
+| **Shift+Up**      | Read to top of buffer     |
+| **Shift+Down**    | Read to bottom of buffer  |
+| **- / =**         | Decrease or increase punctuation |
+| **D**             | Toggle indentation announcement  |
 
-### Step 5: Try Advanced Features
-Still in the command layer:
+### Direct Gestures
 
-- **Home/End** - Jump to start/end of line
-- **PageUp/PageDown** - Jump to top/bottom of buffer
-- **Shift+Arrows** - Read to edge (left/right/up/down)
-- **[/]** - Decrease/increase punctuation level
-- **D** - Toggle indentation announcement
+All commands also work with NVDA modifier combos without entering the layer:
 
-### Step 6: Direct Gestures (Alternative)
-All commands also work with traditional NVDA modifier combos for power users:
+| Gesture                   | Action                              |
+|---------------------------|-------------------------------------|
+| **NVDA+I**                | Read current line                   |
+| **NVDA+O**                | Read next line                      |
+| **NVDA+U**                | Read previous line                  |
+| **NVDA+K**                | Read current word                   |
+| **NVDA+A**                | Continuous reading (say all)        |
+| **NVDA+minus / equals**   | Decrease or increase punctuation    |
 
-- **NVDA+I** - Read current line
-- **NVDA+O** - Read next line
-- **NVDA+U** - Read previous line
-- **NVDA+K** - Read current word
-- **NVDA+A** - Continuous reading (say all)
+These can be remapped in NVDA's Input Gestures dialog under "Terminal Access".
 
-These direct gestures can be remapped in NVDA's Input Gestures dialog under "Terminal Access".
+## Command Layer Reference
 
-## Essential Commands
+Enter with **NVDA+apostrophe**. Exit with **Escape**.
 
-### Command Layer (NVDA+' to enter, Escape to exit)
+### Navigation
 
-| Layer Key | Action |
-|-----------|--------|
-| **I** | Read current line |
-| **O / U** | Read next / previous line |
-| **K** | Read current word |
-| **L / J** | Read next / previous word |
-| **,** | Read current character |
-| **A** | Continuous reading (say all) |
-| **;** | Announce position (row, column) |
-| **[/]** | Decrease/increase punctuation level |
-| **Home/End** | Jump to start/end of line |
-| **PageUp/Down** | Jump to top/bottom of buffer |
-| **Shift+Arrows** | Read to edge (left/right/up/down) |
-| **E** | List URLs in terminal output |
-| **F** | Search terminal output |
-| **Q** | Toggle quiet mode |
-| **D** | Toggle indentation announcement |
-| **F1** | Open user guide |
-| **Escape** | Exit command layer |
+| Key                   | Action                              |
+|-----------------------|-------------------------------------|
+| **U / I / O**         | Previous / current / next line      |
+| **J / K / L**         | Previous / current / next word      |
+| **M / , / .**         | Previous / current / next character |
+| **Home / End**        | Start / end of line                 |
+| **PageUp / PageDown** | Top / bottom of buffer              |
+| **Shift+Left**        | Read to start of line               |
+| **Shift+Right**       | Read to end of line                 |
+| **Shift+Up**          | Read to top of buffer               |
+| **Shift+Down**        | Read to bottom of buffer            |
 
-### Direct Gestures (always available in terminal)
+### Reading and Information
 
-| Command | Action |
-|---------|--------|
-| **NVDA+'** | Enter/exit command layer |
-| **NVDA+Shift+F1** | Open full user guide |
-| **NVDA+Shift+Q** | Toggle quiet mode |
-| **NVDA+F5** | Toggle automatic indentation announcement |
-| **NVDA+I** | Read current line |
-| **NVDA+I** (twice) | Announce line indentation |
-| **NVDA+K** | Read current word |
-| **NVDA+A** | Continuous reading (say all) |
-| **NVDA+;** | Announce position (row, column) |
-| **NVDA+[/]** | Decrease/increase punctuation level |
-| **NVDA+Shift+Home/End** | Jump to start/end of line |
-| **NVDA+F4/F6** | Jump to top/bottom of buffer |
-| **NVDA+Shift+Arrows** | Read to edge (left/right/up/down) |
-| **NVDA+Alt+U** | List URLs in terminal output |
+| Key                 | Action                           |
+|---------------------|----------------------------------|
+| **A**               | Continuous reading (say all)     |
+| **;**               | Announce position (row, column)  |
+| **Shift+A**         | Read text attributes and colors  |
+| **I** (twice)       | Announce line indentation        |
+| **,** (twice)       | Phonetic character reading       |
+| **,** (three times) | Character code (decimal and hex) |
+| **K** (twice)       | Spell current word               |
 
-## Settings (2 minutes)
+### Search and URLs
 
-Open settings:
-1. Press **NVDA+N** (NVDA menu)
-2. Go to Preferences > Settings
-3. Select "Terminal Settings"
+| Key          | Action                             |
+|--------------|------------------------------------|
+| **F**        | Search terminal output             |
+| **F3**       | Next search match                  |
+| **Shift+F3** | Previous search match              |
+| **E**        | List URLs found in terminal output |
 
-Try these settings:
-- **Key Echo**: Hear characters as you type
-- **Cursor Tracking**: Announce cursor movements
-- **Punctuation Level**: Control symbol verbosity (None/Some/Most/All)
-- **Announce Indentation When Reading Lines**: Automatically announce indentation for code
+### Bookmarks
+
+| Key           | Action                       |
+|---------------|------------------------------|
+| **0-9**       | Jump to bookmark             |
+| **Shift+0-9** | Set bookmark at current line |
+| **B**         | Open bookmark list dialog    |
+
+### Selection and Copy
+
+| Key   | Action                                         |
+|-------|-------------------------------------------------|
+| **R** | Toggle mark (start/end)                        |
+| **C** | Copy linear selection                          |
+| **X** | Clear marks                                    |
+| **V** | Enter copy mode (L=line, S=screen, Esc=cancel) |
+
+### Configuration
+
+| Key       | Action                                             |
+|-----------|----------------------------------------------------|
+| **Q**     | Toggle quiet mode                                  |
+| **- / =** | Decrease or increase punctuation level             |
+| **D**     | Toggle indentation announcement                    |
+| **P**     | Announce active profile. Press twice to select.    |
+| **Y**     | Cycle cursor tracking mode                         |
+
+### Tabs, Windows, Help
+
+| Key         | Action                        |
+|-------------|-------------------------------|
+| **T**       | Create new tab                |
+| **Shift+T** | List tabs                     |
+| **W**       | Read window content           |
+| **Shift+W** | Set window boundaries         |
+| **Ctrl+W**  | Clear window                  |
+| **S**       | Open Terminal Access settings |
+| **F1**      | Open user guide               |
+| **Escape**  | Exit command layer            |
+
+## Direct Gesture Reference
+
+### Navigation
+
+| Gesture                   | Action                              |
+|---------------------------|-------------------------------------|
+| **NVDA+apostrophe**       | Enter or exit command layer         |
+| **NVDA+U / I / O**       | Previous / current / next line      |
+| **NVDA+J / K / L**       | Previous / current / next word      |
+| **NVDA+M / , / .**       | Previous / current / next character |
+| **NVDA+Shift+Home / End** | Start / end of line                |
+| **NVDA+F4 / F6**         | Top / bottom of buffer              |
+
+### Reading
+
+| Gesture                  | Action                           |
+|--------------------------|----------------------------------|
+| **NVDA+A**               | Continuous reading (say all)     |
+| **NVDA+;**               | Announce position (row, column)  |
+| **NVDA+I** (twice)       | Announce line indentation        |
+| **NVDA+F5**              | Toggle indentation announcement  |
+| **NVDA+,** (twice)       | Phonetic character reading       |
+| **NVDA+,** (three times) | Character code (decimal and hex) |
+| **NVDA+K** (twice)       | Spell current word               |
+| **NVDA+Shift+A**         | Read text attributes and colors  |
+
+### Directional Reading
+
+| Gesture              | Action                   |
+|----------------------|--------------------------|
+| **NVDA+Shift+Left**  | Read to start of line    |
+| **NVDA+Shift+Right** | Read to end of line      |
+| **NVDA+Shift+Up**    | Read to top of buffer    |
+| **NVDA+Shift+Down**  | Read to bottom of buffer |
+
+### Punctuation and Modes
+
+| Gesture          | Action                                |
+|------------------|---------------------------------------|
+| **NVDA+minus**   | Decrease punctuation level            |
+| **NVDA+equals**  | Increase punctuation level            |
+| **NVDA+Alt+Y**   | Cycle cursor tracking mode            |
+| **NVDA+Shift+Q** | Toggle quiet mode                     |
+
+### Selection and Copy
+
+| Gesture        | Action                |
+|----------------|-----------------------|
+| **NVDA+R**     | Toggle mark           |
+| **NVDA+C** | Copy linear selection |
+| **NVDA+X**     | Clear marks           |
+| **NVDA+V**     | Enter copy mode       |
+
+### Bookmarks
+
+| Gesture          | Action                       |
+|------------------|------------------------------|
+| **Alt+0-9**      | Jump to bookmark             |
+| **NVDA+Alt+0-9** | Set bookmark at current line |
+| **NVDA+Shift+B** | Open bookmark list dialog    |
+
+### Search and URLs
+
+| Gesture           | Action                       |
+|-------------------|------------------------------|
+| **NVDA+F**        | Search terminal output       |
+| **NVDA+F3**       | Next search match            |
+| **NVDA+Shift+F3** | Previous search match        |
+| **NVDA+Alt+U**    | List URLs in terminal output |
+
+### Tabs, Windows, Help
+
+| Gesture           | Action                                      |
+|-------------------|---------------------------------------------|
+| **NVDA+Shift+T**  | Create new tab                              |
+| **NVDA+W**        | List tabs                                   |
+| **NVDA+Alt+F2**   | Set screen window (press twice: start, end) |
+| **NVDA+Alt+F3**   | Clear screen window                         |
+| **NVDA+Alt+Plus** | Read window content                         |
+| **NVDA+F10**      | Announce profile. Press twice to select.    |
+| **NVDA+Shift+F1** | Open user guide                             |
+
+## Settings
+
+Open settings: NVDA menu, Preferences, Settings, Terminal Settings.
+
+| Setting                          | Description                                                          |
+|----------------------------------|----------------------------------------------------------------------|
+| **Key Echo**                     | Hear characters as you type.                                         |
+| **Cursor Tracking**              | Announce cursor movements.                                           |
+| **Punctuation Level**            | Control symbol verbosity (None, Some, Most, All).                    |
+| **Indentation**                  | Automatically announce indentation for code.                         |
+| **Error Audio Cues**             | Play tones on error/warning lines during navigation. On by default.  |
+| **Error Audio Cues in Quiet Mode** | Play error/warning tones on caret events while quiet mode is active. Off by default. |
+| **Output Activity Tones**        | Play two ascending tones (600+800 Hz) when new program output appears. Off by default. |
+| **Output Activity Debounce**     | Minimum interval between activity tones in milliseconds (100 to 10000, default 1000). |
+
+### NVDA Gesture Conflicts
+
+Open NVDA menu, Preferences, Settings, Terminal Settings. The "NVDA Gesture Conflicts" section lists all direct gestures. Uncheck any gesture to disable it and resolve conflicts with other add-ons. Disabled gestures remain accessible through the command layer (NVDA+apostrophe).
+
+### Gesture Scoping
+
+Terminal Access gestures only activate inside supported terminals. Outside a terminal, the gestures pass through to NVDA or other add-ons. Terminal detection uses exact match on the process name.
 
 ## Common Tasks
 
 ### Reading Command Output
-1. Run a command
-2. Use **NVDA+A** for continuous reading (say all)
-3. Or use **NVDA+U/I/O** to read line by line
-4. Use **NVDA+Shift+Q** to enable quiet mode if output is verbose
 
-### Using Punctuation Levels
-1. Press **NVDA+]** to increase level
-2. Type commands with symbols (@, #, $, etc.)
-3. Hear more or fewer symbols based on level
-4. Level 2 (Most) is ideal for code and scripts
-5. Level 0 (None) is good for prose
+1. Run a command.
+2. Press **NVDA+A** for continuous reading.
+3. Or press **NVDA+U/I/O** to read line by line.
+4. Press **NVDA+Shift+Q** to enable quiet mode if output is verbose.
 
 ### Selecting and Copying Text
-1. Navigate to selection start
-2. Press **NVDA+R** to mark start
-3. Navigate to selection end
-4. Press **NVDA+R** to mark end
-5. Press **NVDA+C** to copy (linear) or **NVDA+Shift+C** (rectangular)
-6. Press **NVDA+X** to clear marks
 
-### Reading Portions of Screen
-1. Position cursor where you want to start
-2. Press **NVDA+Shift+Right** to read to end of line
-3. Or **NVDA+Shift+Down** to read to bottom of buffer
-4. Use other directions (Left/Up) as needed
+1. Navigate to selection start.
+2. Press **NVDA+R** to mark start.
+3. Navigate to selection end.
+4. Press **NVDA+R** to mark end.
+5. Press **NVDA+C** to copy.
+6. Press **NVDA+X** to clear marks.
 
-### Reading Long Files or Logs
-1. Navigate to start position
-2. Press **NVDA+A** to read continuously to the end
-3. Press any key to stop reading
-4. Use **NVDA+F4/F6** to jump to top or bottom
+### Working with Code
 
-### Working with Python or YAML Code
-1. Enable automatic indentation announcement with **NVDA+F5**
-2. Navigate to a line of code with **NVDA+U/I/O**
-3. Indentation level is announced automatically after the line content
-4. Or press **NVDA+I** twice to query indentation of current line
-5. Use line navigation to review code structure
-6. Toggle off with **NVDA+F5** when not needed
+1. Enable indentation announcement with **NVDA+F5**.
+2. Navigate lines with **NVDA+U/I/O**.
+3. Indentation level is announced after each line.
+4. Press **NVDA+I** twice to query the current line's indentation.
+5. Toggle off with **NVDA+F5** when not needed.
 
-### Debugging Character Issues
-1. Navigate to a suspicious character
-2. Press **NVDA+Comma** three times
-3. Hear the character code (decimal and hex)
-4. Useful for finding hidden control characters
+### Finding Characters
 
-### Working with Long Commands
-1. Type your command
-2. Use **NVDA+J/K/L** to review word by word
-3. Use **NVDA+M/Comma/Period** for character-by-character editing
-4. Use **NVDA+Shift+Home/End** to jump to start or end of line
+1. Navigate to a character.
+2. Press **NVDA+comma** three times.
+3. Hear the character code (decimal and hex).
+4. Useful for finding hidden control characters.
 
-### Finding Specific Information
-1. Run your command
-2. Navigate with line commands
-3. Use word navigation to scan faster
-4. Switch to character navigation for precision
+## Tips
 
-## Complete Keyboard Reference
-
-### Command Layer (enter with NVDA+', exit with Escape)
-
-Once in the command layer, all commands are single-key presses:
-
-| Key | Action | Key | Action |
-|-----|--------|-----|--------|
-| **u/i/o** | Prev/current/next line | **j/k/l** | Prev/current/next word |
-| **m/,/.** | Prev/current/next char | **Home/End** | Start/end of line |
-| **PgUp/PgDn** | Top/bottom of buffer | **Shift+Arrows** | Read to edge |
-| **a** | Say all | **;** | Announce position |
-| **Shift+A** | Read attributes | **f** | Search output |
-| **F3/Shift+F3** | Next/prev search match | **q** | Toggle quiet mode |
-| **n** | Toggle new output | **d** | Toggle indentation |
-| **[/]** | Punctuation level -/+ | **p** | Active profile |
-| **r** | Toggle mark | **c/Shift+C** | Copy linear/rectangular |
-| **x** | Clear marks | **v** | Copy mode |
-| **w/Shift+W/Ctrl+W** | Read/set/clear window | **y** | Cycle tracking mode |
-| **0-9** | Jump to bookmark | **Shift+0-9** | Set bookmark |
-| **b** | List bookmarks | **t/Shift+T** | New tab / list tabs |
-| **h/g** | Prev/next command | **Shift+H/Shift+L** | Scan/list history |
-| **e** | List URLs | **s** | Open settings |
-| **F1** | Open user guide | **Escape** | Exit command layer |
-
-### Direct Gestures (NVDA modifier combos)
-
-#### Basic Navigation
-- **NVDA+U/I/O** - Read previous/current/next line
-- **NVDA+J/K/L** - Read previous/current/next word
-- **NVDA+M/Comma/Period** - Read previous/current/next character
-- **NVDA+Shift+Home/End** - Jump to start/end of line
-- **NVDA+F4/F6** - Jump to top/bottom of buffer
-
-#### Advanced Reading
-- **NVDA+A** - Continuous reading (say all)
-- **NVDA+I** (twice) - Announce indentation level
-- **NVDA+F5** - Toggle automatic indentation announcement
-- **NVDA+Comma** (twice) - Read character phonetically
-- **NVDA+Comma** (three times) - Announce character code
-- **NVDA+K** (twice) - Spell current word
-- **NVDA+;** - Announce position (row, column)
-
-#### Directional Reading
-- **NVDA+Shift+Left/Right** - Read to beginning/end of line
-- **NVDA+Shift+Up/Down** - Read to top/bottom of buffer
-
-#### Punctuation & Tracking
-- **NVDA+[/]** - Decrease/increase punctuation level
-- **NVDA+Alt+Y** - Cycle cursor tracking mode (layer: **y**)
-- **NVDA+Shift+Q** - Toggle quiet mode
-
-#### Selection & Copy
-- **NVDA+R** - Toggle mark (press 3 times: start, end, clear)
-- **NVDA+C** - Copy linear selection
-- **NVDA+Shift+C** - Copy rectangular selection
-- **NVDA+X** - Clear marks
-- **NVDA+V** - Enter legacy copy mode
-
-#### Window Management
-- **NVDA+Alt+F2** - Set screen window (press twice: start, end)
-- **NVDA+Alt+F3** - Clear screen window
-- **NVDA+Alt+Plus** - Read window content
-- **NVDA+Alt+Shift+A** - Read text attributes/colors
-
-#### Bookmarks (v1.0.29+)
-- **NVDA+Alt+0-9** - Set bookmark (0-9)
-- **Alt+0-9** - Jump to bookmark (0-9)
-- **NVDA+Shift+B** - List bookmarks
-
-#### Command History (v1.0.31+)
-- **NVDA+Shift+H** - Scan command history
-- **NVDA+H/G** - Navigate previous/next command
-- **NVDA+Shift+L** - List command history
-
-#### Search (v1.0.30+)
-- **NVDA+F** - Search terminal output
-- **NVDA+F3** - Next search match
-- **NVDA+Shift+F3** - Previous search match
-
-#### URL List
-- **NVDA+Alt+U** - List URLs in terminal output
-
-#### Tab Management
-- **NVDA+Shift+T** - Create new tab
-- **NVDA+W** - List tabs
-
-#### Settings & Help
-- **NVDA+'** - Toggle command layer
-- **NVDA+Shift+F1** - Open user guide
-- **NVDA+F10** - Announce active and default profiles
-- **NVDA+Shift+N** - Toggle new output announcements
-
-## Getting Help
-
-- **Full User Guide**: Press **NVDA+Shift+F1** anytime in a terminal
-- **GitHub**: https://github.com/PratikP1/Terminal-Access-for-NVDA
-- **Documentation**: See INSTALL.md, README.md, and docs/ directory
-
-## Tips for Efficiency
-
-1. **Use the Command Layer**: Press NVDA+' to enter single-key mode — much faster than modifier combos
-2. **Use Continuous Reading**: Press A (in layer) to read long output instead of navigating line by line
-3. **Master Punctuation Levels**: Press [/] (in layer) to match your current task (code vs. prose)
-4. **Use Directional Reading**: Shift+Arrow combos quickly scan portions without moving cursor
-5. **Learn Screen Edge Navigation**: Jump to line/buffer boundaries with Home/End/PageUp/PageDown
-6. **Use Mark-Based Selection**: For precise text extraction from tables or structured output
-7. **Check Indentation**: Press I twice (in layer) or NVDA+I twice for Python/YAML code
-8. **Use Quiet Mode**: Press Q (in layer) when commands produce lots of output
-9. **Remap Gestures**: All commands appear in NVDA's Input Gestures under "Terminal Access"
-10. **Practice Commands**: Muscle memory makes navigation much faster
+1. **Use the command layer.** Press NVDA+apostrophe. Single-key commands are faster than modifier combos.
+2. **Use continuous reading.** Press A in the layer to read long output.
+3. **Adjust punctuation.** Press minus or equals in the layer to match your task.
+4. **Use directional reading.** Shift+Arrow combos scan quickly without moving the cursor.
+5. **Use quiet mode.** Press Q in the layer when commands produce verbose output.
+6. **Remap gestures.** All commands appear in NVDA's Input Gestures under "Terminal Access".
 
 ## Troubleshooting
 
-### Not Working?
-- Ensure you're in a supported terminal (Windows Terminal, PowerShell, cmd, WSL, or any of the 30 supported terminals)
-- Check add-on is enabled in NVDA > Tools > Manage Add-ons
-- Restart NVDA
+### Add-on does not activate
 
-### Commands Not Responding?
-- Try different terminal application
-- Check for keyboard shortcut conflicts in NVDA Input Gestures
-- Review NVDA log (NVDA menu > Tools > View log)
+- Confirm you are in a supported terminal.
+- Check that the add-on is enabled in NVDA, Tools, Manage Add-ons.
+- Restart NVDA.
 
-## Next Steps
+### Commands do not respond
 
-1. **Read the Full Guide**: Press **NVDA+Shift+F1** for complete documentation
-2. **Explore Settings**: Customize Terminal Access to your workflow
-3. **Try All Features**: Selection, copy mode, phonetic reading
-4. **Practice Daily**: The more you use it, the more efficient you become
+- Try a different terminal application.
+- Check for keyboard shortcut conflicts in NVDA Input Gestures.
+- Review the NVDA log (NVDA menu, Tools, View log).
 
-## Support
+## Getting Help
 
-Need help?
-- Check the troubleshooting section in the user guide
-- Visit the GitHub repository
-- Report issues on GitHub
-
----
-
-**Enjoy using Terminal Access for NVDA!** Your command-line experience just got a lot better.
+- Press **NVDA+Shift+F1** in any terminal for the full user guide.
+- Report issues on [GitHub](https://github.com/PratikP1/Terminal-Access-for-NVDA/issues).

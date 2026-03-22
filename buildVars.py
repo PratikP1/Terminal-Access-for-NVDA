@@ -23,10 +23,10 @@ addon_info = AddonInfo(
 	# Translators: Long description to be shown for this add-on on add-on information from add-on store
 	addon_description=_("""Provides enhanced terminal accessibility for Windows Terminal and PowerShell, enabling screen reader users to efficiently navigate and interact with command-line interfaces. Inspired by TDSR (Terminal Data Structure Reader) and incorporates functionality from both TDSR and Speakup. Advanced features inspired by community suggestions and discussions."""),
 	# version
-	addon_version="1.3.3",
+	addon_version="1.4.0",
 	# Brief changelog for this version
 	# Translators: what's new content for the add-on version to be shown in the add-on store
-	addon_changelog=_("""Security fixes, bug fixes, robustness improvements, and 9 new languages."""),
+	addon_changelog=_("""New error/warning audio cues, profile selection dialog, enhanced bookmarks with labels, settings panel reorganization, gesture changes to avoid NVDA conflicts, and deprecation notices for v2."""),
 	# Author(s)
 	addon_author="Pratik Patel",
 	# URL for the add-on documentation support
@@ -61,7 +61,10 @@ i18nSources: list[str] = pythonSources + ["buildVars.py"]
 
 # Files that will be ignored when building the nvda-addon file
 # Paths are relative to the addon directory, not to the root directory of your addon sources.
-excludedFiles: list[str] = []
+excludedFiles: list[str] = [
+	"**/__pycache__/*",
+	"**/*.pyc",
+]
 
 # Base language for the NVDA add-on
 # If your add-on is written in a language other than english, modify this variable.
@@ -69,7 +72,7 @@ baseLanguage: str = "en"
 
 # Markdown extensions for add-on documentation
 # Most add-ons do not require additional Markdown extensions.
-markdownExtensions: list[str] = []
+markdownExtensions: list[str] = ["tables", "fenced_code"]
 
 # Custom braille translation tables
 brailleTables: BrailleTables = {}

@@ -197,9 +197,10 @@ def test_bookmark_manager_legacy_mode():
 	# Bookmark should exist
 	assert bookmark_manager.has_bookmark("1")
 
-	# List bookmarks
+	# List bookmarks - now returns list of dicts
 	bookmarks = bookmark_manager.list_bookmarks()
-	assert "1" in bookmarks
+	names = [bm["name"] for bm in bookmarks]
+	assert "1" in names
 
 
 def test_tab_manager_get_tab_title():
