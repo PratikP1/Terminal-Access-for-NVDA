@@ -212,6 +212,7 @@ _COMMAND_LAYER_MAP = {
 	"kb:shift+8": "setBookmark",
 	"kb:shift+9": "setBookmark",
 	"kb:b": "listBookmarks",
+	"kb:shift+s": "listSections",
 	# Tab management
 	"kb:t": "createNewTab",
 	"kb:shift+t": "listTabs",
@@ -230,6 +231,9 @@ _COMMAND_LAYER_MAP = {
 	"kb:shift+f1": "checkGestureConflicts",
 	# URL list (elements)
 	"kb:e": "listUrls",
+	# Summarization
+	"kb:z": "summarizeLastCommand",
+	"kb:shift+z": "summarizeSelection",
 	# Layer exit
 	"kb:escape": "exitCommandLayer",
 }
@@ -307,6 +311,9 @@ _DEFAULT_GESTURES = {
 	"kb:alt+7": "jumpToBookmark",
 	"kb:alt+8": "jumpToBookmark",
 	"kb:alt+9": "jumpToBookmark",
+	# Summarization
+	"kb:NVDA+alt+s": "summarizeLastCommand",
+	"kb:NVDA+alt+shift+s": "summarizeSelection",
 }
 
 # Gestures that are always active regardless of context.
@@ -572,6 +579,8 @@ from lib.operations import SelectionProgressDialog, OperationQueue
 # Navigation classes extracted to lib.navigation
 from lib.navigation import TabManager, BookmarkManager
 from lib.gesture_conflicts import GestureConflictDetector
+from lib.section_tokenizer import SectionTokenizer
+from lib.summarizer import OutputSummarizer
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	"""
@@ -768,6 +777,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Error/warning line detector for audio cues during line navigation
 		self._errorDetector = ErrorLineDetector()
 
+		# Section tokenizer for semantic navigation
+		self._sectionTokenizer = SectionTokenizer()
+
+		# Extractive summarizer for terminal output
+		self._outputSummarizer = OutputSummarizer()
+
 		# Gesture conflict detection
 		self._conflictDetector = GestureConflictDetector()
 
@@ -880,7 +895,26 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		except (ValueError, AttributeError):
 			pass
 		super().terminate()
-	
+
+	def chooseNVDAObjectOverlayClasses(self, obj, clsList):
+		"""Insert TerminalAccessTerminal overlay for terminal NVDAObjects.
+
+		Called by NVDA when building the class list for a new NVDAObject.
+		If the object belongs to a supported terminal, we insert our
+		overlay at position 0 so its methods (event_textChange,
+		_reportNewLines) take priority over NVDA's LiveText defaults.
+		"""
+		from lib.terminal_overlay import TerminalAccessTerminal, should_apply_overlay
+		try:
+			appName = obj.appModule.appName
+		except AttributeError:
+			return
+		if not should_apply_overlay(appName):
+			return
+		if TerminalAccessTerminal in clsList:
+			return
+		clsList.insert(0, TerminalAccessTerminal)
+
 	def isTerminalApp(self, obj=None):
 		"""
 		Check if the current application is a supported terminal.
@@ -1047,6 +1081,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self._detectAndApplyProfile(obj)
 		self._announceProfileIfNew(obj, appName)
 		self._bindReviewCursor(obj)
+		self._wireOverlayConfig(obj)
 		self._announceHelpIfNeeded(appName)
 
 	def _startHelperIfNeeded(self):
@@ -1080,6 +1115,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				setattr(self, attr, cls(*args_fn(), **kwargs))
 			else:
 				current.update_terminal(obj)
+
+	def _wireOverlayConfig(self, obj):
+		"""Pass the config manager to the overlay if present on the object."""
+		from lib.terminal_overlay import TerminalAccessTerminal
+		if isinstance(obj, TerminalAccessTerminal):
+			obj._configManager = self._configManager
 
 	def _detectAndApplyProfile(self, obj):
 		"""Detect and activate the appropriate application profile."""
@@ -3355,6 +3396,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# For custom bookmark names, we'd need a dialog - for now use "temp"
 			name = "temp"
 
+		# Provide buffer lines for context-aware auto-labeling.
+		self._bookmarkManager._buffer_lines = self._getBufferLines()
+
 		if self._bookmarkManager.set_bookmark(name):
 			label = self._bookmarkManager.get_bookmark_label(name) or ""
 			if label:
@@ -3448,6 +3492,69 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			self._bookmarkJumpPending = True
 		finally:
 			gui.mainFrame.postPopup()
+
+	# Section 8.4: Section list gesture (v1.5.0+)
+
+	@scriptHandler.script(
+		# Translators: Description for listing detected sections
+		description=_("List all detected sections in the terminal buffer"),
+		category=SCRCAT_TERMINALACCESS,
+		gesture="kb:NVDA+alt+s"
+	)
+	def script_listSections(self, gesture):
+		"""List all detected sections in an accessible dialog."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		lines = self._getBufferLines()
+		if not lines:
+			# Translators: Message when terminal buffer cannot be read
+			ui.message(_("Cannot read terminal buffer"))
+			return
+
+		if not self._bookmarkManager:
+			ui.message(_("Bookmark manager not available"))
+			return
+
+		sections = self._bookmarkManager.list_sections(lines)
+		if not sections:
+			# Translators: Message when no sections detected
+			ui.message(_("No sections detected"))
+			return
+
+		wx.CallAfter(self._showSectionDialog, sections)
+
+	def _showSectionDialog(self, sections):
+		"""Open the section list dialog on the main thread."""
+		from lib.navigation import SectionListDialog
+		import gui
+		try:
+			gui.mainFrame.prePopup()
+			dlg = SectionListDialog(
+				gui.mainFrame, sections, self._jumpToLine
+			)
+			dlg.ShowModal()
+			dlg.Destroy()
+			self._bookmarkJumpPending = True
+		finally:
+			gui.mainFrame.postPopup()
+
+	def _jumpToLine(self, line_num):
+		"""Move the review cursor to a 0-based line number."""
+		terminal = self._boundTerminal
+		if terminal is None:
+			return
+		try:
+			pos = terminal.makeTextInfo(textInfos.POSITION_FIRST)
+			if line_num > 0:
+				pos.move(textInfos.UNIT_LINE, line_num)
+			pos.expand(textInfos.UNIT_LINE)
+			api.setReviewPosition(pos)
+			if pos.text:
+				ui.message(pos.text)
+		except Exception:
+			pass
 
 	# Section 9: Tab management gestures (v1.0.39+)
 
@@ -3902,6 +4009,289 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			return True
 		ui.message(_("Unable to copy"))
 		return False
+
+	# ------------------------------------------------------------------
+	# Section navigation helpers and scripts
+	# ------------------------------------------------------------------
+
+	def _getBufferLines(self):
+		"""Read all lines from the current terminal buffer.
+
+		Returns:
+			list[str] or None if the terminal buffer cannot be read.
+		"""
+		terminal = self._boundTerminal
+		if terminal is None:
+			return None
+		try:
+			info = terminal.makeTextInfo(textInfos.POSITION_ALL)
+			text = info.text or ""
+			return text.split("\n")
+		except Exception:
+			return None
+
+	def _getCurrentLineNumber(self):
+		"""Return the 0-based line number of the review cursor.
+
+		Returns:
+			int or None if the position cannot be determined.
+		"""
+		info = self._getReviewPosition()
+		if info is None:
+			return None
+		terminal = self._boundTerminal
+		if terminal is None:
+			return None
+		try:
+			topInfo = terminal.makeTextInfo(textInfos.POSITION_FIRST)
+			topInfo.setEndPoint(info, "endToStart")
+			above = topInfo.text or ""
+			return above.count("\n")
+		except Exception:
+			return 0
+
+	def _navigateToSection(self, section):
+		"""Move the review cursor to the line indicated by *section* and speak it.
+
+		Args:
+			section: A Section namedtuple, or None (beeps if None).
+		"""
+		if section is None:
+			tones.beep(200, 100)
+			return
+		terminal = self._boundTerminal
+		if terminal is None:
+			return
+		try:
+			info = terminal.makeTextInfo(textInfos.POSITION_FIRST)
+			info.move(textInfos.UNIT_LINE, section.line_num)
+			info.expand(textInfos.UNIT_LINE)
+			api.setReviewPosition(info)
+			speech.speakTextInfo(info, reason=speech.REASON_CARET)
+			# Play a brief audio cue for error/warning sections
+			if section.category == "error":
+				tones.beep(220, 40)
+			elif section.category == "warning":
+				tones.beep(440, 40)
+		except Exception:
+			ui.message(section.text)
+
+	@script(
+		# Translators: Description for jumping to the next section boundary
+		description=_("Jump to next section in terminal output"),
+		gesture="kb:NVDA+n",
+		category=SCRCAT_TERMINALACCESS,
+	)
+	def script_nextSection(self, gesture):
+		"""Jump to the next section boundary."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+		lines = self._getBufferLines()
+		if not lines:
+			tones.beep(200, 100)
+			return
+		self._sectionTokenizer.tokenize(lines)
+		current = self._getCurrentLineNumber() or 0
+		self._navigateToSection(self._sectionTokenizer.next_section(current))
+
+	@script(
+		# Translators: Description for jumping to the previous section boundary
+		description=_("Jump to previous section in terminal output"),
+		gesture="kb:NVDA+shift+n",
+		category=SCRCAT_TERMINALACCESS,
+	)
+	def script_prevSection(self, gesture):
+		"""Jump to the previous section boundary."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+		lines = self._getBufferLines()
+		if not lines:
+			tones.beep(200, 100)
+			return
+		self._sectionTokenizer.tokenize(lines)
+		current = self._getCurrentLineNumber() or 0
+		self._navigateToSection(self._sectionTokenizer.prev_section(current))
+
+	@script(
+		# Translators: Description for jumping to the next error or warning
+		description=_("Jump to next error or warning in terminal output"),
+		gesture="kb:NVDA+alt+n",
+		category=SCRCAT_TERMINALACCESS,
+	)
+	def script_nextError(self, gesture):
+		"""Jump to the next error or warning line."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+		lines = self._getBufferLines()
+		if not lines:
+			tones.beep(200, 100)
+			return
+		self._sectionTokenizer.tokenize(lines)
+		current = self._getCurrentLineNumber() or 0
+		self._navigateToSection(self._sectionTokenizer.next_error(current))
+
+	@script(
+		# Translators: Description for jumping to the previous error or warning
+		description=_("Jump to previous error or warning in terminal output"),
+		gesture="kb:NVDA+alt+shift+n",
+		category=SCRCAT_TERMINALACCESS,
+	)
+	def script_prevError(self, gesture):
+		"""Jump to the previous error or warning line."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+		lines = self._getBufferLines()
+		if not lines:
+			tones.beep(200, 100)
+			return
+		self._sectionTokenizer.tokenize(lines)
+		current = self._getCurrentLineNumber() or 0
+		self._navigateToSection(self._sectionTokenizer.prev_error(current))
+
+	@script(
+		# Translators: Description for jumping to the next prompt
+		description=_("Jump to next prompt in terminal output"),
+		gesture="kb:NVDA+alt+p",
+		category=SCRCAT_TERMINALACCESS,
+	)
+	def script_nextPrompt(self, gesture):
+		"""Jump to the next prompt line."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+		lines = self._getBufferLines()
+		if not lines:
+			tones.beep(200, 100)
+			return
+		self._sectionTokenizer.tokenize(lines)
+		current = self._getCurrentLineNumber() or 0
+		self._navigateToSection(self._sectionTokenizer.next_prompt(current))
+
+	@script(
+		# Translators: Description for jumping to the previous prompt
+		description=_("Jump to previous prompt in terminal output"),
+		gesture="kb:NVDA+alt+shift+p",
+		category=SCRCAT_TERMINALACCESS,
+	)
+	def script_prevPrompt(self, gesture):
+		"""Jump to the previous prompt line."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+		lines = self._getBufferLines()
+		if not lines:
+			tones.beep(200, 100)
+			return
+		self._sectionTokenizer.tokenize(lines)
+		current = self._getCurrentLineNumber() or 0
+		self._navigateToSection(self._sectionTokenizer.prev_prompt(current))
+
+	# ------------------------------------------------------------------
+	# Section 11: Summarization
+	# ------------------------------------------------------------------
+
+	@script(
+		# Translators: Description for summarizing the last command output
+		description=_("Summarize the output of the last command"),
+		gesture="kb:NVDA+alt+s",
+		category=SCRCAT_TERMINALACCESS,
+	)
+	def script_summarizeLastCommand(self, gesture):
+		"""Summarize the output between the last prompt and the cursor."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		# Check privacy toggle
+		if not self._configManager.get("summarizationEnabled", False):
+			ui.message(self._outputSummarizer.get_disabled_message())
+			return
+
+		lines = self._getBufferLines()
+		if not lines:
+			tones.beep(200, 100)
+			return
+
+		# Find the last prompt using SectionTokenizer
+		self._sectionTokenizer.tokenize(lines)
+		current = self._getCurrentLineNumber() or len(lines) - 1
+
+		# Walk backwards to find the last prompt before the cursor
+		last_prompt_line = None
+		for section in reversed(self._sectionTokenizer._sections):
+			if section.category == "prompt" and section.line_num <= current:
+				last_prompt_line = section.line_num
+				break
+
+		if last_prompt_line is None:
+			# No prompt found; summarize from the beginning
+			output_lines = lines[:current + 1]
+		else:
+			# Extract lines between prompt and cursor (skip the prompt itself)
+			output_lines = lines[last_prompt_line + 1:current + 1]
+
+		if not output_lines:
+			# Translators: Message when there is no output to summarize
+			ui.message(_("No output to summarize"))
+			return
+
+		summary = self._outputSummarizer.summarize_lines(output_lines)
+		if summary:
+			ui.message("\n".join(summary))
+		else:
+			# Translators: Message when summarizer produces empty result
+			ui.message(_("No significant output found"))
+
+	@script(
+		# Translators: Description for summarizing the current selection
+		description=_("Summarize the text between selection marks"),
+		gesture="kb:NVDA+alt+shift+s",
+		category=SCRCAT_TERMINALACCESS,
+	)
+	def script_summarizeSelection(self, gesture):
+		"""Summarize the text between selection marks."""
+		if not self.isTerminalApp():
+			gesture.send()
+			return
+
+		# Check privacy toggle
+		if not self._configManager.get("summarizationEnabled", False):
+			ui.message(self._outputSummarizer.get_disabled_message())
+			return
+
+		if not self._markStart or not self._markEnd:
+			# Translators: Message when no selection marks are set
+			ui.message(_("No selection. Set marks first."))
+			return
+
+		terminal = self._boundTerminal
+		if terminal is None:
+			return
+
+		try:
+			startInfo = terminal.makeTextInfo(self._markStart)
+			endInfo = terminal.makeTextInfo(self._markEnd)
+			startInfo.setEndPoint(endInfo, "endToEnd")
+			text = startInfo.text or ""
+			selection_lines = text.split("\n")
+		except Exception:
+			# Translators: Error message when selection text cannot be read
+			ui.message(_("Unable to read selection"))
+			return
+
+		if not selection_lines:
+			ui.message(_("No output to summarize"))
+			return
+
+		summary = self._outputSummarizer.summarize_lines(selection_lines)
+		if summary:
+			ui.message("\n".join(summary))
+		else:
+			ui.message(_("No significant output found"))
 
 	def _getReviewPosition(self):
 		"""

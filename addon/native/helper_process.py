@@ -177,8 +177,11 @@ class HelperProcess:
     """
 
     # Auto-restart parameters
-    _RESTART_DELAY = 2.0
-    _MAX_RESTART_ATTEMPTS = 3
+    _MAX_RESTART_ATTEMPTS = 5
+    _RESTART_WINDOW = 60.0  # seconds: restart budget resets after this window
+
+    # Max payload size for incoming JSON messages (1 MB)
+    _MAX_PAYLOAD_SIZE = 1 * 1024 * 1024
 
     # Timeout for waiting for a response (seconds)
     _RESPONSE_TIMEOUT = 5.0
@@ -207,6 +210,7 @@ class HelperProcess:
 
         self._stopping = False
         self._restart_count = 0
+        self._restart_timestamps: list = []
         self._exe_path = _find_helper_exe()
 
     # ───────────────────────────────────────────────────────────
@@ -621,8 +625,8 @@ class HelperProcess:
         try:
             header = self._read_exact(4)
             length = struct.unpack("<I", header)[0]
-            if length > 16 * 1024 * 1024:
-                raise IOError(f"Response too large: {length} bytes")
+            if length > self._MAX_PAYLOAD_SIZE:
+                raise IOError(f"Response too large: {length} bytes (max {self._MAX_PAYLOAD_SIZE})")
             payload = self._read_exact(length)
             return json.loads(payload.decode("utf-8"))
         except Exception:
@@ -724,19 +728,40 @@ class HelperProcess:
     #  Auto-restart after crash
     # ───────────────────────────────────────────────────────────
 
+    @staticmethod
+    def _get_restart_delay(attempt: int) -> float:
+        """Return the backoff delay for the given restart attempt.
+
+        Uses exponential backoff starting at 1 second, doubling each
+        attempt, capped at 30 seconds.
+        """
+        delay = min(2 ** attempt, 30)
+        return float(delay)
+
+    def _should_restart(self) -> bool:
+        """Decide whether another restart attempt is allowed.
+
+        Returns False if there have been ``_MAX_RESTART_ATTEMPTS`` or
+        more restarts within the last ``_RESTART_WINDOW`` seconds.
+        """
+        now = time.monotonic()
+        cutoff = now - self._RESTART_WINDOW
+        recent = [t for t in self._restart_timestamps if t > cutoff]
+        self._restart_timestamps = recent
+        return len(recent) < self._MAX_RESTART_ATTEMPTS
+
     def _maybe_restart(self):
         """Attempt to restart the helper after a crash.
 
-        Retries up to ``_MAX_RESTART_ATTEMPTS`` times with a fixed
-        2-second delay between attempts.  On final failure, dispatches
-        a ``helper_crashed`` notification so subscribers can fall back
-        to polling.
+        Uses exponential backoff and a sliding window to limit restart
+        attempts.  On final failure, dispatches a ``helper_crashed``
+        notification so subscribers can fall back to polling.
         """
         while True:
             if self._stopping:
                 return
 
-            if self._restart_count >= self._MAX_RESTART_ATTEMPTS:
+            if not self._should_restart():
                 log.error(
                     "Helper restart limit reached (%d attempts), giving up",
                     self._restart_count,
@@ -745,9 +770,11 @@ class HelperProcess:
                 return
 
             self._restart_count += 1
+            self._restart_timestamps.append(time.monotonic())
+            delay = self._get_restart_delay(self._restart_count - 1)
             log.warning(
                 "Helper crashed, restarting in %.1fs (attempt %d/%d)",
-                self._RESTART_DELAY,
+                delay,
                 self._restart_count,
                 self._MAX_RESTART_ATTEMPTS,
             )
@@ -771,7 +798,7 @@ class HelperProcess:
                 except Exception:
                     pass
 
-            time.sleep(self._RESTART_DELAY)
+            time.sleep(delay)
 
             if self._stopping:
                 return

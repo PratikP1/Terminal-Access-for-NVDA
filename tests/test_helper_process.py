@@ -17,14 +17,16 @@ from native.helper_process import HelperProcess
 class TestRestartConfig(unittest.TestCase):
     """Verify auto-restart configuration constants."""
 
-    def test_restart_delay(self):
-        """Fixed restart delay is 2 seconds."""
-        self.assertEqual(HelperProcess._RESTART_DELAY, 2.0)
+    def test_restart_delay_backoff(self):
+        """Restart delay uses exponential backoff starting at 1s."""
+        self.assertEqual(HelperProcess._get_restart_delay(0), 1.0)
+        self.assertEqual(HelperProcess._get_restart_delay(1), 2.0)
+        self.assertEqual(HelperProcess._get_restart_delay(2), 4.0)
 
     def test_max_restart_attempts(self):
         """Max restart attempts is defined and positive."""
         self.assertGreaterEqual(HelperProcess._MAX_RESTART_ATTEMPTS, 1)
-        self.assertEqual(HelperProcess._MAX_RESTART_ATTEMPTS, 3)
+        self.assertEqual(HelperProcess._MAX_RESTART_ATTEMPTS, 5)
 
     def test_response_timeout(self):
         """Response timeout is a positive number."""
@@ -85,12 +87,12 @@ class TestMaybeRestart(unittest.TestCase):
         self.assertEqual(self.helper._restart_count, 1)
 
     @patch.object(HelperProcess, "_start_process")
-    def test_restart_uses_fixed_delay(self, mock_start):
-        """Restart sleeps for the fixed 2-second delay."""
+    def test_restart_uses_exponential_backoff(self, mock_start):
+        """Restart sleeps with exponential backoff (1s, 2s, 4s, ...)."""
         self.helper._stopping = False
         self.helper._restart_count = 0
         self.helper._maybe_restart()
-        self.mock_sleep.assert_called_once_with(2.0)
+        self.mock_sleep.assert_called_once_with(1.0)
 
         self.mock_sleep.reset_mock()
         self.helper._restart_count = 1
@@ -98,19 +100,19 @@ class TestMaybeRestart(unittest.TestCase):
         self.mock_sleep.assert_called_once_with(2.0)
 
     def test_max_attempts_gives_up(self):
-        """After _MAX_RESTART_ATTEMPTS, _maybe_restart gives up."""
+        """After _MAX_RESTART_ATTEMPTS within the window, _maybe_restart gives up."""
+        import time as _time
         self.helper._stopping = False
-        self.helper._restart_count = HelperProcess._MAX_RESTART_ATTEMPTS
+        # Fill the restart timestamps to simulate 5 recent restarts
+        now = _time.monotonic()
+        self.helper._restart_timestamps = [now - i for i in range(HelperProcess._MAX_RESTART_ATTEMPTS)]
 
         # Should dispatch helper_crashed notification
         dispatched = []
         self.helper._dispatch_notification = lambda msg: dispatched.append(msg)
         self.helper._maybe_restart()
 
-        # Should NOT have incremented count or slept
-        self.assertEqual(
-            self.helper._restart_count, HelperProcess._MAX_RESTART_ATTEMPTS
-        )
+        # Should NOT have slept
         self.mock_sleep.assert_not_called()
 
         # Should have dispatched helper_crashed

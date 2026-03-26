@@ -217,6 +217,39 @@ def native_available() -> bool:
 	return _get_dll() is not None
 
 
+# ═══════════════════════════════════════════════════════════════
+#  FFI safety state
+# ═══════════════════════════════════════════════════════════════
+
+_native_available = False   # Set True after DLL loads successfully
+_ffi_error_logged = False   # True after the first FFI error is logged
+_fallback_count = 0         # Number of times callers fell back to Python
+
+
+def safe_native_strip_ansi(text: str) -> str:
+	"""Strip ANSI sequences using native DLL with automatic fallback.
+
+	If the native DLL is unavailable or an FFI call fails, returns the
+	input text unchanged and increments ``_fallback_count``.  The first
+	FFI failure logs an error and sets ``_native_available`` to False so
+	subsequent calls skip the FFI attempt entirely.
+	"""
+	global _native_available, _ffi_error_logged, _fallback_count
+
+	if not _native_available:
+		_fallback_count += 1
+		return text
+
+	try:
+		return native_strip_ansi(text)
+	except Exception as exc:
+		_native_available = False
+		_fallback_count += 1
+		if not _ffi_error_logged:
+			_ffi_error_logged = True
+			log.error("Native FFI call failed, falling back to Python: %s", exc)
+		return text
+
 
 # ═══════════════════════════════════════════════════════════════
 #  Helpers
