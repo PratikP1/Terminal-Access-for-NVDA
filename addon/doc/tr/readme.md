@@ -1,6 +1,6 @@
 # NVDA için Terminal Erişimi (Terminal Access)
 
-Terminal Erişimi; Windows Terminal, PowerShell, Komut İstemi (Command Prompt), WSL ve popüler üçüncü taraf emülatörler dahil olmak üzere 30'dan fazla Windows terminal uygulamasına klavye odaklı inceleme, gezinme, arama, yer imleri ve sesli ipuçları ekler. Terminal çıktılarında imleci hareket ettirmeden satır, kelime ve karakter bazında gezinmenizi sağlayarak, komut sonuçlarını bir belge okur gibi okumanıza olanak tanır.
+Terminal Erişimi, Windows Terminal, PowerShell, Komut İstemi (Command Prompt), WSL ve popüler üçüncü taraf emülatörler dahil olmak üzere 30'dan fazla Windows terminal uygulamasına klavye odaklı inceleme, gezinme, arama, yer imleri ve sesli ipuçları ekler. Terminal çıktılarında imleci hareket ettirmeden satır, kelime ve karakter bazında gezinmenizi sağlayarak, komut sonuçlarını bir belge okur gibi okumanıza olanak tanır.
 
 Bu kılavuzu herhangi bir terminalin içindeyken **NVDA+Shift+F1** tuşlarına basarak dilediğiniz zaman açabilirsiniz.
 
@@ -8,14 +8,6 @@ Bu kılavuzu herhangi bir terminalin içindeyken **NVDA+Shift+F1** tuşlarına b
 
 1. [Başlangıç](#başlangıç)
 2. [Komut Katmanı](#komut-katmanı)
-3. [Arabellek Penceresi](#arabellek-penceresi)
-4. [Tablo Modu](#tablo-modu)
-5. [Yer İmleri](#yer-imleri)
-6. [Hata ve Uyarı Tespiti](#hata-ve-uyarı-tespiti)
-7. [Kısayol Çakışma Tespiti](#kısayol-çakışma-tespiti)
-8. [Uygulama Profilleri](#uygulama-profilleri)
-9. [Ayarlar](#ayarlar)
-10. [Sorun Giderme](#sorun-giderme)
 
 ---
 
@@ -56,6 +48,6 @@ Komut katmanı, Terminal Erişimi komutlarını çok tuşlu NVDA değiştirici k
 | Kısayol | Eylem |
 |--------------------------------|--------------------------------------------------------------------------|
 | **NVDA+Kesme işareti (')** | Komut katmanına gir. "Terminal komutları" ve yüksek perdeli bir ses duyarsınız. |
-| **Escape** veya **NVDA+Kesme İşareti (')** | Komut katmanından çık. "Terminal komutlarından çık" ve alçak perdeli bir ses duyarsınız. |
+| **Escape** veya **NVDA+Kesme işareti (')** | Komut katmanından çık. "Terminal komutlarından çık" ve alçak perdeli bir ses duyarsınız. |
 
 Katman siz çıkana kadar aktif kalır. Her komut, komutları zincirleyebilmeniz için sizi katmanda tutar. Odak terminalden ayrıldığında katman kendi kendine kapanır.

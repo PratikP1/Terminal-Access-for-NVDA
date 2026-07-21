@@ -121,7 +121,7 @@ msgstr "{count} {symbol}"
 #. Translators: Spoken when terminal output reaches a progress
 #. milestone, for example 25, 50, 75, or 100 percent.
 #: addon\globalPlugins\terminalAccess.py:1566
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "{percent} percent"
 msgstr "Yüzde {percent}"
 
@@ -875,7 +875,7 @@ msgstr "Yer imi yöneticisi kullanılamıyor"
 #. Translators: Message when jumping to bookmark with label
 #: addon\globalPlugins\terminalAccess.py:3532
 #: addon\globalPlugins\terminalAccess.py:3574
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Bookmark {name}: {label}"
 msgstr "{name}. yer imi: {label}"
 
@@ -927,7 +927,7 @@ msgstr "Yer imi ayarlanmadı"
 #. Translators: Description for listing detected sections
 #: addon\globalPlugins\terminalAccess.py:3626
 msgid "List all detected sections in the terminal buffer"
-msgstr "Terminal arabelleğinda algılanan tüm bölümleri listele"
+msgstr "Terminal arabelleğinde algılanan tüm bölümleri listele"
 
 # Description for jumping to top
 #. Translators: Message when terminal buffer cannot be read
@@ -1055,7 +1055,7 @@ msgstr "Yapay zeka mesajı algılanmadı"
 # Announced when URL list is loading with count of URLs found
 #. Translators: Announced when AI turn list is loading with count
 #: addon\globalPlugins\terminalAccess.py:3915
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "{count} AI turns found"
 msgstr "{count} yapay zeka mesajı bulundu"
 
@@ -1170,7 +1170,7 @@ msgstr "1 eşleşme"
 # Message for space indentation
 #. Translators: Announced with the number of search matches
 #: addon\globalPlugins\terminalAccess.py:4104
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "{count} matches"
 msgstr "{count} eşleşme"
 
@@ -1226,7 +1226,7 @@ msgstr "Arama sonucu bulunamadı. NVDA+F tuşlarını kullanarak arama yapın."
 # Error jumping to previous match
 #. Translators: Error jumping to search match
 #: addon\globalPlugins\terminalAccess.py:4286
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Cannot jump to {direction} match"
 msgstr "{direction} eşleşmesine atlanamıyor"
 
@@ -1350,7 +1350,7 @@ msgstr "Terminal çıktısında önceki kod bloğuna atla"
 #. Translators: Description for announcing what changed in terminal buffer
 #: addon\globalPlugins\terminalAccess.py:4667
 msgid "Announce what changed in the terminal buffer"
-msgstr "Terminal arabelleğinda nelerin değiştiğini duyur"
+msgstr "Terminal arabelleğinde nelerin değiştiğini duyur"
 
 #: addon\globalPlugins\terminalAccess.py:4679
 msgid "Unable to read terminal"
@@ -1718,7 +1718,7 @@ msgstr "&Satıra git"
 # No matches found
 #. Translators: Title for search results dialog, with the match count and pattern
 #: addon\lib\search.py:1207
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Search Results: {count} matches for '{pattern}'"
 msgstr "Arama Sonuçları: '{pattern}' için {count} eşleşme"
 
@@ -1803,13 +1803,11 @@ msgstr "Bazıları (.,?!;:)"
 # Punctuation level option
 #. Translators: Punctuation level option
 #: addon\lib\settings_panel.py:212
-#, fuzzy
 msgid "Most (adds @#$%^&*()_+=[]{}\\|<>/)"
 msgstr "Çoğu (ekler @#$%^&*()_+=[]{}\\\\|<>/)"
 
 # Tooltip for punctuation level
 #: addon\lib\settings_panel.py:220
-#, fuzzy
 msgid ""
 "Controls which punctuation symbols are announced. Higher levels announce "
 "more symbols. Use NVDA+minus and NVDA+equals to adjust quickly."
@@ -1820,7 +1818,6 @@ msgstr ""
 
 # Tooltip for cursor tracking mode
 #: addon\lib\settings_panel.py:249
-#, fuzzy
 msgid ""
 "Standard: announce line/column changes, Window: only announce within defined "
 "window"
@@ -1961,7 +1958,6 @@ msgstr "Etkinlik tonu &gecikmesi (ms):"
 
 # Tooltip for coalesce delay
 #: addon\lib\settings_panel.py:414
-#, fuzzy
 msgid ""
 "Milliseconds between activity tone repeats. Higher values mean fewer tones "
 "during sustained output."
@@ -2254,7 +2250,7 @@ msgstr "Özetleme devre dışı. Terminal Erişimi ayarlarından etkinleştirin.
 # Summary when many new lines arrive at once
 #. Translators: Announced when many lines of output appear at once.
 #: addon\lib\terminal_overlay.py:117
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "{count} new lines"
 msgstr "{count} yeni satır"
 
@@ -2424,7 +2420,6 @@ msgstr ""
 #~ msgid "&Direct gesture bindings:"
 #~ msgstr "&Doğrudan kısayol atamaları:"
 
-#, fuzzy
 #~ msgid ""
 #~ "Unchecked gestures are disabled. Use the command layer (NVDA+') to access "
 #~ "them.\n"
