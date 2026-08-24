@@ -57,7 +57,7 @@ Line counts are omitted on purpose; they rot faster than descriptions.
 | `lib/ai_turn_tokenizer.py` | `AITurnTokenizer` and `classify_ai_line()`: detect AI CLI conversation turns (user, assistant, tool, system) and navigate between turns and code spans |
 | `lib/code_block_reader.py` | `CodeBlock`, `CodeBlockDetector`: fenced code block detection with navigation, copy, and offline explanation helpers |
 | `lib/streaming_delta.py` | `StreamingDeltaTracker`, `Delta`: buffer snapshot diffing with debounce and verbosity-aware speech and braille output |
-| `lib/privacy.py` | `PrivacyGuard`: gates opt-in features (summarization, code explain, AI turn parsing) behind config flags; the addon is offline only |
+| `lib/privacy.py` | `PrivacyGuard`: gates local opt-in processing (summarization, code explain, AI turn parsing) behind config flags; it does not authorize or perform uploads. Explicitly opening a detected URL is handled separately by the default browser. |
 | `lib/gesture_conflicts.py` | `GestureConflictDetector`: detects gesture conflicts with other NVDA add-ons |
 | `lib/audio_cues.py` | Tone definitions, `play_cue()`, braille message formatting, verbosity logic, buffer change descriptions |
 | `lib/table_reader.py` | `TableDetector`, `TableNavigator`: column-aware table reading for docker ps, kubectl, ls -l, psql, and markdown pipe tables |
