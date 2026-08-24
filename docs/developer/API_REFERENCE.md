@@ -467,7 +467,7 @@ Short braille form of the last delta: `+N` for new lines, `~LN` for a single cha
 
 ### PrivacyGuard (`lib/privacy.py`)
 
-Central gatekeeper for privacy-sensitive opt-in features. The addon is fully offline and makes no network calls anywhere; the guard gates features behind config flags and documents that design.
+Central gatekeeper for privacy-sensitive opt-in processing. Summarization, code explanation, and AI turn parsing run locally and do not upload terminal content; the guard gates these features behind config flags. Explicitly opening a detected URL is separate and launches the default browser.
 
 #### Constructor
 
@@ -485,11 +485,11 @@ Return `(allowed, message)`. Known feature names and their config keys: `'summar
 
 ##### `is_offline_only() -> bool` (static)
 
-Always returns `True`. A static assertion that the addon never makes network calls.
+Always returns `True`. This is a static assertion that the guarded terminal-analysis features are offline, not a runtime network monitor. It does not cover the separate, user-triggered action that opens a detected URL in the default browser.
 
 ##### `format_privacy_status(config_manager) -> str`
 
-Human-readable privacy status, e.g. "Privacy: all features offline. Summarization: on. Code explain: off."
+Human-readable privacy status, e.g. "Privacy: all features offline. Summarization: on. Code explain: off." Here, "features" refers to the guarded terminal-analysis features described above.
 
 ---
 

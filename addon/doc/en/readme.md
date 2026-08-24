@@ -562,7 +562,7 @@ Terminal Access scans for fenced code blocks (triple backtick delimiters) and tr
 | **Ctrl+C** | **NVDA+Alt+C** | Copy code block to clipboard |
 | **Ctrl+E** | **NVDA+Alt+E** | Explain code block |
 
-The explain command gives a brief offline explanation of the block. It is gated by the "Allow Code Explain" privacy setting, which is off by default.
+The explain command gives a brief offline explanation of the block. It is gated by the "Enable code block explanation" setting, which is off by default.
 
 ### Streaming Delta
 
@@ -597,14 +597,16 @@ The verbosity level controls how much optional context Terminal Access speaks. P
 
 ### Privacy Settings
 
-Two settings control AI features that send terminal content to an external service. Both are off by default.
+Terminal Access does not send terminal text, code blocks, or summaries to an AI provider or any other external service. Code explanation and summarization run entirely inside the add-on. Their settings are local-processing controls, not permission to upload data, and both are off by default so you choose whether these features inspect additional terminal text.
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| **Allow Code Explain** | Off | Permits sending code blocks to the AI for summarization. |
-| **Allow Summarization** | Off | Permits automatic summarization of long AI responses. |
+| **Enable summarization** | Off | Selects important lines locally using extractive rules for errors, warnings, URLs, headings, and statistics. No AI model or network service is used. |
+| **Enable code block explanation** | Off | Builds a brief local explanation using heuristics for imports, definitions, control flow, and error handling. No code is uploaded. |
 
-When you invoke a privacy-gated feature while it is disabled, Terminal Access explains that the feature is off and how to enable it. To enable, open NVDA Settings > Terminal Access > Privacy and check the setting.
+When you invoke a privacy-gated feature while it is disabled, Terminal Access explains that the feature is off and how to enable it. To enable, open NVDA menu > Preferences > Settings > Terminal Settings > Privacy and check the setting.
+
+Opening a detected URL is separate from these features. Terminal Access launches your default browser only after you explicitly choose to open the URL; the browser then handles the connection in the usual way.
 
 ---
 

@@ -183,9 +183,11 @@ When an AI assistant includes code in its response, Terminal Access detects fenc
 | **Ctrl+C**        | **NVDA+Alt+C**         | Copy code block to clipboard         |
 | **Ctrl+E**        | **NVDA+Alt+E**         | Explain code block (privacy gated)   |
 
-### How does privacy mode work?
+### How do privacy and local processing work?
 
-AI CLI features that send terminal content to an external AI service are gated by privacy settings. Both "Allow Code Explain" and "Allow Summarization" are off by default. When you try to use a privacy-gated feature while it is disabled, you hear a spoken message explaining how to enable it. Open Terminal Access settings and look for the Privacy section to enable these features.
+Terminal Access performs code explanation and summarization locally and never sends terminal text, code blocks, or summaries to an AI provider or other external service. "Enable code block explanation" and "Enable summarization" are local-processing controls, not permission to upload data, and both are off by default. When you try to use either feature while it is disabled, you hear a spoken message explaining how to enable it. Open Terminal Access settings and look for the Privacy section to enable these features.
+
+The URL list is a separate, explicit action. If you choose to open a detected URL, Terminal Access launches your default browser and the browser handles that connection normally.
 
 ### Why did I hear a different error tone?
 

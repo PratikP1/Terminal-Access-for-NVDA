@@ -16,7 +16,7 @@ An NVDA add-on that makes Windows terminal applications more accessible. It adds
 - AI CLI support: turn navigation, code block navigation, streaming delta announcements
 - Offline summarization of command output
 - URL extraction, tab management, color and formatting reports, selection and copy
-- Fully offline. No terminal content ever leaves your machine.
+- Terminal analysis is fully local. The add-on never uploads terminal content; opening a detected URL is a separate, explicit action that launches your default browser.
 
 ## Installation
 
