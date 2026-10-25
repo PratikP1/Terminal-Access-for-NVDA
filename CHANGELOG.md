@@ -6,6 +6,12 @@ The 2.3.0 entry below is the consolidated summary of everything that changed sin
 
 (There is no 2.2.0 entry: that version number was used during development but never released, and its changes are folded into 2.3.0.)
 
+## [Unreleased]
+
+### Fixed
+
+- Cleaning a build preserves the maintained English Markdown guide. Incremental builds now include changes to library modules, and CI installs the build dependencies needed by the packaging tests.
+
 ## [2.3.0] - 2026-07-17
 
 Everything below is the change from 2.0.3. The headlines: a new way to read the whole terminal as a document, terminals the add-on used to ignore now work, find reaches the scrollback on older consoles, braille follows the cursor again, and Key Echo no longer needs NVDA's own settings turned off. Existing settings are preserved on upgrade.
