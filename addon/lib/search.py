@@ -117,6 +117,7 @@ class OutputSearchManager:
 		# does not re-read and re-strip the whole buffer each time.
 		self._cached_lines = None
 		self._cached_lines_gen = -1
+		self._cached_lines_offsets_valid = False
 		self._content_generation = 0
 		# Search history (most recent first, max 10 entries)
 		self._search_history: list[str] = []
@@ -138,6 +139,8 @@ class OutputSearchManager:
 			'current_match_index': -1,
 			'case_sensitive': False,
 			'use_regex': False,
+			'scope': 'buffer',
+			'current_line': 0,
 			# Content generation the results were computed against, so a
 			# later navigate can tell whether new output made them stale.
 			'generation': None,
@@ -262,23 +265,30 @@ class OutputSearchManager:
 			self._last_read_path = "provided"
 			self._last_read_chars = len(raw_text)
 			self._last_read_ms = 0.0
+		if raw_text is None:
+			# A failed acquisition is not a completed, empty search.
+			return None
 		if not raw_text:
-			# Don't cache a transient empty/failed read; the next text change
-			# would not necessarily bump the generation to clear it.
+			# Retry empty reads, but never reuse content preceding an empty
+			# supplied snapshot when no text-change event has arrived yet.
+			self._cached_lines = None
+			self._cached_lines_gen = -1
 			return []
 
 		# Skip the ANSI strip entirely when there are no escape sequences:
 		# a full-buffer regex sub is wasted work on clean output.
 		t0 = _time.perf_counter()
+		source_length = len(raw_text)
 		if '\x1b' in raw_text:
 			raw_text = _rt.strip_ansi(raw_text)
 		self._last_strip_ms = (_time.perf_counter() - t0) * 1000.0
 
 		max_line = self.MAX_LINE_LENGTH
-		lines = [
-			ln if len(ln) <= max_line else ln[:max_line]
-			for ln in raw_text.split('\n')
-		]
+		lines = raw_text.split('\n')
+		truncated = any(len(line) > max_line for line in lines)
+		self._cached_lines_offsets_valid = len(raw_text) == source_length and not truncated
+		if truncated:
+			lines = [line[:max_line] for line in lines]
 		self._cached_lines = lines
 		self._cached_lines_gen = gen
 		return lines
@@ -370,6 +380,14 @@ class OutputSearchManager:
 				search_pattern = pattern if case_sensitive else pattern.lower()
 				search_text = line_text if case_sensitive else line_text.lower()
 				offset = search_text.find(search_pattern)
+				if offset >= 0 and len(search_text) != len(line_text):
+					# Lowercasing can expand a codepoint (e.g. U+0130). Store
+					# the source offset, not an index into the expanded text.
+					lower_offset = 0
+					for index, char in enumerate(line_text):
+						lower_offset += len(char.lower())
+						if lower_offset > offset:
+							return index
 				return offset if offset >= 0 else 0
 
 		try:
@@ -378,7 +396,7 @@ class OutputSearchManager:
 			# makeTextInfo; matching runs in Python.
 			lines = self._get_buffer_lines(raw_text)
 			match_t0 = _time.perf_counter()
-			if not lines:
+			if lines is None:
 				self._log_search_timing(
 					(_time.perf_counter() - search_t0) * 1000.0, 0.0)
 				return 0
@@ -471,6 +489,8 @@ class OutputSearchManager:
 					line = fuzzy_lines[i]
 					if self._line_fuzzy_matches(pattern, line):
 						matching_indices.append(i)
+						if len(matching_indices) >= max_matches:
+							break
 
 				if matching_indices:
 					fuzzy_fallback = True
@@ -478,13 +498,6 @@ class OutputSearchManager:
 						f"No exact matches. Found {len(matching_indices)} "
 						f"fuzzy match{'es' if len(matching_indices) != 1 else ''}."
 					)
-
-			if not matching_indices:
-				self.add_to_history(pattern)
-				self._log_search_timing(
-					(_time.perf_counter() - search_t0) * 1000.0,
-					(_time.perf_counter() - match_t0) * 1000.0)
-				return 0
 
 			# ─── Store matches without TextInfo ───
 			# Matches are stored as lightweight tuples. No bookmark walk
@@ -514,6 +527,8 @@ class OutputSearchManager:
 				'current_match_index': -1,
 				'case_sensitive': case_sensitive,
 				'use_regex': use_regex,
+				'scope': scope,
+				'current_line': current_line,
 				'generation': self._content_generation,
 			})
 
@@ -553,6 +568,8 @@ class OutputSearchManager:
 				pattern,
 				case_sensitive=state.get('case_sensitive', False),
 				use_regex=state.get('use_regex', False),
+				scope=state.get('scope', 'buffer'),
+				current_line=state.get('current_line', 0),
 			)
 		except Exception:
 			return False
@@ -736,14 +753,15 @@ class OutputSearchManager:
 	def _absolute_offset_for(self, line_num, char_offset=0):
 		"""Absolute codepoint offset of a match, or None if unavailable.
 
-		Computed from the same cached line list the match came from, so
-		it stays consistent with what was searched.
+		Match line numbers are one-based. If ANSI removal or truncation
+		shortened the cached text, use content resolution instead: even a
+		verified offset can otherwise land on the wrong duplicate line.
 		"""
 		from lib.line_resolve import absolute_offset
 		lines = self._cached_lines
-		if not lines:
+		if not lines or not self._cached_lines_offsets_valid:
 			return None
-		return absolute_offset(lines, line_num, char_offset)
+		return absolute_offset(lines, line_num - 1, char_offset)
 
 	def get_match_count(self) -> int:
 		"""
@@ -869,24 +887,43 @@ class OutputSearchManager:
 
 		return d[len1][len2]
 
+	@staticmethod
+	def _within_one_edit(left: str, right: str) -> bool:
+		"""Accept at most one insertion, deletion, substitution or swap.
+
+		Only the first differing position needs a decision. The remaining
+		suffix must match exactly, so work is linear in the word length.
+		"""
+		if abs(len(left) - len(right)) > 1:
+			return False
+		if len(left) > len(right):
+			left, right = right, left
+		index = 0
+		while index < len(left) and left[index] == right[index]:
+			index += 1
+		if index == len(left):
+			return True
+		if len(left) != len(right):
+			return left[index:] == right[index + 1:]
+		if left[index + 1:] == right[index + 1:]:
+			return True  # one substitution
+		return (
+			index + 1 < len(left)
+			and left[index] == right[index + 1]
+			and left[index + 1] == right[index]
+			and left[index + 2:] == right[index + 2:]
+		)
+
 	def _line_fuzzy_matches(self, pattern: str, line: str) -> bool:
 		"""Check whether any word in *line* is within Levenshtein
 		distance 1 of *pattern* (case-insensitive)."""
 		pat_lower = pattern.lower()
-		pat_len = len(pat_lower)
 		# Split on whitespace and common punctuation to get words.
 		words = re.split(r'[\s:;,.()\[\]{}=<>!@#$%^&*|/\\]+', line)
 		for word in words:
 			if not word:
 				continue
-			# Levenshtein distance is at least the length difference, so a
-			# word whose length differs from the pattern by more than 1 can
-			# never be within distance 1. Reject it in O(1) before building
-			# the O(len1*len2) matrix — this bounds the work against a
-			# pathologically long unbroken "word" from malicious output.
-			if abs(len(word) - pat_len) > 1:
-				continue
-			if self._levenshtein_distance(pat_lower, word.lower()) <= 1:
+			if self._within_one_edit(pat_lower, word.lower()):
 				return True
 		return False
 
