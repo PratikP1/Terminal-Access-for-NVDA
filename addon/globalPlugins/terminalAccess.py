@@ -786,6 +786,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Application profile management
 		self._profileManager = ProfileManager()
 		self._currentProfile = None
+		self._manualProfileSelection = None
 
 		# Lazy-start managers — initialized when terminal is bound
 		self._windowMonitor = None
@@ -1233,6 +1234,20 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 	def _detectAndApplyProfile(self, obj):
 		"""Detect and activate the appropriate application profile."""
+		selection = getattr(self, "_manualProfileSelection", None)
+		if selection is not None:
+			from controlTypes import Role
+			from NVDAObjects.behaviors import Terminal
+			terminal, app_name = selection
+			if obj == terminal:
+				profile = self._profileManager.get_profile(app_name)
+				if profile is not None:
+					self._currentProfile = profile
+					return
+			# Host-app dialogs also pass isTerminalApp's app-name fallback.
+			# Only another terminal control ends the manual selection.
+			if obj == terminal or isinstance(obj, Terminal) or obj.role == Role.TERMINAL:
+				self._manualProfileSelection = None
 		detectedApp = self._profileManager.detect_application(obj)
 		if detectedApp != 'default':
 			profile = self._profileManager.get_profile(detectedApp)
@@ -3060,11 +3075,15 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def _showProfileSelectionDialog(self):
 		"""Open the profile selection dialog."""
 		from lib.profiles import ProfileSelectionDialog
+		# The dialog's focus event clears _boundTerminal before activation.
+		terminal = self._boundTerminal or api.getFocusObject()
 
 		def on_activate(app_name):
 			profile = self._profileManager.get_profile(app_name)
 			if profile:
 				self._currentProfile = profile
+				if terminal is not None:
+					self._manualProfileSelection = (terminal, app_name)
 				ui.message(_("Profile activated: {name}").format(name=profile.displayName))
 
 		def _show():

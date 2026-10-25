@@ -374,6 +374,8 @@ Terminal Access ships with default profiles for popular applications:
 
 ### Managing Profiles
 
+Press NVDA+F10 twice to select a profile for the current terminal. The selection remains active until another terminal gains focus, when automatic detection resumes.
+
 View, export, import, and delete profiles from NVDA menu > Preferences > Settings > Terminal Settings > Application Profiles. The "Installed profiles" dropdown lists default profiles first, then custom profiles alphabetically.
 
 - **Export**: Select a profile and click "Export..." to save it as a JSON file with all settings and window definitions.
