@@ -705,6 +705,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		self._reapplyAttemptsLeft = 0
 		self._reapplyEverResolved = False
 		self._cursorTrackingTimer = None
+		self._cursorFocusGeneration = 0
 		self._lastCaretPosition = None
 		self._lastTypedChar = None
 		self._repeatedCharCount = 0
@@ -900,6 +901,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		"""
 		if self.isTerminalApp(obj):
 			return True
+		self._resetTerminalInteractionState()
+		return False
+
+	def _resetTerminalInteractionState(self):
+		"""Discard typing, modal commands and caret state owned by the old focus."""
 		# Exit command layer silently when focus leaves terminal
 		if getattr(self, "_inCommandLayer", False):
 			self._exitCommandLayer()
@@ -909,10 +915,25 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		# Exit table mode silently when focus leaves terminal
 		if getattr(self, "_tableNavigator", None) is not None:
 			self._exitTableModeBindings()
-		return False
+		self._typedWordChars.clear()
+		self._lastTypedChar = None
+		self._repeatedCharCount = 0
+		self._cursorFocusGeneration += 1
+		if self._cursorTrackingTimer is not None:
+			self._cursorTrackingTimer.Stop()
+			self._cursorTrackingTimer = None
+		self._lastCaretPosition = None
+		self._lastLineText = None
+		self._lastLineStartOffset = None
+		self._lastLineEndOffset = None
+		self._lastLineGeneration = -1
 
 	def terminate(self):
 		"""Clean up when the plugin is terminated."""
+		self._cursorFocusGeneration += 1
+		if self._cursorTrackingTimer is not None:
+			self._cursorTrackingTimer.Stop()
+			self._cursorTrackingTimer = None
 		# Unregister from the terminal overlay so it stops delegating to a
 		# dead plugin instance after a reload.
 		try:
@@ -1126,6 +1147,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			appName = obj.appModule.appName
 		except (AttributeError, TypeError):
 			return
+		if self._boundTerminal is None or self._boundTerminal != obj:
+			self._resetTerminalInteractionState()
 		self._boundTerminal = obj
 		wasSearchJump = self._searchJumpPending
 		jumpPending = self._handleSearchJumpSuppression(obj)
@@ -1618,7 +1641,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Schedule announcement with delay
 		self._cursorTrackingTimer = wx.CallLater(
-			self._configManager.get("cursorDelay", 20), self._announceCursorPosition, obj
+			self._configManager.get("cursorDelay", 20), self._announceCursorPosition,
+			obj, self._cursorFocusGeneration
 		)
 
 	def _handleTerminalTextChange(self, obj):
@@ -1729,13 +1753,17 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		tones.beep(600, 30)
 		tones.beep(800, 30)
 
-	def _announceCursorPosition(self, obj):
+	def _announceCursorPosition(self, obj, _focusGeneration=None):
 		"""
 		Announce the current cursor position based on the tracking mode.
 
 		Args:
 			obj: The terminal object.
 		"""
+		if _focusGeneration is not None and (
+			_focusGeneration != self._cursorFocusGeneration or self._boundTerminal != obj
+		):
+			return
 		# Re-check output grace: a textChange may have arrived after
 		# this callback was scheduled by wx.CallLater in event_caret.
 		if self._configManager.get("streamingSuppression", True):
@@ -1757,7 +1785,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			# missing attributes on obj or COM/UIA errors.
 			pass
 
-	def _announceStandardCursor(self, obj, _retry=False):
+	def _announceStandardCursor(self, obj, _retry=False, _focusGeneration=None):
 		"""
 		Standard cursor tracking - announce character at cursor position.
 
@@ -1770,6 +1798,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			_retry: If True, this is a deferred retry call; skip scheduling
 				further retries to prevent unbounded CallLater chains.
 		"""
+		if _focusGeneration is not None and (
+			_focusGeneration != self._cursorFocusGeneration or self._boundTerminal != obj
+		):
+			return
 		# Get the current caret position
 		info = obj.makeTextInfo(textInfos.POSITION_CARET)
 
@@ -1863,8 +1895,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			output_grace = (time.monotonic() - self._lastTextChangeTime) < self._OUTPUT_CARET_GRACE
 			if not _retry and not output_grace:
 				try:
-					wx.CallLater(50, self._announceStandardCursor, obj, True)
-					wx.CallLater(150, self._announceStandardCursor, obj, True)
+					wx.CallLater(50, self._announceStandardCursor, obj, True, self._cursorFocusGeneration)
+					wx.CallLater(150, self._announceStandardCursor, obj, True, self._cursorFocusGeneration)
 				except (RuntimeError, AttributeError):
 					pass
 			return
