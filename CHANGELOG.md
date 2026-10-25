@@ -6,6 +6,12 @@ The 2.3.0 entry below is the consolidated summary of everything that changed sin
 
 (There is no 2.2.0 entry: that version number was used during development but never released, and its changes are folded into 2.3.0.)
 
+## [Unreleased]
+
+### Fixed
+
+- Optional terminal key and word echo now retain NVDA's no-output suppression on terminals that support reliable text-change events. Unconfirmed input and partial words are discarded on Enter, navigation, focus loss and echo-owner changes; protected words are discarded before accumulation.
+
 ## [2.3.0] - 2026-07-17
 
 Everything below is the change from 2.0.3. The headlines: a new way to read the whole terminal as a document, terminals the add-on used to ignore now work, find reaches the scrollback on older consoles, braille follows the cursor again, and Key Echo no longer needs NVDA's own settings turned off. Existing settings are preserved on upgrade.

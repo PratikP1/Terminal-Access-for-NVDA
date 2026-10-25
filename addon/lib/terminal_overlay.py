@@ -11,6 +11,12 @@ audio cues, output coalescing, blank suppression, quiet mode,
 and activity tones all live here.
 """
 import time
+import unicodedata
+import weakref
+
+import api
+import config
+from NVDAObjects.behaviors import EnhancedTermTypedCharSupport
 
 try:
     import tones
@@ -104,11 +110,70 @@ class TerminalAccessTerminal:
         (where initOverlayClass is also called).
         """
         self._errorDetector = ErrorLineDetector()
+        self._init_typing_echo()
 
     def initOverlayClass(self):
         """Called by NVDA after overlay class construction."""
         if not hasattr(self, "_errorDetector"):
             self._errorDetector = ErrorLineDetector()
+        self._init_typing_echo()
+
+    def _init_typing_echo(self):
+        """Keep unconfirmed input on its terminal, never on the plugin."""
+        self._pending_typing_echo = []
+        self._confirmed_word_chars = []
+        self._echo_plugin_ref = None
+        self._echo_owned = None
+
+    def _clear_pending_echo(self, plugin=None):
+        """Discard input across the same boundaries as native word echo."""
+        self._pending_typing_echo = []
+        self._confirmed_word_chars = []
+        if isinstance(self, EnhancedTermTypedCharSupport):
+            self._queuedChars = []
+        active = self._get_plugin()
+        if (active is not None and active._boundTerminal == self) or api.getFocusObject() == self:
+            speech.clearTypedWordBuffer()
+        if plugin is not None and (plugin._boundTerminal is None or plugin._boundTerminal == self):
+            plugin._clear_typing_echo_state()
+
+    def _sync_echo_owner(self, plugin):
+        """Do not deliver a previous owner's queued input after a switch."""
+        previous = self._echo_plugin_ref() if self._echo_plugin_ref is not None else None
+        owned = bool(plugin is not None and plugin._ownsTypingEcho())
+        owner_collected = self._echo_plugin_ref is not None and previous is None
+        if previous is not plugin or owned != self._echo_owned or owner_collected:
+            self._clear_pending_echo(previous)
+            self._echo_plugin_ref = weakref.ref(plugin) if plugin is not None else None
+            self._echo_owned = owned
+        return owned
+
+    def _dispatch_typing_echo(self, plugin):
+        """Release native and add-on typing only after terminal output."""
+        owned = self._sync_echo_owner(plugin)
+        if plugin is not None and (plugin._getEffective("quietMode") or plugin._boundTerminal != self):
+            self._clear_pending_echo(plugin)
+            return
+        if isinstance(self, EnhancedTermTypedCharSupport):
+            self._dispatchQueue()
+        pending, self._pending_typing_echo = self._pending_typing_echo, []
+        if not owned or plugin._boundTerminal != self or plugin._isTypingProtected():
+            self._confirmed_word_chars = []
+            return
+        for ch in pending:
+            self._track_echoed_character(ch)
+            plugin._terminalTypedCharacter(self, ch, lambda: None)
+
+    def _track_echoed_character(self, ch):
+        """Mirror native word length for its typed-fragment output filter."""
+        if ch == "\b":
+            del self._confirmed_word_chars[-1:]
+        elif ch == "\x7f":
+            pass
+        elif ch and unicodedata.category(ch)[0] in "LMN":
+            self._confirmed_word_chars.append(ch)
+        else:
+            self._confirmed_word_chars = []
 
     def _reportNewLines(self, lines):
         """Override LiveText._reportNewLines with coalescing and audio cues.
@@ -118,13 +183,21 @@ class TerminalAccessTerminal:
         Bulk output (21+ lines): announce count, no per-line speech.
         Blank/whitespace lines are always suppressed.
         """
+        plugin = self._get_plugin()
+        self._sync_echo_owner(plugin)
+        if isinstance(self, EnhancedTermTypedCharSupport):
+            # Preserve EnhancedTermTypedCharSupport's typed-fragment filter
+            # before our reporter replaces its superclass output delivery.
+            word_length = max(len(speech.speech._curWordChars), len(self._confirmed_word_chars))
+            if len(lines) == 1 and not self._hasTab and len(lines[0].strip()) < max(word_length + 1, 3):
+                return
+            self._clear_pending_echo(plugin)
         # Filter blanks
         content_lines = [line for line in lines if line and not line.isspace()]
         if not content_lines:
             return
 
         error_cues_enabled = True
-        plugin = self._get_plugin()
         if plugin is not None and getattr(plugin, "_configManager", None) is not None:
             error_cues_enabled = plugin._configManager.get("errorAudioCues", True)
 
@@ -191,6 +264,7 @@ class TerminalAccessTerminal:
         _reportNewLines. In quiet mode the monitor is not woken (silence).
         """
         plugin = self._get_plugin()
+        self._dispatch_typing_echo(plugin)
         if plugin is None:
             # Not wired yet: keep NVDA's default behavior (speak output).
             self._wake_monitor()
@@ -228,7 +302,47 @@ class TerminalAccessTerminal:
                 pass
 
         plugin = self._get_plugin()
+        owned = self._sync_echo_owner(plugin)
         if plugin is None:
             speak_default()
             return
+        if owned and isinstance(self, EnhancedTermTypedCharSupport):
+            self._hasTab = ch == "\t"
+            if self._hasTab:
+                speech.clearTypedWordBuffer()
+                plugin._clear_typing_echo_state()
+            if plugin._isTypingProtected():
+                self._clear_pending_echo(plugin)
+            elif self._supportsTextChange and not config.conf["terminals"]["speakPasswords"]:
+                # Match native no-output suppression even when NVDA's own
+                # typing settings are off. Do not change those settings.
+                plugin._lastTypedCharTime = time.time()
+                plugin._updateBrailleCaret(self)
+                self._pending_typing_echo.append(ch)
+                return
+            else:
+                self._track_echoed_character(ch)
         plugin._terminalTypedCharacter(self, ch, speak_default)
+
+    def script_flush_queuedChars(self, gesture):
+        """Inherited Enter/Tab/interrupt bindings also discard our input."""
+        self._clear_pending_echo(self._get_plugin())
+        native_flush = getattr(super(TerminalAccessTerminal, self), "script_flush_queuedChars", None)
+        if native_flush is not None:
+            native_flush(gesture)
+        else:
+            gesture.send()
+
+    def _caretScriptPostMovedHelper(self, speakUnit, gesture, info=None):
+        """Caret navigation invalidates a partially typed add-on word."""
+        self._clear_pending_echo(self._get_plugin())
+        native_move = getattr(super(TerminalAccessTerminal, self), "_caretScriptPostMovedHelper", None)
+        if native_move is not None:
+            native_move(speakUnit, gesture, info)
+
+    def event_loseFocus(self):
+        """Unconfirmed input must not survive leaving this terminal."""
+        self._clear_pending_echo(self._get_plugin())
+        native_focus = getattr(super(TerminalAccessTerminal, self), "event_loseFocus", None)
+        if native_focus is not None:
+            native_focus()

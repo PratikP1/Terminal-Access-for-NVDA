@@ -3380,6 +3380,12 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	#: matching NVDA's speech.PROTECTED_CHAR.
 	_PROTECTED_CHAR = "*"
 
+	def _clear_typing_echo_state(self):
+		"""Discard partial words and symbol runs without speaking them."""
+		self._typedWordChars = []
+		self._lastTypedChar = None
+		self._repeatedCharCount = 0
+
 	def _echoTypedWord(self, ch):
 		"""Accumulate typed characters and speak each completed word.
 
@@ -3393,6 +3399,9 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		speaking the "word" would read it aloud in full. The buffer is
 		discarded in that case rather than kept.
 		"""
+		if self._isTypingProtected():
+			self._clear_typing_echo_state()
+			return
 		if not self._getEffective("wordEcho"):
 			# Keep the buffer clean so enabling word echo mid-session does
 			# not speak a word half-collected while it was off.

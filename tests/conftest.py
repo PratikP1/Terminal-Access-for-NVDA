@@ -71,9 +71,14 @@ class _MockTerminal:
     """Stands in for NVDAObjects.behaviors.Terminal."""
 
 
+class _MockEnhancedTerminal(_MockTerminal):
+    """Identity boundary for native terminals with output-confirmed input."""
+
+
 nvdaobjects_mock = MagicMock()
 behaviors_mock = MagicMock()
 behaviors_mock.Terminal = _MockTerminal
+behaviors_mock.EnhancedTermTypedCharSupport = _MockEnhancedTerminal
 sys.modules['NVDAObjects'] = nvdaobjects_mock
 sys.modules['NVDAObjects.behaviors'] = behaviors_mock
 
@@ -209,6 +214,7 @@ def _default_conf_dict():
             "speakTypedCharacters": 0,
             "speakTypedWords": 0,
         },
+        "terminals": {"speakPasswords": False},
     }
 
 
