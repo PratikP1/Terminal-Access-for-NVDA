@@ -36,7 +36,16 @@ jobs:
       # Do NOT install wxPython here: tests/conftest.py mocks wx via
       # sys.modules, and a real wx install would break those mocks.
       - name: Install test dependencies
-        run: pip install pytest pytest-cov pytest-timeout hypothesis polib wcwidth
+        run: pip install pytest pytest-cov pytest-timeout hypothesis polib wcwidth scons markdown
+
+      - name: Install translation compiler
+        run: |
+          choco install gettext --version=1.0.0.20260310 --yes --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "$env:ProgramFiles\gettext-iconv\bin" >> $env:GITHUB_PATH
+
+      - name: Build add-on for package tests
+        run: python -m SCons -Q
 
       - name: Run tests
-        run: python -m pytest tests/ -q --no-cov --timeout=120
+        run: python -m pytest tests/ -q --timeout=120

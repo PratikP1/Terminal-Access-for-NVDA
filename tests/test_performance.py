@@ -39,12 +39,17 @@ class TestPerformanceBenchmarks(unittest.TestCase):
         """Test cache set operations are fast."""
         cache = self.terminalAccess.PositionCache()
 
-        start = time.time()
+        # Construct test doubles before timing the cache operations.
+        bookmarks = []
         for i in range(100):
             bookmark = Mock()
             bookmark.__str__ = Mock(return_value=f"perf_{i}")
+            bookmarks.append(bookmark)
+
+        start = time.perf_counter()
+        for i, bookmark in enumerate(bookmarks):
             cache.set(bookmark, i, i)
-        elapsed = time.time() - start
+        elapsed = time.perf_counter() - start
 
         # Should be fast (< 0.1 seconds for 100 sets)
         self.assertLess(elapsed, 0.1, f"Cache set operations too slow: {elapsed}s for 100 sets")
