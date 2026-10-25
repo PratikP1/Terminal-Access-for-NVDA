@@ -1525,25 +1525,11 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			pass
 
 	def _updateBrailleCaret(self, obj):
-		"""Tell the braille display that the caret moved.
+		"""Refresh braille after typing or a transient character message.
 
-		This must be called on every caret and typed-character event we
-		handle, BEFORE any speech-suppression early return.
-
-		The overlay never falls through to NVDA's native event_caret (that
-		would double-speak and announce "blank" after Enter), and NVDA's
-		braille caret tracking rides on that native handler. So if we do
-		not do this ourselves, nothing does: the display keeps showing
-		stale content until the user pans away and back, and it never
-		tethers to the cursor while typing. That was a shipped bug through
-		2.0.x, reported by a braille user.
-
-		Speech and braille are separate output channels. Deliberately not
-		gated on quiet mode or cursorTracking: those silence *speech*, and
-		a braille reader who turns them off still needs the display to
-		follow the cursor. Unlike _brailleMessage (a transient flash),
-		this moves the display's tether, which is what makes typed text
-		show up under the fingers.
+		The overlay preserves NVDAObject's guarded native caret hooks.
+		These additional updates keep typing and post-speech braille
+		tracking independent of the add-on's speech settings.
 		"""
 		try:
 			if braille.handler.displaySize > 0:
@@ -1569,18 +1555,15 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def _handleTerminalCaret(self, obj):
 		"""Handle a caret movement event in a terminal.
 
-		Called from the overlay's event_caret. The overlay never falls
-		through to NVDA's native caret handling for terminals: our own
-		_announceCursorPosition does the speech with debouncing, blank
-		suppression, and error audio cues. In quiet mode nothing is spoken.
+		Called after the overlay preserves NVDA's non-speech caret hooks.
+		Our _announceCursorPosition handles the add-on's speech with
+		debouncing, blank suppression and error audio cues. Quiet mode
+		suppresses these announcements.
 		"""
 		isQuietMode = self._configManager.get("quietMode")
 
-		# Braille first, unconditionally: the overlay suppressed NVDA's
-		# native caret handling (and with it NVDA's braille tracking), so
-		# every early return below would otherwise leave the display
-		# stranded on stale content.
-		self._updateBrailleCaret(obj)
+		# The overlay has already run NVDAObject's non-speech caret hooks,
+		# including braille tracking, before these speech-only early returns.
 
 		# In quiet mode, do NOT call nextHandler (suppresses all speech).
 		# Only play audio cues if enabled.
@@ -1873,9 +1856,8 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 		# Re-assert the braille tether after speaking: _speakCharacter can
 		# emit a transient braille message, and this puts the display back
-		# on the caret with its line context. (The unconditional update at
-		# the top of _handleTerminalCaret is what guarantees braille moves
-		# at all; this is the post-speech refresh.)
+		# on the caret with its line context. The overlay already performed
+		# the native caret update; this is the post-speech refresh.
 		self._updateBrailleCaret(obj)
 
 	# DEPRECATED: Scheduled for removal in v2.0

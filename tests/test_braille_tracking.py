@@ -72,44 +72,6 @@ class TestTypingUpdatesBraille:
         braille.handler.handleCaretMove.assert_called()
 
 
-class TestCaretUpdatesBraille:
-    """Braille tracks the caret even when we suppress our own speech."""
-
-    def _caret_plugin(self, cfg):
-        plugin = _plugin(cfg)
-        plugin._checkOutputActivityTone = MagicMock()
-        plugin._checkErrorAudioCue = MagicMock()
-        plugin._announceCursorPosition = MagicMock()
-        return plugin
-
-    def test_caret_move_updates_braille(self):
-        import braille
-        plugin = self._caret_plugin({"quietMode": False, "cursorTracking": True})
-
-        plugin._handleTerminalCaret(MagicMock())
-
-        braille.handler.handleCaretMove.assert_called()
-
-    def test_caret_updates_braille_with_cursor_tracking_off(self):
-        """Cursor tracking off means WE do not speak the caret. Since the
-        overlay also suppresses NVDA's native caret handling, nothing
-        else would ever update braille."""
-        import braille
-        plugin = self._caret_plugin({"quietMode": False, "cursorTracking": False})
-
-        plugin._handleTerminalCaret(MagicMock())
-
-        braille.handler.handleCaretMove.assert_called()
-
-    def test_caret_updates_braille_in_quiet_mode(self):
-        import braille
-        plugin = self._caret_plugin({"quietMode": True, "cursorTracking": True})
-
-        plugin._handleTerminalCaret(MagicMock())
-
-        braille.handler.handleCaretMove.assert_called()
-
-
 class TestBrailleUpdateIsSafe:
     """Never raise into NVDA's event chain over an optional display."""
 

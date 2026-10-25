@@ -12,6 +12,9 @@ and activity tones all live here.
 """
 import time
 
+import braille
+from NVDAObjects import NVDAObject
+
 try:
     import tones
 except ImportError:
@@ -191,19 +194,19 @@ class TerminalAccessTerminal:
         _reportNewLines. In quiet mode the monitor is not woken (silence).
         """
         plugin = self._get_plugin()
-        if plugin is None:
-            # Not wired yet: keep NVDA's default behavior (speak output).
+        if plugin is None or plugin._handleTerminalTextChange(self):
             self._wake_monitor()
-            return
-        if plugin._handleTerminalTextChange(self):
-            self._wake_monitor()
+        # Terminal.event_textChange also refreshes braille, including when
+        # output repaints without moving the caret. Keep that independent
+        # of whether the monitor is allowed to speak.
+        braille.handler.handleUpdate(self)
 
     def event_caret(self):
         """Caret moved.
 
-        The plugin owns terminal caret announcement (debounced cursor
-        tracking, blank suppression, error cues), so NVDA's native caret
-        handling is intentionally suppressed here (no super call).
+        Keep NVDAObject's guarded non-speech hooks for review, vision,
+        braille input and the braille display. The plugin handles its
+        own announcements; EditableText selection reporting is not run.
         """
         plugin = self._get_plugin()
         if plugin is None:
@@ -212,6 +215,7 @@ class TerminalAccessTerminal:
             except AttributeError:
                 pass
             return
+        NVDAObject.event_caret(self)
         plugin._handleTerminalCaret(self)
 
     def event_typedCharacter(self, ch):
